@@ -4,14 +4,6 @@ package-lock.json
 yarn.lock
 .pnpm-debug.log*
 
-# Archivos de Expo y React Native
-.expo/
-.expo-shared/
-dist/
-build/
-web-build/
-android/app/build/
-ios/build/
 
 # Configuración de Metro bundler
 .metro/
