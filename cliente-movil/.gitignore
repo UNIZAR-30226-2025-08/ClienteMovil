@@ -1,0 +1,44 @@
+# Node.js dependencies
+node_modules/
+npm-debug.log*
+yarn-error.log
+pnpm-debug.log
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Expo-specific files
+.expo/
+.expo-shared/
+
+# Build outputs
+dist/
+build/
+web-build/
+android/app/build/
+ios/Pods/
+ios/build/
+
+# Environment files
+.env*
+.env.local
+.env.development
+.env.production
+.env.test
+
+# System files
+.DS_Store
+Thumbs.db
+*.log
+*.swp
+
+# Metro bundler cache
+.expo-cache/
+metro-cache/
+
+# VSCode settings (optional)
+.vscode/
+
+# Temporary files
+tmp/
+temp/
