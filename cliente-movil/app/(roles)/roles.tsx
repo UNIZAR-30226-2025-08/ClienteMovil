@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';  // Importar useState desde React
 import { ImageBackground, StyleSheet, Text, View, Image, TouchableOpacity, Alert } from 'react-native';
-import { Link } from 'expo-router';
+import { Link, useRouter } from 'expo-router';
 
 import { useFonts } from 'expo-font';
 
@@ -16,6 +16,8 @@ const imagenAtras = require('@/assets/images/botonAtras.png');
 
 export default function rolesScreen() {
 
+  const router = useRouter();  // Usamos useRouter para manejar la navegación
+
   // Cargar la fuente GhostShadow
   const [loaded] = useFonts({
     GhostShadow: require('@/assets/fonts/ghost-shadow.ttf'),
@@ -24,6 +26,10 @@ export default function rolesScreen() {
   if (!loaded) {
     return null; // Esperar a que se cargue la fuente
   }
+
+  const irAtras = () => {
+    router.back();  // Regresa a la pantalla anterior
+  };
 
   return (
     <View style={styles.container}>
@@ -37,21 +43,21 @@ export default function rolesScreen() {
       <Text style={styles.tituloRoles}>ROLES</Text>
 
       <TouchableOpacity style={styles.containerCazador}>
-        <Link href="/(roles)/roles"> {/* Ruta a la que quieres redirigir */}
+        <Link href="/(roles)/(personajes)/cazador"> {/* Ruta a la que quieres redirigir */}
             <Image source={imagenCazador} style={styles.imageIconos} />
         </Link>
       </TouchableOpacity>
       <Text style={styles.textoCazador}>CAZADOR</Text>
 
       <TouchableOpacity style={styles.containerAlguacil}>
-        <Link href="/(roles)/roles"> {/* Ruta a la que quieres redirigir */}
+        <Link href="/(roles)/(personajes)/alguacil"> {/* Ruta a la que quieres redirigir */}
             <Image source={imagenAlguacil} style={styles.imageIconos} />
         </Link>
       </TouchableOpacity>
       <Text style={styles.textoAlguacil}>ALGUACIL</Text>
 
       <TouchableOpacity style={styles.containerVidente}>
-        <Link href="/(roles)/roles"> {/* Ruta a la que quieres redirigir */}
+        <Link href="/(roles)/(personajes)/vidente"> {/* Ruta a la que quieres redirigir */}
             <Image source={imagenVidente} style={styles.imageIconos} />
         </Link>
       </TouchableOpacity>
@@ -65,24 +71,22 @@ export default function rolesScreen() {
       <Text style={styles.textoBruja}>BRUJA</Text>
 
       <TouchableOpacity style={styles.containerAldeano}>
-        <Link href="/(roles)/roles"> {/* Ruta a la que quieres redirigir */}
+        <Link href="/(roles)/(personajes)/aldeano"> {/* Ruta a la que quieres redirigir */}
             <Image source={imagenAldeano} style={styles.imageIconos} />
         </Link>
       </TouchableOpacity>
       <Text style={styles.textoAldeano}>ALDEANO</Text>
 
       <TouchableOpacity style={styles.containerLobo}>
-        <Link href="/(roles)/roles"> {/* Ruta a la que quieres redirigir */}
+        <Link href="/(roles)/(personajes)/lobo"> {/* Ruta a la que quieres redirigir */}
             <Image source={imagenLobo} style={styles.imageIconos} />
         </Link>
       </TouchableOpacity>
       <Text style={styles.textoLobo}>LOBO</Text>
 
 
-      <TouchableOpacity style={styles.containerAtras}>
-        <Link href="/elegirOpciones"> {/* Ruta a la que quieres redirigir */}
+      <TouchableOpacity style={styles.containerAtras} onPress={irAtras}>
             <Image source={imagenAtras} style={styles.imageAtras} />
-        </Link>
       </TouchableOpacity>
 
       </ImageBackground>
