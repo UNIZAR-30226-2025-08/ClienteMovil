@@ -30,7 +30,7 @@ export default function opcionesScreen() {
       <View style={styles.overlay} />
       <Image source={imagenPerfil} style={styles.profileImage}></Image>
       <Text style={styles.nombrePlayer}>Player 1</Text>
-      <Link href="/(partida)/elegirTipoPartida" style={styles.textoPartida}>PARTIDA RÁPIDA</Link>
+      <Link href={"/jugando"} style={styles.textoPartida}>PARTIDA RÁPIDA</Link>
       <Link href={"/(comoJugar)/comoJugar"} style={styles.textoComoJugar}>BUSCAR SALAS</Link>
       <Link href={"/roles"} style={styles.textoRoles}>CREAR PARTIDA</Link>
       </ImageBackground>
