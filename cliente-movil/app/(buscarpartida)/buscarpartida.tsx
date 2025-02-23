@@ -11,7 +11,7 @@ import { useRouter } from "expo-router";
 
 const imagenFondo = require("@/assets/images/fondo-roles.jpg");
 const imagenAtras = require("@/assets/images/botonAtras.png");
-const iconoCandado = require("@/assets/images/botonAtras.png");
+const iconoCandado = require("@/assets/images/candado.png");
 
 const salas = [
   { estado: "Sala", tipo: "Privada", nombre: "SADADDSADADSSAS", privada: true },
@@ -81,18 +81,16 @@ const styles = StyleSheet.create({
     color: "white",
     fontWeight: "bold",
     textAlign: "center",
-    marginBottom: 20,
-    marginTop: 100, // Ajusta este valor según sea necesario para centrar el texto verticalmente
+    marginTop: 80, // Ajusta este valor según sea necesario para centrar el texto verticalmente
   },
   rectanglesContainer: {
     flexDirection: "column",
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 20, // Ajusta este valor según sea necesario
   },
   rectangle: {
     width: "80%", // Ajusta el tamaño del rectángulo
-    height: 50, // Ajusta el tamaño del rectángulo
+    height: 30, // Ajusta el tamaño del rectángulo
     backgroundColor: "rgba(0, 0, 0, 0.5)", // Color negro semitransparente
     marginVertical: 10, // Espacio entre los rectángulos
   },
@@ -124,5 +122,6 @@ const styles = StyleSheet.create({
   imagenAtras: {
     width: 50,
     height: 50,
+    marginBottom: 60,
   },
 });
