@@ -42,7 +42,7 @@ export default function opcionesScreen() {
         >
           BUSCAR SALAS
         </Link>
-        <Link href={"/roles"} style={styles.textoRoles}>
+        <Link href={"/(crearsala)/crearsala"} style={styles.textoRoles}>
           CREAR PARTIDA
         </Link>
       </ImageBackground>
