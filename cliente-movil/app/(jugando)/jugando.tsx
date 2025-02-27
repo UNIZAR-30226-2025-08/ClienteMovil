@@ -13,10 +13,25 @@ const imagenHabilidad = require("@/assets/images/hombre-lobo-icon.jpeg");
 const imagenPueblo = require("@/assets/images/pueblo-barra-arriba-juego.png");
 const imagenLobos = require("@/assets/images/lobo-barra-arriba-juego.png");
 
+const imagenJugadores = require("@/assets/images/jugador-icono.png");
+
 const PantallaJugando = () => {
   const [mostrarRol, setMostrarRol] = useState(false);
   const [mostrarInicio, setMostrarInicio] = useState(false);
   const [mostrarBotones, setMostrarBotones] = useState(false);
+
+  // New state variables for the circular images
+  const [numberOfImages, setNumberOfImages] = useState(8);
+  const [images] = useState([
+    imagenJugadores,
+    imagenJugadores,
+    imagenJugadores,
+    imagenJugadores,
+    imagenJugadores,
+    imagenJugadores,
+    imagenJugadores,
+    imagenJugadores,
+  ]);
 
   const animacionTexto = useRef(new Animated.Value(0)).current;
   const animacionRol = useRef(new Animated.Value(0)).current;
@@ -84,13 +99,23 @@ const PantallaJugando = () => {
     return null;
   }
 
+  // Compute a max radius for the circle
+  const computedMaxRadius = Math.min(width, height) * 0.4;
+  
+  // Calculate the image size once so that container centering can be adjusted if needed
+  const imageSize = Math.min(width, height) * 0.12;
+  // Adjust the max radius to avoid clipping half the image at the edges
+  const maxRadius = computedMaxRadius - imageSize / 2;
+
   return (
     <View style={estilos.contenedor}>
       <ImageBackground source={imagenFondo} style={estilos.fondo} resizeMode="cover" />
       <Animated.View style={[estilos.superposicion, { opacity: animacionFondo }]} />
 
       <Animated.View style={[estilos.contenedorTexto, { opacity: animacionTexto }]}>
-        <Text style={estilos.texto}>AMANECE EN LA ALDEA, TODO EL MUNDO DESPIERTA Y ABRE LOS OJOS</Text>
+        <Text style={estilos.texto}>
+          AMANECE EN LA ALDEA, TODO EL MUNDO DESPIERTA Y ABRE LOS OJOS
+        </Text>
       </Animated.View>
 
       {mostrarRol && (
@@ -111,50 +136,84 @@ const PantallaJugando = () => {
       )}
 
       {mostrarBotones && (
-        <View style={estilos.contenedorBotones}>
-          {/* LEFT BUTTON (HABILIDAD) */}
-          <TouchableOpacity style={estilos.botonHabilidad}>
-            <Image source={imagenHabilidad} style={estilos.iconoBoton} />
-            <Text style={estilos.textoBoton}>HABILIDAD</Text>
-          </TouchableOpacity>
+        <>
+          <View style={estilos.contenedorBotones}>
+            {/* LEFT BUTTON (HABILIDAD) */}
+            <TouchableOpacity style={estilos.botonHabilidad}>
+              <Image source={imagenHabilidad} style={estilos.iconoBoton} />
+              <Text style={estilos.textoBoton}>HABILIDAD</Text>
+            </TouchableOpacity>
 
-          {/* RIGHT BUTTON (CHAT) */}
-          <TouchableOpacity style={estilos.botonChat}>
-            <Text style={estilos.textoBoton}>CHAT</Text>
-          </TouchableOpacity>
-        </View>
-      )}
+            {/* RIGHT BUTTON (CHAT) */}
+            <TouchableOpacity style={estilos.botonChat}>
+              <Text style={estilos.textoBoton}>CHAT</Text>
+            </TouchableOpacity>
+          </View>
 
-      {mostrarBotones && (
-        <View style={estilos.contenedorTopBar}>
-          {/* Left Section - Pueblo */}
-          <View style={estilos.seccionTopBarIzquierda}>
-            <View style={estilos.contenedorTopBarItem}>
-              <Image source={imagenPueblo} style={estilos.iconoTopBar} />
-              <View style={estilos.textoTopBarContainer}>
-                <Text style={estilos.textoTopBarTitulo}>PUEBLO</Text>
-                <Text style={estilos.textoTopBarSub}>5/6 vivos</Text>
+          <View style={estilos.contenedorTopBar}>
+            {/* Left Section - Pueblo */}
+            <View style={estilos.seccionTopBarIzquierda}>
+              <View style={estilos.contenedorTopBarItem}>
+                <Image source={imagenPueblo} style={estilos.iconoTopBar} />
+                <View style={estilos.textoTopBarContainer}>
+                  <Text style={estilos.textoTopBarTitulo}>PUEBLO</Text>
+                  <Text style={estilos.textoTopBarSub}>5/6 vivos</Text>
+                </View>
+              </View>
+            </View>
+
+            {/* Center Section - Jornada */}
+            <View style={estilos.seccionTopBarCentro}>
+              <Text style={estilos.textoTopBarTitulo}>JORNADA 2</Text>
+              <Text style={estilos.textoTopBarSub}>DÍA 2</Text>
+            </View>
+
+            {/* Right Section - Lobos */}
+            <View style={estilos.seccionTopBarDerecha}>
+              <View style={estilos.contenedorTopBarItem}>
+                <View style={estilos.textoTopBarContainer}>
+                  <Text style={estilos.textoTopBarTitulo}>LOBOS</Text>
+                  <Text style={estilos.textoTopBarSub}>2/2 vivos</Text>
+                </View>
+                <Image source={imagenLobos} style={estilos.iconoTopBar} />
               </View>
             </View>
           </View>
 
-          {/* Center Section - Jornada */}
-          <View style={estilos.seccionTopBarCentro}>
-            <Text style={estilos.textoTopBarTitulo}>JORNADA 2</Text>
-            <Text style={estilos.textoTopBarSub}>DÍA 2</Text>
+          {/* New Centered Circle Container for Images */}
+          <View
+            style={[
+              estilos.circleContainer,
+              {
+                width: computedMaxRadius * 2,
+                height: computedMaxRadius * 2,
+                marginLeft: -computedMaxRadius,
+                marginTop: -computedMaxRadius,
+              },
+            ]}
+          >
+            {images.slice(0, numberOfImages).map((image, index) => {
+              const angle = (index * 2 * Math.PI) / numberOfImages;
+              const x = maxRadius * Math.cos(angle);
+              const y = maxRadius * Math.sin(angle);
+              
+              return (
+                <Image
+                  key={index}
+                  source={image}
+                  style={[
+                    estilos.circleImage,
+                    {
+                      width: imageSize,
+                      height: imageSize,
+                      transform: [{ translateX: x }, { translateY: y }],
+                    },
+                  ]}
+                />
+              );
+            })}
           </View>
-
-          {/* Right Section - Lobos (text on the left, image on the right) */}
-          <View style={estilos.seccionTopBarDerecha}>
-            <View style={estilos.contenedorTopBarItem}>
-              <View style={estilos.textoTopBarContainer}>
-                <Text style={estilos.textoTopBarTitulo}>LOBOS</Text>
-                <Text style={estilos.textoTopBarSub}>2/2 vivos</Text>
-              </View>
-              <Image source={imagenLobos} style={estilos.iconoTopBar} />
-            </View>
-          </View>
-        </View>
+        </>
       )}
     </View>
   );
@@ -326,6 +385,20 @@ const estilos = StyleSheet.create({
     fontSize: width * 0.03,
     fontWeight: "bold",
     opacity: 0.9,
+  },
+  // Updated circle container style to center it on the screen
+  circleContainer: {
+    position: "absolute",
+    top: "56%",
+    left: "50%",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  circleImage: {
+    position: "absolute",
+    borderRadius: 50,
+    borderWidth: 2,
+    borderColor: "white",
   },
 });
 
