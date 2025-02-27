@@ -8,7 +8,7 @@ import { useFonts } from "expo-font";
 
 // Sección de valores hardcoded, su proposito es:
 //  1. (Principal) Cuando tengamos que integrar el backend, que sea un proceso lo menos doloroso posible
-//  2. Tener centralizadas las deicisiones de estilo
+//  2. (Secundario) Tener centralizadas las deicisiones de estilo
 
 // Strings
 const TEXTO_INICIAL = "AMANECE EN LA ALDEA, TODO EL MUNDO DESPIERTA Y ABRE LOS OJOS";
@@ -40,7 +40,7 @@ const TAMANIO_TEMPORIZADOR = 60;
 // Imagenes
 const imagenFondo = require("@/assets/images/fondo-partida.png");
 const imagenLoboRol = require("@/assets/images/hombre-lobo-icon.jpeg");
-const imagenHabilidad = require("@/assets/images/hombre-lobo-icon.jpeg"); // Same as loboRol
+const imagenHabilidad = require("@/assets/images/hombre-lobo-icon.jpeg");
 const imagenPueblo = require("@/assets/images/pueblo-barra-arriba-juego.png");
 const imagenLobos = require("@/assets/images/lobo-barra-arriba-juego.png");
 const imagenJugadores = require("@/assets/images/jugador-icono.jpg");
