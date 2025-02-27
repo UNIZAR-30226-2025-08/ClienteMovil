@@ -1,5 +1,16 @@
 import React, { useState, useEffect, useRef } from "react";
-import { View, ImageBackground, StyleSheet, Text, Image, Animated, Dimensions, TouchableOpacity } from "react-native";
+import {
+  View,
+  ImageBackground,
+  StyleSheet,
+  Text,
+  Image,
+  Animated,
+  Dimensions,
+  TouchableOpacity,
+  TextInput,
+  ScrollView,
+} from "react-native";
 import { useFonts } from "expo-font";
 
 // ============================================================================
@@ -27,15 +38,17 @@ const TEXTO_ESTADO_PUEBLO = "5/6 vivos";
 const TEXTO_ESTADO_LOBOS = "2/2 vivos";
 
 // Constantes numéricas
-const NUMERO_IMAGENES = 8;
+const CANTIDAD_IMAGENES = 8;
 const TIEMPO_INICIAL = 60; // Segundos
-const RADIO_MULTIPLICADOR = 0.45;
-const TAMANIO_IMAGEN_MULTIPLICADOR = 0.13;
-const ANIMATION_DURATION = 1500;
-const ANIMATION_DELAY = 3000;
-const BORDE_RADIO_BOTON = 20;
-const TAMANIO_ICONO_BOTON = 40;
-const TAMANIO_TEMPORIZADOR = 60;
+const MULTIPLICADOR_RADIO = 0.45;
+const MULTIPLICADOR_TAMANIO_IMAGEN = 0.13;
+const DURACION_ANIMACION = 1500;
+const RETRASO_ANIMACION = 3000;
+
+const { width: ancho, height: alto } = Dimensions.get("window"); // Obtiene las dimensiones de la ventana y las renombra a "ancho" y "alto"
+const BORDE_RADIO_BOTON = ancho * 0.0556; // Aproximadamente 20px en un dispositivo de ~360px de ancho
+const TAMANIO_ICONO_BOTON = ancho * 0.1;
+const TAMANIO_TEMPORIZADOR = ancho * 0.15;
 
 // Imagenes
 const imagenFondo = require("@/assets/images/fondo-partida.png");
@@ -49,37 +62,38 @@ const imagenJugadores = require("@/assets/images/jugador-icono.jpg");
 // ============================================================================
 // ============================================================================
 
-// Obtenemos las dimensiones de la ventana y las renombramos a "ancho" y "alto"
-const { width: ancho, height: alto } = Dimensions.get("window");
-
 const PantallaJugando = () => {
-  // Estados para controlar la visualización de elementos
+  // Estados para manejar las secciones
   const [mostrarRol, setMostrarRol] = useState(false);
   const [mostrarInicio, setMostrarInicio] = useState(false);
   const [mostrarBotones, setMostrarBotones] = useState(false);
+  const [mostrarChat, setMostrarChat] = useState(false);
 
-  // Estados para las imágenes circulares en el centro
-  const [numeroDeImagenes, setNumeroDeImagenes] = useState(NUMERO_IMAGENES);
-  const [imagenes] = useState(new Array(NUMERO_IMAGENES).fill(imagenJugadores));
+  const [cantidadImagenes, setCantidadImagenes] = useState(CANTIDAD_IMAGENES);
+  const [imagenes, setImagenes] = useState(new Array(CANTIDAD_IMAGENES).fill(imagenJugadores));
 
-  // NUEVA FUNCIÓN: Manejar la pulsación de un jugador
-  const handlePressJugador = (indice) => {
+  // Estado para mensajes del chat
+  const [mensajes, setMensajes] = useState([
+    { id: 1, texto: "Jugador 2: Mensaje de prueba" },
+    { id: 2, texto: "Jugador 5: Otro mensaje" },
+  ]);
+
+  // Función para manejar la pulsación sobre un jugador
+  const presionarJugador = (indice) => {
     console.log(`Jugador ${indice + 1} presionado`);
-    // Aquí iría la lógica para manejar la interacción con el jugador
+    // Lógica para manejar la interacción con el jugador
   };
 
-  // Nuevos estados para el temporizador
-  const [tiempoInicial, setTiempoInicial] = useState(TIEMPO_INICIAL); // Valor inicial configurable
-  const [tiempoRestante, setTiempoRestante] = useState(tiempoInicial);
+  // Estados y lógica para el temporizador
+  const [tiempoInicialEstado, setTiempoInicialEstado] = useState(TIEMPO_INICIAL);
+  const [tiempoRestante, setTiempoRestante] = useState(tiempoInicialEstado);
   const [temporizadorActivo, setTemporizadorActivo] = useState(false);
 
-  // Función para reiniciar el temporizador al tocarlo
   const reiniciarTemporizador = () => {
-    setTiempoRestante(tiempoInicial);
+    setTiempoRestante(tiempoInicialEstado);
     setTemporizadorActivo(true);
   };
 
-  // Efecto para manejar el temporizador
   useEffect(() => {
     let intervalo;
     if (temporizadorActivo && tiempoRestante > 0) {
@@ -92,143 +106,154 @@ const PantallaJugando = () => {
     return () => clearInterval(intervalo);
   }, [temporizadorActivo, tiempoRestante]);
 
-  // Referencias para las animaciones
+  // Animaciones para las secuencias iniciales
   const animacionTexto = useRef(new Animated.Value(0)).current;
   const animacionRol = useRef(new Animated.Value(0)).current;
   const animacionInicio = useRef(new Animated.Value(0)).current;
   const animacionFondo = useRef(new Animated.Value(1)).current;
 
-  // Carga de fuentes personalizadas
-  const [fuentesCargadas] = useFonts({
-    Corben: require("@/assets/fonts/Corben-Regular.ttf"),
-  });
+  // Animación para deslizar el chat
+  const posicionChat = useRef(new Animated.Value(alto)).current;
+  const referenciaScrollView = useRef(null);
 
-  // Secuencia de animaciones encadenadas
+  const abrirChat = () => {
+    setMostrarChat(true);
+    Animated.timing(posicionChat, {
+      toValue: 0,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const cerrarChat = () => {
+    Animated.timing(posicionChat, {
+      toValue: alto,
+      duration: 300,
+      useNativeDriver: true,
+    }).start(() => {
+      setMostrarChat(false);
+    });
+  };
+
+  // Secuencia de animación inicial
   useEffect(() => {
-    // Animación del texto inicial
     Animated.timing(animacionTexto, {
       toValue: 1,
-      duration: ANIMATION_DURATION,
+      duration: DURACION_ANIMACION,
       useNativeDriver: true,
     }).start(() => {
       setTimeout(() => {
         Animated.timing(animacionTexto, {
           toValue: 0,
-          duration: ANIMATION_DURATION,
+          duration: DURACION_ANIMACION,
           useNativeDriver: true,
         }).start(() => {
-          // Muestra la sección de rol
           setMostrarRol(true);
           Animated.timing(animacionRol, {
             toValue: 1,
-            duration: ANIMATION_DURATION,
+            duration: DURACION_ANIMACION,
             useNativeDriver: true,
           }).start();
 
           setTimeout(() => {
             Animated.timing(animacionRol, {
               toValue: 0,
-              duration: ANIMATION_DURATION,
+              duration: DURACION_ANIMACION,
               useNativeDriver: true,
             }).start(() => {
-              // Muestra el mensaje de inicio
               setMostrarInicio(true);
               Animated.timing(animacionInicio, {
                 toValue: 1,
-                duration: ANIMATION_DURATION,
+                duration: DURACION_ANIMACION,
                 useNativeDriver: true,
               }).start();
 
               setTimeout(() => {
                 Animated.timing(animacionInicio, {
                   toValue: 0,
-                  duration: ANIMATION_DURATION,
+                  duration: DURACION_ANIMACION,
                   useNativeDriver: true,
                 }).start();
-                // Desvanece el fondo para mostrar los botones
                 Animated.timing(animacionFondo, {
                   toValue: 0,
-                  duration: ANIMATION_DURATION,
+                  duration: DURACION_ANIMACION,
                   useNativeDriver: true,
                 }).start(() => {
                   setMostrarBotones(true);
                 });
-              }, ANIMATION_DELAY);
+              }, RETRASO_ANIMACION);
             });
-          }, ANIMATION_DELAY);
+          }, RETRASO_ANIMACION);
         });
-      }, ANIMATION_DELAY);
+      }, RETRASO_ANIMACION);
     });
   }, []);
 
-  // Iniciar temporizador cuando se muestran los botones
+  // Inicia el temporizador cuando se muestran los botones
   useEffect(() => {
     if (mostrarBotones) {
       setTemporizadorActivo(true);
     }
   }, [mostrarBotones]);
 
-  if (!fuentesCargadas) {
-    return null;
-  }
+  // Cargar fuente personalizada
+  const [fuentesCargadas] = useFonts({
+    Corben: require("@/assets/fonts/Corben-Regular.ttf"),
+  });
 
-  // Calcula el radio máximo para el círculo (en función de las dimensiones de la pantalla)
-  const radioMaximoCalculado = Math.min(ancho, alto) * RADIO_MULTIPLICADOR;
-  
-  // Calcula el tamaño de la imagen para el círculo
-  const tamanioImagen = Math.min(ancho, alto) * TAMANIO_IMAGEN_MULTIPLICADOR;
-  // Ajusta el radio máximo para evitar que se recorte la imagen en los bordes
+  if (!fuentesCargadas) return null;
+
+  // Cálculos para posicionar imágenes en círculo
+  const radioMaximoCalculado = Math.min(ancho, alto) * MULTIPLICADOR_RADIO;
+  const tamanioImagen = Math.min(ancho, alto) * MULTIPLICADOR_TAMANIO_IMAGEN;
   const radioMaximo = radioMaximoCalculado - tamanioImagen / 2;
 
   return (
     <View style={estilos.contenedor}>
-      {/* Imagen de fondo */}
       <ImageBackground source={imagenFondo} style={estilos.fondo} resizeMode="cover" />
       <Animated.View style={[estilos.superposicion, { opacity: animacionFondo }]} />
 
-      {/* Texto inicial animado */}
+      {/* Texto inicial */}
       <Animated.View style={[estilos.contenedorTexto, { opacity: animacionTexto }]}>
         <Text style={estilos.texto}>{TEXTO_INICIAL}</Text>
       </Animated.View>
 
-      {/* Sección para mostrar el rol */}
+      {/* Sección de rol */}
       {mostrarRol && (
         <Animated.View style={[estilos.contenedorRol, { opacity: animacionRol }]}>
           <View style={estilos.contenedorTextoRol}>
             <Text style={estilos.textoRol}>{TEXTO_ROL_TITULO}</Text>
           </View>
-          {/* Imagen del rol */}
           <Image source={imagenLoboRol} style={estilos.imagenRol} />
           <Text style={estilos.nombreRol}>{TEXTO_NOMBRE_ROL}</Text>
         </Animated.View>
       )}
 
-      {/* Mensaje de inicio de la partida */}
+      {/* Mensaje de inicio */}
       {mostrarInicio && (
         <Animated.View style={[estilos.contenedorTexto, { opacity: animacionInicio }]}>
           <Text style={estilos.textoInicio}>{TEXTO_INICIO_PARTIDA}</Text>
         </Animated.View>
       )}
 
-      {/* Botones y barra superior que se muestran al finalizar las animaciones */}
+      {/* Botones y barra superior */}
       {mostrarBotones && (
         <>
           <View style={estilos.contenedorBotones}>
-            {/* Botón izquierdo (HABILIDAD) */}
+            {/* Botón Habilidad */}
             <TouchableOpacity style={estilos.botonHabilidad}>
               <Image source={imagenHabilidad} style={estilos.iconoBoton} />
               <Text style={estilos.textoBoton}>{TEXTO_BOTON_HABILIDAD}</Text>
             </TouchableOpacity>
 
-            {/* Botón derecho (CHAT) */}
-            <TouchableOpacity style={estilos.botonChat}>
+            {/* Botón Chat */}
+            <TouchableOpacity style={estilos.botonChat} onPress={abrirChat}>
               <Text style={estilos.textoBoton}>{TEXTO_BOTON_CHAT}</Text>
             </TouchableOpacity>
           </View>
 
-          {/* Barra superior con información de Pueblo, Jornada y Lobos */}
+          {/* Barra superior */}
           <View style={estilos.contenedorTopBar}>
-            {/* Sección izquierda - Pueblo */}
             <View style={estilos.seccionTopBarIzquierda}>
               <View style={estilos.contenedorTopBarItem}>
                 <Image source={imagenPueblo} style={estilos.iconoTopBar} />
@@ -238,14 +263,10 @@ const PantallaJugando = () => {
                 </View>
               </View>
             </View>
-
-            {/* Sección central - Jornada */}
             <View style={estilos.seccionTopBarCentro}>
               <Text style={estilos.textoTopBarTitulo}>{TEXTO_JORNADA}</Text>
               <Text style={estilos.textoTopBarSub}>{TEXTO_DIA}</Text>
             </View>
-
-            {/* Sección derecha - Lobos */}
             <View style={estilos.seccionTopBarDerecha}>
               <View style={estilos.contenedorTopBarItem}>
                 <View style={estilos.textoTopBarContainer}>
@@ -257,9 +278,9 @@ const PantallaJugando = () => {
             </View>
           </View>
 
-          {/* Temporizador circular en la parte superior izquierda */}
-          <TouchableOpacity 
-            style={estilos.contenedorTemporizador} 
+          {/* Temporizador */}
+          <TouchableOpacity
+            style={estilos.contenedorTemporizador}
             onPress={reiniciarTemporizador}
             activeOpacity={0.7}
           >
@@ -278,10 +299,10 @@ const PantallaJugando = () => {
             </TouchableOpacity>
           </View>
 
-          {/* Contenedor circular centrado para las imágenes de los jugadores */}
+          {/* Círculo de jugadores */}
           <View
             style={[
-              estilos.circleContainer,
+              estilos.contenedorCirculo,
               {
                 width: radioMaximoCalculado * 2,
                 height: radioMaximoCalculado * 2,
@@ -290,18 +311,17 @@ const PantallaJugando = () => {
               },
             ]}
           >
-            {imagenes.slice(0, numeroDeImagenes).map((imagen, indice) => {
-              // Calcula el ángulo y la posición (x, y) de cada imagen en el círculo
-              const angulo = (indice * 2 * Math.PI) / numeroDeImagenes;
+            {imagenes.slice(0, cantidadImagenes).map((img, indice) => {
+              const angulo = (indice * 2 * Math.PI) / cantidadImagenes;
               const x = radioMaximo * Math.cos(angulo);
               const y = radioMaximo * Math.sin(angulo);
-              
+
               return (
                 <TouchableOpacity
                   key={indice}
-                  onPress={() => handlePressJugador(indice)}
+                  onPress={() => presionarJugador(indice)}
                   style={[
-                    estilos.circleImageContainer,
+                    estilos.contenedorImagenCirculo,
                     {
                       width: tamanioImagen,
                       height: tamanioImagen,
@@ -310,24 +330,76 @@ const PantallaJugando = () => {
                   ]}
                   activeOpacity={0.7}
                 >
-                  <Image source={imagen} style={estilos.circleImage} />
+                  <Image source={img} style={estilos.imagenCirculo} />
                 </TouchableOpacity>
               );
             })}
           </View>
         </>
       )}
+
+      {/* Chat deslizable */}
+      {mostrarChat && (
+        <Animated.View
+          style={[
+            estilos.contenedorChat,
+            { transform: [{ translateY: posicionChat }] },
+          ]}
+        >
+          <TouchableOpacity 
+            style={estilos.botonCerrarChat}
+            onPress={cerrarChat}
+            activeOpacity={0.5}
+            hitSlop={{
+              top: alto * 0.02,
+              bottom: alto * 0.02,
+              left: ancho * 0.04,
+              right: ancho * 0.04,
+            }}
+          >
+            <Text style={estilos.textoCerrarChat}>X</Text>
+          </TouchableOpacity>
+
+          <Text style={estilos.tituloChat}>CHAT</Text>
+          <View style={estilos.separadorChat} />
+
+          <ScrollView
+            contentContainerStyle={estilos.contenedorMensajesChat}
+            ref={referenciaScrollView}
+            onContentSizeChange={() =>
+              referenciaScrollView.current &&
+              referenciaScrollView.current.scrollToEnd({ animated: true })
+            }
+          >
+            {mensajes.map((mensaje) => (
+              <Text key={mensaje.id} style={estilos.mensajeChat}>
+                {mensaje.texto}
+              </Text>
+            ))}
+          </ScrollView>
+
+          <View style={estilos.contenedorEntradaChat}>
+            <TextInput
+              style={estilos.entradaChat}
+              placeholder="Enviar un mensaje"
+              placeholderTextColor="#CCC"
+            />
+            <TouchableOpacity style={estilos.botonEnviarChat}>
+              <Text style={estilos.textoBotonEnviarChat}>Enviar</Text>
+            </TouchableOpacity>
+          </View>
+        </Animated.View>
+      )}
     </View>
   );
 };
 
-// Estilos actualizados
 const estilos = StyleSheet.create({
   contenedor: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    paddingTop: 50,
+    paddingTop: alto * 0.07,
   },
   fondo: {
     width: "100%",
@@ -433,7 +505,7 @@ const estilos = StyleSheet.create({
   iconoBoton: {
     width: TAMANIO_ICONO_BOTON,
     height: TAMANIO_ICONO_BOTON,
-    marginBottom: 5,
+    marginBottom: ancho * 0.02,
   },
   textoBoton: {
     color: "white",
@@ -443,14 +515,14 @@ const estilos = StyleSheet.create({
   },
   contenedorTopBar: {
     position: "absolute",
-    top: 40,
+    top: alto * 0.06,
     width: "100%",
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     backgroundColor: "black",
-    paddingVertical: 20,
-    paddingHorizontal: 15,
+    paddingVertical: alto * 0.03,
+    paddingHorizontal: ancho * 0.04,
   },
   seccionTopBarIzquierda: {
     flex: 1,
@@ -468,12 +540,12 @@ const estilos = StyleSheet.create({
   contenedorTopBarItem: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
+    gap: ancho * 0.02,
   },
   iconoTopBar: {
-    width: 40,
-    height: 40,
-    borderRadius: 8,
+    width: ancho * 0.1,
+    height: ancho * 0.1,
+    borderRadius: ancho * 0.02,
   },
   textoTopBarContainer: {
     flexDirection: "column",
@@ -489,28 +561,28 @@ const estilos = StyleSheet.create({
     fontWeight: "bold",
     opacity: 0.9,
   },
-  circleContainer: {
+  contenedorCirculo: {
     position: "absolute",
     top: "56%",
     left: "50%",
     alignItems: "center",
     justifyContent: "center",
   },
-  circleImageContainer: {
+  contenedorImagenCirculo: {
     position: "absolute",
     borderRadius: 50,
-    borderWidth: 2,
+    borderWidth: ancho * 0.005,
     borderColor: "white",
     overflow: "hidden",
   },
-  circleImage: {
+  imagenCirculo: {
     width: "100%",
     height: "100%",
   },
   contenedorTemporizador: {
     position: "absolute",
-    top: 140,
-    left: 20,
+    top: alto * 0.2,
+    left: ancho * 0.05,
     zIndex: 2,
   },
   circuloTemporizador: {
@@ -523,26 +595,124 @@ const estilos = StyleSheet.create({
   },
   textoTemporizador: {
     color: "white",
-    fontSize: 24,
+    fontSize: ancho * 0.05,
     fontWeight: "bold",
   },
   contenedorBotonesDerecha: {
     position: "absolute",
-    top: 140,
-    right: 20,
+    top: alto * 0.2,
+    right: ancho * 0.05,
     zIndex: 2,
-    gap: 10,
+    gap: ancho * 0.02,
   },
   botonAccion: {
     backgroundColor: "#000000",
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: 25,
+    paddingVertical: alto * 0.02,
+    paddingHorizontal: ancho * 0.06,
+    borderRadius: ancho * 0.07,
     alignItems: "center",
-    minWidth: 120,
+    minWidth: ancho * 0.33,
   },
   botonVotar: {
     backgroundColor: "#000000",
+  },
+  contenedorChat: {
+    position: "absolute",
+    zIndex: 9999,
+    left: ancho * 0.05,
+    right: ancho * 0.05,
+    bottom: 0,
+    height: alto * 0.90,
+    backgroundColor: "black",
+    borderTopLeftRadius: ancho * 0.05,
+    borderTopRightRadius: ancho * 0.05,
+    padding: ancho * 0.04,
+    borderWidth: ancho * 0.002,
+    elevation: 50,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: alto * 0.003 },
+    shadowOpacity: 0.5,
+    shadowRadius: ancho * 0.02,
+  },
+  botonCerrarChat: {
+    position: "absolute",
+    top: alto * 0.02,
+    right: ancho * 0.04,
+    zIndex: 99999,
+    padding: ancho * 0.02,
+    backgroundColor: "black",
+    borderRadius: ancho * 0.015,
+    minWidth: ancho * 0.08,
+    minHeight: ancho * 0.08,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  textoCerrarChat: {
+    color: "white",
+    fontSize: ancho * 0.07,
+    fontWeight: "bold",
+    fontFamily: "Corben",
+    includeFontPadding: true,
+    textAlignVertical: "center",
+    marginBottom: -alto * 0.005,
+  },
+  mensajeChat: {
+    color: "white",
+    fontSize: ancho * 0.04,
+    marginBottom: alto * 0.015,
+    fontFamily: "Corben",
+    lineHeight: ancho * 0.05,
+    includeFontPadding: true,
+  },
+  tituloChat: {
+    color: "white",
+    fontSize: ancho * 0.07,
+    fontWeight: "bold",
+    textAlign: "center",
+    marginTop: alto * 0.02,
+    fontFamily: "Corben",
+  },
+  separadorChat: {
+    height: 1,
+    backgroundColor: "white",
+    marginVertical: alto * 0.02,
+  },
+  contenedorMensajesChat: {
+    flexGrow: 1,
+    justifyContent: "flex-end",
+    paddingBottom: alto * 0.02,
+  },
+  contenedorEntradaChat: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: alto * 0.02,
+  },
+  entradaChat: {
+    flex: 1,
+    height: alto * 0.07,
+    borderWidth: ancho * 0.002,
+    borderColor: "white",
+    backgroundColor: "black",
+    borderRadius: ancho * 0.02,
+    paddingHorizontal: ancho * 0.03,
+    color: "white",
+    fontSize: ancho * 0.04,
+    fontFamily: "Corben",
+  },
+  botonEnviarChat: {
+    backgroundColor: "green",
+    height: alto * 0.07,
+    justifyContent: "center",
+    paddingHorizontal: ancho * 0.04,
+    borderRadius: ancho * 0.02,
+    borderWidth: ancho * 0.002,
+    marginLeft: ancho * 0.02,
+  },
+  textoBotonEnviarChat: {
+    color: "white",
+    fontWeight: "bold",
+    fontSize: ancho * 0.04,
+    fontFamily: "Corben",
   },
 });
 
