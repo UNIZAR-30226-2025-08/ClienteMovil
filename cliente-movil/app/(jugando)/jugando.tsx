@@ -1,31 +1,27 @@
 import React, { useState, useEffect, useRef } from "react";
-import { View, ImageBackground, StyleSheet, Text, Image, Animated, Dimensions } from "react-native";
+import { View, ImageBackground, StyleSheet, Text, Image, Animated, Dimensions, TouchableOpacity } from "react-native";
 import { useFonts } from "expo-font";
 
 const { width, height } = Dimensions.get("window");
 
-// Importación de imágenes utilizadas en la pantalla
 const imagenFondo = require("@/assets/images/fondo-partida.png");
 const imagenLobo = require("@/assets/images/hombre-lobo-icon.jpeg");
 
 const PantallaJugando = () => {
-  // Estados para controlar la visibilidad de los textos y animaciones
   const [mostrarRol, setMostrarRol] = useState(false);
   const [mostrarInicio, setMostrarInicio] = useState(false);
+  const [mostrarBotones, setMostrarBotones] = useState(false);
 
-  // Referencias de animaciones para los efectos de desvanecimiento
   const animacionTexto = useRef(new Animated.Value(0)).current;
   const animacionRol = useRef(new Animated.Value(0)).current;
   const animacionInicio = useRef(new Animated.Value(0)).current;
   const animacionFondo = useRef(new Animated.Value(1)).current;
 
-  // Cargar fuentes personalizadas
   const [fuentesCargadas] = useFonts({
     Corben: require("@/assets/fonts/Corben-Regular.ttf"),
   });
 
   useEffect(() => {
-    // Secuencia de animaciones al iniciar la pantalla
     Animated.timing(animacionTexto, {
       toValue: 1,
       duration: 1500,
@@ -67,7 +63,9 @@ const PantallaJugando = () => {
                   toValue: 0,
                   duration: 1500,
                   useNativeDriver: true,
-                }).start();
+                }).start(() => {
+                  setMostrarBotones(true);
+                });
               }, 3000);
             });
           }, 3000);
@@ -84,15 +82,13 @@ const PantallaJugando = () => {
     <View style={estilos.contenedor}>
       <ImageBackground source={imagenFondo} style={estilos.fondo} resizeMode="cover" />
       <Animated.View style={[estilos.superposicion, { opacity: animacionFondo }]} />
-      
-      {/* Texto de inicio de la partida */}
-      <Animated.View style={[estilos.contenedorTexto, { opacity: animacionTexto }]}> 
+
+      <Animated.View style={[estilos.contenedorTexto, { opacity: animacionTexto }]}>
         <Text style={estilos.texto}>AMANECE EN LA ALDEA, TODO EL MUNDO DESPIERTA Y ABRE LOS OJOS</Text>
       </Animated.View>
 
-      {/* Visualización del rol asignado al jugador */}
       {mostrarRol && (
-        <Animated.View style={[estilos.contenedorRol, { opacity: animacionRol }]}> 
+        <Animated.View style={[estilos.contenedorRol, { opacity: animacionRol }]}>
           <View style={estilos.contenedorTextoRol}>
             <Text style={estilos.textoRol} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.5}>
               TU ROL ES
@@ -103,11 +99,21 @@ const PantallaJugando = () => {
         </Animated.View>
       )}
 
-      {/* Mensaje de inicio del juego */}
       {mostrarInicio && (
-        <Animated.View style={[estilos.contenedorTexto, { opacity: animacionInicio }]}> 
+        <Animated.View style={[estilos.contenedorTexto, { opacity: animacionInicio }]}>
           <Text style={estilos.textoInicio}>EMPIEZA LA PARTIDA</Text>
         </Animated.View>
+      )}
+
+      {mostrarBotones && (
+        <View style={estilos.contenedorBotones}>
+          <TouchableOpacity style={estilos.boton}>
+            <Text style={estilos.textoBoton}>HABILIDAD</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={estilos.boton}>
+            <Text style={estilos.textoBoton}>CHAT</Text>
+          </TouchableOpacity>
+        </View>
       )}
     </View>
   );
@@ -189,6 +195,25 @@ const estilos = StyleSheet.create({
     textAlign: "center",
     top: "127%",
     paddingHorizontal: width * 0.05,
+  },
+  contenedorBotones: {
+    position: "absolute",
+    bottom: 0,
+    width: "100%",
+    flexDirection: "row",
+  },
+  boton: {
+    flex: 1,
+    backgroundColor: "black",
+    paddingVertical: height * 0.03,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  textoBoton: {
+    color: "white",
+    fontSize: width * 0.05,
+    fontWeight: "bold",
+    textAlign: "center",
   },
 });
 
