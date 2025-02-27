@@ -2,20 +2,55 @@ import React, { useState, useEffect, useRef } from "react";
 import { View, ImageBackground, StyleSheet, Text, Image, Animated, Dimensions, TouchableOpacity } from "react-native";
 import { useFonts } from "expo-font";
 
-// Obtenemos las dimensiones de la ventana y las renombramos a "ancho" y "alto"
-const { width: ancho, height: alto } = Dimensions.get("window");
+// ============================================================================
+// ============================================================================
+// ============================================================================
 
-// Imágenes originales de fondo y rol
+// Sección de valores hardcoded, su proposito es:
+//  1. (Principal) Cuando tengamos que integrar el backend, que sea un proceso lo menos doloroso posible
+//  2. Tener centralizadas las deicisiones de estilo
+
+// Strings
+const TEXTO_INICIAL = "AMANECE EN LA ALDEA, TODO EL MUNDO DESPIERTA Y ABRE LOS OJOS";
+const TEXTO_ROL_TITULO = "TU ROL ES";
+const TEXTO_NOMBRE_ROL = "HOMBRE LOBO";
+const TEXTO_INICIO_PARTIDA = "EMPIEZA LA PARTIDA";
+const TEXTO_BOTON_HABILIDAD = "HABILIDAD";
+const TEXTO_BOTON_CHAT = "CHAT";
+const TEXTO_BOTON_PASAR_TURNO = "Pasar turno";
+const TEXTO_BOTON_VOTAR = "Votar";
+const TEXTO_PUEBLO = "PUEBLO";
+const TEXTO_LOBOS = "LOBOS";
+const TEXTO_JORNADA = "JORNADA 2";
+const TEXTO_DIA = "DÍA 2";
+const TEXTO_ESTADO_PUEBLO = "5/6 vivos";
+const TEXTO_ESTADO_LOBOS = "2/2 vivos";
+
+// Cosntantes numéricas
+const NUMERO_IMAGENES = 8;
+const TIEMPO_INICIAL = 60; // Segundos
+const RADIO_MULTIPLICADOR = 0.45;
+const TAMANIO_IMAGEN_MULTIPLICADOR = 0.13;
+const ANIMATION_DURATION = 1500;
+const ANIMATION_DELAY = 3000;
+const BORDE_RADIO_BOTON = 20;
+const TAMANIO_ICONO_BOTON = 40;
+const TAMANIO_TEMPORIZADOR = 60;
+
+// Imagenes
 const imagenFondo = require("@/assets/images/fondo-partida.png");
 const imagenLoboRol = require("@/assets/images/hombre-lobo-icon.jpeg");
-const imagenHabilidad = require("@/assets/images/hombre-lobo-icon.jpeg");
-
-// Nuevas imágenes de marcador de posición para Pueblo y Lobos
+const imagenHabilidad = require("@/assets/images/hombre-lobo-icon.jpeg"); // Same as loboRol
 const imagenPueblo = require("@/assets/images/pueblo-barra-arriba-juego.png");
 const imagenLobos = require("@/assets/images/lobo-barra-arriba-juego.png");
-
-// Imagen para representar a los jugadores
 const imagenJugadores = require("@/assets/images/jugador-icono.jpg");
+
+// ============================================================================
+// ============================================================================
+// ============================================================================
+
+// Obtenemos las dimensiones de la ventana y las renombramos a "ancho" y "alto"
+const { width: ancho, height: alto } = Dimensions.get("window");
 
 const PantallaJugando = () => {
   // Estados para controlar la visualización de elementos
@@ -24,20 +59,13 @@ const PantallaJugando = () => {
   const [mostrarBotones, setMostrarBotones] = useState(false);
 
   // Estados para las imágenes circulares en el centro
-  const [numeroDeImagenes, setNumeroDeImagenes] = useState(8);
-  const [imagenes] = useState([
-    imagenJugadores,
-    imagenJugadores,
-    imagenJugadores,
-    imagenJugadores,
-    imagenJugadores,
-    imagenJugadores,
-    imagenJugadores,
-    imagenJugadores,
-  ]);
+  const [numeroDeImagenes, setNumeroDeImagenes] = useState(NUMERO_IMAGENES);
+  const [imagenes] = useState(
+    new Array(NUMERO_IMAGENES).fill(imagenJugadores)
+  );
 
   // Nuevos estados para el temporizador
-  const [tiempoInicial, setTiempoInicial] = useState(60); // Valor inicial configurable (60s por defecto)
+  const [tiempoInicial, setTiempoInicial] = useState(TIEMPO_INICIAL); // Valor inicial configurable
   const [tiempoRestante, setTiempoRestante] = useState(tiempoInicial);
   const [temporizadorActivo, setTemporizadorActivo] = useState(false);
 
@@ -76,56 +104,56 @@ const PantallaJugando = () => {
     // Animación del texto inicial
     Animated.timing(animacionTexto, {
       toValue: 1,
-      duration: 1500,
+      duration: ANIMATION_DURATION,
       useNativeDriver: true,
     }).start(() => {
       setTimeout(() => {
         Animated.timing(animacionTexto, {
           toValue: 0,
-          duration: 1500,
+          duration: ANIMATION_DURATION,
           useNativeDriver: true,
         }).start(() => {
           // Muestra la sección de rol
           setMostrarRol(true);
           Animated.timing(animacionRol, {
             toValue: 1,
-            duration: 1500,
+            duration: ANIMATION_DURATION,
             useNativeDriver: true,
           }).start();
 
           setTimeout(() => {
             Animated.timing(animacionRol, {
               toValue: 0,
-              duration: 1500,
+              duration: ANIMATION_DURATION,
               useNativeDriver: true,
             }).start(() => {
               // Muestra el mensaje de inicio
               setMostrarInicio(true);
               Animated.timing(animacionInicio, {
                 toValue: 1,
-                duration: 1500,
+                duration: ANIMATION_DURATION,
                 useNativeDriver: true,
               }).start();
 
               setTimeout(() => {
                 Animated.timing(animacionInicio, {
                   toValue: 0,
-                  duration: 1500,
+                  duration: ANIMATION_DURATION,
                   useNativeDriver: true,
                 }).start();
                 // Desvanece el fondo para mostrar los botones
                 Animated.timing(animacionFondo, {
                   toValue: 0,
-                  duration: 1500,
+                  duration: ANIMATION_DURATION,
                   useNativeDriver: true,
                 }).start(() => {
                   setMostrarBotones(true);
                 });
-              }, 3000);
+              }, ANIMATION_DELAY);
             });
-          }, 3000);
+          }, ANIMATION_DELAY);
         });
-      }, 3000);
+      }, ANIMATION_DELAY);
     });
   }, []);
 
@@ -141,10 +169,10 @@ const PantallaJugando = () => {
   }
 
   // Calcula el radio máximo para el círculo (en función de las dimensiones de la pantalla)
-  const radioMaximoCalculado = Math.min(ancho, alto) * 0.45;
+  const radioMaximoCalculado = Math.min(ancho, alto) * RADIO_MULTIPLICADOR;
   
   // Calcula el tamaño de la imagen para el círculo
-  const tamanioImagen = Math.min(ancho, alto) * 0.13;
+  const tamanioImagen = Math.min(ancho, alto) * TAMANIO_IMAGEN_MULTIPLICADOR;
   // Ajusta el radio máximo para evitar que se recorte la imagen en los bordes
   const radioMaximo = radioMaximoCalculado - tamanioImagen / 2;
 
@@ -156,27 +184,25 @@ const PantallaJugando = () => {
 
       {/* Texto inicial animado */}
       <Animated.View style={[estilos.contenedorTexto, { opacity: animacionTexto }]}>
-        <Text style={estilos.texto}>
-          AMANECE EN LA ALDEA, TODO EL MUNDO DESPIERTA Y ABRE LOS OJOS
-        </Text>
+        <Text style={estilos.texto}>{TEXTO_INICIAL}</Text>
       </Animated.View>
 
       {/* Sección para mostrar el rol */}
       {mostrarRol && (
         <Animated.View style={[estilos.contenedorRol, { opacity: animacionRol }]}>
           <View style={estilos.contenedorTextoRol}>
-            <Text style={estilos.textoRol}>TU ROL ES</Text>
+            <Text style={estilos.textoRol}>{TEXTO_ROL_TITULO}</Text>
           </View>
           {/* Imagen del rol */}
           <Image source={imagenLoboRol} style={estilos.imagenRol} />
-          <Text style={estilos.nombreRol}>HOMBRE LOBO</Text>
+          <Text style={estilos.nombreRol}>{TEXTO_NOMBRE_ROL}</Text>
         </Animated.View>
       )}
 
       {/* Mensaje de inicio de la partida */}
       {mostrarInicio && (
         <Animated.View style={[estilos.contenedorTexto, { opacity: animacionInicio }]}>
-          <Text style={estilos.textoInicio}>EMPIEZA LA PARTIDA</Text>
+          <Text style={estilos.textoInicio}>{TEXTO_INICIO_PARTIDA}</Text>
         </Animated.View>
       )}
 
@@ -187,12 +213,12 @@ const PantallaJugando = () => {
             {/* Botón izquierdo (HABILIDAD) */}
             <TouchableOpacity style={estilos.botonHabilidad}>
               <Image source={imagenHabilidad} style={estilos.iconoBoton} />
-              <Text style={estilos.textoBoton}>HABILIDAD</Text>
+              <Text style={estilos.textoBoton}>{TEXTO_BOTON_HABILIDAD}</Text>
             </TouchableOpacity>
 
             {/* Botón derecho (CHAT) */}
             <TouchableOpacity style={estilos.botonChat}>
-              <Text style={estilos.textoBoton}>CHAT</Text>
+              <Text style={estilos.textoBoton}>{TEXTO_BOTON_CHAT}</Text>
             </TouchableOpacity>
           </View>
 
@@ -203,24 +229,24 @@ const PantallaJugando = () => {
               <View style={estilos.contenedorTopBarItem}>
                 <Image source={imagenPueblo} style={estilos.iconoTopBar} />
                 <View style={estilos.textoTopBarContainer}>
-                  <Text style={estilos.textoTopBarTitulo}>PUEBLO</Text>
-                  <Text style={estilos.textoTopBarSub}>5/6 vivos</Text>
+                  <Text style={estilos.textoTopBarTitulo}>{TEXTO_PUEBLO}</Text>
+                  <Text style={estilos.textoTopBarSub}>{TEXTO_ESTADO_PUEBLO}</Text>
                 </View>
               </View>
             </View>
 
             {/* Sección central - Jornada */}
             <View style={estilos.seccionTopBarCentro}>
-              <Text style={estilos.textoTopBarTitulo}>JORNADA 2</Text>
-              <Text style={estilos.textoTopBarSub}>DÍA 2</Text>
+              <Text style={estilos.textoTopBarTitulo}>{TEXTO_JORNADA}</Text>
+              <Text style={estilos.textoTopBarSub}>{TEXTO_DIA}</Text>
             </View>
 
             {/* Sección derecha - Lobos */}
             <View style={estilos.seccionTopBarDerecha}>
               <View style={estilos.contenedorTopBarItem}>
                 <View style={estilos.textoTopBarContainer}>
-                  <Text style={estilos.textoTopBarTitulo}>LOBOS</Text>
-                  <Text style={estilos.textoTopBarSub}>2/2 vivos</Text>
+                  <Text style={estilos.textoTopBarTitulo}>{TEXTO_LOBOS}</Text>
+                  <Text style={estilos.textoTopBarSub}>{TEXTO_ESTADO_LOBOS}</Text>
                 </View>
                 <Image source={imagenLobos} style={estilos.iconoTopBar} />
               </View>
@@ -241,10 +267,10 @@ const PantallaJugando = () => {
           {/* Botones en la parte superior derecha */}
           <View style={estilos.contenedorBotonesDerecha}>
             <TouchableOpacity style={estilos.botonAccion}>
-              <Text style={estilos.textoBoton}>Pasar turno</Text>
+              <Text style={estilos.textoBoton}>{TEXTO_BOTON_PASAR_TURNO}</Text>
             </TouchableOpacity>
             <TouchableOpacity style={[estilos.botonAccion, estilos.botonVotar]}>
-              <Text style={estilos.textoBoton}>Votar</Text>
+              <Text style={estilos.textoBoton}>{TEXTO_BOTON_VOTAR}</Text>
             </TouchableOpacity>
           </View>
 
@@ -381,8 +407,8 @@ const estilos = StyleSheet.create({
     height: alto * 0.13,
     justifyContent: "center",
     alignItems: "center",
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    borderTopLeftRadius: BORDE_RADIO_BOTON,
+    borderTopRightRadius: BORDE_RADIO_BOTON,
     maxWidth: "45%",
     marginRight: ancho * 0.12,
   },
@@ -392,14 +418,14 @@ const estilos = StyleSheet.create({
     height: alto * 0.07,
     justifyContent: "center",
     alignItems: "center",
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    borderTopLeftRadius: BORDE_RADIO_BOTON,
+    borderTopRightRadius: BORDE_RADIO_BOTON,
     maxWidth: "45%",
     marginLeft: ancho * 0.02,
   },
   iconoBoton: {
-    width: 40,
-    height: 40,
+    width: TAMANIO_ICONO_BOTON,
+    height: TAMANIO_ICONO_BOTON,
     marginBottom: 5,
   },
   textoBoton: {
@@ -469,47 +495,42 @@ const estilos = StyleSheet.create({
     borderWidth: 2,
     borderColor: "white",
   },
-
   contenedorTemporizador: {
-    position: 'absolute',
+    position: "absolute",
     top: 140,
     left: 20,
     zIndex: 2,
   },
   circuloTemporizador: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: '#000000',
-    // borderWidth: 3,
-    // borderColor: '#FFFFFF',
-    justifyContent: 'center',
-    alignItems: 'center',
+    width: TAMANIO_TEMPORIZADOR,
+    height: TAMANIO_TEMPORIZADOR,
+    borderRadius: TAMANIO_TEMPORIZADOR / 2,
+    backgroundColor: "#000000",
+    justifyContent: "center",
+    alignItems: "center",
   },
   textoTemporizador: {
-    color: 'white',
+    color: "white",
     fontSize: 24,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   contenedorBotonesDerecha: {
-    position: 'absolute',
+    position: "absolute",
     top: 140,
     right: 20,
     zIndex: 2,
     gap: 10,
   },
   botonAccion: {
-    backgroundColor: '#000000',
+    backgroundColor: "#000000",
     paddingVertical: 12,
     paddingHorizontal: 24,
     borderRadius: 25,
-    // borderWidth: 2,
-    // borderColor: '#FFFFFF',
-    alignItems: 'center',
+    alignItems: "center",
     minWidth: 120,
   },
   botonVotar: {
-    backgroundColor: '#000000',
+    backgroundColor: "#000000",
   },
 });
 
