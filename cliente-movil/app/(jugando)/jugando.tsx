@@ -91,9 +91,7 @@ const PantallaJugando = () => {
       {mostrarRol && (
         <Animated.View style={[estilos.contenedorRol, { opacity: animacionRol }]}>
           <View style={estilos.contenedorTextoRol}>
-            <Text style={estilos.textoRol}>
-              TU ROL ES
-            </Text>
+            <Text style={estilos.textoRol}>TU ROL ES</Text>
           </View>
           <Image source={imagenLobo} style={estilos.imagenRol} />
           <Text style={estilos.nombreRol}>HOMBRE LOBO</Text>
@@ -114,10 +112,42 @@ const PantallaJugando = () => {
             <Text style={estilos.textoBoton}>HABILIDAD</Text>
           </TouchableOpacity>
 
-          {/* RIGHT BUTTON (CHAT) - half the height */}
+          {/* RIGHT BUTTON (CHAT) */}
           <TouchableOpacity style={estilos.botonChat}>
             <Text style={estilos.textoBoton}>CHAT</Text>
           </TouchableOpacity>
+        </View>
+      )}
+
+      {mostrarBotones && (
+        <View style={estilos.contenedorTopBar}>
+          {/* Left Section - Pueblo */}
+          <View style={estilos.seccionTopBarIzquierda}>
+            <View style={estilos.contenedorTopBarItem}>
+              <Image source={imagenLobo} style={estilos.iconoTopBar} />
+              <View style={estilos.textoTopBarContainer}>
+                <Text style={estilos.textoTopBarTitulo}>PUEBLO</Text>
+                <Text style={estilos.textoTopBarSub}>5/6 vivos</Text>
+              </View>
+            </View>
+          </View>
+
+          {/* Center Section - Jornada */}
+          <View style={estilos.seccionTopBarCentro}>
+            <Text style={estilos.textoTopBarTitulo}>JORNADA 2</Text>
+            <Text style={estilos.textoTopBarSub}>DÍA 2</Text>
+          </View>
+
+          {/* Right Section - Lobos (text on the left, image on the right) */}
+          <View style={estilos.seccionTopBarDerecha}>
+            <View style={estilos.contenedorTopBarItem}>
+              <View style={estilos.textoTopBarContainer}>
+                <Text style={estilos.textoTopBarTitulo}>LOBOS</Text>
+                <Text style={estilos.textoTopBarSub}>2/2 vivos</Text>
+              </View>
+              <Image source={imagenLobo} style={estilos.iconoTopBar} />
+            </View>
+          </View>
         </View>
       )}
     </View>
@@ -129,6 +159,7 @@ const estilos = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    paddingTop: 50,
   },
   fondo: {
     width: "100%",
@@ -194,7 +225,7 @@ const estilos = StyleSheet.create({
   },
   textoInicio: {
     color: "white",
-    fontSize: width * 0.10,
+    fontSize: width * 0.1,
     fontFamily: "Corben",
     textAlign: "center",
     top: "127%",
@@ -206,7 +237,7 @@ const estilos = StyleSheet.create({
     width: "100%",
     flexDirection: "row",
     alignItems: "flex-end",
-    justifyContent: 'center',
+    justifyContent: "center",
     paddingHorizontal: width * 0.10,
   },
   botonHabilidad: {
@@ -217,7 +248,7 @@ const estilos = StyleSheet.create({
     alignItems: "center",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    maxWidth: '45%',
+    maxWidth: "45%",
     marginRight: width * 0.12,
   },
   botonChat: {
@@ -228,7 +259,7 @@ const estilos = StyleSheet.create({
     alignItems: "center",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    maxWidth: '45%',
+    maxWidth: "45%",
     marginLeft: width * 0.02,
   },
   iconoBoton: {
@@ -241,6 +272,61 @@ const estilos = StyleSheet.create({
     fontSize: width * 0.05,
     fontWeight: "bold",
     textAlign: "center",
+  },
+
+  // Updated top bar styles
+  contenedorTopBar: {
+    position: "absolute",
+    top: 40,
+    width: "100%",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    backgroundColor: "black",
+    paddingVertical: 20,
+    paddingHorizontal: 15,
+  },
+
+  // Split each section for better alignment
+  seccionTopBarIzquierda: {
+    flex: 1,
+    alignItems: "flex-start",  // Align content to the left
+  },
+  seccionTopBarCentro: {
+    flex: 1,
+    alignItems: "center",      // Align content to the center
+    justifyContent: "center",
+  },
+  seccionTopBarDerecha: {
+    flex: 1,
+    alignItems: "flex-end",    // Align content to the right
+  },
+
+  contenedorTopBarItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  iconoTopBar: {
+    width: 40,
+    height: 40,
+    borderRadius: 8,
+  },
+  textoTopBarContainer: {
+    flexDirection: "column",
+  },
+
+  // Same typography as bottom buttons
+  textoTopBarTitulo: {
+    color: "white",
+    fontSize: width * 0.04,
+    fontWeight: "bold",
+  },
+  textoTopBarSub: {
+    color: "white",
+    fontSize: width * 0.03,
+    fontWeight: "bold",
+    opacity: 0.9,
   },
 });
 
