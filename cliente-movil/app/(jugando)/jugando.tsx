@@ -26,7 +26,7 @@ const TEXTO_DIA = "DÍA 2";
 const TEXTO_ESTADO_PUEBLO = "5/6 vivos";
 const TEXTO_ESTADO_LOBOS = "2/2 vivos";
 
-// Cosntantes numéricas
+// Constantes numéricas
 const NUMERO_IMAGENES = 8;
 const TIEMPO_INICIAL = 60; // Segundos
 const RADIO_MULTIPLICADOR = 0.45;
@@ -60,9 +60,13 @@ const PantallaJugando = () => {
 
   // Estados para las imágenes circulares en el centro
   const [numeroDeImagenes, setNumeroDeImagenes] = useState(NUMERO_IMAGENES);
-  const [imagenes] = useState(
-    new Array(NUMERO_IMAGENES).fill(imagenJugadores)
-  );
+  const [imagenes] = useState(new Array(NUMERO_IMAGENES).fill(imagenJugadores));
+
+  // NUEVA FUNCIÓN: Manejar la pulsación de un jugador
+  const handlePressJugador = (indice) => {
+    console.log(`Jugador ${indice + 1} presionado`);
+    // Aquí iría la lógica para manejar la interacción con el jugador
+  };
 
   // Nuevos estados para el temporizador
   const [tiempoInicial, setTiempoInicial] = useState(TIEMPO_INICIAL); // Valor inicial configurable
@@ -293,18 +297,21 @@ const PantallaJugando = () => {
               const y = radioMaximo * Math.sin(angulo);
               
               return (
-                <Image
+                <TouchableOpacity
                   key={indice}
-                  source={imagen}
+                  onPress={() => handlePressJugador(indice)}
                   style={[
-                    estilos.circleImage,
+                    estilos.circleImageContainer,
                     {
                       width: tamanioImagen,
                       height: tamanioImagen,
                       transform: [{ translateX: x }, { translateY: y }],
                     },
                   ]}
-                />
+                  activeOpacity={0.7}
+                >
+                  <Image source={imagen} style={estilos.circleImage} />
+                </TouchableOpacity>
               );
             })}
           </View>
@@ -489,11 +496,16 @@ const estilos = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  circleImage: {
+  circleImageContainer: {
     position: "absolute",
     borderRadius: 50,
     borderWidth: 2,
     borderColor: "white",
+    overflow: "hidden",
+  },
+  circleImage: {
+    width: "100%",
+    height: "100%",
   },
   contenedorTemporizador: {
     position: "absolute",
