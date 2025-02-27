@@ -6,6 +6,7 @@ const { width, height } = Dimensions.get("window");
 
 const imagenFondo = require("@/assets/images/fondo-partida.png");
 const imagenLobo = require("@/assets/images/hombre-lobo-icon.jpeg");
+const imagenHabilidad = require("@/assets/images/hombre-lobo-icon.jpeg"); // Example skill icon
 
 const PantallaJugando = () => {
   const [mostrarRol, setMostrarRol] = useState(false);
@@ -107,10 +108,14 @@ const PantallaJugando = () => {
 
       {mostrarBotones && (
         <View style={estilos.contenedorBotones}>
-          <TouchableOpacity style={estilos.boton}>
+          {/* LEFT BUTTON (HABILIDAD) */}
+          <TouchableOpacity style={estilos.botonHabilidad}>
+            <Image source={imagenHabilidad} style={estilos.iconoBoton} />
             <Text style={estilos.textoBoton}>HABILIDAD</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={estilos.boton}>
+
+          {/* RIGHT BUTTON (CHAT) - half the height */}
+          <TouchableOpacity style={estilos.botonChat}>
             <Text style={estilos.textoBoton}>CHAT</Text>
           </TouchableOpacity>
         </View>
@@ -201,13 +206,36 @@ const estilos = StyleSheet.create({
     bottom: 0,
     width: "100%",
     flexDirection: "row",
+    alignItems: "flex-end",
+    justifyContent: 'center',
+    paddingHorizontal: width * 0.10,
   },
-  boton: {
+  botonHabilidad: {
     flex: 1,
     backgroundColor: "black",
-    paddingVertical: height * 0.03,
+    height: height * 0.13,
     justifyContent: "center",
     alignItems: "center",
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    maxWidth: '45%',
+    marginRight: width * 0.12,
+  },
+  botonChat: {
+    flex: 1,
+    backgroundColor: "black",
+    height: height * 0.07,
+    justifyContent: "center",
+    alignItems: "center",
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    maxWidth: '45%',
+    marginLeft: width * 0.02,
+  },
+  iconoBoton: {
+    width: 40,
+    height: 40,
+    marginBottom: 5,
   },
   textoBoton: {
     color: "white",
