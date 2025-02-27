@@ -4,9 +4,14 @@ import { useFonts } from "expo-font";
 
 const { width, height } = Dimensions.get("window");
 
+// Original background and role images
 const imagenFondo = require("@/assets/images/fondo-partida.png");
-const imagenLobo = require("@/assets/images/hombre-lobo-icon.jpeg");
+const imagenLoboRol = require("@/assets/images/hombre-lobo-icon.jpeg");
 const imagenHabilidad = require("@/assets/images/hombre-lobo-icon.jpeg");
+
+// New placeholder images for Pueblo & Lobos
+const imagenPueblo = require("@/assets/images/pueblo-barra-arriba-juego.png");
+const imagenLobos = require("@/assets/images/lobo-barra-arriba-juego.png");
 
 const PantallaJugando = () => {
   const [mostrarRol, setMostrarRol] = useState(false);
@@ -93,7 +98,8 @@ const PantallaJugando = () => {
           <View style={estilos.contenedorTextoRol}>
             <Text style={estilos.textoRol}>TU ROL ES</Text>
           </View>
-          <Image source={imagenLobo} style={estilos.imagenRol} />
+          {/* Role Image */}
+          <Image source={imagenLoboRol} style={estilos.imagenRol} />
           <Text style={estilos.nombreRol}>HOMBRE LOBO</Text>
         </Animated.View>
       )}
@@ -124,7 +130,7 @@ const PantallaJugando = () => {
           {/* Left Section - Pueblo */}
           <View style={estilos.seccionTopBarIzquierda}>
             <View style={estilos.contenedorTopBarItem}>
-              <Image source={imagenLobo} style={estilos.iconoTopBar} />
+              <Image source={imagenPueblo} style={estilos.iconoTopBar} />
               <View style={estilos.textoTopBarContainer}>
                 <Text style={estilos.textoTopBarTitulo}>PUEBLO</Text>
                 <Text style={estilos.textoTopBarSub}>5/6 vivos</Text>
@@ -145,7 +151,7 @@ const PantallaJugando = () => {
                 <Text style={estilos.textoTopBarTitulo}>LOBOS</Text>
                 <Text style={estilos.textoTopBarSub}>2/2 vivos</Text>
               </View>
-              <Image source={imagenLobo} style={estilos.iconoTopBar} />
+              <Image source={imagenLobos} style={estilos.iconoTopBar} />
             </View>
           </View>
         </View>
@@ -273,8 +279,6 @@ const estilos = StyleSheet.create({
     fontWeight: "bold",
     textAlign: "center",
   },
-
-  // Updated top bar styles
   contenedorTopBar: {
     position: "absolute",
     top: 40,
@@ -286,22 +290,19 @@ const estilos = StyleSheet.create({
     paddingVertical: 20,
     paddingHorizontal: 15,
   },
-
-  // Split each section for better alignment
   seccionTopBarIzquierda: {
     flex: 1,
-    alignItems: "flex-start",  // Align content to the left
+    alignItems: "flex-start",
   },
   seccionTopBarCentro: {
     flex: 1,
-    alignItems: "center",      // Align content to the center
+    alignItems: "center",
     justifyContent: "center",
   },
   seccionTopBarDerecha: {
     flex: 1,
-    alignItems: "flex-end",    // Align content to the right
+    alignItems: "flex-end",
   },
-
   contenedorTopBarItem: {
     flexDirection: "row",
     alignItems: "center",
@@ -315,8 +316,6 @@ const estilos = StyleSheet.create({
   textoTopBarContainer: {
     flexDirection: "column",
   },
-
-  // Same typography as bottom buttons
   textoTopBarTitulo: {
     color: "white",
     fontSize: width * 0.04,
