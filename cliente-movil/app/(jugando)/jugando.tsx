@@ -36,6 +36,30 @@ const PantallaJugando = () => {
     imagenJugadores,
   ]);
 
+  // Nuevos estados para el temporizador
+  const [tiempoInicial, setTiempoInicial] = useState(60); // Valor inicial configurable (60s por defecto)
+  const [tiempoRestante, setTiempoRestante] = useState(tiempoInicial);
+  const [temporizadorActivo, setTemporizadorActivo] = useState(false);
+
+  // Función para reiniciar el temporizador al tocarlo
+  const reiniciarTemporizador = () => {
+    setTiempoRestante(tiempoInicial);
+    setTemporizadorActivo(true);
+  };
+
+  // Efecto para manejar el temporizador
+  useEffect(() => {
+    let intervalo;
+    if (temporizadorActivo && tiempoRestante > 0) {
+      intervalo = setInterval(() => {
+        setTiempoRestante((prev) => prev - 1);
+      }, 1000);
+    } else if (tiempoRestante === 0) {
+      setTemporizadorActivo(false);
+    }
+    return () => clearInterval(intervalo);
+  }, [temporizadorActivo, tiempoRestante]);
+
   // Referencias para las animaciones
   const animacionTexto = useRef(new Animated.Value(0)).current;
   const animacionRol = useRef(new Animated.Value(0)).current;
@@ -104,6 +128,13 @@ const PantallaJugando = () => {
       }, 3000);
     });
   }, []);
+
+  // Iniciar temporizador cuando se muestran los botones
+  useEffect(() => {
+    if (mostrarBotones) {
+      setTemporizadorActivo(true);
+    }
+  }, [mostrarBotones]);
 
   if (!fuentesCargadas) {
     return null;
@@ -196,6 +227,27 @@ const PantallaJugando = () => {
             </View>
           </View>
 
+          {/* Temporizador circular en la parte superior izquierda */}
+          <TouchableOpacity 
+            style={estilos.contenedorTemporizador} 
+            onPress={reiniciarTemporizador}
+            activeOpacity={0.7}
+          >
+            <View style={estilos.circuloTemporizador}>
+              <Text style={estilos.textoTemporizador}>{tiempoRestante}</Text>
+            </View>
+          </TouchableOpacity>
+
+          {/* Botones en la parte superior derecha */}
+          <View style={estilos.contenedorBotonesDerecha}>
+            <TouchableOpacity style={estilos.botonAccion}>
+              <Text style={estilos.textoBoton}>Pasar turno</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={[estilos.botonAccion, estilos.botonVotar]}>
+              <Text style={estilos.textoBoton}>Votar</Text>
+            </TouchableOpacity>
+          </View>
+
           {/* Contenedor circular centrado para las imágenes de los jugadores */}
           <View
             style={[
@@ -236,7 +288,7 @@ const PantallaJugando = () => {
   );
 };
 
-// Estilos de la pantalla
+// Estilos actualizados
 const estilos = StyleSheet.create({
   contenedor: {
     flex: 1,
@@ -416,6 +468,48 @@ const estilos = StyleSheet.create({
     borderRadius: 50,
     borderWidth: 2,
     borderColor: "white",
+  },
+
+  contenedorTemporizador: {
+    position: 'absolute',
+    top: 140,
+    left: 20,
+    zIndex: 2,
+  },
+  circuloTemporizador: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#000000',
+    // borderWidth: 3,
+    // borderColor: '#FFFFFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  textoTemporizador: {
+    color: 'white',
+    fontSize: 24,
+    fontWeight: 'bold',
+  },
+  contenedorBotonesDerecha: {
+    position: 'absolute',
+    top: 140,
+    right: 20,
+    zIndex: 2,
+    gap: 10,
+  },
+  botonAccion: {
+    backgroundColor: '#000000',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 25,
+    // borderWidth: 2,
+    // borderColor: '#FFFFFF',
+    alignItems: 'center',
+    minWidth: 120,
+  },
+  botonVotar: {
+    backgroundColor: '#000000',
   },
 });
 
