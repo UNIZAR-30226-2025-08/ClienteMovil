@@ -13,7 +13,7 @@ const imagenHabilidad = require("@/assets/images/hombre-lobo-icon.jpeg");
 const imagenPueblo = require("@/assets/images/pueblo-barra-arriba-juego.png");
 const imagenLobos = require("@/assets/images/lobo-barra-arriba-juego.png");
 
-const imagenJugadores = require("@/assets/images/jugador-icono.png");
+const imagenJugadores = require("@/assets/images/jugador-icono.jpg");
 
 const PantallaJugando = () => {
   const [mostrarRol, setMostrarRol] = useState(false);
