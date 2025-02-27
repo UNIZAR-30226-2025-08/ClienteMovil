@@ -69,11 +69,14 @@ const PantallaJugando = () => {
   const [mostrarBotones, setMostrarBotones] = useState(false);
   const [mostrarChat, setMostrarChat] = useState(false);
 
-  const [cantidadImagenes, setCantidadImagenes] = useState(CANTIDAD_IMAGENES);
-  const [imagenes, setImagenes] = useState(new Array(CANTIDAD_IMAGENES).fill(imagenJugadores));
+  // POPUP DE HABILIDAD: Estado para manejar la ventana emergente de habilidad
+  const [mostrarHabilidad, setMostrarHabilidad] = useState(false);
+
+  const [cantidadImagenes] = useState(CANTIDAD_IMAGENES);
+  const [imagenes] = useState(new Array(CANTIDAD_IMAGENES).fill(imagenJugadores));
 
   // Estado para mensajes del chat
-  const [mensajes, setMensajes] = useState([
+  const [mensajes] = useState([
     { id: 1, texto: "Jugador 2: Mensaje de prueba" },
     { id: 2, texto: "Jugador 5: Otro mensaje" },
   ]);
@@ -85,7 +88,7 @@ const PantallaJugando = () => {
   };
 
   // Estados y lógica para el temporizador
-  const [tiempoInicialEstado, setTiempoInicialEstado] = useState(TIEMPO_INICIAL);
+  const [tiempoInicialEstado] = useState(TIEMPO_INICIAL);
   const [tiempoRestante, setTiempoRestante] = useState(tiempoInicialEstado);
   const [temporizadorActivo, setTemporizadorActivo] = useState(false);
 
@@ -132,6 +135,28 @@ const PantallaJugando = () => {
       useNativeDriver: true,
     }).start(() => {
       setMostrarChat(false);
+    });
+  };
+
+  // POPUP DE HABILIDAD: Animación de la ventana emergente de habilidad
+  const posicionHabilidad = useRef(new Animated.Value(alto)).current;
+
+  const abrirHabilidad = () => {
+    setMostrarHabilidad(true);
+    Animated.timing(posicionHabilidad, {
+      toValue: 0,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const cerrarHabilidad = () => {
+    Animated.timing(posicionHabilidad, {
+      toValue: alto,
+      duration: 300,
+      useNativeDriver: true,
+    }).start(() => {
+      setMostrarHabilidad(false);
     });
   };
 
@@ -240,8 +265,8 @@ const PantallaJugando = () => {
       {mostrarBotones && (
         <>
           <View style={estilos.contenedorBotones}>
-            {/* Botón Habilidad */}
-            <TouchableOpacity style={estilos.botonHabilidad}>
+            {/* Botón Habilidad - se añade onPress para abrir pop-up */}
+            <TouchableOpacity style={estilos.botonHabilidad} onPress={abrirHabilidad}>
               <Image source={imagenHabilidad} style={estilos.iconoBoton} />
               <Text style={estilos.textoBoton}>{TEXTO_BOTON_HABILIDAD}</Text>
             </TouchableOpacity>
@@ -338,7 +363,7 @@ const PantallaJugando = () => {
         </>
       )}
 
-      {/* Chat deslizable */}
+      {/* CHAT DESLIZABLE */}
       {mostrarChat && (
         <Animated.View
           style={[
@@ -388,6 +413,48 @@ const PantallaJugando = () => {
               <Text style={estilos.textoBotonEnviarChat}>Enviar</Text>
             </TouchableOpacity>
           </View>
+        </Animated.View>
+      )}
+
+      {/* POPUP DE HABILIDAD DESLIZABLE */}
+      {mostrarHabilidad && (
+        <Animated.View
+          style={[
+            estilos.contenedorHabilidad,
+            { transform: [{ translateY: posicionHabilidad }] },
+          ]}
+        >
+          <TouchableOpacity 
+            style={estilos.botonCerrarHabilidad}
+            onPress={cerrarHabilidad}
+            activeOpacity={0.5}
+            hitSlop={{
+              top: alto * 0.02,
+              bottom: alto * 0.02,
+              left: ancho * 0.04,
+              right: ancho * 0.04,
+            }}
+          >
+            <Text style={estilos.textoCerrarHabilidad}>X</Text>
+          </TouchableOpacity>
+
+          {/* Contenedor para título + imagen a la izquierda */}
+          <View style={estilos.contenedorTituloHabilidad}>
+            <Image source={imagenHabilidad} style={estilos.iconoHabilidadPopup} />
+            <Text style={estilos.tituloHabilidad}>Habilidad</Text>
+          </View>
+          
+          <View style={estilos.separadorHabilidad} />
+
+          <ScrollView contentContainerStyle={estilos.contenedorInfoHabilidad}>
+            <Text style={estilos.textoHabilidad}>
+              Eres El Lobo. Tienes el poder de matar a un jugador durante la noche, 
+              pero ten cuidado de no ser descubierto.
+            </Text>
+            <Text style={estilos.textoRecuerda}>
+              Recuerda: Los lobos deben ponerse de acuerdo sobre a quién asesinar en la noche.
+            </Text>
+          </ScrollView>
         </Animated.View>
       )}
     </View>
@@ -622,7 +689,7 @@ const estilos = StyleSheet.create({
     left: ancho * 0.05,
     right: ancho * 0.05,
     bottom: 0,
-    height: alto * 0.90,
+    height: alto * 0.85,
     backgroundColor: "black",
     borderTopLeftRadius: ancho * 0.05,
     borderTopRightRadius: ancho * 0.05,
@@ -656,14 +723,6 @@ const estilos = StyleSheet.create({
     textAlignVertical: "center",
     marginBottom: -alto * 0.005,
   },
-  mensajeChat: {
-    color: "white",
-    fontSize: ancho * 0.04,
-    marginBottom: alto * 0.015,
-    fontFamily: "Corben",
-    lineHeight: ancho * 0.05,
-    includeFontPadding: true,
-  },
   tituloChat: {
     color: "white",
     fontSize: ancho * 0.07,
@@ -681,6 +740,14 @@ const estilos = StyleSheet.create({
     flexGrow: 1,
     justifyContent: "flex-end",
     paddingBottom: alto * 0.02,
+  },
+  mensajeChat: {
+    color: "white",
+    fontSize: ancho * 0.04,
+    marginBottom: alto * 0.015,
+    fontFamily: "Corben",
+    lineHeight: ancho * 0.05,
+    includeFontPadding: true,
   },
   contenedorEntradaChat: {
     flexDirection: "row",
@@ -713,6 +780,92 @@ const estilos = StyleSheet.create({
     fontWeight: "bold",
     fontSize: ancho * 0.04,
     fontFamily: "Corben",
+  },
+
+  // POPUP DE HABILIDAD
+  contenedorHabilidad: {
+    position: "absolute",
+    zIndex: 9999,
+    left: ancho * 0.05,
+    right: ancho * 0.05,
+    bottom: 0,
+    height: alto * 0.6,
+    backgroundColor: "black",
+    borderTopLeftRadius: ancho * 0.05,
+    borderTopRightRadius: ancho * 0.05,
+    padding: ancho * 0.04,
+    borderWidth: ancho * 0.002,
+    elevation: 50,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: alto * 0.003 },
+    shadowOpacity: 0.5,
+    shadowRadius: ancho * 0.02,
+  },
+  botonCerrarHabilidad: {
+    position: "absolute",
+    top: alto * 0.02,
+    right: ancho * 0.04,
+    zIndex: 99999,
+    padding: ancho * 0.02,
+    backgroundColor: "black",
+    borderRadius: ancho * 0.015,
+    minWidth: ancho * 0.08,
+    minHeight: ancho * 0.08,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  textoCerrarHabilidad: {
+    color: "white",
+    fontSize: ancho * 0.07,
+    fontWeight: "bold",
+    fontFamily: "Corben",
+    includeFontPadding: true,
+    textAlignVertical: "center",
+    marginBottom: -alto * 0.005,
+  },
+  contenedorTituloHabilidad: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: alto * 0.02,
+  },
+  iconoHabilidadPopup: {
+    width: ancho * 0.12,
+    height: ancho * 0.12,
+    marginRight: ancho * 0.02,
+  },
+  tituloHabilidad: {
+    color: "white",
+    fontSize: ancho * 0.07,
+    fontWeight: "bold",
+    textAlign: "center",
+    fontFamily: "Corben",
+  },
+  separadorHabilidad: {
+    height: 1,
+    backgroundColor: "white",
+    marginVertical: alto * 0.02,
+  },
+  contenedorInfoHabilidad: {
+    flexGrow: 1,
+    justifyContent: "flex-start",
+    paddingBottom: alto * 0.02,
+  },
+  textoHabilidad: {
+    color: "white",
+    fontSize: ancho * 0.05,
+    marginBottom: alto * 0.015,
+    fontFamily: "Corben",
+    lineHeight: ancho * 0.06,
+    includeFontPadding: true,
+  },
+  textoRecuerda: {
+    color: "white",
+    fontSize: ancho * 0.045,
+    marginTop: alto * 0.02,
+    fontFamily: "Corben",
+    lineHeight: ancho * 0.055,
+    includeFontPadding: true,
   },
 });
 
