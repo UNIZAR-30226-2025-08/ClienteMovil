@@ -275,7 +275,7 @@ const estilos = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     width: "100%",
-    top: "28%",
+    top: "35%",
     flexDirection: "column",
   },
   contenedorTextoRol: {
