@@ -21,7 +21,7 @@ import { useFonts } from "expo-font";
 //  1. (Principal) Cuando tengamos que integrar el backend, que sea un proceso lo menos doloroso posible
 //  2. (Secundario) Tener centralizadas las deicisiones de estilo
 
-// Strings
+// Strings existentes
 const TEXTO_INICIAL = "AMANECE EN LA ALDEA, TODO EL MUNDO DESPIERTA Y ABRE LOS OJOS";
 const TEXTO_ROL_TITULO = "TU ROL ES";
 const TEXTO_NOMBRE_ROL = "HOMBRE LOBO";
@@ -37,7 +37,7 @@ const TEXTO_DIA = "DÍA 2";
 const TEXTO_ESTADO_PUEBLO = "5/6 vivos";
 const TEXTO_ESTADO_LOBOS = "2/2 vivos";
 
-// Constantes numéricas
+// Números
 const CANTIDAD_IMAGENES = 8;
 const TIEMPO_INICIAL = 60; // Segundos
 const MULTIPLICADOR_RADIO = 0.45;
@@ -45,7 +45,8 @@ const MULTIPLICADOR_TAMANIO_IMAGEN = 0.13;
 const DURACION_ANIMACION = 1500;
 const RETRASO_ANIMACION = 3000;
 
-const { width: ancho, height: alto } = Dimensions.get("window"); // Obtiene las dimensiones de la ventana y las renombra a "ancho" y "alto"
+// Dimensiones
+const { width: ancho, height: alto } = Dimensions.get("window");
 const BORDE_RADIO_BOTON = ancho * 0.0556; // Aproximadamente 20px en un dispositivo de ~360px de ancho
 const TAMANIO_ICONO_BOTON = ancho * 0.1;
 const TAMANIO_TEMPORIZADOR = ancho * 0.15;
@@ -57,6 +58,20 @@ const imagenHabilidad = require("@/assets/images/hombre-lobo-icon.jpeg");
 const imagenPueblo = require("@/assets/images/pueblo-barra-arriba-juego.png");
 const imagenLobos = require("@/assets/images/lobo-barra-arriba-juego.png");
 const imagenJugadores = require("@/assets/images/jugador-icono.jpg");
+
+// NUEVAS CONSTANTES: textos y mensajes hardcodeados no centralizados
+const TEXTO_CHAT_PLACEHOLDER = "Enviar un mensaje";
+const TEXTO_BOTON_ENVIAR_CHAT = "Enviar";
+const TEXTO_TITULO_CHAT = "CHAT";
+const TEXTO_CERRAR_CHAT = "X";
+const TEXTO_CERRAR_POPUP = "X";
+const TEXTO_POPUP_HABILIDAD_TITULO = "Habilidad";
+const TEXTO_POPUP_HABILIDAD_DESC = "Eres El Lobo. Tienes el poder de matar a un jugador durante la noche, pero ten cuidado de no ser descubierto.";
+const TEXTO_POPUP_HABILIDAD_RECUERDA = "Recuerda: Los lobos deben ponerse de acuerdo sobre a quién asesinar en la noche.";
+const MENSAJES_CHAT_INITIAL = [
+  { id: 1, texto: "Jugador 2: Mensaje de prueba" },
+  { id: 2, texto: "Jugador 5: Otro mensaje" },
+];
 
 // ============================================================================
 // ============================================================================
@@ -76,10 +91,7 @@ const PantallaJugando = () => {
   const [imagenes] = useState(new Array(CANTIDAD_IMAGENES).fill(imagenJugadores));
 
   // Estado para mensajes del chat
-  const [mensajes] = useState([
-    { id: 1, texto: "Jugador 2: Mensaje de prueba" },
-    { id: 2, texto: "Jugador 5: Otro mensaje" },
-  ]);
+  const [mensajes] = useState(MENSAJES_CHAT_INITIAL);
 
   // Función para manejar la pulsación sobre un jugador
   const presionarJugador = (indice) => {
@@ -382,10 +394,10 @@ const PantallaJugando = () => {
               right: ancho * 0.04,
             }}
           >
-            <Text style={estilos.textoCerrarChat}>X</Text>
+            <Text style={estilos.textoCerrarChat}>{TEXTO_CERRAR_CHAT}</Text>
           </TouchableOpacity>
 
-          <Text style={estilos.tituloChat}>CHAT</Text>
+          <Text style={estilos.tituloChat}>{TEXTO_TITULO_CHAT}</Text>
           <View style={estilos.separadorChat} />
 
           <ScrollView
@@ -406,11 +418,11 @@ const PantallaJugando = () => {
           <View style={estilos.contenedorEntradaChat}>
             <TextInput
               style={estilos.entradaChat}
-              placeholder="Enviar un mensaje"
+              placeholder={TEXTO_CHAT_PLACEHOLDER}
               placeholderTextColor="#CCC"
             />
             <TouchableOpacity style={estilos.botonEnviarChat}>
-              <Text style={estilos.textoBotonEnviarChat}>Enviar</Text>
+              <Text style={estilos.textoBotonEnviarChat}>{TEXTO_BOTON_ENVIAR_CHAT}</Text>
             </TouchableOpacity>
           </View>
         </Animated.View>
@@ -435,24 +447,23 @@ const PantallaJugando = () => {
               right: ancho * 0.04,
             }}
           >
-            <Text style={estilos.textoCerrarHabilidad}>X</Text>
+            <Text style={estilos.textoCerrarHabilidad}>{TEXTO_CERRAR_POPUP}</Text>
           </TouchableOpacity>
 
           {/* Contenedor para título + imagen a la izquierda */}
           <View style={estilos.contenedorTituloHabilidad}>
             <Image source={imagenHabilidad} style={estilos.iconoHabilidadPopup} />
-            <Text style={estilos.tituloHabilidad}>Habilidad</Text>
+            <Text style={estilos.tituloHabilidad}>{TEXTO_POPUP_HABILIDAD_TITULO}</Text>
           </View>
           
           <View style={estilos.separadorHabilidad} />
 
           <ScrollView contentContainerStyle={estilos.contenedorInfoHabilidad}>
             <Text style={estilos.textoHabilidad}>
-              Eres El Lobo. Tienes el poder de matar a un jugador durante la noche, 
-              pero ten cuidado de no ser descubierto.
+              {TEXTO_POPUP_HABILIDAD_DESC}
             </Text>
             <Text style={estilos.textoRecuerda}>
-              Recuerda: Los lobos deben ponerse de acuerdo sobre a quién asesinar en la noche.
+              {TEXTO_POPUP_HABILIDAD_RECUERDA}
             </Text>
           </ScrollView>
         </Animated.View>
