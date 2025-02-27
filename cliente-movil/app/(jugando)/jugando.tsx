@@ -6,7 +6,7 @@ const { width, height } = Dimensions.get("window");
 
 const imagenFondo = require("@/assets/images/fondo-partida.png");
 const imagenLobo = require("@/assets/images/hombre-lobo-icon.jpeg");
-const imagenHabilidad = require("@/assets/images/hombre-lobo-icon.jpeg"); // Example skill icon
+const imagenHabilidad = require("@/assets/images/hombre-lobo-icon.jpeg");
 
 const PantallaJugando = () => {
   const [mostrarRol, setMostrarRol] = useState(false);
@@ -91,7 +91,7 @@ const PantallaJugando = () => {
       {mostrarRol && (
         <Animated.View style={[estilos.contenedorRol, { opacity: animacionRol }]}>
           <View style={estilos.contenedorTextoRol}>
-            <Text style={estilos.textoRol} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.5}>
+            <Text style={estilos.textoRol}>
               TU ROL ES
             </Text>
           </View>
@@ -145,7 +145,7 @@ const estilos = StyleSheet.create({
   contenedorTexto: {
     position: "absolute",
     width: "80%",
-    top: "22%",
+    top: "21%",
     justifyContent: "center",
     alignItems: "center",
   },
@@ -168,7 +168,7 @@ const estilos = StyleSheet.create({
     width: "100%",
     alignItems: "center",
     justifyContent: "center",
-    minHeight: height * 0.15,
+    minHeight: height * 0.1,
     paddingHorizontal: width * 0.05,
   },
   textoRol: {
@@ -176,10 +176,9 @@ const estilos = StyleSheet.create({
     color: "white",
     fontFamily: "Corben",
     textAlign: "center",
-    textAlignVertical: "center",
-    width: "90%",
-    flexShrink: 1,
-    paddingVertical: height * 0.03,
+    lineHeight: width * 0.12,
+    paddingVertical: height * 0.005,
+    includeFontPadding: true,
   },
   imagenRol: {
     width: width * 0.35,
