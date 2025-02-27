@@ -100,10 +100,10 @@ const PantallaJugando = () => {
   }
 
   // Compute a max radius for the circle
-  const computedMaxRadius = Math.min(width, height) * 0.4;
+  const computedMaxRadius = Math.min(width, height) * 0.45;
   
   // Calculate the image size once so that container centering can be adjusted if needed
-  const imageSize = Math.min(width, height) * 0.12;
+  const imageSize = Math.min(width, height) * 0.13;
   // Adjust the max radius to avoid clipping half the image at the edges
   const maxRadius = computedMaxRadius - imageSize / 2;
 
@@ -386,7 +386,6 @@ const estilos = StyleSheet.create({
     fontWeight: "bold",
     opacity: 0.9,
   },
-  // Updated circle container style to center it on the screen
   circleContainer: {
     position: "absolute",
     top: "56%",
