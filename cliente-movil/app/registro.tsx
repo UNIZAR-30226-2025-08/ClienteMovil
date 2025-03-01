@@ -15,6 +15,7 @@ import {
 } from 'react-native';
 import { Link } from 'expo-router';
 import { useFonts } from 'expo-font';
+import { useRouter } from 'expo-router';
 
 const imagenPortada = require('@/assets/images/imagen-portada.png');
 const imagenGoogle = require('@/assets/images/google-icon.png');
@@ -22,13 +23,19 @@ const imagenFondoInicioSesion = require('@/assets/images/fondo-inicio-sesion.jpg
 
 export default function App() {
 
+  // 'nombre' almacena el valor escrito en el campo nombre y 
+  // 'setNombre' es una funcion que actualiza el valor cuando el usuario escribe
+  const [nombre, setNombre] = useState('');
+
   // 'email' almacena el valor escrito en el campo correo y 
-  // 'setEmail' es una funcion que actualiza el valor cuando el usuario escribe  
+  // 'setEmail' es una funcion que actualiza el valor cuando el usuario escribe
   const [email, setEmail] = useState('');
 
-  // 'password' almacena el valor escrito en el campo correo y 
+  // 'password' almacena el valor escrito en el campo contraseña y 
   // 'setPassword' es una funcion que actualiza el valor cuando el usuario escribe
   const [password, setPassword] = useState('');
+
+  const router = useRouter();
 
   const [loaded] = useFonts({
     GhostShadow: require('@/assets/fonts/ghost-shadow.ttf'),
@@ -38,13 +45,13 @@ export default function App() {
     return null;
   }
 
-  // Función para enviar los datos al backend
-  const handleLogin = async () => {
+  // 📌 Función para registrar al usuario
+  const handleRegister = async () => {
 
     // Si el usuario no ha rellenado el campo de email o contraseña
     // lanza un mensaje de que no se han rellenado los campos y no 
     // manda la petición
-    if (!email || !password) {
+    if (!nombre || !email || !password) {
       Alert.alert('Error', 'Por favor, completa todos los campos.');
       return;
     }
@@ -55,26 +62,28 @@ export default function App() {
     // datos al backend en formato JSON y 'body' son la propia información que
     // vamos a enviar al backend en formato JSON
     try {
-      const response = await fetch('http://BACKEND_URL/api/login', {
+      const response = await fetch('http://BACKEND_URL/api/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ nombre, email, password }),
       });
 
-      // Convertimos la respuesta del servidor en JSON
       const data = await response.json();
 
       if (response.ok) {
-        Alert.alert('Inicio de sesión exitoso', `Bienvenido, ${data.user.nombre}`);
+        Alert.alert('Registro exitoso', 'Ahora puedes iniciar sesión.', [
+          { text: 'OK', onPress: () => router.push('/entrar') }
+        ]);
       } else {
-        Alert.alert('Error', data.message || 'Credenciales incorrectas.');
+        Alert.alert('Error', data.message || 'No se pudo registrar el usuario.');
       }
     } catch (error) {
       Alert.alert('Error', 'No se pudo conectar con el servidor.');
     }
   };
+
 
   return (
     <KeyboardAvoidingView
@@ -93,40 +102,24 @@ export default function App() {
 
             {/* Formulario */}
             <View style={styles.formContainer}>
-              <Text style={styles.tituloIniciarSesion}>INICIAR SESION</Text>
+              <Text style={styles.tituloIniciarSesion}>REGISTRARSE</Text>
+
+              <Text style={styles.textoCorreo}>Nombre</Text>
+              <TextInput style={styles.input} placeholder="Tu nombre" placeholderTextColor="#444" />
 
               <Text style={styles.textoCorreo}>Correo electrónico</Text>
-                            <TextInput
-                style={styles.input}
-                placeholder="Tu correo"
-                placeholderTextColor="#444"
-                value={email}
-                onChangeText={setEmail} // Actualiza el estado y por tanto el valor de la variable con el texto ingresado
-                keyboardType="email-address"
-                autoCapitalize="none"
-              />
+              <TextInput style={styles.input} placeholder="Tu correo" placeholderTextColor="#444" />
 
               <Text style={styles.textoPassword}>Contraseña</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Tu contraseña"
-                placeholderTextColor="#444"
-                value={password}
-                onChangeText={setPassword} // Actualiza el estado y por tanto el valor de la variable con el texto ingresado
-                secureTextEntry
-              />
-
-              <Text style={styles.textoRegistro}>
-                ¿No tienes cuenta? <Link href="/registro" style={styles.linkRegistro}>Regístrate</Link>
-              </Text>
+              <TextInput style={styles.input} placeholder="Tu contraseña" placeholderTextColor="#444" secureTextEntry />
 
               <TouchableOpacity style={styles.botonGoogle}>
                 <Image source={imagenGoogle} style={styles.imagenGoogle} />
-                <Text style={styles.textoGoogle}>Continuar con Google</Text>
+                <Text style={styles.textoGoogle}>Registrarse con Google</Text>
               </TouchableOpacity>
 
-              <TouchableOpacity style={styles.botonEntrar} onPress={handleLogin}>
-                  <Text style={styles.textoEntrar}>ENTRAR</Text>
+              <TouchableOpacity style={styles.botonEntrar} onPress={handleRegister}>
+                  <Text style={styles.textoEntrar}>CONTINUAR</Text>
               </TouchableOpacity>
             </View>
           </ImageBackground>

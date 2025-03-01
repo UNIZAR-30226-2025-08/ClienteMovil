@@ -26,16 +26,9 @@ export default function entrarScreen() {
         resizeMode='cover'
         style={styles.image}
       >
-      <Text style={styles.title}>LOS HOMBRE LOBOS DE CASTRONEGRO</Text>
-
-      <TouchableOpacity 
-        style={styles.iconoBoton}
-        onPress={() => Alert.alert("Has tocado el botón de la imagen")}>
-        <Image source={imagenSoporte} style={styles.iconoSoporte} />
-      </TouchableOpacity>
+      <Text style={styles.title}>LOS HOMBRES LOBOS DE CASTRONEGRO</Text>
 
       <Link href="/elegirOpciones" style={styles.textoEntrar}>PULSA PARA ENTRAR</Link>
-      <Text style={styles.textoSoporte}>Soporte</Text>
 
       </ImageBackground>
     </View>
@@ -93,21 +86,4 @@ const styles = StyleSheet.create({
     bottom: 15,
     right: 10,
   },
-
-  iconoSoporte: {
-    position: 'absolute',
-    bottom: 5,  // Ajusta la distancia desde la parte inferior
-    right: 1,   // Ajusta la distancia desde la derecha
-    width: 50,   // Ajusta el tamaño de la imagen 
-    height: 50,  // Ajusta el tamaño de la imagen
-    resizeMode: 'contain', // Ajusta el modo de escala de la imagen
-  }, 
-  textoSoporte: {
-    position: 'absolute',
-    bottom: 10,  // Justo debajo de la imagen
-    right: 15,   // Alineado con la imagen
-    fontSize: 12, // Tamaño pequeño
-    color: 'white', // Color del texto
-    textAlign: 'center',
-  }, 
 });
