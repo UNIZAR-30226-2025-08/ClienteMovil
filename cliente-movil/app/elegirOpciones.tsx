@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';  // Importar useState desde React
 import { ImageBackground, StyleSheet, Text, View, Image, TouchableOpacity, Alert } from 'react-native';
 import { Link } from 'expo-router';
-
+import { useRouter } from 'expo-router';
 import { useFonts } from 'expo-font';
 
 
@@ -9,6 +9,8 @@ const imagenPortada = require('@/assets/images/imagen-portada.png');
 const imagenPerfil = require('@/assets/images/imagenPerfil.webp');
 
 export default function opcionesScreen() {
+
+  const router = useRouter();
 
   // Cargar la fuente GhostShadow
   const [loaded] = useFonts({
@@ -28,7 +30,9 @@ export default function opcionesScreen() {
       >
 
       <View style={styles.overlay} />
-      <Image source={imagenPerfil} style={styles.profileImage}></Image>
+      <TouchableOpacity onPress={() => router.push('/perfil')} style={styles.contenedorPerfil}>
+        <Image source={imagenPerfil} style={styles.profileImage} />
+      </TouchableOpacity>
       <Text style={styles.nombrePlayer}>Player 1</Text>
       <Link href="/(partida)/elegirTipoPartida" style={styles.textoPartida}>JUGAR</Link>
       <Link href={"/(comoJugar)/comoJugar"} style={styles.textoComoJugar}>¿CÓMO JUGAR?</Link>
@@ -47,6 +51,13 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
   },
 
+  contenedorPerfil: {
+    position: 'absolute',
+    top: 100,
+    alignSelf: 'center',
+    zIndex: 1,
+  },
+
   image: {
     width: '100%',
     height: '100%',
@@ -61,14 +72,9 @@ const styles = StyleSheet.create({
   },
 
   profileImage: {
-    width: 100,  // Ajusta el tamaño de la imagen
-    height: 100, // Ajusta el tamaño de la imagen
-    position: 'absolute',
-    top: 100,  // Centra la imagen en el eje vertical
-    left: '50%',
-    marginLeft: -50,  // Desplaza la imagen hacia la izquierda para que esté completamente centrada (mitad del ancho de la imagen)
-    zIndex: 1, 
-    borderRadius: 50,
+    width: 100,  
+    height: 100, 
+    borderRadius: 100,
   },
 
   nombrePlayer: {

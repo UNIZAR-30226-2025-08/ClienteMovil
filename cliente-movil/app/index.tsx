@@ -15,12 +15,15 @@ import {
 } from 'react-native';
 import { Link } from 'expo-router';
 import { useFonts } from 'expo-font';
+import { useRouter } from 'expo-router';
 
 const imagenPortada = require('@/assets/images/imagen-portada.png');
 const imagenGoogle = require('@/assets/images/google-icon.png');
 const imagenFondoInicioSesion = require('@/assets/images/fondo-inicio-sesion.jpg');
 
 export default function App() {
+
+  const router = useRouter();
 
   // 'email' almacena el valor escrito en el campo correo y 
   // 'setEmail' es una funcion que actualiza el valor cuando el usuario escribe  
@@ -127,6 +130,10 @@ export default function App() {
 
               <TouchableOpacity style={styles.botonEntrar} onPress={handleLogin}>
                   <Text style={styles.textoEntrar}>ENTRAR</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity style={styles.botonEntrar} onPress={() => router.push('/entrar')}>
+                <Text style={styles.textoEntrar}>ATAJO</Text>
               </TouchableOpacity>
             </View>
           </ImageBackground>
