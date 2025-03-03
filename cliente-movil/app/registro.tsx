@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import Constants from 'expo-constants';
+import axios from 'axios'; // Importamos axios
+import CryptoJS from 'crypto-js'; // Importamos crypto-js
 
 import {
   ImageBackground,
@@ -85,22 +87,20 @@ export default function App() {
     // datos al backend en formato JSON y 'body' son la propia información que
     // vamos a enviar al backend en formato JSON
     try {
-      const response = await fetch(`${BACKEND_URL}/api/usuario/crear`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ nombre, correo, contrasena }),
+      // Generar hash SHA256 en el cliente
+      const hashContrasena = CryptoJS.SHA256(contrasena).toString(CryptoJS.enc.Hex);
+
+      const response = await axios.post(`${BACKEND_URL}/api/usuario/crear`, {
+        nombre,
+        correo,
+        contrasena: hashContrasena // Enviar la contraseña encriptada
       });
-
-      const data = await response.json();
-
-      if (response.ok) {
+      if (response.status === 201) {
         Alert.alert('Registro exitoso', 'Ahora puedes iniciar sesión.', [
           { text: 'OK', onPress: () => router.push('/entrar') }
         ]);
       } else {
-        Alert.alert('Error', data.message || 'No se pudo registrar el usuario.');
+        Alert.alert('Error', response.data.message || 'No se pudo registrar el usuario.');
       }
     } catch (error) {
       Alert.alert('Error', 'No se pudo conectar con el servidor.');

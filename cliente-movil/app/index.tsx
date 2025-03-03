@@ -17,7 +17,9 @@ import {
 import { Link } from 'expo-router';
 import { useFonts } from 'expo-font';
 import { useRouter } from 'expo-router';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios'; // Importamos axios
+import CryptoJS from 'crypto-js'; // Importamos crypto-js
+//import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const imagenPortada = require('@/assets/images/imagen-portada.png');
 const imagenGoogle = require('@/assets/images/google-icon.png');
@@ -71,28 +73,25 @@ export default function App() {
     // datos al backend en formato JSON y 'body' son la propia información que
     // vamos a enviar al backend en formato JSON
     try {
-      const response = await fetch(`${BACKEND_URL}/api/usuario/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ correo, contrasena }), // Enviar email y password
+      // Generar hash SHA256 en el cliente
+      const hashContrasena = CryptoJS.SHA256(contrasena).toString(CryptoJS.enc.Hex);
+
+      const response = await axios.post(`${BACKEND_URL}/api/usuario/login`, {
+        correo,
+        contrasena: hashContrasena // Enviar la contraseña encriptada
       });
+      if (response.status === 200) {
+        const data = response.data;
 
-      // Convertimos la respuesta del servidor en JSON
-      const data = await response.json();
-
-      if (response.ok) {
         // Guardamos el correo en AsyncStorage para su uso posterior
-        await AsyncStorage.setItem('nombreUsuario', data.usuario.nombre);
-        if (data.usuario.avatar) {
-          await AsyncStorage.setItem('avatarUsuario', data.usuario.avatar);
-        }
-
+        // await AsyncStorage.setItem('nombreUsuario', data.usuario.nombre);
+        // if (data.usuario.avatar) {
+        //   await AsyncStorage.setItem('avatarUsuario', data.usuario.avatar);
+        // }
         Alert.alert('Inicio de sesión exitoso', `Bienvenido, ${data.usuario.nombre}`);
         router.push('/entrar');
       } else {
-        Alert.alert('Error', data.error || 'Credenciales incorrectas.');
+        Alert.alert('Error', response.data.message || 'Credenciales incorrectas.');
       }
     } catch (error) {
       Alert.alert('Error', 'No se pudo conectar con el servidor.');
