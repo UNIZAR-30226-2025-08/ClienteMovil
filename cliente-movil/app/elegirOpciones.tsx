@@ -1,16 +1,44 @@
 import React, { useState, useEffect } from 'react';  // Importar useState desde React
-import { ImageBackground, StyleSheet, Text, View, Image, TouchableOpacity, Alert } from 'react-native';
+import { ImageBackground, StyleSheet, Text, View, Image, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import { Link } from 'expo-router';
 import { useRouter } from 'expo-router';
 import { useFonts } from 'expo-font';
-
+import Constants from 'expo-constants';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const imagenPortada = require('@/assets/images/imagen-portada.png');
-const imagenPerfil = require('@/assets/images/imagenPerfil.webp');
+const imagenPorDefecto = require('@/assets/images/imagenPerfil.webp');
 
 export default function opcionesScreen() {
 
+  // Recuperar la URL de backend desde Constants
+  const BACKEND_URL = Constants.expoConfig?.extra?.backendUrl;
   const router = useRouter();
+
+  // Estado para almacenar los datos del usuario
+  const [usuario, setUsuario] = useState<{ nombre: string; avatar?: string } | null>(null);
+  const [loading, setLoading] = useState(true); // Estado de carga
+
+  // Cargar los datos del usuario al entrar a la pantalla
+  useEffect(() => {
+    const cargarUsuario = async () => {
+      try {
+        const nombre = await AsyncStorage.getItem('nombreUsuario');
+        const avatar = await AsyncStorage.getItem('avatarUsuario');
+  
+        setUsuario({
+          nombre: nombre ?? "Usuario", // Si es null, usa "Usuario"
+          avatar: avatar || undefined, // Si es null, usa undefined
+        });
+      } catch (error) {
+        console.error("Error al cargar usuario:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+  
+    cargarUsuario();
+  }, []);
 
   // Cargar la fuente GhostShadow
   const [loaded] = useFonts({
@@ -23,23 +51,43 @@ export default function opcionesScreen() {
 
   return (
     <View style={styles.container}>
-      <ImageBackground
-        source={imagenPortada}
-        resizeMode='cover'
-        style={styles.image}
-      >
+      <ImageBackground source={imagenPortada} resizeMode="cover" style={styles.image}>
+        <View style={styles.overlay} />
 
-      <View style={styles.overlay} />
-      <TouchableOpacity onPress={() => router.push('/perfil')} style={styles.contenedorPerfil}>
-        <Image source={imagenPerfil} style={styles.profileImage} />
-      </TouchableOpacity>
-      <Text style={styles.nombrePlayer}>Player 1</Text>
-      <Link href="/(partida)/elegirTipoPartida" style={styles.textoPartida}>JUGAR</Link>
-      <Link href={"/(comoJugar)/comoJugar"} style={styles.textoComoJugar}>¿CÓMO JUGAR?</Link>
-      <Link href={"/roles"} style={styles.textoRoles}>ROLES</Link>
-      <Link href={"/(opciones)/opciones"} style={styles.textoOpciones}>OPCIONES</Link>
-      <Link href={"/(contacto)/contacto"} style={styles.textoContacto}>CONTACTO</Link>
+        {loading ? (
+          <ActivityIndicator size="large" color="#fff" style={styles.loader} />
+        ) : (
+          <>
+            <TouchableOpacity onPress={() => router.push('/perfil')} style={styles.contenedorPerfil}>
+              <Image 
+                source={usuario?.avatar ? { uri: usuario.avatar } : imagenPorDefecto} 
+                style={styles.profileImage} 
+              />
+            </TouchableOpacity>
 
+            <Text style={styles.nombrePlayer}>{usuario?.nombre || "Usuario"}</Text>
+
+            <TouchableOpacity style={styles.boton} onPress={() => router.push('/(partida)/elegirTipoPartida')}>
+              <Text style={styles.textoBoton}>JUGAR</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.boton} onPress={() => router.push('/(comoJugar)/comoJugar')}>
+              <Text style={styles.textoBoton}>¿CÓMO JUGAR?</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity style={styles.boton} onPress={() => router.push('/roles')}>
+              <Text style={styles.textoBoton}>ROLES</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity style={styles.boton} onPress={() => router.push('/(opciones)/opciones')}>
+              <Text style={styles.textoBoton}>OPCIONES</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.boton} onPress={() => router.push('/(contacto)/contacto')}>
+              <Text style={styles.textoBoton}>CONTACTO</Text>
+            </TouchableOpacity>
+          </>
+        )}
       </ImageBackground>
     </View>
   );
@@ -78,16 +126,16 @@ const styles = StyleSheet.create({
   },
 
   nombrePlayer: {
-    position: 'absolute',  // Para posicionarlo de forma absoluta
-    top: '18%',  // Colocamos el texto justo después de la imagen
-    left: '57%',  // Centrado en el eje horizontal
-    marginTop: 60,  // Ajustamos el margen para que esté justo debajo de la imagen (ajustamos este valor según el tamaño de la imagen)
-    marginLeft: -60,  // Ajuste horizontal para centrar el texto
-    color: 'white',  // Color del texto
-    fontSize: 18,  // Tamaño del texto
-    fontWeight: 'bold',  // Estilo del texto
-    textAlign: 'center',  // Alineamos el texto al centro
+    position: 'absolute',  
+    top: 205,  // Ajusta la distancia desde la parte superior
+    alignSelf: 'center',  // Centra horizontalmente
+    color: 'white',  
+    fontSize: 20,  
+    fontWeight: 'bold',  
+    textAlign: 'center',  
+    width: '100%',  // Asegura que el texto se centre correctamente
   },
+  
 
   textoPartida: {
     fontSize: 20,
@@ -167,5 +215,27 @@ const styles = StyleSheet.create({
     width: '100%',
     paddingVertical: 10,
     borderRadius: 20,
+  },
+
+  boton: {
+    backgroundColor: 'rgba(255, 255, 255, 0.6)',
+    paddingVertical: 10,
+    borderRadius: 20,
+    marginVertical: 10,
+    alignSelf: 'center',
+    width: '80%',
+  },
+
+  textoBoton: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: 'black',
+    textAlign: 'center',
+  },
+
+  loader: { 
+    position: 'absolute', 
+    top: '50%', 
+    alignSelf: 'center' 
   },
 });

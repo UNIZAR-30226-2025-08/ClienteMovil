@@ -17,6 +17,7 @@ import {
 import { Link } from 'expo-router';
 import { useFonts } from 'expo-font';
 import { useRouter } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const imagenPortada = require('@/assets/images/imagen-portada.png');
 const imagenGoogle = require('@/assets/images/google-icon.png');
@@ -82,6 +83,12 @@ export default function App() {
       const data = await response.json();
 
       if (response.ok) {
+        // Guardamos el correo en AsyncStorage para su uso posterior
+        await AsyncStorage.setItem('nombreUsuario', data.usuario.nombre);
+        if (data.usuario.avatar) {
+          await AsyncStorage.setItem('avatarUsuario', data.usuario.avatar);
+        }
+
         Alert.alert('Inicio de sesión exitoso', `Bienvenido, ${data.usuario.nombre}`);
         router.push('/entrar');
       } else {
