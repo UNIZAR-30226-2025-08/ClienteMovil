@@ -57,6 +57,13 @@ export default function App() {
       return;
     }
 
+    // Validación básica del correo electrónico
+    const correoRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!correoRegex.test(correo)) {
+      Alert.alert('Error', 'Por favor, ingresa un correo válido.');
+      return;
+    }
+
     // Intenta realizar una solicitud al backend de tipo POST con fetch(), 
     // que realiza una petición HTTP, con 'POST' indicamos que estamos 
     // enviando información al backend, 'headres' indica que estamos enviando
