@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import Constants from 'expo-constants';
+
 import {
   ImageBackground,
   StyleSheet,
@@ -13,7 +15,7 @@ import {
   Keyboard,
   Alert,
 } from 'react-native';
-import { Link } from 'expo-router';
+
 import { useFonts } from 'expo-font';
 import { useRouter } from 'expo-router';
 
@@ -22,18 +24,27 @@ const imagenGoogle = require('@/assets/images/google-icon.png');
 const imagenFondoInicioSesion = require('@/assets/images/fondo-inicio-sesion.jpg');
 
 export default function App() {
+  // Recuperar la URL de backend desde Constants
+  const BACKEND_URL = Constants.expoConfig?.extra?.backendUrl;
 
   // 'nombre' almacena el valor escrito en el campo nombre y 
   // 'setNombre' es una funcion que actualiza el valor cuando el usuario escribe
   const [nombre, setNombre] = useState('');
 
-  // 'email' almacena el valor escrito en el campo correo y 
-  // 'setEmail' es una funcion que actualiza el valor cuando el usuario escribe
-  const [email, setEmail] = useState('');
+  // 'correo' almacena el valor escrito en el campo correo y 
+  // 'setCorreo' es una funcion que actualiza el valor cuando el usuario escribe
+  const [correo, setCorreo] = useState('');
 
-  // 'password' almacena el valor escrito en el campo contraseña y 
-  // 'setPassword' es una funcion que actualiza el valor cuando el usuario escribe
-  const [password, setPassword] = useState('');
+  // 'contrasena' almacena el valor escrito en el campo contraseña y 
+  // 'setContrasena' es una funcion que actualiza el valor cuando el usuario escribe
+  const [contrasena, setContrasena] = useState('');
+
+  // 'confirmContrasena' almacena el valor escrito en el campo confirmar contraseña y
+  // 'setconfirmContrasena' es una funcion que actualiza el valor cuando el usuario escribe
+  const [confirmContrasena, setconfirmContrasena] = useState('');
+  
+  const [secureText, setSecureText] = useState(true);
+  const [secureTextConfirm, setSecureTextConfirm] = useState(true);
 
   const router = useRouter();
 
@@ -45,14 +56,26 @@ export default function App() {
     return null;
   }
 
-  // 📌 Función para registrar al usuario
+  // Función para registrar al usuario
   const handleRegister = async () => {
 
-    // Si el usuario no ha rellenado el campo de email o contraseña
+    // Si el usuario no ha rellenado el campo de correo o contraseña
     // lanza un mensaje de que no se han rellenado los campos y no 
     // manda la petición
-    if (!nombre || !email || !password) {
+    if (!nombre || !correo || !contrasena || !confirmContrasena) {
       Alert.alert('Error', 'Por favor, completa todos los campos.');
+      return;
+    }
+
+    if (contrasena !== confirmContrasena) {
+      Alert.alert('Error', 'Las contraseñas no coinciden.');
+      return;
+    }
+
+    // Validación básica del correo electrónico
+    const correoRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!correoRegex.test(correo)) {
+      Alert.alert('Error', 'Por favor, ingresa un correo válido.');
       return;
     }
 
@@ -62,12 +85,12 @@ export default function App() {
     // datos al backend en formato JSON y 'body' son la propia información que
     // vamos a enviar al backend en formato JSON
     try {
-      const response = await fetch('http://BACKEND_URL/api/register', {
+      const response = await fetch(`${BACKEND_URL}/api/usuario/crear`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ nombre, email, password }),
+        body: JSON.stringify({ nombre, correo, contrasena }),
       });
 
       const data = await response.json();
@@ -98,20 +121,47 @@ export default function App() {
             <Text style={styles.title}>LOS HOMBRES LOBOS DE CASTRONEGRO</Text>
 
             {/* Imagen de fondo de inicio de sesión */}
-            <Image source={imagenFondoInicioSesion} style={styles.imagenInicioSesion} />
+            <Image source={imagenFondoInicioSesion} style={styles.imagenRegistro} />
 
             {/* Formulario */}
             <View style={styles.formContainer}>
-              <Text style={styles.tituloIniciarSesion}>REGISTRARSE</Text>
+              <Text style={styles.tituloResgistrarse}>REGISTRARSE</Text>
 
               <Text style={styles.textoCorreo}>Nombre</Text>
-              <TextInput style={styles.input} placeholder="Tu nombre" placeholderTextColor="#444" />
+              <TextInput style={styles.input} placeholder="Tu nombre" value={nombre} onChangeText={setNombre}
+              placeholderTextColor="#444" />
 
               <Text style={styles.textoCorreo}>Correo electrónico</Text>
-              <TextInput style={styles.input} placeholder="Tu correo" placeholderTextColor="#444" />
+              <TextInput style={styles.input} placeholder="Tu correo" value={correo} onChangeText={setCorreo}
+              placeholderTextColor="#444" autoCapitalize="none" keyboardType="email-address" />
 
-              <Text style={styles.textoPassword}>Contraseña</Text>
-              <TextInput style={styles.input} placeholder="Tu contraseña" placeholderTextColor="#444" secureTextEntry />
+              <Text style={styles.textoContrasena}>Contraseña</Text>
+              <View style={styles.contrasenaContainer}>
+                <TextInput 
+                  style={[styles.input, { width: '95%' }]}
+                  placeholder="Contraseña" 
+                  value={contrasena} 
+                  onChangeText={setContrasena} 
+                  secureTextEntry={secureText} 
+                />
+                <TouchableOpacity onPress={() => setSecureText(!secureText)}>
+                  <Text>{secureText ? '👁️' : '🙈'}</Text>
+                </TouchableOpacity>
+              </View>
+
+              <Text style={styles.textoContrasena}>Confirmar contraseña</Text>
+              <View style={styles.contrasenaContainer}>
+                <TextInput 
+                  style={[styles.input, { width: '95%' }]} 
+                  placeholder="Confirmar Contraseña" 
+                  value={confirmContrasena} 
+                  onChangeText={setconfirmContrasena} 
+                  secureTextEntry={secureTextConfirm} 
+                />
+                <TouchableOpacity onPress={() => setSecureTextConfirm(!secureTextConfirm)}>
+                  <Text>{secureTextConfirm ? '👁️' : '🙈'}</Text>
+                </TouchableOpacity>
+              </View>
 
               <TouchableOpacity style={styles.botonGoogle}>
                 <Image source={imagenGoogle} style={styles.imagenGoogle} />
@@ -119,7 +169,7 @@ export default function App() {
               </TouchableOpacity>
 
               <TouchableOpacity style={styles.botonEntrar} onPress={handleRegister}>
-                  <Text style={styles.textoEntrar}>CONTINUAR</Text>
+                  <Text style={styles.textoEntrar}>REGISTRARSE</Text>
               </TouchableOpacity>
             </View>
           </ImageBackground>
@@ -154,7 +204,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 50,
   },
-  imagenInicioSesion: {
+  imagenRegistro: {
     position: 'absolute',
     width: 320,
     height: 470,
@@ -168,7 +218,7 @@ const styles = StyleSheet.create({
     bottom: "20%",
     alignItems: 'center',
   },
-  tituloIniciarSesion: {
+  tituloResgistrarse: {
     fontFamily: 'GhostShadow',
     fontSize: 30,
     color: 'black',
@@ -179,7 +229,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
     color: 'black',
   },
-  textoPassword: {
+  textoContrasena: {
     fontSize: 16,
     fontWeight: 'bold',
     marginTop: 10,
@@ -235,5 +285,10 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 20,
     color: 'white',
+  },
+  contrasenaContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '70%',
   },
 });

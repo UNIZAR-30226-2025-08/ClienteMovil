@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Constants from 'expo-constants';
 import {
   ImageBackground,
   StyleSheet,
@@ -22,16 +23,20 @@ const imagenGoogle = require('@/assets/images/google-icon.png');
 const imagenFondoInicioSesion = require('@/assets/images/fondo-inicio-sesion.jpg');
 
 export default function App() {
+  // Recuperar la URL de backend desde Constants
+  const BACKEND_URL = Constants.expoConfig?.extra?.backendUrl;
 
   const router = useRouter();
 
-  // 'email' almacena el valor escrito en el campo correo y 
-  // 'setEmail' es una funcion que actualiza el valor cuando el usuario escribe  
-  const [email, setEmail] = useState('');
+  // 'correo' almacena el valor escrito en el campo correo y 
+  // 'setCorreo' es una funcion que actualiza el valor cuando el usuario escribe  
+  const [correo, setCorreo] = useState('');
 
-  // 'password' almacena el valor escrito en el campo correo y 
-  // 'setPassword' es una funcion que actualiza el valor cuando el usuario escribe
-  const [password, setPassword] = useState('');
+  // 'contrasena' almacena el valor escrito en el campo correo y 
+  // 'setContrasena' es una funcion que actualiza el valor cuando el usuario escribe
+  const [contrasena, setContrasena] = useState('');
+
+  const [secureText, setSecureText] = useState(true);
 
   const [loaded] = useFonts({
     GhostShadow: require('@/assets/fonts/ghost-shadow.ttf'),
@@ -44,10 +49,10 @@ export default function App() {
   // Función para enviar los datos al backend
   const handleLogin = async () => {
 
-    // Si el usuario no ha rellenado el campo de email o contraseña
+    // Si el usuario no ha rellenado el campo de correo o contraseña
     // lanza un mensaje de que no se han rellenado los campos y no 
     // manda la petición
-    if (!email || !password) {
+    if (!correo || !contrasena) {
       Alert.alert('Error', 'Por favor, completa todos los campos.');
       return;
     }
@@ -58,21 +63,22 @@ export default function App() {
     // datos al backend en formato JSON y 'body' son la propia información que
     // vamos a enviar al backend en formato JSON
     try {
-      const response = await fetch('http://BACKEND_URL/api/login', {
+      const response = await fetch(`${BACKEND_URL}/api/usuario/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ correo, contrasena }), // Enviar email y password
       });
 
       // Convertimos la respuesta del servidor en JSON
       const data = await response.json();
 
       if (response.ok) {
-        Alert.alert('Inicio de sesión exitoso', `Bienvenido, ${data.user.nombre}`);
+        Alert.alert('Inicio de sesión exitoso', `Bienvenido, ${data.usuario.nombre}`);
+        router.push('/entrar');
       } else {
-        Alert.alert('Error', data.message || 'Credenciales incorrectas.');
+        Alert.alert('Error', data.error || 'Credenciales incorrectas.');
       }
     } catch (error) {
       Alert.alert('Error', 'No se pudo conectar con el servidor.');
@@ -103,21 +109,26 @@ export default function App() {
                 style={styles.input}
                 placeholder="Tu correo"
                 placeholderTextColor="#444"
-                value={email}
-                onChangeText={setEmail} // Actualiza el estado y por tanto el valor de la variable con el texto ingresado
+                value={correo}
+                onChangeText={setCorreo} // Actualiza el estado y por tanto el valor de la variable con el texto ingresado
                 keyboardType="email-address"
                 autoCapitalize="none"
               />
 
-              <Text style={styles.textoPassword}>Contraseña</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Tu contraseña"
-                placeholderTextColor="#444"
-                value={password}
-                onChangeText={setPassword} // Actualiza el estado y por tanto el valor de la variable con el texto ingresado
-                secureTextEntry
-              />
+              <Text style={styles.textoContrasena}>Contraseña</Text>
+              <View style={styles.contrasenaContainer}>
+                <TextInput
+                  style={[styles.input, { width: '95%' }]}
+                  placeholder="Tu contraseña"
+                  placeholderTextColor="#444"
+                  value={contrasena}
+                  onChangeText={setContrasena} // Actualiza el estado y por tanto el valor de la variable con el texto ingresado
+                  secureTextEntry={secureText}
+                />
+                <TouchableOpacity onPress={() => setSecureText(!secureText)}>
+                  <Text>{secureText ? '👁️' : '🙈'}</Text>
+                </TouchableOpacity>
+              </View>
 
               <Text style={styles.textoRegistro}>
                 ¿No tienes cuenta? <Link href="/registro" style={styles.linkRegistro}>Regístrate</Link>
@@ -193,7 +204,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
     color: 'black',
   },
-  textoPassword: {
+  textoContrasena: {
     fontSize: 16,
     fontWeight: 'bold',
     marginTop: 10,
@@ -249,5 +260,10 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 20,
     color: 'white',
+  },
+  contrasenaContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '70%',
   },
 });
