@@ -42,6 +42,12 @@ export default function PerfilScreen() {
 
         <View style={styles.overlay} />
         <Image source={imagenPerfil} style={styles.profileImage} />
+        <TouchableOpacity 
+            style={styles.botonEditar} 
+            onPress={() => router.push('/(perfil)/elegirAvatar')}
+        >
+            <Text style={styles.textoBotonEditar}>EDITAR</Text>
+        </TouchableOpacity>
         <Image source={imagenPapiro} style={styles.imagePapiro}></Image>
 
         {/* Formulario */}
@@ -231,5 +237,30 @@ const styles = StyleSheet.create({
     listaAmigosImagen: {
         width: 20,
         height: 20,
-    }
+    },
+
+    botonEditar: {
+        position: 'absolute', 
+        top: 182, 
+        left: '50%', 
+        marginLeft: -50, 
+        backgroundColor: '#008f39', 
+        justifyContent: 'center',
+        alignItems: 'center',
+        width: 100,
+        height: 35,
+        borderRadius: 20, 
+        elevation: 3, 
+        shadowColor: '#000', 
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.5,
+    },
+    
+    textoBotonEditar: {
+        color: 'white',
+        fontSize: 14,
+        fontWeight: 'bold',
+        textAlign: 'center',
+    },
 });
