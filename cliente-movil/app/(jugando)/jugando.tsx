@@ -18,12 +18,21 @@ import { useFonts } from "expo-font";
 export let MODO_NOCHE_GLOBAL = false;
 // Global flag para controlar si ya se mostró el texto inicial
 let TEXTO_YA_MOSTRADO = false;
+// Global variable para el rol del usuario (aldeano, lobo, bruja, cazador)
+export let ROL_USUARIO = "aldeano";
 // ---------------------------------------------------------------------------
+
+// ============================================================================
+// ============================================================================
+// ============================================================================
+
+// Sección de valores hardcoded, su proposito es:
+//  1. (Principal) Cuando tengamos que integrar el backend, que sea un proceso lo menos doloroso posible
+//  2. (Secundario) Tener centralizadas las deicisiones de estilo
 
 // Strings existentes
 const TEXTO_INICIAL = "AMANECE EN LA ALDEA, TODO EL MUNDO DESPIERTA Y ABRE LOS OJOS";
 const TEXTO_ROL_TITULO = "TU ROL ES";
-const TEXTO_NOMBRE_ROL = "HOMBRE LOBO";
 const TEXTO_INICIO_PARTIDA = "EMPIEZA LA PARTIDA";
 const TEXTO_BOTON_HABILIDAD = "HABILIDAD";
 const TEXTO_BOTON_CHAT = "CHAT";
@@ -54,12 +63,13 @@ const imagenPueblo = require("@/assets/images/pueblo-barra-arriba-juego.png");
 const imagenLobos = require("@/assets/images/lobo-barra-arriba-juego.png");
 const imagenJugadores = require("@/assets/images/jugador-icono.jpg");
 
-// NUEVAS CONSTANTES: textos y mensajes hardcodeados no centralizados
+// Textos y mensajes hardcodeados no centralizados
 const TEXTO_CHAT_PLACEHOLDER = "Enviar un mensaje";
 const TEXTO_BOTON_ENVIAR_CHAT = "Enviar";
 const TEXTO_TITULO_CHAT = "CHAT";
 const TEXTO_CERRAR_CHAT = "X";
 const TEXTO_CERRAR_POPUP = "X";
+// Textos por defecto para el popup de habilidad
 const TEXTO_POPUP_HABILIDAD_TITULO = "Habilidad";
 const TEXTO_POPUP_HABILIDAD_DESC =
   "Eres El Lobo. Tienes el poder de matar a un jugador durante la noche, pero ten cuidado de no ser descubierto.";
@@ -69,6 +79,88 @@ const MENSAJES_CHAT_INITIAL = [
   { id: 1, texto: "Jugador 2: Mensaje de prueba" },
   { id: 2, texto: "Jugador 5: Otro mensaje" },
 ];
+
+// ---------------------------------------------------------------------------
+// Helper function para retornar la información de habilidad según el rol
+const getHabilidadInfo = (rol) => {
+  switch (rol) {
+    case "aldeano":
+      return {
+        titulo: "Habilidad",
+        descripcion:
+          "Como aldeano, no posees una habilidad especial, pero tu voto es crucial para la aldea.",
+        recuerda: "",
+        imagen: require("@/assets/images/aldeano-icon.jpeg"),
+      };
+    case "lobo":
+      return {
+        titulo: "Habilidad",
+        descripcion:
+          "Eres el lobo. Tienes el poder de matar a un jugador durante la noche, pero ten cuidado de no ser descubierto.",
+        recuerda: "Recuerda: Los lobos deben ponerse de acuerdo sobre a quién asesinar en la noche.",
+        imagen: require("@/assets/images/hombre-lobo-icon.jpeg"),
+      };
+    case "bruja":
+      return {
+        titulo: "Habilidad",
+        descripcion:
+          "Como bruja, tienes dos pociones: una para salvar a un jugador y otra para envenenar. Úsalas con sabiduría.",
+        recuerda: "Recuerda: Cada poción solo se puede usar una vez.",
+        imagen: require("@/assets/images/bruja-icon.jpeg"),
+      };
+    case "cazador":
+      return {
+        titulo: "Habilidad",
+        descripcion:
+          "Si mueres, puedes disparar a otro jugador en venganza. Usa tu habilidad para proteger a la aldea.",
+        recuerda: "Recuerda: Tu disparo final puede cambiar el destino del juego.",
+        imagen: require("@/assets/images/cazador-icon.jpeg"),
+      };
+    default:
+      return {
+        titulo: TEXTO_POPUP_HABILIDAD_TITULO,
+        descripcion: TEXTO_POPUP_HABILIDAD_DESC,
+        recuerda: TEXTO_POPUP_HABILIDAD_RECUERDA,
+        imagen: imagenHabilidad,
+      };
+  }
+};
+
+// ---------------------------------------------------------------------------
+// Helper function para retornar la información del rol para la sección "Tu rol es"
+const getRoleInfo = (rol) => {
+  switch (rol) {
+    case "aldeano":
+      return {
+        roleName: "ALDEANO",
+        image: require("@/assets/images/aldeano-icon.jpeg"),
+      };
+    case "lobo":
+      return {
+        roleName: "HOMBRE LOBO",
+        image: require("@/assets/images/hombre-lobo-icon.jpeg"),
+      };
+    case "bruja":
+      return {
+        roleName: "BRUJA",
+        image: require("@/assets/images/bruja-icon.jpeg"),
+      };
+    case "cazador":
+      return {
+        roleName: "CAZADOR",
+        image: require("@/assets/images/cazador-icon.jpeg"),
+      };
+    default:
+      return {
+        roleName: "HOMBRE LOBO",
+        image: require("@/assets/images/hombre-lobo-icon.jpeg"),
+      };
+  }
+};
+
+// ============================================================================
+// ============================================================================
+// ============================================================================
 
 const PantallaJugando = () => {
   // Estados de la UI
@@ -274,6 +366,11 @@ const PantallaJugando = () => {
   const tamanioImagen = Math.min(ancho, alto) * MULTIPLICADOR_TAMANIO_IMAGEN;
   const radioMaximo = radioMaximoCalculado - tamanioImagen / 2;
 
+  // Obtener información de habilidad según el rol del usuario
+  const habilidadInfo = getHabilidadInfo(ROL_USUARIO);
+  // Obtener información del rol para la sección "Tu rol es"
+  const roleInfo = getRoleInfo(ROL_USUARIO);
+
   return (
     <View style={estilos.contenedor}>
       <ImageBackground
@@ -291,14 +388,17 @@ const PantallaJugando = () => {
         </Animated.View>
       )}
 
-      {/* Sección de rol */}
+      {/* Sección de rol adaptada */}
       {mostrarRol && (
         <Animated.View style={[estilos.contenedorRol, { opacity: animacionRol }]}>
           <View style={estilos.contenedorTextoRol}>
             <Text style={estilos.textoRol}>{TEXTO_ROL_TITULO}</Text>
           </View>
-          <Image source={imagenLoboRol} style={estilos.imagenRol} />
-          <Text style={estilos.nombreRol}>{TEXTO_NOMBRE_ROL}</Text>
+          <Image source={roleInfo.image} style={estilos.imagenRol} />
+          {/* El color del texto se determina dinámicamente */}
+          <Text style={[estilos.nombreRol, { color: ROL_USUARIO === "lobo" ? "red" : "blue" }]}>
+            {roleInfo.roleName}
+          </Text>
         </Animated.View>
       )}
 
@@ -314,7 +414,8 @@ const PantallaJugando = () => {
         <>
           <View style={estilos.contenedorBotones}>
             <TouchableOpacity style={estilos.botonHabilidad} onPress={abrirHabilidad}>
-              <Image source={imagenHabilidad} style={estilos.iconoBoton} />
+              {/* Botón de habilidad con icono adaptado al rol */}
+              <Image source={habilidadInfo.imagen} style={estilos.iconoBoton} />
               <Text style={estilos.textoBoton}>{TEXTO_BOTON_HABILIDAD}</Text>
             </TouchableOpacity>
 
@@ -350,7 +451,7 @@ const PantallaJugando = () => {
 
           <View style={estilos.contenedorTemporizador}>
             <View style={estilos.circuloTemporizador}>
-            <Text style={estilos.textoTemporizador}>{tiempoRestante}</Text>
+              <Text style={estilos.textoTemporizador}>{tiempoRestante}</Text>
             </View>
           </View>
           <View style={estilos.contenedorBotonesDerecha}>
@@ -471,17 +572,19 @@ const PantallaJugando = () => {
             <Text style={estilos.textoCerrarHabilidad}>{TEXTO_CERRAR_POPUP}</Text>
           </TouchableOpacity>
           <View style={estilos.contenedorTituloHabilidad}>
-            <Image source={imagenHabilidad} style={estilos.iconoHabilidadPopup} />
-            <Text style={estilos.tituloHabilidad}>{TEXTO_POPUP_HABILIDAD_TITULO}</Text>
+            <Image source={habilidadInfo.imagen} style={estilos.iconoHabilidadPopup} />
+            <Text style={estilos.tituloHabilidad}>{habilidadInfo.titulo}</Text>
           </View>
           <View style={estilos.separadorHabilidad} />
           <ScrollView contentContainerStyle={estilos.contenedorInfoHabilidad}>
             <Text style={estilos.textoHabilidad}>
-              {TEXTO_POPUP_HABILIDAD_DESC}
+              {habilidadInfo.descripcion}
             </Text>
-            <Text style={estilos.textoRecuerda}>
-              {TEXTO_POPUP_HABILIDAD_RECUERDA}
-            </Text>
+            {habilidadInfo.recuerda !== "" && (
+              <Text style={estilos.textoRecuerda}>
+                {habilidadInfo.recuerda}
+              </Text>
+            )}
           </ScrollView>
         </Animated.View>
       )}
@@ -554,7 +657,7 @@ const estilos = StyleSheet.create({
   nombreRol: {
     textAlign: "center",
     fontSize: ancho * 0.12,
-    color: "red",
+    // The color is set dynamically in the component
     fontFamily: "Corben",
     fontWeight: "bold",
   },
