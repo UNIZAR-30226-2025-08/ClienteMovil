@@ -13,13 +13,12 @@ import {
 } from "react-native";
 import { useFonts } from "expo-font";
 
-// ============================================================================
-// ============================================================================
-// ============================================================================
-
-// Sección de valores hardcoded, su proposito es:
-//  1. (Principal) Cuando tengamos que integrar el backend, que sea un proceso lo menos doloroso posible
-//  2. (Secundario) Tener centralizadas las deicisiones de estilo
+// ---------------------------------------------------------------------------
+// Variable global para controlar si es de día o de noche (false = día, true = noche)
+export let MODO_NOCHE_GLOBAL = false;
+// Global flag para controlar si ya se mostró el texto inicial
+let TEXTO_YA_MOSTRADO = false;
+// ---------------------------------------------------------------------------
 
 // Strings existentes
 const TEXTO_INICIAL = "AMANECE EN LA ALDEA, TODO EL MUNDO DESPIERTA Y ABRE LOS OJOS";
@@ -40,18 +39,14 @@ const TEXTO_ESTADO_LOBOS = "2/2 vivos";
 // Números
 const CANTIDAD_IMAGENES = 8;
 const TIEMPO_INICIAL = 60; // Segundos
-const MULTIPLICADOR_RADIO = 0.45;
-const MULTIPLICADOR_TAMANIO_IMAGEN = 0.13;
-const DURACION_ANIMACION = 1500;
-const RETRASO_ANIMACION = 3000;
 
 // Dimensiones
 const { width: ancho, height: alto } = Dimensions.get("window");
-const BORDE_RADIO_BOTON = ancho * 0.0556; // Aproximadamente 20px en un dispositivo de ~360px de ancho
+const BORDE_RADIO_BOTON = ancho * 0.0556;
 const TAMANIO_ICONO_BOTON = ancho * 0.1;
 const TAMANIO_TEMPORIZADOR = ancho * 0.15;
 
-// Imagenes
+// Imágenes
 const imagenFondo = require("@/assets/images/fondo-partida.png");
 const imagenLoboRol = require("@/assets/images/hombre-lobo-icon.jpeg");
 const imagenHabilidad = require("@/assets/images/hombre-lobo-icon.jpeg");
@@ -66,68 +61,89 @@ const TEXTO_TITULO_CHAT = "CHAT";
 const TEXTO_CERRAR_CHAT = "X";
 const TEXTO_CERRAR_POPUP = "X";
 const TEXTO_POPUP_HABILIDAD_TITULO = "Habilidad";
-const TEXTO_POPUP_HABILIDAD_DESC = "Eres El Lobo. Tienes el poder de matar a un jugador durante la noche, pero ten cuidado de no ser descubierto.";
-const TEXTO_POPUP_HABILIDAD_RECUERDA = "Recuerda: Los lobos deben ponerse de acuerdo sobre a quién asesinar en la noche.";
+const TEXTO_POPUP_HABILIDAD_DESC =
+  "Eres El Lobo. Tienes el poder de matar a un jugador durante la noche, pero ten cuidado de no ser descubierto.";
+const TEXTO_POPUP_HABILIDAD_RECUERDA =
+  "Recuerda: Los lobos deben ponerse de acuerdo sobre a quién asesinar en la noche.";
 const MENSAJES_CHAT_INITIAL = [
   { id: 1, texto: "Jugador 2: Mensaje de prueba" },
   { id: 2, texto: "Jugador 5: Otro mensaje" },
 ];
 
-// ============================================================================
-// ============================================================================
-// ============================================================================
-
 const PantallaJugando = () => {
-  // Estados para manejar las secciones
+  // Estados de la UI
   const [mostrarRol, setMostrarRol] = useState(false);
   const [mostrarInicio, setMostrarInicio] = useState(false);
   const [mostrarBotones, setMostrarBotones] = useState(false);
   const [mostrarChat, setMostrarChat] = useState(false);
 
-  // POPUP DE HABILIDAD: Estado para manejar la ventana emergente de habilidad
-  const [mostrarHabilidad, setMostrarHabilidad] = useState(false);
+  // Usamos la bandera inicial para decidir si mostrar la animación del texto inicial
+  const [mostrarTextoInicial, setMostrarTextoInicial] = useState(!TEXTO_YA_MOSTRADO);
 
+  // Estados para popups
+  const [mostrarHabilidad, setMostrarHabilidad] = useState(false);
   const [cantidadImagenes] = useState(CANTIDAD_IMAGENES);
   const [imagenes] = useState(new Array(CANTIDAD_IMAGENES).fill(imagenJugadores));
-
-  // Estado para mensajes del chat
   const [mensajes] = useState(MENSAJES_CHAT_INITIAL);
 
-  // Función para manejar la pulsación sobre un jugador
-  const presionarJugador = (indice) => {
-    console.log(`Jugador ${indice + 1} presionado`);
-    // Lógica para manejar la interacción con el jugador
-  };
-
-  // Estados y lógica para el temporizador
-  const [tiempoInicialEstado] = useState(TIEMPO_INICIAL);
-  const [tiempoRestante, setTiempoRestante] = useState(tiempoInicialEstado);
+  // Temporizador
+  const [tiempoRestante, setTiempoRestante] = useState(TIEMPO_INICIAL);
   const [temporizadorActivo, setTemporizadorActivo] = useState(false);
 
+  // Función para reiniciar el temporizador
   const reiniciarTemporizador = () => {
-    setTiempoRestante(tiempoInicialEstado);
+    setTiempoRestante(TIEMPO_INICIAL);
     setTemporizadorActivo(true);
   };
 
+  // useEffect para manejar el temporizador
   useEffect(() => {
     let intervalo;
     if (temporizadorActivo && tiempoRestante > 0) {
       intervalo = setInterval(() => {
         setTiempoRestante((prev) => prev - 1);
       }, 1000);
-    } else if (tiempoRestante === 0) {
-      setTemporizadorActivo(false);
+    } else if (temporizadorActivo && tiempoRestante === 0) {
+      // Cuando el temporizador llega a 0, se invierte el valor de MODO_NOCHE_GLOBAL
+      MODO_NOCHE_GLOBAL = !MODO_NOCHE_GLOBAL;
+      // Reinicia el temporizador
+      reiniciarTemporizador();
     }
     return () => clearInterval(intervalo);
   }, [temporizadorActivo, tiempoRestante]);
 
-  // Animaciones para las secuencias iniciales
+  // Animaciones
+  const DURACION_ANIMACION = 1500;
+  const RETRASO_ANIMACION = 3000;
   const animacionTexto = useRef(new Animated.Value(0)).current;
   const animacionRol = useRef(new Animated.Value(0)).current;
   const animacionInicio = useRef(new Animated.Value(0)).current;
+
+  // Animación para efecto de noche/día (se reutiliza para la superposición)
   const animacionFondo = useRef(new Animated.Value(1)).current;
 
-  // Animación para deslizar el chat
+  // Estado para modo día/noche
+  const [isNight, setIsNight] = useState(false);
+  const setNightDayMode = (mode) => {
+    setIsNight(mode);
+    Animated.timing(animacionFondo, {
+      toValue: mode ? 1 : 0,
+      duration: 500,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  // Comprobar cada 100ms si el valor global difiere del local
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (MODO_NOCHE_GLOBAL !== isNight) {
+        setNightDayMode(MODO_NOCHE_GLOBAL);
+      }
+    }, 100);
+    return () => clearInterval(interval);
+  }, [isNight]);
+
+  // Animaciones para chat y habilidad
   const posicionChat = useRef(new Animated.Value(alto)).current;
   const referenciaScrollView = useRef(null);
 
@@ -150,7 +166,6 @@ const PantallaJugando = () => {
     });
   };
 
-  // POPUP DE HABILIDAD: Animación de la ventana emergente de habilidad
   const posicionHabilidad = useRef(new Animated.Value(alto)).current;
 
   const abrirHabilidad = () => {
@@ -174,6 +189,15 @@ const PantallaJugando = () => {
 
   // Secuencia de animación inicial
   useEffect(() => {
+    // Saltar animación si ya se mostró el texto
+    if (TEXTO_YA_MOSTRADO) {
+      setMostrarTextoInicial(false);
+      setMostrarRol(false);
+      setMostrarInicio(false);
+      setMostrarBotones(true);
+      return;
+    }
+
     Animated.timing(animacionTexto, {
       toValue: 1,
       duration: DURACION_ANIMACION,
@@ -185,48 +209,51 @@ const PantallaJugando = () => {
           duration: DURACION_ANIMACION,
           useNativeDriver: true,
         }).start(() => {
+          // Marcar que el texto ya se mostró
+          TEXTO_YA_MOSTRADO = true;
+          setMostrarTextoInicial(false);
           setMostrarRol(true);
           Animated.timing(animacionRol, {
             toValue: 1,
             duration: DURACION_ANIMACION,
             useNativeDriver: true,
-          }).start();
-
-          setTimeout(() => {
-            Animated.timing(animacionRol, {
-              toValue: 0,
-              duration: DURACION_ANIMACION,
-              useNativeDriver: true,
-            }).start(() => {
-              setMostrarInicio(true);
-              Animated.timing(animacionInicio, {
-                toValue: 1,
+          }).start(() => {
+            setTimeout(() => {
+              Animated.timing(animacionRol, {
+                toValue: 0,
                 duration: DURACION_ANIMACION,
                 useNativeDriver: true,
-              }).start();
-
-              setTimeout(() => {
+              }).start(() => {
+                setMostrarInicio(true);
                 Animated.timing(animacionInicio, {
-                  toValue: 0,
-                  duration: DURACION_ANIMACION,
-                  useNativeDriver: true,
-                }).start();
-                Animated.timing(animacionFondo, {
-                  toValue: 0,
+                  toValue: 1,
                   duration: DURACION_ANIMACION,
                   useNativeDriver: true,
                 }).start(() => {
-                  setMostrarBotones(true);
+                  setTimeout(() => {
+                    Animated.timing(animacionInicio, {
+                      toValue: 0,
+                      duration: DURACION_ANIMACION,
+                      useNativeDriver: true,
+                    }).start();
+                    Animated.timing(animacionFondo, {
+                      toValue: 0,
+                      duration: DURACION_ANIMACION,
+                      useNativeDriver: true,
+                    }).start(() => {
+                      setMostrarBotones(true);
+                    });
+                  }, RETRASO_ANIMACION);
                 });
-              }, RETRASO_ANIMACION);
-            });
-          }, RETRASO_ANIMACION);
+              });
+            }, RETRASO_ANIMACION);
+          });
         });
       }, RETRASO_ANIMACION);
     });
   }, []);
 
-  // Inicia el temporizador cuando se muestran los botones
+  // Activar el temporizador cuando se muestran los botones
   useEffect(() => {
     if (mostrarBotones) {
       setTemporizadorActivo(true);
@@ -241,19 +268,28 @@ const PantallaJugando = () => {
   if (!fuentesCargadas) return null;
 
   // Cálculos para posicionar imágenes en círculo
+  const MULTIPLICADOR_RADIO = 0.45;
+  const MULTIPLICADOR_TAMANIO_IMAGEN = 0.13;
   const radioMaximoCalculado = Math.min(ancho, alto) * MULTIPLICADOR_RADIO;
   const tamanioImagen = Math.min(ancho, alto) * MULTIPLICADOR_TAMANIO_IMAGEN;
   const radioMaximo = radioMaximoCalculado - tamanioImagen / 2;
 
   return (
     <View style={estilos.contenedor}>
-      <ImageBackground source={imagenFondo} style={estilos.fondo} resizeMode="cover" />
+      <ImageBackground
+        source={imagenFondo}
+        style={estilos.fondo}
+        resizeMode="cover"
+      />
+      {/* Overlay para efecto noche/día */}
       <Animated.View style={[estilos.superposicion, { opacity: animacionFondo }]} />
 
       {/* Texto inicial */}
-      <Animated.View style={[estilos.contenedorTexto, { opacity: animacionTexto }]}>
-        <Text style={estilos.texto}>{TEXTO_INICIAL}</Text>
-      </Animated.View>
+      {mostrarTextoInicial && (
+        <Animated.View style={[estilos.contenedorTexto, { opacity: animacionTexto }]}>
+          <Text style={estilos.texto}>{TEXTO_INICIAL}</Text>
+        </Animated.View>
+      )}
 
       {/* Sección de rol */}
       {mostrarRol && (
@@ -277,19 +313,16 @@ const PantallaJugando = () => {
       {mostrarBotones && (
         <>
           <View style={estilos.contenedorBotones}>
-            {/* Botón Habilidad - se añade onPress para abrir pop-up */}
             <TouchableOpacity style={estilos.botonHabilidad} onPress={abrirHabilidad}>
               <Image source={imagenHabilidad} style={estilos.iconoBoton} />
               <Text style={estilos.textoBoton}>{TEXTO_BOTON_HABILIDAD}</Text>
             </TouchableOpacity>
 
-            {/* Botón Chat */}
             <TouchableOpacity style={estilos.botonChat} onPress={abrirChat}>
               <Text style={estilos.textoBoton}>{TEXTO_BOTON_CHAT}</Text>
             </TouchableOpacity>
           </View>
 
-          {/* Barra superior */}
           <View style={estilos.contenedorTopBar}>
             <View style={estilos.seccionTopBarIzquierda}>
               <View style={estilos.contenedorTopBarItem}>
@@ -315,18 +348,11 @@ const PantallaJugando = () => {
             </View>
           </View>
 
-          {/* Temporizador */}
-          <TouchableOpacity
-            style={estilos.contenedorTemporizador}
-            onPress={reiniciarTemporizador}
-            activeOpacity={0.7}
-          >
+          <View style={estilos.contenedorTemporizador}>
             <View style={estilos.circuloTemporizador}>
-              <Text style={estilos.textoTemporizador}>{tiempoRestante}</Text>
+            <Text style={estilos.textoTemporizador}>{tiempoRestante}</Text>
             </View>
-          </TouchableOpacity>
-
-          {/* Botones en la parte superior derecha */}
+          </View>
           <View style={estilos.contenedorBotonesDerecha}>
             <TouchableOpacity style={estilos.botonAccion}>
               <Text style={estilos.textoBoton}>{TEXTO_BOTON_PASAR_TURNO}</Text>
@@ -336,7 +362,6 @@ const PantallaJugando = () => {
             </TouchableOpacity>
           </View>
 
-          {/* Círculo de jugadores */}
           <View
             style={[
               estilos.contenedorCirculo,
@@ -348,15 +373,14 @@ const PantallaJugando = () => {
               },
             ]}
           >
-            {imagenes.slice(0, cantidadImagenes).map((img, indice) => {
-              const angulo = (indice * 2 * Math.PI) / cantidadImagenes;
+            {imagenes.slice(0, CANTIDAD_IMAGENES).map((img, indice) => {
+              const angulo = (indice * 2 * Math.PI) / CANTIDAD_IMAGENES;
               const x = radioMaximo * Math.cos(angulo);
               const y = radioMaximo * Math.sin(angulo);
-
               return (
                 <TouchableOpacity
                   key={indice}
-                  onPress={() => presionarJugador(indice)}
+                  onPress={() => console.log(`Jugador ${indice + 1} presionado`)}
                   style={[
                     estilos.contenedorImagenCirculo,
                     {
@@ -375,7 +399,7 @@ const PantallaJugando = () => {
         </>
       )}
 
-      {/* CHAT DESLIZABLE */}
+      {/* Chat */}
       {mostrarChat && (
         <Animated.View
           style={[
@@ -383,7 +407,7 @@ const PantallaJugando = () => {
             { transform: [{ translateY: posicionChat }] },
           ]}
         >
-          <TouchableOpacity 
+          <TouchableOpacity
             style={estilos.botonCerrarChat}
             onPress={cerrarChat}
             activeOpacity={0.5}
@@ -396,10 +420,8 @@ const PantallaJugando = () => {
           >
             <Text style={estilos.textoCerrarChat}>{TEXTO_CERRAR_CHAT}</Text>
           </TouchableOpacity>
-
           <Text style={estilos.tituloChat}>{TEXTO_TITULO_CHAT}</Text>
           <View style={estilos.separadorChat} />
-
           <ScrollView
             contentContainerStyle={estilos.contenedorMensajesChat}
             ref={referenciaScrollView}
@@ -414,7 +436,6 @@ const PantallaJugando = () => {
               </Text>
             ))}
           </ScrollView>
-
           <View style={estilos.contenedorEntradaChat}>
             <TextInput
               style={estilos.entradaChat}
@@ -428,7 +449,7 @@ const PantallaJugando = () => {
         </Animated.View>
       )}
 
-      {/* POPUP DE HABILIDAD DESLIZABLE */}
+      {/* Popup de Habilidad */}
       {mostrarHabilidad && (
         <Animated.View
           style={[
@@ -436,7 +457,7 @@ const PantallaJugando = () => {
             { transform: [{ translateY: posicionHabilidad }] },
           ]}
         >
-          <TouchableOpacity 
+          <TouchableOpacity
             style={estilos.botonCerrarHabilidad}
             onPress={cerrarHabilidad}
             activeOpacity={0.5}
@@ -449,15 +470,11 @@ const PantallaJugando = () => {
           >
             <Text style={estilos.textoCerrarHabilidad}>{TEXTO_CERRAR_POPUP}</Text>
           </TouchableOpacity>
-
-          {/* Contenedor para título + imagen a la izquierda */}
           <View style={estilos.contenedorTituloHabilidad}>
             <Image source={imagenHabilidad} style={estilos.iconoHabilidadPopup} />
             <Text style={estilos.tituloHabilidad}>{TEXTO_POPUP_HABILIDAD_TITULO}</Text>
           </View>
-          
           <View style={estilos.separadorHabilidad} />
-
           <ScrollView contentContainerStyle={estilos.contenedorInfoHabilidad}>
             <Text style={estilos.textoHabilidad}>
               {TEXTO_POPUP_HABILIDAD_DESC}
@@ -792,8 +809,6 @@ const estilos = StyleSheet.create({
     fontSize: ancho * 0.04,
     fontFamily: "Corben",
   },
-
-  // POPUP DE HABILIDAD
   contenedorHabilidad: {
     position: "absolute",
     zIndex: 9999,
