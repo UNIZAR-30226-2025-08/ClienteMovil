@@ -10,6 +10,7 @@ import {
   Modal,
   ImageBackground,
 } from "react-native";
+import { useRouter } from "expo-router";
 
 const rolesData = [
   {
@@ -45,6 +46,7 @@ const rolesData = [
 ];
 
 const CrearSala = () => {
+  const router = useRouter();
   const [nombreServidor, setNombreServidor] = useState(
     'Servidor de "nombreJugador"'
   );
@@ -158,7 +160,11 @@ const CrearSala = () => {
           </View>
         ))}
 
-        <Button title="Crear Sala" disabled={botonCrearDeshabilitado} />
+        <Button
+          title="Crear Sala"
+          disabled={botonCrearDeshabilitado}
+          onPress={() => router.push("/(sala)/sala")}
+        />
 
         <Modal visible={mostrarPopup} transparent animationType="slide">
           <View style={styles.modalContainer}>
