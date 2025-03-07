@@ -172,6 +172,9 @@ const PantallaJugando = () => {
   // Estado para trackear qué jugador está seleccionado para votar
   const [selectedPlayer, setSelectedPlayer] = useState<number | null>(null);
 
+  // Estado para almacenar los votos (inicialmente, cero votos para cada jugador)
+  const [votes, setVotes] = useState(Array(CANTIDAD_IMAGENES).fill(0));
+
   // Estados para popups
   const [mostrarHabilidad, setMostrarHabilidad] = useState(false);
   const [cantidadImagenes] = useState(CANTIDAD_IMAGENES);
@@ -188,14 +191,18 @@ const PantallaJugando = () => {
     setTemporizadorActivo(true);
   };
 
-  // Función para votar a un jugador
+  // Función para votar a un jugador y almacenar el voto
   const voteForPlayer = () => {
     if (selectedPlayer === null) {
       console.log("No player selected to vote for.");
       return;
     }
-    console.log(`Voted for player ${selectedPlayer + 1}`);
-    // Aquí puedes agregar lógica para procesar el voto (ej. llamar a una API)
+    setVotes((prevVotes) => {
+      const newVotes = [...prevVotes];
+      newVotes[selectedPlayer] += 1;
+      return newVotes;
+    });
+    console.log(`Voted for player ${selectedPlayer + 1}`, votes);
     setSelectedPlayer(null);
   };
 
@@ -207,7 +214,6 @@ const PantallaJugando = () => {
         setTiempoRestante((prev) => prev - 1);
       }, 1000);
     } else if (temporizadorActivo && tiempoRestante === 0) {
-      // Cuando el temporizador llega a 0, se invierte el valor de MODO_NOCHE_GLOBAL
       MODO_NOCHE_GLOBAL = !MODO_NOCHE_GLOBAL;
       reiniciarTemporizador();
     }
@@ -483,18 +489,32 @@ const PantallaJugando = () => {
                   key={indice}
                   onPress={() => setSelectedPlayer(indice)}
                   style={[
-                    estilos.contenedorImagenCirculo,
+                    estilos.contenedorJugador,
                     {
-                      width: tamanioImagen,
-                      height: tamanioImagen,
                       transform: [{ translateX: x }, { translateY: y }],
-                      borderWidth: isSelected ? 3 : 3,
-                      borderColor: isSelected ? "green" : "white",
                     },
                   ]}
                   activeOpacity={0.7}
                 >
-                  <Image source={img} style={estilos.imagenCirculo} />
+                  {/* Circular container with hidden overflow */}
+                  <View style={[
+                    estilos.contenedorImagenCirculo,
+                    {
+                      width: tamanioImagen,
+                      height: tamanioImagen,
+                      borderWidth: 3,
+                      borderColor: isSelected ? "green" : "white",
+                    }
+                  ]}>
+                    <Image source={img} style={estilos.imagenCirculo} />
+                  </View>
+                  
+                  {/* Vote sticks outside the circular container */}
+                  <View style={estilos.contenedorVotos}>
+                    {Array.from({ length: votes[indice] }).map((_, index) => (
+                      <View key={index} style={estilos.barraVoto} />
+                    ))}
+                  </View>
                 </TouchableOpacity>
               );
             })}
@@ -765,16 +785,33 @@ const estilos = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  contenedorImagenCirculo: {
+  contenedorJugador: {
     position: "absolute",
+    alignItems: 'center',
+  },
+  contenedorImagenCirculo: {
     borderRadius: 50,
-    borderWidth: ancho * 0.005,
-    borderColor: "white",
     overflow: "hidden",
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   imagenCirculo: {
     width: "100%",
     height: "100%",
+  },
+  contenedorVotos: {
+    position: 'absolute',
+    bottom: -alto * 0.025,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: ancho * 0.005,
+  },
+  barraVoto: {
+    width: ancho * 0.008,
+    height: alto * 0.015,
+    backgroundColor: 'black',
+    borderRadius: ancho * 0.002,
   },
   contenedorTemporizador: {
     position: "absolute",
