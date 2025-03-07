@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   ImageBackground,
   StyleSheet,
@@ -6,6 +6,9 @@ import {
   View,
   Image,
   TouchableOpacity,
+  Alert,
+  TextInput,
+  Modal,
 } from "react-native";
 import { useRouter } from "expo-router";
 
@@ -26,6 +29,39 @@ const salas = [
 
 export default function BuscarSalasScreen() {
   const router = useRouter();
+  const [mostrarModal, setMostrarModal] = useState(false);
+  const [password, setPassword] = useState("");
+  const [salaSeleccionada, setSalaSeleccionada] = useState<{
+    estado: string;
+    tipo: string;
+    nombre: string;
+    privada: boolean;
+  } | null>(null);
+
+  const handleSalaPress = (sala: {
+    estado: string;
+    tipo: string;
+    nombre: string;
+    privada: boolean;
+  }) => {
+    if (sala.privada) {
+      setSalaSeleccionada(sala);
+      setMostrarModal(true);
+    } else {
+      router.push("/(sala)/sala");
+    }
+  };
+
+  const handleConfirmarPassword = () => {
+    // Aquí puedes agregar la lógica para verificar la contraseña
+    if (password === "1234") {
+      // Ejemplo de contraseña
+      setMostrarModal(false);
+      router.push("/(sala)/sala");
+    } else {
+      Alert.alert("Contraseña incorrecta", "Por favor, intenta de nuevo.");
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -39,7 +75,11 @@ export default function BuscarSalasScreen() {
         </View>
 
         {salas.map((sala, index) => (
-          <View key={index} style={styles.salaContainer}>
+          <TouchableOpacity
+            key={index}
+            style={styles.salaContainer}
+            onPress={() => handleSalaPress(sala)}
+          >
             <Text style={styles.texto}>
               <Text style={styles.label}>ESTADO: </Text> {sala.estado}
             </Text>
@@ -52,7 +92,7 @@ export default function BuscarSalasScreen() {
             <Text style={styles.texto}>
               <Text style={styles.label}>NOMBRE: </Text> {sala.nombre}
             </Text>
-          </View>
+          </TouchableOpacity>
         ))}
 
         <TouchableOpacity
@@ -61,6 +101,33 @@ export default function BuscarSalasScreen() {
         >
           <Image source={imagenAtras} style={styles.imagenAtras} />
         </TouchableOpacity>
+
+        <Modal visible={mostrarModal} transparent animationType="slide">
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              <Text style={styles.modalTitle}>Introduce la contraseña</Text>
+              <TextInput
+                style={styles.input}
+                value={password}
+                onChangeText={setPassword}
+                placeholder="Contraseña"
+                secureTextEntry
+              />
+              <TouchableOpacity
+                style={styles.botonConfirmar}
+                onPress={handleConfirmarPassword}
+              >
+                <Text style={styles.textoBotonConfirmar}>Confirmar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.botonCancelar}
+                onPress={() => setMostrarModal(false)}
+              >
+                <Text style={styles.textoBotonCancelar}>Cancelar</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
       </ImageBackground>
     </View>
   );
@@ -123,5 +190,50 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     marginBottom: 60,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.5)",
+  },
+  modalContent: {
+    width: "80%",
+    backgroundColor: "white",
+    padding: 20,
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+  input: {
+    width: "100%",
+    padding: 10,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 5,
+    marginBottom: 20,
+  },
+  botonConfirmar: {
+    backgroundColor: "#008000",
+    padding: 10,
+    borderRadius: 5,
+    marginBottom: 10,
+  },
+  textoBotonConfirmar: {
+    color: "white",
+    fontWeight: "bold",
+  },
+  botonCancelar: {
+    backgroundColor: "#ff0000",
+    padding: 10,
+    borderRadius: 5,
+  },
+  textoBotonCancelar: {
+    color: "white",
+    fontWeight: "bold",
   },
 });

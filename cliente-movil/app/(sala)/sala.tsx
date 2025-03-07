@@ -44,8 +44,7 @@ export default function SalaPreviaScreen() {
   // Maneja el botón "Iniciar Partida"
   const handleIniciarPartida = () => {
     if (allReady) {
-      Alert.alert("¡Partida iniciada!", "Todos los jugadores están listos.");
-      // Aquí iría la navegación a la pantalla de juego
+      router.push("/(jugando)/jugando"); // Cambia a la pantalla de juego
     } else {
       Alert.alert(
         "Faltan jugadores por estar listos",
