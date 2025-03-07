@@ -503,7 +503,7 @@ const PantallaJugando = () => {
                       width: tamanioImagen,
                       height: tamanioImagen,
                       borderWidth: 3,
-                      borderColor: isSelected ? "green" : "white",
+                      borderColor: isSelected ? "#33FF00" : "white",
                     }
                   ]}>
                     <Image source={img} style={estilos.imagenCirculo} />
