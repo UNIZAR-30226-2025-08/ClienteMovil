@@ -11,8 +11,10 @@ import {
 } from "react-native";
 import { Link, useRouter } from "expo-router";
 import { Picker } from "@react-native-picker/picker";
-
+import Constants from "expo-constants";
 import { useFonts } from "expo-font";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
 
 const imagenFondoRoles = require("@/assets/images/fondo-roles.jpg");
 const imagenPapiro = require("@/assets/images/papiro.png");
@@ -22,6 +24,33 @@ const imagenListaAmigos = require("@/assets/images/imagen-lista-amigos.png");
 
 export default function PerfilScreen() {
   const router = useRouter();
+  const [nombre, setNombre] = useState("");
+  const [rolFavorito, setRolFavorito] = useState("");
+  const [fechaCreacion, setFechaCreacion] = useState("");
+  const [avatar, setAvatar] = useState<string | null>(null);
+
+
+  const BACKEND_URL = Constants.expoConfig?.extra?.backendUrl;
+
+  useEffect(() => {
+    const cargarDatosUsuario = async () => {
+      try {
+        const nombre = await AsyncStorage.getItem("nombreUsuario");
+        const avatar = await AsyncStorage.getItem("avatarUsuario");
+        const rolFavorito = await AsyncStorage.getItem("rolFavorito");
+        const fechaCreacion = await AsyncStorage.getItem("fechaCreacion");
+
+        setNombre(nombre || "Usuario");
+        setAvatar(avatar || null);
+        setRolFavorito(rolFavorito || "aldeano");
+        setFechaCreacion(fechaCreacion || "Fecha desconocida");
+      } catch (error) {
+        console.error("Error al obtener usuario:", error);
+      }
+    };
+
+    cargarDatosUsuario();
+  }, []);
 
   const [loaded] = useFonts({
     GhostShadow: require("@/assets/fonts/ghost-shadow.ttf"),
@@ -35,8 +64,6 @@ export default function PerfilScreen() {
     router.back();
   };
 
-  const [rolFavorito, setRolFavorito] = useState("");
-
   return (
     <View style={styles.container}>
       <ImageBackground
@@ -45,7 +72,7 @@ export default function PerfilScreen() {
         style={styles.image}
       >
         <View style={styles.overlay} />
-        <Image source={imagenPerfil} style={styles.profileImage} />
+        <Image source={avatar ? { uri: avatar } : imagenPerfil} style={styles.profileImage} />
         <TouchableOpacity
           style={styles.botonEditar}
           onPress={() => router.push("/(perfil)/elegirAvatar")}
@@ -60,11 +87,12 @@ export default function PerfilScreen() {
             style={styles.input}
             placeholder="Nuevo nombre"
             placeholderTextColor="#444"
-            autoCapitalize="none"
+            value={nombre}
+            onChangeText={setNombre}
           />
 
           <Text style={styles.textoFecha}>Fecha de creación</Text>
-          <Text style={styles.fechaCreacion}>27/01/2025</Text>
+          <Text style={styles.fechaCreacion}>{fechaCreacion}</Text>
 
           <Text style={styles.textoRol}>Rol favorito</Text>
           <View style={styles.pickerContainer}>

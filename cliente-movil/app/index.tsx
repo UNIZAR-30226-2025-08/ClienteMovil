@@ -83,19 +83,16 @@ export default function App() {
       if (response.status === 200) {
         const data = response.data;
 
-      // Guardamos el usuario en AsyncStorage
+      // Guardamos el correo en AsyncStorage para su uso posterior
       await AsyncStorage.setItem('nombreUsuario', data.usuario.nombre);
       if (data.usuario.avatar) {
         await AsyncStorage.setItem('avatarUsuario', data.usuario.avatar);
-      } else {
-        await AsyncStorage.removeItem('avatarUsuario'); // Elimina el avatar si no hay
       }
 
-        // Guardamos el correo en AsyncStorage para su uso posterior
-        // await AsyncStorage.setItem('nombreUsuario', data.usuario.nombre);
-        // if (data.usuario.avatar) {
-        //   await AsyncStorage.setItem('avatarUsuario', data.usuario.avatar);
-        // }
+      await AsyncStorage.setItem("rolFavorito", data.usuario.rolFavorito || "aldeano");
+      await AsyncStorage.setItem("fechaCreacion", data.usuario.fechaCreacion || "Fecha desconocida");
+
+
         Alert.alert('Inicio de sesión exitoso', `Bienvenido, ${data.usuario.nombre}`);
         router.push('/entrar');
       } else {
