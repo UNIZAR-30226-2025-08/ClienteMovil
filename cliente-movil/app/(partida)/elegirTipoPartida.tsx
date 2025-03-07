@@ -15,9 +15,9 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const imagenPortada = require("@/assets/images/imagen-portada.png");
 const imagenPorDefecto = require("@/assets/images/imagenPerfil.webp");
+const imagenNotificaciones = require("@/assets/images/noti_icon.png");
 
 export default function elegirPartidaScreen() {
-
   // Estado para almacenar los datos del usuario
   const [usuario, setUsuario] = useState<{
     nombre: string;
@@ -66,20 +66,20 @@ export default function elegirPartidaScreen() {
       >
         <View style={styles.overlay} />
         <TouchableOpacity
-              onPress={() => router.push("/perfil")}
-              style={styles.contenedorPerfil}
-            >
-              <Image
-                source={
-                  usuario?.avatar ? { uri: usuario.avatar } : imagenPorDefecto
-                }
-                style={styles.profileImage}
-              />
-            </TouchableOpacity>
-        <Text style={styles.nombrePlayer}>
-          {usuario?.nombre || "Usuario"}
-        </Text>
-        <Link href={"/jugando"} style={styles.textoPartida}>PARTIDA RÁPIDA</Link>
+          onPress={() => router.push("/perfil")}
+          style={styles.contenedorPerfil}
+        >
+          <Image
+            source={
+              usuario?.avatar ? { uri: usuario.avatar } : imagenPorDefecto
+            }
+            style={styles.profileImage}
+          />
+        </TouchableOpacity>
+        <Text style={styles.nombrePlayer}>{usuario?.nombre || "Usuario"}</Text>
+        <Link href={"/jugando"} style={styles.textoPartida}>
+          PARTIDA RÁPIDA
+        </Link>
         <Link
           href={"/(buscarpartida)/buscarpartida"}
           style={styles.textoComoJugar}
@@ -89,6 +89,18 @@ export default function elegirPartidaScreen() {
         <Link href={"/(crearsala)/crearsala"} style={styles.textoRoles}>
           CREAR PARTIDA
         </Link>
+
+        <TouchableOpacity
+          style={styles.botonNotificaciones}
+          onPress={() => router.push("/notificaciones")}
+        >
+          <View style={styles.iconoNotificacionesContainer}>
+            <Image
+              source={imagenNotificaciones}
+              style={styles.iconoNotificaciones}
+            />
+          </View>
+        </TouchableOpacity>
       </ImageBackground>
     </View>
   );
@@ -185,35 +197,21 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
 
-  textoOpciones: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "white",
-    textShadowColor: "rgba(0, 0, 0, 0.75)", // Sombra de texto
-    textShadowOffset: { width: 2, height: 2 },
-    textShadowRadius: 10,
-    textAlign: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.6)",
-    position: "absolute", // Fija el contenedor en la parte inferior
-    top: 475, // Ajusta la distancia desde la parte inferior
-    width: "100%",
-    paddingVertical: 10,
-    borderRadius: 20,
+  botonNotificaciones: {
+    position: "absolute",
+    top: 40,
+    right: 20,
+    padding: 10,
   },
 
-  textoContacto: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "white",
-    textShadowColor: "rgba(0, 0, 0, 0.75)", // Sombra de texto
-    textShadowOffset: { width: 2, height: 2 },
-    textShadowRadius: 10,
-    textAlign: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.6)",
-    position: "absolute", // Fija el contenedor en la parte inferior
-    top: 550, // Ajusta la distancia desde la parte inferior
-    width: "100%",
-    paddingVertical: 10,
-    borderRadius: 20,
+  iconoNotificacionesContainer: {
+    backgroundColor: "rgba(0, 0, 0, 0.6)", // Fondo negro semitransparente
+    borderRadius: 10,
+    padding: 5,
+  },
+
+  iconoNotificaciones: {
+    width: 40, // Aumenta el tamaño de la imagen
+    height: 40, // Aumenta el tamaño de la imagen
   },
 });

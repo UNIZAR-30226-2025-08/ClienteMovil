@@ -13,12 +13,13 @@ import { Link } from "expo-router";
 import { useRouter } from "expo-router";
 import { useFonts } from "expo-font";
 import Constants from "expo-constants";
-import { useFocusEffect } from '@react-navigation/native';
-import { useCallback } from 'react';
+import { useFocusEffect } from "@react-navigation/native";
+import { useCallback } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const imagenPortada = require("@/assets/images/imagen-portada.png");
 const imagenPorDefecto = require("@/assets/images/imagenPerfil.webp");
+const imagenNotificaciones = require("@/assets/images/noti_icon.png");
 
 export default function opcionesScreen() {
   // Recuperar la URL de backend desde Constants
@@ -39,7 +40,7 @@ export default function opcionesScreen() {
         try {
           const nombre = await AsyncStorage.getItem("nombreUsuario");
           const avatar = await AsyncStorage.getItem("avatarUsuario");
-  
+
           setUsuario({
             nombre: nombre ?? "Usuario",
             avatar: avatar || undefined,
@@ -50,7 +51,7 @@ export default function opcionesScreen() {
           setLoading(false);
         }
       };
-  
+
       cargarUsuario();
     }, [])
   );
@@ -65,8 +66,6 @@ export default function opcionesScreen() {
       console.error("Error al cerrar sesión:", error);
     }
   };
-  
-  
 
   // Cargar la fuente GhostShadow
   const [loaded] = useFonts({
@@ -141,11 +140,26 @@ export default function opcionesScreen() {
               <Text style={styles.textoBoton}>CONTACTO</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.botonCerrarSesion} onPress={cerrarSesion}>
+            <TouchableOpacity
+              style={styles.botonCerrarSesion}
+              onPress={cerrarSesion}
+            >
               <Text style={styles.textoBoton}>CERRAR SESIÓN</Text>
             </TouchableOpacity>
-          </>          
+          </>
         )}
+
+        <TouchableOpacity
+          style={styles.botonNotificaciones}
+          onPress={() => router.push("/notificaciones")}
+        >
+          <View style={styles.iconoNotificacionesContainer}>
+            <Image
+              source={imagenNotificaciones}
+              style={styles.iconoNotificaciones}
+            />
+          </View>
+        </TouchableOpacity>
       </ImageBackground>
     </View>
   );
@@ -296,15 +310,32 @@ const styles = StyleSheet.create({
     alignSelf: "center",
   },
 
-  
   botonCerrarSesion: {
     backgroundColor: "red",
     paddingVertical: 10,
     borderRadius: 20,
-    marginTop: 30, 
+    marginTop: 30,
     alignSelf: "center",
     width: "80%",
     position: "absolute",
-    bottom: 50, 
+    bottom: 50,
+  },
+
+  botonNotificaciones: {
+    position: "absolute",
+    top: 40,
+    right: 20,
+    padding: 10,
+  },
+
+  iconoNotificacionesContainer: {
+    backgroundColor: "rgba(0, 0, 0, 0.6)", // Fondo negro semitransparente
+    borderRadius: 10,
+    padding: 5,
+  },
+
+  iconoNotificaciones: {
+    width: 40, // Aumenta el tamaño de la imagen
+    height: 40, // Aumenta el tamaño de la imagen
   },
 });
