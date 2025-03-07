@@ -6,7 +6,6 @@ import { useFonts } from 'expo-font';
 
 
 const imagenPortada = require('@/assets/images/imagen-portada.png');
-const imagenSoporte = require('@/assets/images/settings-portada.png');
 
 export default function entrarScreen() {
 

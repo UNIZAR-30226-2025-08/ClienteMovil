@@ -9,13 +9,45 @@ import {
   Alert,
 } from "react-native";
 import { Link } from "expo-router";
-
+import { useRouter } from "expo-router";
 import { useFonts } from "expo-font";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const imagenPortada = require("@/assets/images/imagen-portada.png");
-const imagenPerfil = require("@/assets/images/imagenPerfil.webp");
+const imagenPorDefecto = require("@/assets/images/imagenPerfil.webp");
 
-export default function opcionesScreen() {
+export default function elegirPartidaScreen() {
+
+  // Estado para almacenar los datos del usuario
+  const [usuario, setUsuario] = useState<{
+    nombre: string;
+    avatar?: string;
+  } | null>(null);
+
+  const [loading, setLoading] = useState(true); // Estado de carga
+
+  // Cargar los datos del usuario al entrar a la pantalla
+  useEffect(() => {
+    const cargarUsuario = async () => {
+      try {
+        const nombre = await AsyncStorage.getItem("nombreUsuario");
+        const avatar = await AsyncStorage.getItem("avatarUsuario");
+
+        setUsuario({
+          nombre: nombre ?? "Usuario", // Si es null, usa "Usuario"
+          avatar: avatar || undefined, // Si es null, usa undefined
+        });
+      } catch (error) {
+        console.error("Error al cargar usuario:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    cargarUsuario();
+  }, []);
+
+  const router = useRouter();
   // Cargar la fuente GhostShadow
   const [loaded] = useFonts({
     GhostShadow: require("@/assets/fonts/ghost-shadow.ttf"),
@@ -33,8 +65,20 @@ export default function opcionesScreen() {
         style={styles.image}
       >
         <View style={styles.overlay} />
-        <Image source={imagenPerfil} style={styles.profileImage}></Image>
-        <Text style={styles.nombrePlayer}>Player 1</Text>
+        <TouchableOpacity
+              onPress={() => router.push("/perfil")}
+              style={styles.contenedorPerfil}
+            >
+              <Image
+                source={
+                  usuario?.avatar ? { uri: usuario.avatar } : imagenPorDefecto
+                }
+                style={styles.profileImage}
+              />
+            </TouchableOpacity>
+        <Text style={styles.nombrePlayer}>
+          {usuario?.nombre || "Usuario"}
+        </Text>
         <Link href={"/jugando"} style={styles.textoPartida}>PARTIDA RÁPIDA</Link>
         <Link
           href={"/(buscarpartida)/buscarpartida"}
@@ -56,6 +100,13 @@ const styles = StyleSheet.create({
     flexDirection: "column",
   },
 
+  contenedorPerfil: {
+    position: "absolute",
+    top: 100,
+    alignSelf: "center",
+    zIndex: 1,
+  },
+
   image: {
     width: "100%",
     height: "100%",
@@ -70,26 +121,20 @@ const styles = StyleSheet.create({
   },
 
   profileImage: {
-    width: 100, // Ajusta el tamaño de la imagen
-    height: 100, // Ajusta el tamaño de la imagen
-    position: "absolute",
-    top: 100, // Centra la imagen en el eje vertical
-    left: "50%",
-    marginLeft: -50, // Desplaza la imagen hacia la izquierda para que esté completamente centrada (mitad del ancho de la imagen)
-    zIndex: 1,
-    borderRadius: 50,
+    width: 100,
+    height: 100,
+    borderRadius: 100,
   },
 
   nombrePlayer: {
-    position: "absolute", // Para posicionarlo de forma absoluta
-    top: "18%", // Colocamos el texto justo después de la imagen
-    left: "57%", // Centrado en el eje horizontal
-    marginTop: 60, // Ajustamos el margen para que esté justo debajo de la imagen (ajustamos este valor según el tamaño de la imagen)
-    marginLeft: -60, // Ajuste horizontal para centrar el texto
-    color: "white", // Color del texto
-    fontSize: 18, // Tamaño del texto
-    fontWeight: "bold", // Estilo del texto
-    textAlign: "center", // Alineamos el texto al centro
+    position: "absolute",
+    top: 205, // Ajusta la distancia desde la parte superior
+    alignSelf: "center", // Centra horizontalmente
+    color: "white",
+    fontSize: 20,
+    fontWeight: "bold",
+    textAlign: "center",
+    width: "100%", // Asegura que el texto se centre correctamente
   },
 
   textoPartida: {

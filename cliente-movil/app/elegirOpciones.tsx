@@ -259,13 +259,13 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     marginVertical: 10,
     alignSelf: "center",
-    width: "80%",
+    width: "100%",
   },
 
   textoBoton: {
     fontSize: 20,
     fontWeight: "bold",
-    color: "black",
+    color: "white",
     textAlign: "center",
   },
 
