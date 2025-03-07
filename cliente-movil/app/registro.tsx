@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Constants from 'expo-constants';
 import axios from 'axios'; // Importamos axios
 import CryptoJS from 'crypto-js'; // Importamos crypto-js
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import {
   ImageBackground,
@@ -96,6 +97,16 @@ export default function App() {
         contrasena: hashContrasena // Enviar la contraseña encriptada
       });
       if (response.status === 201) {
+        const data = response.data;
+
+        // Guardamos los datos del usuario en AsyncStorage para su uso posterior
+        await AsyncStorage.setItem('idUsuario', data.usuario.idUsuario.toString());
+        await AsyncStorage.setItem('nombreUsuario', data.usuario.nombre);
+        await AsyncStorage.setItem('avatarUsuario', data.usuario.avatar);
+        await AsyncStorage.setItem('correoUsuario', data.usuario.correo);
+        await AsyncStorage.setItem("fechaCreacion", data.usuario.fechaCreacion);
+        await AsyncStorage.setItem("rolFavorito", data.usuario.rolFavorito);
+
         Alert.alert('Registro exitoso', 'Ahora puedes iniciar sesión.', [
           { text: 'OK', onPress: () => router.push('/entrar') }
         ]);

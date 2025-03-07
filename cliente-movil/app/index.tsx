@@ -83,15 +83,13 @@ export default function App() {
       if (response.status === 200) {
         const data = response.data;
 
-      // Guardamos el correo en AsyncStorage para su uso posterior
-      await AsyncStorage.setItem('nombreUsuario', data.usuario.nombre);
-      if (data.usuario.avatar) {
+        // Guardamos los datos del usuario en AsyncStorage para su uso posterior
+        await AsyncStorage.setItem('idUsuario', data.usuario.idUsuario.toString());
+        await AsyncStorage.setItem('nombreUsuario', data.usuario.nombre);
         await AsyncStorage.setItem('avatarUsuario', data.usuario.avatar);
-      }
-
-      await AsyncStorage.setItem("rolFavorito", data.usuario.rolFavorito || "aldeano");
-      await AsyncStorage.setItem("fechaCreacion", data.usuario.fechaCreacion || "Fecha desconocida");
-
+        await AsyncStorage.setItem('correoUsuario', data.usuario.correo);
+        await AsyncStorage.setItem("fechaCreacion", data.usuario.fechaCreacion);
+        await AsyncStorage.setItem("rolFavorito", data.usuario.rolFavorito);
 
         Alert.alert('Inicio de sesión exitoso', `Bienvenido, ${data.usuario.nombre}`);
         router.push('/entrar');
@@ -99,6 +97,7 @@ export default function App() {
         Alert.alert('Error', response.data.message || 'Credenciales incorrectas.');
       }
     } catch (error) {
+      console.error("Error en el login:", error); // Esto va a imprimir más detalles en la consola
       Alert.alert('Error', 'No se pudo conectar con el servidor.');
     }
   };

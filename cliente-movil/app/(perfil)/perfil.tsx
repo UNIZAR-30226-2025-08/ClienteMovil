@@ -43,7 +43,19 @@ export default function PerfilScreen() {
         setNombre(nombre || "Usuario");
         setAvatar(avatar || null);
         setRolFavorito(rolFavorito || "aldeano");
-        setFechaCreacion(fechaCreacion || "Fecha desconocida");
+
+        // Formatear la fecha de creación
+        if (fechaCreacion) {
+          const fechaFormateada = new Date(fechaCreacion);
+          const dia = String(fechaFormateada.getDate()).padStart(2, "0"); // Asegura que tenga 2 dígitos
+          const mes = String(fechaFormateada.getMonth() + 1).padStart(2, "0"); // Los meses van de 0-11, así que se suma 1
+          const año = fechaFormateada.getFullYear();
+
+          setFechaCreacion(`${dia}/${mes}/${año}`);
+        } else {
+          setFechaCreacion("Fecha desconocida");
+        }
+
       } catch (error) {
         console.error("Error al obtener usuario:", error);
       }
