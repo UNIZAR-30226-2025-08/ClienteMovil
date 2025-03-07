@@ -26,11 +26,8 @@ export let ROL_USUARIO = "aldeano";
 // ============================================================================
 // ============================================================================
 
-// Sección de valores hardcoded, su proposito es:
-//  1. (Principal) Cuando tengamos que integrar el backend, que sea un proceso lo menos doloroso posible
-//  2. (Secundario) Tener centralizadas las deicisiones de estilo
+// Sección de valores hardcoded
 
-// Strings existentes
 const TEXTO_INICIAL = "AMANECE EN LA ALDEA, TODO EL MUNDO DESPIERTA Y ABRE LOS OJOS";
 const TEXTO_ROL_TITULO = "TU ROL ES";
 const TEXTO_INICIO_PARTIDA = "EMPIEZA LA PARTIDA";
@@ -172,6 +169,9 @@ const PantallaJugando = () => {
   // Usamos la bandera inicial para decidir si mostrar la animación del texto inicial
   const [mostrarTextoInicial, setMostrarTextoInicial] = useState(!TEXTO_YA_MOSTRADO);
 
+  // Estado para trackear qué jugador está seleccionado para votar
+  const [selectedPlayer, setSelectedPlayer] = useState<number | null>(null);
+
   // Estados para popups
   const [mostrarHabilidad, setMostrarHabilidad] = useState(false);
   const [cantidadImagenes] = useState(CANTIDAD_IMAGENES);
@@ -188,6 +188,17 @@ const PantallaJugando = () => {
     setTemporizadorActivo(true);
   };
 
+  // Función para votar a un jugador
+  const voteForPlayer = () => {
+    if (selectedPlayer === null) {
+      console.log("No player selected to vote for.");
+      return;
+    }
+    console.log(`Voted for player ${selectedPlayer + 1}`);
+    // Aquí puedes agregar lógica para procesar el voto (ej. llamar a una API)
+    setSelectedPlayer(null);
+  };
+
   // useEffect para manejar el temporizador
   useEffect(() => {
     let intervalo;
@@ -198,7 +209,6 @@ const PantallaJugando = () => {
     } else if (temporizadorActivo && tiempoRestante === 0) {
       // Cuando el temporizador llega a 0, se invierte el valor de MODO_NOCHE_GLOBAL
       MODO_NOCHE_GLOBAL = !MODO_NOCHE_GLOBAL;
-      // Reinicia el temporizador
       reiniciarTemporizador();
     }
     return () => clearInterval(intervalo);
@@ -210,8 +220,6 @@ const PantallaJugando = () => {
   const animacionTexto = useRef(new Animated.Value(0)).current;
   const animacionRol = useRef(new Animated.Value(0)).current;
   const animacionInicio = useRef(new Animated.Value(0)).current;
-
-  // Animación para efecto de noche/día (se reutiliza para la superposición)
   const animacionFondo = useRef(new Animated.Value(1)).current;
 
   // Estado para modo día/noche
@@ -225,7 +233,7 @@ const PantallaJugando = () => {
     }).start();
   };
 
-  // Comprobar cada 100ms si el valor global difiere del local
+  // Sincronizar el modo día/noche
   useEffect(() => {
     const interval = setInterval(() => {
       if (MODO_NOCHE_GLOBAL !== isNight) {
@@ -281,7 +289,6 @@ const PantallaJugando = () => {
 
   // Secuencia de animación inicial
   useEffect(() => {
-    // Saltar animación si ya se mostró el texto
     if (TEXTO_YA_MOSTRADO) {
       setMostrarTextoInicial(false);
       setMostrarRol(false);
@@ -289,7 +296,6 @@ const PantallaJugando = () => {
       setMostrarBotones(true);
       return;
     }
-
     Animated.timing(animacionTexto, {
       toValue: 1,
       duration: DURACION_ANIMACION,
@@ -301,7 +307,6 @@ const PantallaJugando = () => {
           duration: DURACION_ANIMACION,
           useNativeDriver: true,
         }).start(() => {
-          // Marcar que el texto ya se mostró
           TEXTO_YA_MOSTRADO = true;
           setMostrarTextoInicial(false);
           setMostrarRol(true);
@@ -352,7 +357,6 @@ const PantallaJugando = () => {
     }
   }, [mostrarBotones]);
 
-  // Cargar fuente personalizada
   const [fuentesCargadas] = useFonts({
     Corben: require("@/assets/fonts/Corben-Regular.ttf"),
   });
@@ -366,9 +370,8 @@ const PantallaJugando = () => {
   const tamanioImagen = Math.min(ancho, alto) * MULTIPLICADOR_TAMANIO_IMAGEN;
   const radioMaximo = radioMaximoCalculado - tamanioImagen / 2;
 
-  // Obtener información de habilidad según el rol del usuario
+  // Obtener información de habilidad y rol
   const habilidadInfo = getHabilidadInfo(ROL_USUARIO);
-  // Obtener información del rol para la sección "Tu rol es"
   const roleInfo = getRoleInfo(ROL_USUARIO);
 
   return (
@@ -378,47 +381,39 @@ const PantallaJugando = () => {
         style={estilos.fondo}
         resizeMode="cover"
       />
-      {/* Overlay para efecto noche/día */}
       <Animated.View style={[estilos.superposicion, { opacity: animacionFondo }]} />
 
-      {/* Texto inicial */}
       {mostrarTextoInicial && (
         <Animated.View style={[estilos.contenedorTexto, { opacity: animacionTexto }]}>
           <Text style={estilos.texto}>{TEXTO_INICIAL}</Text>
         </Animated.View>
       )}
 
-      {/* Sección de rol adaptada */}
       {mostrarRol && (
         <Animated.View style={[estilos.contenedorRol, { opacity: animacionRol }]}>
           <View style={estilos.contenedorTextoRol}>
             <Text style={estilos.textoRol}>{TEXTO_ROL_TITULO}</Text>
           </View>
           <Image source={roleInfo.image} style={estilos.imagenRol} />
-          {/* El color del texto se determina dinámicamente */}
           <Text style={[estilos.nombreRol, { color: ROL_USUARIO === "lobo" ? "red" : "blue" }]}>
             {roleInfo.roleName}
           </Text>
         </Animated.View>
       )}
 
-      {/* Mensaje de inicio */}
       {mostrarInicio && (
         <Animated.View style={[estilos.contenedorTexto, { opacity: animacionInicio }]}>
           <Text style={estilos.textoInicio}>{TEXTO_INICIO_PARTIDA}</Text>
         </Animated.View>
       )}
 
-      {/* Botones y barra superior */}
       {mostrarBotones && (
         <>
           <View style={estilos.contenedorBotones}>
             <TouchableOpacity style={estilos.botonHabilidad} onPress={abrirHabilidad}>
-              {/* Botón de habilidad con icono adaptado al rol */}
               <Image source={habilidadInfo.imagen} style={estilos.iconoBoton} />
               <Text style={estilos.textoBoton}>{TEXTO_BOTON_HABILIDAD}</Text>
             </TouchableOpacity>
-
             <TouchableOpacity style={estilos.botonChat} onPress={abrirChat}>
               <Text style={estilos.textoBoton}>{TEXTO_BOTON_CHAT}</Text>
             </TouchableOpacity>
@@ -454,11 +449,15 @@ const PantallaJugando = () => {
               <Text style={estilos.textoTemporizador}>{tiempoRestante}</Text>
             </View>
           </View>
+
           <View style={estilos.contenedorBotonesDerecha}>
             <TouchableOpacity style={estilos.botonAccion}>
               <Text style={estilos.textoBoton}>{TEXTO_BOTON_PASAR_TURNO}</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={[estilos.botonAccion, estilos.botonVotar]}>
+            <TouchableOpacity
+              style={[estilos.botonAccion, estilos.botonVotar]}
+              onPress={voteForPlayer}
+            >
               <Text style={estilos.textoBoton}>{TEXTO_BOTON_VOTAR}</Text>
             </TouchableOpacity>
           </View>
@@ -478,16 +477,19 @@ const PantallaJugando = () => {
               const angulo = (indice * 2 * Math.PI) / CANTIDAD_IMAGENES;
               const x = radioMaximo * Math.cos(angulo);
               const y = radioMaximo * Math.sin(angulo);
+              const isSelected = selectedPlayer === indice;
               return (
                 <TouchableOpacity
                   key={indice}
-                  onPress={() => console.log(`Jugador ${indice + 1} presionado`)}
+                  onPress={() => setSelectedPlayer(indice)}
                   style={[
                     estilos.contenedorImagenCirculo,
                     {
                       width: tamanioImagen,
                       height: tamanioImagen,
                       transform: [{ translateX: x }, { translateY: y }],
+                      borderWidth: isSelected ? 3 : 3,
+                      borderColor: isSelected ? "green" : "white",
                     },
                   ]}
                   activeOpacity={0.7}
@@ -500,7 +502,6 @@ const PantallaJugando = () => {
         </>
       )}
 
-      {/* Chat */}
       {mostrarChat && (
         <Animated.View
           style={[
@@ -550,7 +551,6 @@ const PantallaJugando = () => {
         </Animated.View>
       )}
 
-      {/* Popup de Habilidad */}
       {mostrarHabilidad && (
         <Animated.View
           style={[
@@ -604,7 +604,6 @@ const estilos = StyleSheet.create({
     height: "100%",
   },
   superposicion: {
-    // Was rgba(0, 0, 0, 0.7)
     backgroundColor: "rgba(38, 37, 34, 0.7)",
     position: "absolute",
     top: 0,
@@ -658,7 +657,6 @@ const estilos = StyleSheet.create({
   nombreRol: {
     textAlign: "center",
     fontSize: ancho * 0.12,
-    // The color is set dynamically in the component
     fontFamily: "Corben",
     fontWeight: "bold",
   },
