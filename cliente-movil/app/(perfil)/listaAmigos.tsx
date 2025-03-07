@@ -112,7 +112,7 @@ export default function AmigosScreen() {
         <View style={styles.addFriendContainer}>
           <TextInput
             style={styles.input}
-            placeholder="Id del nuevo amigo"
+            placeholder="Nombre del nuevo amigo"
             placeholderTextColor="#666"
             value={nuevoAmigo}
             onChangeText={setNuevoAmigo}
