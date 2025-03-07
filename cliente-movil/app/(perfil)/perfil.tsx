@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react"; // Importar useState desde React
+import React, { useState, useEffect } from "react";
 import {
   ImageBackground,
   StyleSheet,
@@ -10,7 +10,7 @@ import {
   TextInput,
 } from "react-native";
 import { Link, useRouter } from "expo-router";
-import { Picker } from "@react-native-picker/picker"; // Importamos Picker
+import { Picker } from "@react-native-picker/picker";
 
 import { useFonts } from "expo-font";
 
@@ -21,22 +21,20 @@ const imagenPerfil = require("@/assets/images/imagenPerfil.webp");
 const imagenListaAmigos = require("@/assets/images/imagen-lista-amigos.png");
 
 export default function PerfilScreen() {
-  const router = useRouter(); // Usamos useRouter para manejar la navegación
+  const router = useRouter();
 
-  // Cargar la fuente GhostShadow
   const [loaded] = useFonts({
     GhostShadow: require("@/assets/fonts/ghost-shadow.ttf"),
   });
 
   if (!loaded) {
-    return null; // Esperar a que se cargue la fuente
+    return null;
   }
 
   const irAtras = () => {
-    router.back(); // Regresa a la pantalla anterior
+    router.back();
   };
 
-  // Estado para el rol favorito seleccionado
   const [rolFavorito, setRolFavorito] = useState("");
 
   return (
@@ -54,9 +52,8 @@ export default function PerfilScreen() {
         >
           <Text style={styles.textoBotonEditar}>EDITAR</Text>
         </TouchableOpacity>
-        <Image source={imagenPapiro} style={styles.imagePapiro}></Image>
+        <Image source={imagenPapiro} style={styles.imagePapiro} />
 
-        {/* Formulario */}
         <View style={styles.formContainer}>
           <Text style={styles.textoNombre}>Nombre</Text>
           <TextInput
@@ -70,7 +67,6 @@ export default function PerfilScreen() {
           <Text style={styles.fechaCreacion}>27/01/2025</Text>
 
           <Text style={styles.textoRol}>Rol favorito</Text>
-          {/* Lista desplegable para elegir el rol */}
           <View style={styles.pickerContainer}>
             <Picker
               selectedValue={rolFavorito}
@@ -93,17 +89,24 @@ export default function PerfilScreen() {
             <Image
               source={imagenListaAmigos}
               style={styles.listaAmigosImagen}
-            ></Image>
+            />
             <Text style={styles.textoGuardar}>LISTA AMIGOS</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={styles.botonGuardar}
-            onPress={() => router.push("/elegirOpciones")}
+            style={styles.botonHistorial}
+            onPress={() => router.push("/(perfil)/historial")}
           >
-            <Text style={styles.textoGuardar}>GUARDAR</Text>
+            <Text style={styles.textoHistorial}>HISTORIAL DE PARTIDAS</Text>
           </TouchableOpacity>
         </View>
+
+        <TouchableOpacity
+          style={styles.botonGuardar}
+          onPress={() => router.push("/elegirOpciones")}
+        >
+          <Text style={styles.textoGuardar}>GUARDAR</Text>
+        </TouchableOpacity>
 
         <TouchableOpacity style={styles.containerAtras} onPress={irAtras}>
           <Image source={imagenAtras} style={styles.imageAtras} />
@@ -118,29 +121,25 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: "column",
   },
-
   containerAtras: {
     position: "absolute",
     bottom: 20,
     left: "46%",
   },
-
   imageAtras: {
     height: 40,
     width: 40,
   },
-
   profileImage: {
-    width: 100, // Ajusta el tamaño de la imagen
-    height: 100, // Ajusta el tamaño de la imagen
+    width: 100,
+    height: 100,
     position: "absolute",
-    top: 80, // Centra la imagen en el eje vertical
+    top: 80,
     left: "50%",
-    marginLeft: -50, // Desplaza la imagen hacia la izquierda para que esté completamente centrada (mitad del ancho de la imagen)
+    marginLeft: -50,
     zIndex: 1,
     borderRadius: 50,
   },
-
   image: {
     width: "100%",
     height: "100%",
@@ -148,7 +147,6 @@ const styles = StyleSheet.create({
     resizeMode: "cover",
     justifyContent: "center",
   },
-
   imagePapiro: {
     height: 420,
     width: 333,
@@ -156,7 +154,6 @@ const styles = StyleSheet.create({
     bottom: "20%",
     left: "8%",
   },
-
   formContainer: {
     position: "absolute",
     width: "100%",
@@ -164,35 +161,30 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 4,
   },
-
   textoNombre: {
     fontSize: 16,
     fontWeight: "bold",
     marginTop: 10,
     color: "black",
   },
-
   textoFecha: {
     fontSize: 16,
     fontWeight: "bold",
     marginTop: 10,
     color: "black",
   },
-
   fechaCreacion: {
     fontSize: 16,
     fontWeight: "bold",
     marginTop: 10,
     color: "black",
   },
-
   textoRol: {
     fontSize: 16,
     fontWeight: "bold",
     marginTop: 10,
     color: "black",
   },
-
   input: {
     width: "70%",
     height: 50,
@@ -201,7 +193,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     marginTop: 5,
   },
-
   botonGuardar: {
     backgroundColor: "#008f39",
     justifyContent: "center",
@@ -210,19 +201,20 @@ const styles = StyleSheet.create({
     height: 45,
     marginTop: 15,
     borderRadius: 30,
+    position: "absolute",
+    bottom: 95, // Ajusta este valor según sea necesario para posicionar el botón por encima del botón "VOLVER"
+    left: "50%",
+    marginLeft: -75, // Centra el botón horizontalmente
   },
-
   textoGuardar: {
     fontWeight: "bold",
     fontSize: 20,
     color: "white",
   },
-
   overlay: {
-    ...StyleSheet.absoluteFillObject, // Cubre toda el área de la imagen
-    backgroundColor: "rgba(0, 0, 0, 0.4)", // Fondo negro semitransparente, puedes ajustar la opacidad
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0, 0, 0, 0.4)",
   },
-
   pickerContainer: {
     width: "68%",
     height: 50,
@@ -231,13 +223,11 @@ const styles = StyleSheet.create({
     marginTop: 5,
     justifyContent: "center",
   },
-
   picker: {
     height: 60,
     width: "100%",
     color: "black",
   },
-
   botonListaAmigos: {
     backgroundColor: "#000",
     justifyContent: "center",
@@ -247,12 +237,25 @@ const styles = StyleSheet.create({
     marginTop: 15,
     borderRadius: 10,
   },
-
   listaAmigosImagen: {
     width: 20,
     height: 20,
   },
-
+  botonHistorial: {
+    backgroundColor: "#000",
+    justifyContent: "center",
+    alignItems: "center",
+    width: 150,
+    height: 45, // Aumenta la altura del botón
+    marginTop: 15,
+    borderRadius: 10,
+  },
+  textoHistorial: {
+    fontWeight: "bold",
+    fontSize: 20,
+    color: "white",
+    textAlign: "center", // Alinea el texto al centro
+  },
   botonEditar: {
     position: "absolute",
     top: 182,
@@ -270,7 +273,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.5,
   },
-
   textoBotonEditar: {
     color: "white",
     fontSize: 14,
