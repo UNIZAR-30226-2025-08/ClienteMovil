@@ -13,6 +13,8 @@ import { Link } from "expo-router";
 import { useRouter } from "expo-router";
 import { useFonts } from "expo-font";
 import Constants from "expo-constants";
+import { useFocusEffect } from '@react-navigation/native';
+import { useCallback } from 'react';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const imagenPortada = require("@/assets/images/imagen-portada.png");
@@ -31,25 +33,40 @@ export default function opcionesScreen() {
   const [loading, setLoading] = useState(true); // Estado de carga
 
   // Cargar los datos del usuario al entrar a la pantalla
-  useEffect(() => {
-    const cargarUsuario = async () => {
-      try {
-        const nombre = await AsyncStorage.getItem("nombreUsuario");
-        const avatar = await AsyncStorage.getItem("avatarUsuario");
+  useFocusEffect(
+    useCallback(() => {
+      const cargarUsuario = async () => {
+        try {
+          const nombre = await AsyncStorage.getItem("nombreUsuario");
+          const avatar = await AsyncStorage.getItem("avatarUsuario");
+  
+          setUsuario({
+            nombre: nombre ?? "Usuario",
+            avatar: avatar || undefined,
+          });
+        } catch (error) {
+          console.error("Error al cargar usuario:", error);
+        } finally {
+          setLoading(false);
+        }
+      };
+  
+      cargarUsuario();
+    }, [])
+  );
 
-        setUsuario({
-          nombre: nombre ?? "Usuario", // Si es null, usa "Usuario"
-          avatar: avatar || undefined, // Si es null, usa undefined
-        });
-      } catch (error) {
-        console.error("Error al cargar usuario:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    cargarUsuario();
-  }, []);
+  const cerrarSesion = async () => {
+    try {
+      await AsyncStorage.removeItem("nombreUsuario");
+      await AsyncStorage.removeItem("avatarUsuario");
+      setUsuario(null); // Restablecer el estado del usuario
+      router.push("/"); // Redirigir a la pantalla de inicio de sesión
+    } catch (error) {
+      console.error("Error al cerrar sesión:", error);
+    }
+  };
+  
+  
 
   // Cargar la fuente GhostShadow
   const [loaded] = useFonts({
@@ -123,7 +140,11 @@ export default function opcionesScreen() {
             >
               <Text style={styles.textoBoton}>CONTACTO</Text>
             </TouchableOpacity>
-          </>
+
+            <TouchableOpacity style={styles.botonCerrarSesion} onPress={cerrarSesion}>
+              <Text style={styles.textoBoton}>CERRAR SESIÓN</Text>
+            </TouchableOpacity>
+          </>          
         )}
       </ImageBackground>
     </View>
@@ -273,5 +294,17 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: "50%",
     alignSelf: "center",
+  },
+
+  
+  botonCerrarSesion: {
+    backgroundColor: "red",
+    paddingVertical: 10,
+    borderRadius: 20,
+    marginTop: 30, 
+    alignSelf: "center",
+    width: "80%",
+    position: "absolute",
+    bottom: 50, 
   },
 });

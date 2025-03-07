@@ -19,7 +19,7 @@ import { useFonts } from 'expo-font';
 import { useRouter } from 'expo-router';
 import axios from 'axios'; // Importamos axios
 import CryptoJS from 'crypto-js'; // Importamos crypto-js
-//import AsyncStorage from '@react-native-async-storage/async-storage';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const imagenPortada = require('@/assets/images/imagen-portada.png');
 const imagenGoogle = require('@/assets/images/google-icon.png');
@@ -82,6 +82,14 @@ export default function App() {
       });
       if (response.status === 200) {
         const data = response.data;
+
+      // Guardamos el usuario en AsyncStorage
+      await AsyncStorage.setItem('nombreUsuario', data.usuario.nombre);
+      if (data.usuario.avatar) {
+        await AsyncStorage.setItem('avatarUsuario', data.usuario.avatar);
+      } else {
+        await AsyncStorage.removeItem('avatarUsuario'); // Elimina el avatar si no hay
+      }
 
         // Guardamos el correo en AsyncStorage para su uso posterior
         // await AsyncStorage.setItem('nombreUsuario', data.usuario.nombre);
