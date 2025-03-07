@@ -5,8 +5,14 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
+  ImageBackground,
+  Image,
 } from "react-native";
 import { useRouter } from "expo-router";
+
+const imagenFondoRoles = require("@/assets/images/fondo-roles.jpg");
+// Asegúrate de tener tu imagen de "botón atrás"
+const imagenAtras = require("@/assets/images/botonAtras.png");
 
 export default function HistorialPartidasScreen() {
   const router = useRouter();
@@ -25,29 +31,38 @@ export default function HistorialPartidasScreen() {
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity style={styles.botonAtras} onPress={irAtras}>
-        <Text style={styles.textoBotonAtras}>ATRÁS</Text>
-      </TouchableOpacity>
+      <ImageBackground
+        source={imagenFondoRoles}
+        resizeMode="cover"
+        style={styles.image}
+      >
+        <View style={styles.overlay} />
 
-      <Text style={styles.titulo}>Historial de Partidas</Text>
+        <Text style={styles.titulo}>Historial de Partidas</Text>
 
-      <ScrollView style={styles.scrollContainer}>
-        {partidas.map((partida) => (
-          <View key={partida.id} style={styles.partidaItem}>
-            <Text style={styles.fecha}>Fecha: {partida.fecha}</Text>
-            <Text
-              style={[
-                styles.resultado,
-                partida.resultado === "victoria"
-                  ? styles.victoria
-                  : styles.derrota,
-              ]}
-            >
-              {partida.resultado.toUpperCase()}
-            </Text>
-          </View>
-        ))}
-      </ScrollView>
+        <ScrollView style={styles.scrollContainer}>
+          {partidas.map((partida) => (
+            <View key={partida.id} style={styles.partidaItem}>
+              <Text style={styles.fecha}>Fecha: {partida.fecha}</Text>
+              <Text
+                style={[
+                  styles.resultado,
+                  partida.resultado === "victoria"
+                    ? styles.victoria
+                    : styles.derrota,
+                ]}
+              >
+                {partida.resultado.toUpperCase()}
+              </Text>
+            </View>
+          ))}
+        </ScrollView>
+
+        {/* Botón de ir atrás con la imagen */}
+        <TouchableOpacity style={styles.containerAtras} onPress={irAtras}>
+          <Image source={imagenAtras} style={styles.imageAtras} />
+        </TouchableOpacity>
+      </ImageBackground>
     </View>
   );
 }
@@ -55,26 +70,25 @@ export default function HistorialPartidasScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 60,
-    backgroundColor: "#fff",
+  },
+  image: {
+    width: "100%",
+    height: "100%",
+    flex: 1,
+    resizeMode: "cover",
+    justifyContent: "center",
     alignItems: "center",
   },
-  botonAtras: {
-    position: "absolute",
-    top: 20,
-    left: 20,
-    padding: 10,
-    backgroundColor: "#ccc",
-    borderRadius: 5,
-  },
-  textoBotonAtras: {
-    fontWeight: "bold",
-    color: "#000",
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0, 0, 0, 0.4)",
   },
   titulo: {
     fontSize: 22,
     fontWeight: "bold",
     marginBottom: 20,
+    marginTop: 60,
+    color: "#fff",
   },
   scrollContainer: {
     width: "90%",
@@ -98,5 +112,15 @@ const styles = StyleSheet.create({
   },
   derrota: {
     color: "red",
+  },
+  // Estilos para el nuevo botón de atrás con imagen
+  containerAtras: {
+    position: "absolute",
+    bottom: 20,
+    left: "46%",
+  },
+  imageAtras: {
+    width: 40,
+    height: 40,
   },
 });
