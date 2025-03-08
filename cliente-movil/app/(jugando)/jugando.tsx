@@ -54,6 +54,21 @@ const PantallaJugando: React.FC = () => {
   const [mensajes] = useState(TEXTOS.CHAT.MENSAJES_INICIALES);
   const [tiempoRestante, setTiempoRestante] = useState(NUMERICAS.TIEMPO_INICIAL);
   const [temporizadorActivo, setTemporizadorActivo] = useState(false);
+  const [indiceUsuario] = useState(0);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const animacionError = useRef(new Animated.Value(0)).current;
+
+  /**
+   * Maneja la selección de jugadores, evitando que el usuario se seleccione a sí mismo
+   * @param index - Índice del jugador seleccionado
+   */
+  const handleSelectPlayer = (index: number) => {
+    if (index === indiceUsuario) {
+      showError("¡No puedes votarte a ti mismo!");
+      return;
+    }
+    setSelectedPlayer(index);
+  };
 
   /**
    * Reinicia el temporizador al valor inicial y lo activa.
@@ -69,17 +84,20 @@ const PantallaJugando: React.FC = () => {
    */
   const voteForPlayer = () => {
     if (selectedPlayer === null) {
-      console.log("No player selected to vote for.");
+      console.log("No se ha seleccionado ningún jugador para votar.");
       return;
     }
+    
     setVotes((prevVotes) => {
       const newVotes = [...prevVotes];
       newVotes[selectedPlayer] += 1;
       return newVotes;
     });
-    console.log(`Voted for player ${selectedPlayer + 1}`, votes);
+    
+    console.log(`Votado al jugador ${selectedPlayer + 1}`, votes);
     setSelectedPlayer(null);
   };
+
 
   /**
    * Efecto que maneja el temporizador decrementándolo cada segundo y alterna el modo noche cuando llega a 0.
@@ -212,6 +230,28 @@ const PantallaJugando: React.FC = () => {
   }, []);
 
   /**
+ * Muestra un mensaje de error temporal
+ * @param message - Mensaje a mostrar
+ */
+  const showError = (message: string) => {
+    setErrorMessage(message);
+    // Animación para mostrar y ocultar el mensaje
+    Animated.sequence([
+      Animated.timing(animacionError, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+      Animated.delay(2000),
+      Animated.timing(animacionError, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+    ]).start(() => setErrorMessage(null));
+  };
+
+  /**
    * Activa el temporizador una vez que se muestran los botones de acción.
    */
   useEffect(() => {
@@ -231,18 +271,40 @@ const PantallaJugando: React.FC = () => {
   const roleInfo = getRoleInfo(ROL_USUARIO);
 
   return (
-    // Contenedor principal de la pantalla de juego
-    <View style={estilos.contenedor}>
-      {/* Imagen de fondo que cubre toda la pantalla */}
-      <ImageBackground source={IMAGENES.FONDO} style={estilos.fondo} resizeMode="cover" />
-      
-      {/* Superposición animada para efectos visuales en el fondo */}
-      <Animated.View style={[estilos.superposicion, { opacity: animacionFondo.value }]} />
-      
-      {/* Condicional: Muestra el texto inicial animado si aún no se ha ocultado */}
-      {mostrarTextoInicial && (
-        <Animated.View style={[estilos.contenedorTexto, { opacity: animacionTexto.value }]}>
-          <Text style={estilos.texto}>{TEXTOS.INICIAL}</Text>
+      // Contenedor principal de la pantalla de juego
+      <View style={estilos.contenedor}>
+        {/* Imagen de fondo que cubre toda la pantalla */}
+        <ImageBackground source={IMAGENES.FONDO} style={estilos.fondo} resizeMode="cover" />
+        
+        {/* Superposición animada para efectos visuales en el fondo */}
+        <Animated.View style={[estilos.superposicion, { opacity: animacionFondo.value }]} />
+        
+        {/* Condicional: Muestra el texto inicial animado si aún no se ha ocultado */}
+        {mostrarTextoInicial && (
+          <Animated.View style={[estilos.contenedorTexto, { opacity: animacionTexto.value }]}>
+            <Text style={estilos.texto}>{TEXTOS.INICIAL}</Text>
+          </Animated.View>
+        )}
+
+        {/* Condicional: Mensaje de error animado */}
+        {errorMessage && (
+        <Animated.View
+          style={[
+            estilos.contenedorError,
+            {
+              opacity: animacionError,
+              transform: [
+                {
+                  translateY: animacionError.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [-20, 0],
+                  }),
+                },
+              ],
+            },
+          ]}
+        >
+          <Text style={estilos.textoError}>{errorMessage}</Text>
         </Animated.View>
       )}
       
@@ -300,7 +362,7 @@ const PantallaJugando: React.FC = () => {
             imagenes={imagenes}
             votes={votes}
             selectedPlayer={selectedPlayer}
-            onSelectPlayer={setSelectedPlayer}
+            onSelectPlayer={handleSelectPlayer}
           />
         </>
       )}
@@ -321,6 +383,34 @@ const PantallaJugando: React.FC = () => {
           posicionHabilidad={posicionHabilidad}
           onClose={cerrarHabilidad}
         />
+      )}
+
+      {/* Mensaje de error animado */}
+      {errorMessage && (
+        <Animated.View
+          style={[
+            estilos.contenedorError,
+            {
+              opacity: animacionError,
+              transform: [
+                {
+                  translateY: animacionError.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [-ALTO * 0.04, 0],
+                  }),
+                },
+              ],
+            },
+          ]}
+        >
+        <Text 
+          style={estilos.textoError}
+          numberOfLines={2}
+          ellipsizeMode="tail"
+        >
+          {errorMessage}
+        </Text>  
+        </Animated.View>
       )}
     </View>
   );
