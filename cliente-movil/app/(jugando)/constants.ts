@@ -1,3 +1,9 @@
+/**
+ * @file Constantes globales de la partida.
+ * - La mayoría están **hardcoded por diseño**.
+ * - Otras están **hardcoded temporalmente** por falta de integración con el backend (marcadas con "TODO").
+ * @module constants
+ */
 import { Dimensions } from "react-native";
 
 const { width: ANCHO, height: ALTO } = Dimensions.get("window");
@@ -13,8 +19,8 @@ export const CONSTANTES = {
     BOTON_VOTAR: "Votar",
     PUEBLO: "PUEBLO",
     LOBOS: "LOBOS",
-    JORNADA: "JORNADA 2",
-    DIA: "DÍA 2",
+    JORNADA: "JORNADA 2", // TODO
+    DIA: "DÍA 2", // TODO
     ESTADO_PUEBLO: "5/6 vivos",
     ESTADO_LOBOS: "2/2 vivos",
     CHAT: {
@@ -23,21 +29,15 @@ export const CONSTANTES = {
       TITULO: "CHAT",
       CERRAR: "X",
       MENSAJES_INICIALES: [
-        { id: 1, texto: "Jugador 2: Mensaje de prueba" },
-        { id: 2, texto: "Jugador 5: Otro mensaje" },
+        { id: 1, texto: "Jugador 2: Mensaje de prueba" }, // TODO
+        { id: 2, texto: "Jugador 5: Otro mensaje" }, // TODO
       ],
     },
-    HABILIDAD: {
-      TITULO: "Habilidad",
-      DESCRIPCION_LOBO: "Eres El Lobo. Tienes el poder de matar a un jugador durante la noche, pero ten cuidado de no ser descubierto.",
-      RECUERDA_LOBO: "Recuerda: Los lobos deben ponerse de acuerdo sobre a quién asesinar en la noche.",
-      CERRAR: "X",
-    }
   },
 
   NUMERICAS: {
     CANTIDAD_IMAGENES: 8,
-    TIEMPO_INICIAL: 60,
+    TIEMPO_INICIAL: 60, // segundos
     MULTIPLICADOR_RADIO: 0.45,
     MULTIPLICADOR_TAMANIO_IMAGEN: 0.13,
     DURACION_ANIMACION: 1500,
@@ -53,7 +53,7 @@ export const CONSTANTES = {
     HABILIDAD: require("@/assets/images/hombre-lobo-icon.jpeg"),
     PUEBLO: require("@/assets/images/pueblo-barra-arriba-juego.png"),
     LOBOS: require("@/assets/images/lobo-barra-arriba-juego.png"),
-    JUGADORES: require("@/assets/images/jugador-icono.jpg"),
+    JUGADORES: require("@/assets/images/jugador-icono.jpg"), // TODO
     ALDEANO: require("@/assets/images/aldeano-icon.jpeg"),
     BRUJA: require("@/assets/images/bruja-icon.jpeg"),
     CAZADOR: require("@/assets/images/cazador-icon.jpeg"),

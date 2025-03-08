@@ -1,5 +1,14 @@
+/**
+ * @file Funciones para devoler información sobre los roles durante la partida.
+ * Son arrow y puras.
+ */
 import { CONSTANTES, Rol } from "./constants";
 const { TEXTOS, IMAGENES } = CONSTANTES;
+
+/**
+ * Obtiene la información necesaria para mostrar el pop-up de "HABILIDAD" dentro de la partida
+ * Incluye descripción, recordatorio e imagen.
+ */
 export const getHabilidadInfo = (rol: Rol) => {
   switch (rol) {
     case "aldeano":
@@ -10,8 +19,8 @@ export const getHabilidadInfo = (rol: Rol) => {
       };
     case "lobo":
       return {
-        descripcion: TEXTOS.HABILIDAD.DESCRIPCION_LOBO,
-        recuerda: TEXTOS.HABILIDAD.RECUERDA_LOBO,
+        descripcion: "Eres El Lobo. Tienes el poder de matar a un jugador durante la noche, pero ten cuidado de no ser descubierto.",
+        recuerda: "Recuerda: Los lobos deben ponerse de acuerdo sobre a quién asesinar en la noche.",
         imagen: IMAGENES.HABILIDAD
       };
     case "bruja":
@@ -28,12 +37,16 @@ export const getHabilidadInfo = (rol: Rol) => {
       };
     default:
       return {
-        descripcion: TEXTOS.HABILIDAD.DESCRIPCION_LOBO,
-        recuerda: TEXTOS.HABILIDAD.RECUERDA_LOBO,
+        descripcion: "Eres El Lobo. Tienes el poder de matar a un jugador durante la noche, pero ten cuidado de no ser descubierto.",
+        recuerda: "Recuerda: Los lobos deben ponerse de acuerdo sobre a quién asesinar en la noche.",
         imagen: IMAGENES.HABILIDAD
       };
   }
 };
+
+/**
+ * Obtiene la información necesaria para mostrar el rol del jugador en la animación de comienzo de partida.
+ */
 export const getRoleInfo = (rol: Rol) => {
   switch (rol) {
     case "aldeano":

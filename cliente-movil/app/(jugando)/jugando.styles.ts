@@ -1,5 +1,10 @@
+/**
+ * @file Estilos para la pantalla de juego. Define todos los componentes visuales.
+ * @module jugando.styles
+ */
 import { Dimensions, StyleSheet } from "react-native";
 
+// Para que la partida sea épicamente responsiva
 const { width: ancho, height: alto } = Dimensions.get("window");
 
 const BORDE_RADIO_BOTON = ancho * 0.0556;

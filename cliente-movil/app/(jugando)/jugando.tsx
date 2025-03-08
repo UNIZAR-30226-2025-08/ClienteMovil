@@ -1,3 +1,7 @@
+/**
+ * @file PantallaJugando - Componente principal de la pantalla de juego.
+ * Maneja todo lo importante: estados, animaciones, temporizador y lógica de votación, chat y habilidades.
+ */
 import React, { useState, useEffect, useRef } from "react";
 import { View, ImageBackground, Text, Image, Animated, TouchableOpacity } from "react-native";
 import { useFonts } from "expo-font";
@@ -10,13 +14,33 @@ import TopBar from "./components/TopBar";
 import VotingCircle from "./components/VotingCircle";
 import { useAnimationManager } from "./animations";
 
+/**
+ * Indica si el modo noche está activado globalmente.
+ */
 export let MODO_NOCHE_GLOBAL = false;
+
+/**
+ * Define el rol del usuario.
+ */
 export let ROL_USUARIO: Rol = "aldeano";
+
+/**
+ * Bandera para controlar si el texto inicial ya se mostró.
+ */
 let TEXTO_YA_MOSTRADO = false;
+
+// Desestructuración de constantes usadas en el componente.
 const { TEXTOS, NUMERICAS, IMAGENES, DIMENSIONES, COLORES } = CONSTANTES;
 const { ANCHO, ALTO } = DIMENSIONES;
 
+/**
+ * PantallaJugando
+ * Componente principal que gestiona la lógica de juego, animaciones y renderizado de elementos interactivos.
+ *
+ * @component
+ */
 const PantallaJugando: React.FC = () => {
+  // Estados locales para controlar visibilidad e interacciones.
   const [mostrarRol, setMostrarRol] = useState(false);
   const [mostrarInicio, setMostrarInicio] = useState(false);
   const [mostrarBotones, setMostrarBotones] = useState(false);
@@ -31,11 +55,18 @@ const PantallaJugando: React.FC = () => {
   const [tiempoRestante, setTiempoRestante] = useState(NUMERICAS.TIEMPO_INICIAL);
   const [temporizadorActivo, setTemporizadorActivo] = useState(false);
 
+  /**
+   * Reinicia el temporizador al valor inicial y lo activa.
+   */
   const reiniciarTemporizador = () => {
     setTiempoRestante(NUMERICAS.TIEMPO_INICIAL);
     setTemporizadorActivo(true);
   };
 
+  /**
+   * Incrementa el voto para el jugador seleccionado.
+   * Valida la selección y resetea el jugador seleccionado tras votar.
+   */
   const voteForPlayer = () => {
     if (selectedPlayer === null) {
       console.log("No player selected to vote for.");
@@ -50,6 +81,9 @@ const PantallaJugando: React.FC = () => {
     setSelectedPlayer(null);
   };
 
+  /**
+   * Efecto que maneja el temporizador decrementándolo cada segundo y alterna el modo noche cuando llega a 0.
+   */
   useEffect(() => {
     let intervalo: NodeJS.Timeout;
     if (temporizadorActivo && tiempoRestante > 0) {
@@ -63,18 +97,23 @@ const PantallaJugando: React.FC = () => {
     return () => clearInterval(intervalo);
   }, [temporizadorActivo, tiempoRestante]);
 
-  // Use our animation manager hook to create animations
+  // Inicializa el gestor de animaciones.
   const animationManager = useAnimationManager();
   const animacionTexto = useRef(animationManager.createAnimation(0)).current;
   const animacionRol = useRef(animationManager.createAnimation(0)).current;
   const animacionInicio = useRef(animationManager.createAnimation(0)).current;
-  // Note: animacionFondo is used in two different contexts here.
+  // Nota: animacionFondo se utiliza en dos contextos diferentes.
   const animacionFondo = useRef(animationManager.createAnimation(1)).current;
 
+  // Constantes para la duración y retraso de animaciones.
   const DURACION_ANIMACION = NUMERICAS.DURACION_ANIMACION;
   const RETRASO_ANIMACION = NUMERICAS.RETRASO_ANIMACION;
 
-  // Update night/day mode using our animation functions
+  /**
+   * Cambia el modo noche/día usando animaciones.
+   *
+   * @param mode - true para activar modo noche, false para modo día.
+   */
   const [isNight, setIsNight] = useState(false);
   const setNightDayMode = (mode: boolean) => {
     setIsNight(mode);
@@ -85,6 +124,9 @@ const PantallaJugando: React.FC = () => {
     }
   };
 
+  /**
+   * Sincroniza el estado global del modo noche con el estado local.
+   */
   useEffect(() => {
     const interval = setInterval(() => {
       if (MODO_NOCHE_GLOBAL !== isNight) {
@@ -94,29 +136,46 @@ const PantallaJugando: React.FC = () => {
     return () => clearInterval(interval);
   }, [isNight]);
 
+  // Animación para la posición del chat.
   const posicionChat = useRef(new Animated.Value(ALTO)).current;
+  /**
+   * Abre el chat animándolo desde la parte inferior.
+   */
   const abrirChat = () => {
     setMostrarChat(true);
     Animated.timing(posicionChat, { toValue: 0, duration: 300, useNativeDriver: true }).start();
   };
+  /**
+   * Cierra el chat animándolo hacia la parte inferior.
+   */
   const cerrarChat = () => {
     Animated.timing(posicionChat, { toValue: ALTO, duration: 300, useNativeDriver: true }).start(() => {
       setMostrarChat(false);
     });
   };
 
+  // Animación para la posición del popup de habilidad.
   const posicionHabilidad = useRef(new Animated.Value(ALTO)).current;
+  /**
+   * Abre el popup de habilidad animándolo desde la parte inferior.
+   */
   const abrirHabilidad = () => {
     setMostrarHabilidad(true);
     Animated.timing(posicionHabilidad, { toValue: 0, duration: 300, useNativeDriver: true }).start();
   };
+  /**
+   * Cierra el popup de habilidad animándolo hacia la parte inferior.
+   */
   const cerrarHabilidad = () => {
     Animated.timing(posicionHabilidad, { toValue: ALTO, duration: 300, useNativeDriver: true }).start(() => {
       setMostrarHabilidad(false);
     });
   };
 
-  // Replace the sequence of Animated.timing calls with our animation manager functions
+  /**
+   * Secuencia de animaciones para mostrar el texto inicial, rol, inicio de partida y botones.
+   * Encadena múltiples animaciones para la transición de estados en la interfaz.
+   */
   useEffect(() => {
     if (TEXTO_YA_MOSTRADO) {
       setMostrarTextoInicial(false);
@@ -152,44 +211,62 @@ const PantallaJugando: React.FC = () => {
     });
   }, []);
 
+  /**
+   * Activa el temporizador una vez que se muestran los botones de acción.
+   */
   useEffect(() => {
     if (mostrarBotones) {
       setTemporizadorActivo(true);
     }
   }, [mostrarBotones]);
 
+  // Carga de fuente personalizada.
   const [fuentesCargadas] = useFonts({
     Corben: require("@/assets/fonts/Corben-Regular.ttf"),
   });
   if (!fuentesCargadas) return null;
 
+  // Obtiene la información de la habilidad y del rol actual.
   const habilidadInfo = getHabilidadInfo(ROL_USUARIO);
   const roleInfo = getRoleInfo(ROL_USUARIO);
 
   return (
+    // Contenedor principal de la pantalla de juego
     <View style={estilos.contenedor}>
+      {/* Imagen de fondo que cubre toda la pantalla */}
       <ImageBackground source={IMAGENES.FONDO} style={estilos.fondo} resizeMode="cover" />
-      {/* Use the animated value from our manager */}
+      
+      {/* Superposición animada para efectos visuales en el fondo */}
       <Animated.View style={[estilos.superposicion, { opacity: animacionFondo.value }]} />
+      
+      {/* Condicional: Muestra el texto inicial animado si aún no se ha ocultado */}
       {mostrarTextoInicial && (
         <Animated.View style={[estilos.contenedorTexto, { opacity: animacionTexto.value }]}>
           <Text style={estilos.texto}>{TEXTOS.INICIAL}</Text>
         </Animated.View>
       )}
+      
+      {/* Condicional: Muestra la información del rol del usuario con animación */}
       {mostrarRol && (
         <Animated.View style={[estilos.contenedorRol, { opacity: animacionRol.value }]}>
           <View style={estilos.contenedorTextoRol}>
             <Text style={estilos.textoRol}>{TEXTOS.ROL_TITULO}</Text>
           </View>
           <Image source={roleInfo.image} style={estilos.imagenRol} />
-          <Text style={[estilos.nombreRol, { color: ROL_USUARIO === "lobo" ? "red" : "blue" }]}>{roleInfo.roleName}</Text>
+          <Text style={[estilos.nombreRol, { color: ROL_USUARIO === "lobo" ? "red" : "blue" }]}>
+            {roleInfo.roleName}
+          </Text>
         </Animated.View>
       )}
+      
+      {/* Condicional: Muestra el mensaje de inicio de partida animado */}
       {mostrarInicio && (
         <Animated.View style={[estilos.contenedorTexto, { opacity: animacionInicio.value }]}>
           <Text style={estilos.textoInicio}>{TEXTOS.INICIO_PARTIDA}</Text>
         </Animated.View>
       )}
+      
+      {/* Condicional: Renderiza los botones de acción, temporizador, barra superior y votación */}
       {mostrarBotones && (
         <>
           <View style={estilos.contenedorBotones}>
@@ -201,12 +278,15 @@ const PantallaJugando: React.FC = () => {
               <Text style={estilos.textoBoton}>{TEXTOS.BOTON_CHAT}</Text>
             </TouchableOpacity>
           </View>
+          {/* Barra superior con información adicional del juego */}
           <TopBar />
+          {/* Temporizador central que muestra el tiempo restante */}
           <View style={estilos.contenedorTemporizador}>
             <View style={estilos.circuloTemporizador}>
               <Text style={estilos.textoTemporizador}>{tiempoRestante}</Text>
             </View>
           </View>
+          {/* Botones de acciones complementarias: pasar turno y votar */}
           <View style={estilos.contenedorBotonesDerecha}>
             <TouchableOpacity style={estilos.botonAccion}>
               <Text style={estilos.textoBoton}>{TEXTOS.BOTON_PASAR_TURNO}</Text>
@@ -215,6 +295,7 @@ const PantallaJugando: React.FC = () => {
               <Text style={estilos.textoBoton}>{TEXTOS.BOTON_VOTAR}</Text>
             </TouchableOpacity>
           </View>
+          {/* Componente para la votación de jugadores */}
           <VotingCircle
             imagenes={imagenes}
             votes={votes}
@@ -223,6 +304,8 @@ const PantallaJugando: React.FC = () => {
           />
         </>
       )}
+      
+      {/* Condicional: Muestra el componente de chat si está activado */}
       {mostrarChat && (
         <ChatComponent
           mensajes={TEXTOS.CHAT.MENSAJES_INICIALES}
@@ -230,6 +313,8 @@ const PantallaJugando: React.FC = () => {
           onClose={cerrarChat}
         />
       )}
+      
+      {/* Condicional: Muestra el popup de habilidad del jugador si está activado */}
       {mostrarHabilidad && (
         <HabilidadPopup
           habilidadInfo={habilidadInfo}
