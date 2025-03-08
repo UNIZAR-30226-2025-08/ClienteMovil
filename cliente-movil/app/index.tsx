@@ -105,6 +105,7 @@ export default function App() {
         Alert.alert('Error', response.data.message || 'Credenciales incorrectas.');
       }
     } catch (error) {
+      console.error("Error en el login:", error); // Esto va a imprimir más detalles en la consola
       Alert.alert('Error', 'No se pudo conectar con el servidor.');
     }
   };

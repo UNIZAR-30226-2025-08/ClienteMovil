@@ -1,231 +1,132 @@
+/**
+ * @file PantallaJugando - Componente principal de la pantalla de juego.
+ * Maneja todo lo importante: estados, animaciones, temporizador y lógica de votación, chat y habilidades.
+ */
 import React, { useState, useEffect, useRef } from "react";
-import {
-  View,
-  ImageBackground,
-  StyleSheet,
-  Text,
-  Image,
-  Animated,
-  Dimensions,
-  TouchableOpacity,
-  TextInput,
-  ScrollView,
-} from "react-native";
+import { View, ImageBackground, Text, Image, Animated, TouchableOpacity } from "react-native";
 import { useFonts } from "expo-font";
+import { estilos } from "./jugando.styles";
+import { CONSTANTES, Rol } from "./constants";
+import { getHabilidadInfo, getRoleInfo } from "./roleUtils";
+import ChatComponent from "./components/ChatComponent";
+import HabilidadPopup from "./components/HabilidadPopup";
+import TopBar from "./components/TopBar";
+import VotingCircle from "./components/VotingCircle";
+import { useAnimationManager } from "./animations";
 
-// ---------------------------------------------------------------------------
-// Variable global para controlar si es de día o de noche (false = día, true = noche)
+/**
+ * Indica si el modo noche está activado globalmente.
+ */
 export let MODO_NOCHE_GLOBAL = false;
-// Global flag para controlar si ya se mostró el texto inicial
+
+/**
+ * Define el rol del usuario.
+ */
+export let ROL_USUARIO: Rol = "aldeano";
+
+/**
+ * Bandera para controlar si el texto inicial ya se mostró.
+ */
 let TEXTO_YA_MOSTRADO = false;
-// Global variable para el rol del usuario (aldeano, lobo, bruja, cazador)
-export let ROL_USUARIO = "aldeano";
-// ---------------------------------------------------------------------------
 
-// ============================================================================
-// ============================================================================
-// ============================================================================
+// Desestructuración de constantes usadas en el componente.
+const { TEXTOS, NUMERICAS, IMAGENES, DIMENSIONES, COLORES } = CONSTANTES;
+const { ANCHO, ALTO } = DIMENSIONES;
 
-// Sección de valores hardcoded, su proposito es:
-//  1. (Principal) Cuando tengamos que integrar el backend, que sea un proceso lo menos doloroso posible
-//  2. (Secundario) Tener centralizadas las deicisiones de estilo
-
-// Strings existentes
-const TEXTO_INICIAL = "AMANECE EN LA ALDEA, TODO EL MUNDO DESPIERTA Y ABRE LOS OJOS";
-const TEXTO_ROL_TITULO = "TU ROL ES";
-const TEXTO_INICIO_PARTIDA = "EMPIEZA LA PARTIDA";
-const TEXTO_BOTON_HABILIDAD = "HABILIDAD";
-const TEXTO_BOTON_CHAT = "CHAT";
-const TEXTO_BOTON_PASAR_TURNO = "Pasar turno";
-const TEXTO_BOTON_VOTAR = "Votar";
-const TEXTO_PUEBLO = "PUEBLO";
-const TEXTO_LOBOS = "LOBOS";
-const TEXTO_JORNADA = "JORNADA 2";
-const TEXTO_DIA = "DÍA 2";
-const TEXTO_ESTADO_PUEBLO = "5/6 vivos";
-const TEXTO_ESTADO_LOBOS = "2/2 vivos";
-
-// Números
-const CANTIDAD_IMAGENES = 8;
-const TIEMPO_INICIAL = 60; // Segundos
-
-// Dimensiones
-const { width: ancho, height: alto } = Dimensions.get("window");
-const BORDE_RADIO_BOTON = ancho * 0.0556;
-const TAMANIO_ICONO_BOTON = ancho * 0.1;
-const TAMANIO_TEMPORIZADOR = ancho * 0.15;
-
-// Imágenes
-const imagenFondo = require("@/assets/images/fondo-partida.png");
-const imagenLoboRol = require("@/assets/images/hombre-lobo-icon.jpeg");
-const imagenHabilidad = require("@/assets/images/hombre-lobo-icon.jpeg");
-const imagenPueblo = require("@/assets/images/pueblo-barra-arriba-juego.png");
-const imagenLobos = require("@/assets/images/lobo-barra-arriba-juego.png");
-const imagenJugadores = require("@/assets/images/jugador-icono.jpg");
-
-// Textos y mensajes hardcodeados no centralizados
-const TEXTO_CHAT_PLACEHOLDER = "Enviar un mensaje";
-const TEXTO_BOTON_ENVIAR_CHAT = "Enviar";
-const TEXTO_TITULO_CHAT = "CHAT";
-const TEXTO_CERRAR_CHAT = "X";
-const TEXTO_CERRAR_POPUP = "X";
-// Textos por defecto para el popup de habilidad
-const TEXTO_POPUP_HABILIDAD_TITULO = "Habilidad";
-const TEXTO_POPUP_HABILIDAD_DESC =
-  "Eres El Lobo. Tienes el poder de matar a un jugador durante la noche, pero ten cuidado de no ser descubierto.";
-const TEXTO_POPUP_HABILIDAD_RECUERDA =
-  "Recuerda: Los lobos deben ponerse de acuerdo sobre a quién asesinar en la noche.";
-const MENSAJES_CHAT_INITIAL = [
-  { id: 1, texto: "Jugador 2: Mensaje de prueba" },
-  { id: 2, texto: "Jugador 5: Otro mensaje" },
-];
-
-// ---------------------------------------------------------------------------
-// Helper function para retornar la información de habilidad según el rol
-const getHabilidadInfo = (rol) => {
-  switch (rol) {
-    case "aldeano":
-      return {
-        titulo: "Habilidad",
-        descripcion:
-          "Como aldeano, no posees una habilidad especial, pero tu voto es crucial para la aldea.",
-        recuerda: "",
-        imagen: require("@/assets/images/aldeano-icon.jpeg"),
-      };
-    case "lobo":
-      return {
-        titulo: "Habilidad",
-        descripcion:
-          "Eres el lobo. Tienes el poder de matar a un jugador durante la noche, pero ten cuidado de no ser descubierto.",
-        recuerda: "Recuerda: Los lobos deben ponerse de acuerdo sobre a quién asesinar en la noche.",
-        imagen: require("@/assets/images/hombre-lobo-icon.jpeg"),
-      };
-    case "bruja":
-      return {
-        titulo: "Habilidad",
-        descripcion:
-          "Como bruja, tienes dos pociones: una para salvar a un jugador y otra para envenenar. Úsalas con sabiduría.",
-        recuerda: "Recuerda: Cada poción solo se puede usar una vez.",
-        imagen: require("@/assets/images/bruja-icon.jpeg"),
-      };
-    case "cazador":
-      return {
-        titulo: "Habilidad",
-        descripcion:
-          "Si mueres, puedes disparar a otro jugador en venganza. Usa tu habilidad para proteger a la aldea.",
-        recuerda: "Recuerda: Tu disparo final puede cambiar el destino del juego.",
-        imagen: require("@/assets/images/cazador-icon.jpeg"),
-      };
-    default:
-      return {
-        titulo: TEXTO_POPUP_HABILIDAD_TITULO,
-        descripcion: TEXTO_POPUP_HABILIDAD_DESC,
-        recuerda: TEXTO_POPUP_HABILIDAD_RECUERDA,
-        imagen: imagenHabilidad,
-      };
-  }
-};
-
-// ---------------------------------------------------------------------------
-// Helper function para retornar la información del rol para la sección "Tu rol es"
-const getRoleInfo = (rol) => {
-  switch (rol) {
-    case "aldeano":
-      return {
-        roleName: "ALDEANO",
-        image: require("@/assets/images/aldeano-icon.jpeg"),
-      };
-    case "lobo":
-      return {
-        roleName: "HOMBRE LOBO",
-        image: require("@/assets/images/hombre-lobo-icon.jpeg"),
-      };
-    case "bruja":
-      return {
-        roleName: "BRUJA",
-        image: require("@/assets/images/bruja-icon.jpeg"),
-      };
-    case "cazador":
-      return {
-        roleName: "CAZADOR",
-        image: require("@/assets/images/cazador-icon.jpeg"),
-      };
-    default:
-      return {
-        roleName: "HOMBRE LOBO",
-        image: require("@/assets/images/hombre-lobo-icon.jpeg"),
-      };
-  }
-};
-
-// ============================================================================
-// ============================================================================
-// ============================================================================
-
-const PantallaJugando = () => {
-  // Estados de la UI
+/**
+ * PantallaJugando
+ * Componente principal que gestiona la lógica de juego, animaciones y renderizado de elementos interactivos.
+ *
+ * @component
+ */
+const PantallaJugando: React.FC = () => {
+  // Estados locales para controlar visibilidad e interacciones.
   const [mostrarRol, setMostrarRol] = useState(false);
   const [mostrarInicio, setMostrarInicio] = useState(false);
   const [mostrarBotones, setMostrarBotones] = useState(false);
   const [mostrarChat, setMostrarChat] = useState(false);
-
-  // Usamos la bandera inicial para decidir si mostrar la animación del texto inicial
   const [mostrarTextoInicial, setMostrarTextoInicial] = useState(!TEXTO_YA_MOSTRADO);
-
-  // Estados para popups
+  const [selectedPlayer, setSelectedPlayer] = useState<number | null>(null);
+  const [votes, setVotes] = useState(Array(NUMERICAS.CANTIDAD_IMAGENES).fill(0));
   const [mostrarHabilidad, setMostrarHabilidad] = useState(false);
-  const [cantidadImagenes] = useState(CANTIDAD_IMAGENES);
-  const [imagenes] = useState(new Array(CANTIDAD_IMAGENES).fill(imagenJugadores));
-  const [mensajes] = useState(MENSAJES_CHAT_INITIAL);
-
-  // Temporizador
-  const [tiempoRestante, setTiempoRestante] = useState(TIEMPO_INICIAL);
+  const [cantidadImagenes] = useState(NUMERICAS.CANTIDAD_IMAGENES);
+  const [imagenes] = useState(new Array(NUMERICAS.CANTIDAD_IMAGENES).fill(IMAGENES.JUGADORES));
+  const [mensajes] = useState(TEXTOS.CHAT.MENSAJES_INICIALES);
+  const [tiempoRestante, setTiempoRestante] = useState(NUMERICAS.TIEMPO_INICIAL);
   const [temporizadorActivo, setTemporizadorActivo] = useState(false);
 
-  // Función para reiniciar el temporizador
+  /**
+   * Reinicia el temporizador al valor inicial y lo activa.
+   */
   const reiniciarTemporizador = () => {
-    setTiempoRestante(TIEMPO_INICIAL);
+    setTiempoRestante(NUMERICAS.TIEMPO_INICIAL);
     setTemporizadorActivo(true);
   };
 
-  // useEffect para manejar el temporizador
+  /**
+   * Incrementa el voto para el jugador seleccionado.
+   * Valida la selección y resetea el jugador seleccionado tras votar.
+   */
+  const voteForPlayer = () => {
+    if (selectedPlayer === null) {
+      console.log("No player selected to vote for.");
+      return;
+    }
+    setVotes((prevVotes) => {
+      const newVotes = [...prevVotes];
+      newVotes[selectedPlayer] += 1;
+      return newVotes;
+    });
+    console.log(`Voted for player ${selectedPlayer + 1}`, votes);
+    setSelectedPlayer(null);
+  };
+
+  /**
+   * Efecto que maneja el temporizador decrementándolo cada segundo y alterna el modo noche cuando llega a 0.
+   */
   useEffect(() => {
-    let intervalo;
+    let intervalo: NodeJS.Timeout;
     if (temporizadorActivo && tiempoRestante > 0) {
       intervalo = setInterval(() => {
         setTiempoRestante((prev) => prev - 1);
       }, 1000);
     } else if (temporizadorActivo && tiempoRestante === 0) {
-      // Cuando el temporizador llega a 0, se invierte el valor de MODO_NOCHE_GLOBAL
       MODO_NOCHE_GLOBAL = !MODO_NOCHE_GLOBAL;
-      // Reinicia el temporizador
       reiniciarTemporizador();
     }
     return () => clearInterval(intervalo);
   }, [temporizadorActivo, tiempoRestante]);
 
-  // Animaciones
-  const DURACION_ANIMACION = 1500;
-  const RETRASO_ANIMACION = 3000;
-  const animacionTexto = useRef(new Animated.Value(0)).current;
-  const animacionRol = useRef(new Animated.Value(0)).current;
-  const animacionInicio = useRef(new Animated.Value(0)).current;
+  // Inicializa el gestor de animaciones.
+  const animationManager = useAnimationManager();
+  const animacionTexto = useRef(animationManager.createAnimation(0)).current;
+  const animacionRol = useRef(animationManager.createAnimation(0)).current;
+  const animacionInicio = useRef(animationManager.createAnimation(0)).current;
+  // Nota: animacionFondo se utiliza en dos contextos diferentes.
+  const animacionFondo = useRef(animationManager.createAnimation(1)).current;
 
-  // Animación para efecto de noche/día (se reutiliza para la superposición)
-  const animacionFondo = useRef(new Animated.Value(1)).current;
+  // Constantes para la duración y retraso de animaciones.
+  const DURACION_ANIMACION = NUMERICAS.DURACION_ANIMACION;
+  const RETRASO_ANIMACION = NUMERICAS.RETRASO_ANIMACION;
 
-  // Estado para modo día/noche
+  /**
+   * Cambia el modo noche/día usando animaciones.
+   *
+   * @param mode - true para activar modo noche, false para modo día.
+   */
   const [isNight, setIsNight] = useState(false);
-  const setNightDayMode = (mode) => {
+  const setNightDayMode = (mode: boolean) => {
     setIsNight(mode);
-    Animated.timing(animacionFondo, {
-      toValue: mode ? 1 : 0,
-      duration: 500,
-      useNativeDriver: true,
-    }).start();
+    if (mode) {
+      animacionFondo.fadeIn(500).start();
+    } else {
+      animacionFondo.fadeOut(500).start();
+    }
   };
 
-  // Comprobar cada 100ms si el valor global difiere del local
+  /**
+   * Sincroniza el estado global del modo noche con el estado local.
+   */
   useEffect(() => {
     const interval = setInterval(() => {
       if (MODO_NOCHE_GLOBAL !== isNight) {
@@ -235,53 +136,47 @@ const PantallaJugando = () => {
     return () => clearInterval(interval);
   }, [isNight]);
 
-  // Animaciones para chat y habilidad
-  const posicionChat = useRef(new Animated.Value(alto)).current;
-  const referenciaScrollView = useRef(null);
-
+  // Animación para la posición del chat.
+  const posicionChat = useRef(new Animated.Value(ALTO)).current;
+  /**
+   * Abre el chat animándolo desde la parte inferior.
+   */
   const abrirChat = () => {
     setMostrarChat(true);
-    Animated.timing(posicionChat, {
-      toValue: 0,
-      duration: 300,
-      useNativeDriver: true,
-    }).start();
+    Animated.timing(posicionChat, { toValue: 0, duration: 300, useNativeDriver: true }).start();
   };
-
+  /**
+   * Cierra el chat animándolo hacia la parte inferior.
+   */
   const cerrarChat = () => {
-    Animated.timing(posicionChat, {
-      toValue: alto,
-      duration: 300,
-      useNativeDriver: true,
-    }).start(() => {
+    Animated.timing(posicionChat, { toValue: ALTO, duration: 300, useNativeDriver: true }).start(() => {
       setMostrarChat(false);
     });
   };
 
-  const posicionHabilidad = useRef(new Animated.Value(alto)).current;
-
+  // Animación para la posición del popup de habilidad.
+  const posicionHabilidad = useRef(new Animated.Value(ALTO)).current;
+  /**
+   * Abre el popup de habilidad animándolo desde la parte inferior.
+   */
   const abrirHabilidad = () => {
     setMostrarHabilidad(true);
-    Animated.timing(posicionHabilidad, {
-      toValue: 0,
-      duration: 300,
-      useNativeDriver: true,
-    }).start();
+    Animated.timing(posicionHabilidad, { toValue: 0, duration: 300, useNativeDriver: true }).start();
   };
-
+  /**
+   * Cierra el popup de habilidad animándolo hacia la parte inferior.
+   */
   const cerrarHabilidad = () => {
-    Animated.timing(posicionHabilidad, {
-      toValue: alto,
-      duration: 300,
-      useNativeDriver: true,
-    }).start(() => {
+    Animated.timing(posicionHabilidad, { toValue: ALTO, duration: 300, useNativeDriver: true }).start(() => {
       setMostrarHabilidad(false);
     });
   };
 
-  // Secuencia de animación inicial
+  /**
+   * Secuencia de animaciones para mostrar el texto inicial, rol, inicio de partida y botones.
+   * Encadena múltiples animaciones para la transición de estados en la interfaz.
+   */
   useEffect(() => {
-    // Saltar animación si ya se mostró el texto
     if (TEXTO_YA_MOSTRADO) {
       setMostrarTextoInicial(false);
       setMostrarRol(false);
@@ -289,713 +184,146 @@ const PantallaJugando = () => {
       setMostrarBotones(true);
       return;
     }
-
-    Animated.timing(animacionTexto, {
-      toValue: 1,
-      duration: DURACION_ANIMACION,
-      useNativeDriver: true,
-    }).start(() => {
+    animacionTexto.fadeIn().start(() => {
       setTimeout(() => {
-        Animated.timing(animacionTexto, {
-          toValue: 0,
-          duration: DURACION_ANIMACION,
-          useNativeDriver: true,
-        }).start(() => {
-          // Marcar que el texto ya se mostró
+        animacionTexto.fadeOut().start(() => {
           TEXTO_YA_MOSTRADO = true;
           setMostrarTextoInicial(false);
           setMostrarRol(true);
-          Animated.timing(animacionRol, {
-            toValue: 1,
-            duration: DURACION_ANIMACION,
-            useNativeDriver: true,
-          }).start(() => {
+          animacionRol.fadeIn().start(() => {
             setTimeout(() => {
-              Animated.timing(animacionRol, {
-                toValue: 0,
-                duration: DURACION_ANIMACION,
-                useNativeDriver: true,
-              }).start(() => {
+              animacionRol.fadeOut().start(() => {
                 setMostrarInicio(true);
-                Animated.timing(animacionInicio, {
-                  toValue: 1,
-                  duration: DURACION_ANIMACION,
-                  useNativeDriver: true,
-                }).start(() => {
+                animacionInicio.fadeIn().start(() => {
                   setTimeout(() => {
-                    Animated.timing(animacionInicio, {
-                      toValue: 0,
-                      duration: DURACION_ANIMACION,
-                      useNativeDriver: true,
-                    }).start();
-                    Animated.timing(animacionFondo, {
-                      toValue: 0,
-                      duration: DURACION_ANIMACION,
-                      useNativeDriver: true,
-                    }).start(() => {
-                      setMostrarBotones(true);
+                    animacionInicio.fadeOut().start(() => {
+                      animacionFondo.fadeOut().start(() => {
+                        setMostrarBotones(true);
+                      });
                     });
-                  }, RETRASO_ANIMACION);
+                  }, animationManager.RETRASO_ANIMACION);
                 });
               });
-            }, RETRASO_ANIMACION);
+            }, animationManager.RETRASO_ANIMACION);
           });
         });
-      }, RETRASO_ANIMACION);
+      }, animationManager.RETRASO_ANIMACION);
     });
   }, []);
 
-  // Activar el temporizador cuando se muestran los botones
+  /**
+   * Activa el temporizador una vez que se muestran los botones de acción.
+   */
   useEffect(() => {
     if (mostrarBotones) {
       setTemporizadorActivo(true);
     }
   }, [mostrarBotones]);
 
-  // Cargar fuente personalizada
+  // Carga de fuente personalizada.
   const [fuentesCargadas] = useFonts({
     Corben: require("@/assets/fonts/Corben-Regular.ttf"),
   });
-
   if (!fuentesCargadas) return null;
 
-  // Cálculos para posicionar imágenes en círculo
-  const MULTIPLICADOR_RADIO = 0.45;
-  const MULTIPLICADOR_TAMANIO_IMAGEN = 0.13;
-  const radioMaximoCalculado = Math.min(ancho, alto) * MULTIPLICADOR_RADIO;
-  const tamanioImagen = Math.min(ancho, alto) * MULTIPLICADOR_TAMANIO_IMAGEN;
-  const radioMaximo = radioMaximoCalculado - tamanioImagen / 2;
-
-  // Obtener información de habilidad según el rol del usuario
+  // Obtiene la información de la habilidad y del rol actual.
   const habilidadInfo = getHabilidadInfo(ROL_USUARIO);
-  // Obtener información del rol para la sección "Tu rol es"
   const roleInfo = getRoleInfo(ROL_USUARIO);
 
   return (
+    // Contenedor principal de la pantalla de juego
     <View style={estilos.contenedor}>
-      <ImageBackground
-        source={imagenFondo}
-        style={estilos.fondo}
-        resizeMode="cover"
-      />
-      {/* Overlay para efecto noche/día */}
-      <Animated.View style={[estilos.superposicion, { opacity: animacionFondo }]} />
-
-      {/* Texto inicial */}
+      {/* Imagen de fondo que cubre toda la pantalla */}
+      <ImageBackground source={IMAGENES.FONDO} style={estilos.fondo} resizeMode="cover" />
+      
+      {/* Superposición animada para efectos visuales en el fondo */}
+      <Animated.View style={[estilos.superposicion, { opacity: animacionFondo.value }]} />
+      
+      {/* Condicional: Muestra el texto inicial animado si aún no se ha ocultado */}
       {mostrarTextoInicial && (
-        <Animated.View style={[estilos.contenedorTexto, { opacity: animacionTexto }]}>
-          <Text style={estilos.texto}>{TEXTO_INICIAL}</Text>
+        <Animated.View style={[estilos.contenedorTexto, { opacity: animacionTexto.value }]}>
+          <Text style={estilos.texto}>{TEXTOS.INICIAL}</Text>
         </Animated.View>
       )}
-
-      {/* Sección de rol adaptada */}
+      
+      {/* Condicional: Muestra la información del rol del usuario con animación */}
       {mostrarRol && (
-        <Animated.View style={[estilos.contenedorRol, { opacity: animacionRol }]}>
+        <Animated.View style={[estilos.contenedorRol, { opacity: animacionRol.value }]}>
           <View style={estilos.contenedorTextoRol}>
-            <Text style={estilos.textoRol}>{TEXTO_ROL_TITULO}</Text>
+            <Text style={estilos.textoRol}>{TEXTOS.ROL_TITULO}</Text>
           </View>
           <Image source={roleInfo.image} style={estilos.imagenRol} />
-          {/* El color del texto se determina dinámicamente */}
           <Text style={[estilos.nombreRol, { color: ROL_USUARIO === "lobo" ? "red" : "blue" }]}>
             {roleInfo.roleName}
           </Text>
         </Animated.View>
       )}
-
-      {/* Mensaje de inicio */}
+      
+      {/* Condicional: Muestra el mensaje de inicio de partida animado */}
       {mostrarInicio && (
-        <Animated.View style={[estilos.contenedorTexto, { opacity: animacionInicio }]}>
-          <Text style={estilos.textoInicio}>{TEXTO_INICIO_PARTIDA}</Text>
+        <Animated.View style={[estilos.contenedorTexto, { opacity: animacionInicio.value }]}>
+          <Text style={estilos.textoInicio}>{TEXTOS.INICIO_PARTIDA}</Text>
         </Animated.View>
       )}
-
-      {/* Botones y barra superior */}
+      
+      {/* Condicional: Renderiza los botones de acción, temporizador, barra superior y votación */}
       {mostrarBotones && (
         <>
           <View style={estilos.contenedorBotones}>
             <TouchableOpacity style={estilos.botonHabilidad} onPress={abrirHabilidad}>
-              {/* Botón de habilidad con icono adaptado al rol */}
               <Image source={habilidadInfo.imagen} style={estilos.iconoBoton} />
-              <Text style={estilos.textoBoton}>{TEXTO_BOTON_HABILIDAD}</Text>
+              <Text style={estilos.textoBoton}>{TEXTOS.BOTON_HABILIDAD}</Text>
             </TouchableOpacity>
-
             <TouchableOpacity style={estilos.botonChat} onPress={abrirChat}>
-              <Text style={estilos.textoBoton}>{TEXTO_BOTON_CHAT}</Text>
+              <Text style={estilos.textoBoton}>{TEXTOS.BOTON_CHAT}</Text>
             </TouchableOpacity>
           </View>
-
-          <View style={estilos.contenedorTopBar}>
-            <View style={estilos.seccionTopBarIzquierda}>
-              <View style={estilos.contenedorTopBarItem}>
-                <Image source={imagenPueblo} style={estilos.iconoTopBar} />
-                <View style={estilos.textoTopBarContainer}>
-                  <Text style={estilos.textoTopBarTitulo}>{TEXTO_PUEBLO}</Text>
-                  <Text style={estilos.textoTopBarSub}>{TEXTO_ESTADO_PUEBLO}</Text>
-                </View>
-              </View>
-            </View>
-            <View style={estilos.seccionTopBarCentro}>
-              <Text style={estilos.textoTopBarTitulo}>{TEXTO_JORNADA}</Text>
-              <Text style={estilos.textoTopBarSub}>{TEXTO_DIA}</Text>
-            </View>
-            <View style={estilos.seccionTopBarDerecha}>
-              <View style={estilos.contenedorTopBarItem}>
-                <View style={estilos.textoTopBarContainer}>
-                  <Text style={estilos.textoTopBarTitulo}>{TEXTO_LOBOS}</Text>
-                  <Text style={estilos.textoTopBarSub}>{TEXTO_ESTADO_LOBOS}</Text>
-                </View>
-                <Image source={imagenLobos} style={estilos.iconoTopBar} />
-              </View>
-            </View>
-          </View>
-
+          {/* Barra superior con información adicional del juego */}
+          <TopBar />
+          {/* Temporizador central que muestra el tiempo restante */}
           <View style={estilos.contenedorTemporizador}>
             <View style={estilos.circuloTemporizador}>
               <Text style={estilos.textoTemporizador}>{tiempoRestante}</Text>
             </View>
           </View>
+          {/* Botones de acciones complementarias: pasar turno y votar */}
           <View style={estilos.contenedorBotonesDerecha}>
             <TouchableOpacity style={estilos.botonAccion}>
-              <Text style={estilos.textoBoton}>{TEXTO_BOTON_PASAR_TURNO}</Text>
+              <Text style={estilos.textoBoton}>{TEXTOS.BOTON_PASAR_TURNO}</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={[estilos.botonAccion, estilos.botonVotar]}>
-              <Text style={estilos.textoBoton}>{TEXTO_BOTON_VOTAR}</Text>
+            <TouchableOpacity style={[estilos.botonAccion, estilos.botonVotar]} onPress={voteForPlayer}>
+              <Text style={estilos.textoBoton}>{TEXTOS.BOTON_VOTAR}</Text>
             </TouchableOpacity>
           </View>
-
-          <View
-            style={[
-              estilos.contenedorCirculo,
-              {
-                width: radioMaximoCalculado * 2,
-                height: radioMaximoCalculado * 2,
-                marginLeft: -radioMaximoCalculado,
-                marginTop: -radioMaximoCalculado,
-              },
-            ]}
-          >
-            {imagenes.slice(0, CANTIDAD_IMAGENES).map((img, indice) => {
-              const angulo = (indice * 2 * Math.PI) / CANTIDAD_IMAGENES;
-              const x = radioMaximo * Math.cos(angulo);
-              const y = radioMaximo * Math.sin(angulo);
-              return (
-                <TouchableOpacity
-                  key={indice}
-                  onPress={() => console.log(`Jugador ${indice + 1} presionado`)}
-                  style={[
-                    estilos.contenedorImagenCirculo,
-                    {
-                      width: tamanioImagen,
-                      height: tamanioImagen,
-                      transform: [{ translateX: x }, { translateY: y }],
-                    },
-                  ]}
-                  activeOpacity={0.7}
-                >
-                  <Image source={img} style={estilos.imagenCirculo} />
-                </TouchableOpacity>
-              );
-            })}
-          </View>
+          {/* Componente para la votación de jugadores */}
+          <VotingCircle
+            imagenes={imagenes}
+            votes={votes}
+            selectedPlayer={selectedPlayer}
+            onSelectPlayer={setSelectedPlayer}
+          />
         </>
       )}
-
-      {/* Chat */}
+      
+      {/* Condicional: Muestra el componente de chat si está activado */}
       {mostrarChat && (
-        <Animated.View
-          style={[
-            estilos.contenedorChat,
-            { transform: [{ translateY: posicionChat }] },
-          ]}
-        >
-          <TouchableOpacity
-            style={estilos.botonCerrarChat}
-            onPress={cerrarChat}
-            activeOpacity={0.5}
-            hitSlop={{
-              top: alto * 0.02,
-              bottom: alto * 0.02,
-              left: ancho * 0.04,
-              right: ancho * 0.04,
-            }}
-          >
-            <Text style={estilos.textoCerrarChat}>{TEXTO_CERRAR_CHAT}</Text>
-          </TouchableOpacity>
-          <Text style={estilos.tituloChat}>{TEXTO_TITULO_CHAT}</Text>
-          <View style={estilos.separadorChat} />
-          <ScrollView
-            contentContainerStyle={estilos.contenedorMensajesChat}
-            ref={referenciaScrollView}
-            onContentSizeChange={() =>
-              referenciaScrollView.current &&
-              referenciaScrollView.current.scrollToEnd({ animated: true })
-            }
-          >
-            {mensajes.map((mensaje) => (
-              <Text key={mensaje.id} style={estilos.mensajeChat}>
-                {mensaje.texto}
-              </Text>
-            ))}
-          </ScrollView>
-          <View style={estilos.contenedorEntradaChat}>
-            <TextInput
-              style={estilos.entradaChat}
-              placeholder={TEXTO_CHAT_PLACEHOLDER}
-              placeholderTextColor="#CCC"
-            />
-            <TouchableOpacity style={estilos.botonEnviarChat}>
-              <Text style={estilos.textoBotonEnviarChat}>{TEXTO_BOTON_ENVIAR_CHAT}</Text>
-            </TouchableOpacity>
-          </View>
-        </Animated.View>
+        <ChatComponent
+          mensajes={TEXTOS.CHAT.MENSAJES_INICIALES}
+          posicionChat={posicionChat}
+          onClose={cerrarChat}
+        />
       )}
-
-      {/* Popup de Habilidad */}
+      
+      {/* Condicional: Muestra el popup de habilidad del jugador si está activado */}
       {mostrarHabilidad && (
-        <Animated.View
-          style={[
-            estilos.contenedorHabilidad,
-            { transform: [{ translateY: posicionHabilidad }] },
-          ]}
-        >
-          <TouchableOpacity
-            style={estilos.botonCerrarHabilidad}
-            onPress={cerrarHabilidad}
-            activeOpacity={0.5}
-            hitSlop={{
-              top: alto * 0.02,
-              bottom: alto * 0.02,
-              left: ancho * 0.04,
-              right: ancho * 0.04,
-            }}
-          >
-            <Text style={estilos.textoCerrarHabilidad}>{TEXTO_CERRAR_POPUP}</Text>
-          </TouchableOpacity>
-          <View style={estilos.contenedorTituloHabilidad}>
-            <Image source={habilidadInfo.imagen} style={estilos.iconoHabilidadPopup} />
-            <Text style={estilos.tituloHabilidad}>{habilidadInfo.titulo}</Text>
-          </View>
-          <View style={estilos.separadorHabilidad} />
-          <ScrollView contentContainerStyle={estilos.contenedorInfoHabilidad}>
-            <Text style={estilos.textoHabilidad}>
-              {habilidadInfo.descripcion}
-            </Text>
-            {habilidadInfo.recuerda !== "" && (
-              <Text style={estilos.textoRecuerda}>
-                {habilidadInfo.recuerda}
-              </Text>
-            )}
-          </ScrollView>
-        </Animated.View>
+        <HabilidadPopup
+          habilidadInfo={habilidadInfo}
+          posicionHabilidad={posicionHabilidad}
+          onClose={cerrarHabilidad}
+        />
       )}
     </View>
   );
 };
-
-const estilos = StyleSheet.create({
-  contenedor: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    paddingTop: alto * 0.07,
-  },
-  fondo: {
-    width: "100%",
-    height: "100%",
-  },
-  superposicion: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: "rgba(0, 0, 0, 0.7)",
-  },
-  contenedorTexto: {
-    position: "absolute",
-    width: "80%",
-    top: "21%",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  texto: {
-    color: "white",
-    fontSize: ancho * 0.09,
-    fontFamily: "Corben",
-    textAlign: "center",
-    paddingHorizontal: ancho * 0.05,
-  },
-  contenedorRol: {
-    position: "absolute",
-    justifyContent: "center",
-    alignItems: "center",
-    width: "100%",
-    top: "35%",
-    flexDirection: "column",
-  },
-  contenedorTextoRol: {
-    width: "100%",
-    alignItems: "center",
-    justifyContent: "center",
-    minHeight: alto * 0.1,
-    paddingHorizontal: ancho * 0.05,
-  },
-  textoRol: {
-    fontSize: ancho * 0.1,
-    color: "white",
-    fontFamily: "Corben",
-    textAlign: "center",
-    lineHeight: ancho * 0.12,
-    paddingVertical: alto * 0.005,
-    includeFontPadding: true,
-  },
-  imagenRol: {
-    width: ancho * 0.35,
-    height: ancho * 0.35,
-    marginBottom: alto * 0.05,
-  },
-  nombreRol: {
-    textAlign: "center",
-    fontSize: ancho * 0.12,
-    // The color is set dynamically in the component
-    fontFamily: "Corben",
-    fontWeight: "bold",
-  },
-  textoInicio: {
-    color: "white",
-    fontSize: ancho * 0.1,
-    fontFamily: "Corben",
-    textAlign: "center",
-    top: "127%",
-    paddingHorizontal: ancho * 0.05,
-  },
-  contenedorBotones: {
-    position: "absolute",
-    bottom: 0,
-    width: "100%",
-    flexDirection: "row",
-    alignItems: "flex-end",
-    justifyContent: "center",
-    paddingHorizontal: ancho * 0.10,
-  },
-  botonHabilidad: {
-    flex: 1,
-    backgroundColor: "black",
-    height: alto * 0.13,
-    justifyContent: "center",
-    alignItems: "center",
-    borderTopLeftRadius: BORDE_RADIO_BOTON,
-    borderTopRightRadius: BORDE_RADIO_BOTON,
-    maxWidth: "45%",
-    marginRight: ancho * 0.12,
-  },
-  botonChat: {
-    flex: 1,
-    backgroundColor: "black",
-    height: alto * 0.07,
-    justifyContent: "center",
-    alignItems: "center",
-    borderTopLeftRadius: BORDE_RADIO_BOTON,
-    borderTopRightRadius: BORDE_RADIO_BOTON,
-    maxWidth: "45%",
-    marginLeft: ancho * 0.02,
-  },
-  iconoBoton: {
-    width: TAMANIO_ICONO_BOTON,
-    height: TAMANIO_ICONO_BOTON,
-    marginBottom: ancho * 0.02,
-  },
-  textoBoton: {
-    color: "white",
-    fontSize: ancho * 0.05,
-    fontWeight: "bold",
-    textAlign: "center",
-  },
-  contenedorTopBar: {
-    position: "absolute",
-    top: alto * 0.06,
-    width: "100%",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    backgroundColor: "black",
-    paddingVertical: alto * 0.03,
-    paddingHorizontal: ancho * 0.04,
-  },
-  seccionTopBarIzquierda: {
-    flex: 1,
-    alignItems: "flex-start",
-  },
-  seccionTopBarCentro: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  seccionTopBarDerecha: {
-    flex: 1,
-    alignItems: "flex-end",
-  },
-  contenedorTopBarItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: ancho * 0.02,
-  },
-  iconoTopBar: {
-    width: ancho * 0.1,
-    height: ancho * 0.1,
-    borderRadius: ancho * 0.02,
-  },
-  textoTopBarContainer: {
-    flexDirection: "column",
-  },
-  textoTopBarTitulo: {
-    color: "white",
-    fontSize: ancho * 0.04,
-    fontWeight: "bold",
-  },
-  textoTopBarSub: {
-    color: "white",
-    fontSize: ancho * 0.03,
-    fontWeight: "bold",
-    opacity: 0.9,
-  },
-  contenedorCirculo: {
-    position: "absolute",
-    top: "56%",
-    left: "50%",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  contenedorImagenCirculo: {
-    position: "absolute",
-    borderRadius: 50,
-    borderWidth: ancho * 0.005,
-    borderColor: "white",
-    overflow: "hidden",
-  },
-  imagenCirculo: {
-    width: "100%",
-    height: "100%",
-  },
-  contenedorTemporizador: {
-    position: "absolute",
-    top: alto * 0.2,
-    left: ancho * 0.05,
-    zIndex: 2,
-  },
-  circuloTemporizador: {
-    width: TAMANIO_TEMPORIZADOR,
-    height: TAMANIO_TEMPORIZADOR,
-    borderRadius: TAMANIO_TEMPORIZADOR / 2,
-    backgroundColor: "#000000",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  textoTemporizador: {
-    color: "white",
-    fontSize: ancho * 0.05,
-    fontWeight: "bold",
-  },
-  contenedorBotonesDerecha: {
-    position: "absolute",
-    top: alto * 0.2,
-    right: ancho * 0.05,
-    zIndex: 2,
-    gap: ancho * 0.02,
-  },
-  botonAccion: {
-    backgroundColor: "#000000",
-    paddingVertical: alto * 0.02,
-    paddingHorizontal: ancho * 0.06,
-    borderRadius: ancho * 0.07,
-    alignItems: "center",
-    minWidth: ancho * 0.33,
-  },
-  botonVotar: {
-    backgroundColor: "#000000",
-  },
-  contenedorChat: {
-    position: "absolute",
-    zIndex: 9999,
-    left: ancho * 0.05,
-    right: ancho * 0.05,
-    bottom: 0,
-    height: alto * 0.85,
-    backgroundColor: "black",
-    borderTopLeftRadius: ancho * 0.05,
-    borderTopRightRadius: ancho * 0.05,
-    padding: ancho * 0.04,
-    borderWidth: ancho * 0.002,
-    elevation: 50,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: alto * 0.003 },
-    shadowOpacity: 0.5,
-    shadowRadius: ancho * 0.02,
-  },
-  botonCerrarChat: {
-    position: "absolute",
-    top: alto * 0.02,
-    right: ancho * 0.04,
-    zIndex: 99999,
-    padding: ancho * 0.02,
-    backgroundColor: "black",
-    borderRadius: ancho * 0.015,
-    minWidth: ancho * 0.08,
-    minHeight: ancho * 0.08,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  textoCerrarChat: {
-    color: "white",
-    fontSize: ancho * 0.07,
-    fontWeight: "bold",
-    fontFamily: "Corben",
-    includeFontPadding: true,
-    textAlignVertical: "center",
-    marginBottom: -alto * 0.005,
-  },
-  tituloChat: {
-    color: "white",
-    fontSize: ancho * 0.07,
-    fontWeight: "bold",
-    textAlign: "center",
-    marginTop: alto * 0.02,
-    fontFamily: "Corben",
-  },
-  separadorChat: {
-    height: 1,
-    backgroundColor: "white",
-    marginVertical: alto * 0.02,
-  },
-  contenedorMensajesChat: {
-    flexGrow: 1,
-    justifyContent: "flex-end",
-    paddingBottom: alto * 0.02,
-  },
-  mensajeChat: {
-    color: "white",
-    fontSize: ancho * 0.04,
-    marginBottom: alto * 0.015,
-    fontFamily: "Corben",
-    lineHeight: ancho * 0.05,
-    includeFontPadding: true,
-  },
-  contenedorEntradaChat: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: alto * 0.02,
-  },
-  entradaChat: {
-    flex: 1,
-    height: alto * 0.07,
-    borderWidth: ancho * 0.002,
-    borderColor: "white",
-    backgroundColor: "black",
-    borderRadius: ancho * 0.02,
-    paddingHorizontal: ancho * 0.03,
-    color: "white",
-    fontSize: ancho * 0.04,
-    fontFamily: "Corben",
-  },
-  botonEnviarChat: {
-    backgroundColor: "green",
-    height: alto * 0.07,
-    justifyContent: "center",
-    paddingHorizontal: ancho * 0.04,
-    borderRadius: ancho * 0.02,
-    borderWidth: ancho * 0.002,
-    marginLeft: ancho * 0.02,
-  },
-  textoBotonEnviarChat: {
-    color: "white",
-    fontWeight: "bold",
-    fontSize: ancho * 0.04,
-    fontFamily: "Corben",
-  },
-  contenedorHabilidad: {
-    position: "absolute",
-    zIndex: 9999,
-    left: ancho * 0.05,
-    right: ancho * 0.05,
-    bottom: 0,
-    height: alto * 0.6,
-    backgroundColor: "black",
-    borderTopLeftRadius: ancho * 0.05,
-    borderTopRightRadius: ancho * 0.05,
-    padding: ancho * 0.04,
-    borderWidth: ancho * 0.002,
-    elevation: 50,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: alto * 0.003 },
-    shadowOpacity: 0.5,
-    shadowRadius: ancho * 0.02,
-  },
-  botonCerrarHabilidad: {
-    position: "absolute",
-    top: alto * 0.02,
-    right: ancho * 0.04,
-    zIndex: 99999,
-    padding: ancho * 0.02,
-    backgroundColor: "black",
-    borderRadius: ancho * 0.015,
-    minWidth: ancho * 0.08,
-    minHeight: ancho * 0.08,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  textoCerrarHabilidad: {
-    color: "white",
-    fontSize: ancho * 0.07,
-    fontWeight: "bold",
-    fontFamily: "Corben",
-    includeFontPadding: true,
-    textAlignVertical: "center",
-    marginBottom: -alto * 0.005,
-  },
-  contenedorTituloHabilidad: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: alto * 0.02,
-  },
-  iconoHabilidadPopup: {
-    width: ancho * 0.12,
-    height: ancho * 0.12,
-    marginRight: ancho * 0.02,
-  },
-  tituloHabilidad: {
-    color: "white",
-    fontSize: ancho * 0.07,
-    fontWeight: "bold",
-    textAlign: "center",
-    fontFamily: "Corben",
-  },
-  separadorHabilidad: {
-    height: 1,
-    backgroundColor: "white",
-    marginVertical: alto * 0.02,
-  },
-  contenedorInfoHabilidad: {
-    flexGrow: 1,
-    justifyContent: "flex-start",
-    paddingBottom: alto * 0.02,
-  },
-  textoHabilidad: {
-    color: "white",
-    fontSize: ancho * 0.05,
-    marginBottom: alto * 0.015,
-    fontFamily: "Corben",
-    lineHeight: ancho * 0.06,
-    includeFontPadding: true,
-  },
-  textoRecuerda: {
-    color: "white",
-    fontSize: ancho * 0.045,
-    marginTop: alto * 0.02,
-    fontFamily: "Corben",
-    lineHeight: ancho * 0.055,
-    includeFontPadding: true,
-  },
-});
 
 export default PantallaJugando;
