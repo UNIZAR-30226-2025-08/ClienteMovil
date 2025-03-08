@@ -8,11 +8,14 @@ import ChatComponent from "./components/ChatComponent";
 import HabilidadPopup from "./components/HabilidadPopup";
 import TopBar from "./components/TopBar";
 import VotingCircle from "./components/VotingCircle";
+import { useAnimationManager } from "./animations";
+
 export let MODO_NOCHE_GLOBAL = false;
 export let ROL_USUARIO: Rol = "aldeano";
 let TEXTO_YA_MOSTRADO = false;
 const { TEXTOS, NUMERICAS, IMAGENES, DIMENSIONES, COLORES } = CONSTANTES;
 const { ANCHO, ALTO } = DIMENSIONES;
+
 const PantallaJugando: React.FC = () => {
   const [mostrarRol, setMostrarRol] = useState(false);
   const [mostrarInicio, setMostrarInicio] = useState(false);
@@ -27,10 +30,12 @@ const PantallaJugando: React.FC = () => {
   const [mensajes] = useState(TEXTOS.CHAT.MENSAJES_INICIALES);
   const [tiempoRestante, setTiempoRestante] = useState(NUMERICAS.TIEMPO_INICIAL);
   const [temporizadorActivo, setTemporizadorActivo] = useState(false);
+
   const reiniciarTemporizador = () => {
     setTiempoRestante(NUMERICAS.TIEMPO_INICIAL);
     setTemporizadorActivo(true);
   };
+
   const voteForPlayer = () => {
     if (selectedPlayer === null) {
       console.log("No player selected to vote for.");
@@ -44,6 +49,7 @@ const PantallaJugando: React.FC = () => {
     console.log(`Voted for player ${selectedPlayer + 1}`, votes);
     setSelectedPlayer(null);
   };
+
   useEffect(() => {
     let intervalo: NodeJS.Timeout;
     if (temporizadorActivo && tiempoRestante > 0) {
@@ -56,17 +62,29 @@ const PantallaJugando: React.FC = () => {
     }
     return () => clearInterval(intervalo);
   }, [temporizadorActivo, tiempoRestante]);
+
+  // Use our animation manager hook to create animations
+  const animationManager = useAnimationManager();
+  const animacionTexto = useRef(animationManager.createAnimation(0)).current;
+  const animacionRol = useRef(animationManager.createAnimation(0)).current;
+  const animacionInicio = useRef(animationManager.createAnimation(0)).current;
+  // Note: animacionFondo is used in two different contexts here.
+  const animacionFondo = useRef(animationManager.createAnimation(1)).current;
+
   const DURACION_ANIMACION = NUMERICAS.DURACION_ANIMACION;
   const RETRASO_ANIMACION = NUMERICAS.RETRASO_ANIMACION;
-  const animacionTexto = useRef(new Animated.Value(0)).current;
-  const animacionRol = useRef(new Animated.Value(0)).current;
-  const animacionInicio = useRef(new Animated.Value(0)).current;
-  const animacionFondo = useRef(new Animated.Value(1)).current;
+
+  // Update night/day mode using our animation functions
   const [isNight, setIsNight] = useState(false);
   const setNightDayMode = (mode: boolean) => {
     setIsNight(mode);
-    Animated.timing(animacionFondo, { toValue: mode ? 1 : 0, duration: 500, useNativeDriver: true }).start();
+    if (mode) {
+      animacionFondo.fadeIn(500).start();
+    } else {
+      animacionFondo.fadeOut(500).start();
+    }
   };
+
   useEffect(() => {
     const interval = setInterval(() => {
       if (MODO_NOCHE_GLOBAL !== isNight) {
@@ -75,6 +93,7 @@ const PantallaJugando: React.FC = () => {
     }, 100);
     return () => clearInterval(interval);
   }, [isNight]);
+
   const posicionChat = useRef(new Animated.Value(ALTO)).current;
   const abrirChat = () => {
     setMostrarChat(true);
@@ -85,6 +104,7 @@ const PantallaJugando: React.FC = () => {
       setMostrarChat(false);
     });
   };
+
   const posicionHabilidad = useRef(new Animated.Value(ALTO)).current;
   const abrirHabilidad = () => {
     setMostrarHabilidad(true);
@@ -95,6 +115,8 @@ const PantallaJugando: React.FC = () => {
       setMostrarHabilidad(false);
     });
   };
+
+  // Replace the sequence of Animated.timing calls with our animation manager functions
   useEffect(() => {
     if (TEXTO_YA_MOSTRADO) {
       setMostrarTextoInicial(false);
@@ -103,53 +125,59 @@ const PantallaJugando: React.FC = () => {
       setMostrarBotones(true);
       return;
     }
-    Animated.timing(animacionTexto, { toValue: 1, duration: DURACION_ANIMACION, useNativeDriver: true }).start(() => {
+    animacionTexto.fadeIn().start(() => {
       setTimeout(() => {
-        Animated.timing(animacionTexto, { toValue: 0, duration: DURACION_ANIMACION, useNativeDriver: true }).start(() => {
+        animacionTexto.fadeOut().start(() => {
           TEXTO_YA_MOSTRADO = true;
           setMostrarTextoInicial(false);
           setMostrarRol(true);
-          Animated.timing(animacionRol, { toValue: 1, duration: DURACION_ANIMACION, useNativeDriver: true }).start(() => {
+          animacionRol.fadeIn().start(() => {
             setTimeout(() => {
-              Animated.timing(animacionRol, { toValue: 0, duration: DURACION_ANIMACION, useNativeDriver: true }).start(() => {
+              animacionRol.fadeOut().start(() => {
                 setMostrarInicio(true);
-                Animated.timing(animacionInicio, { toValue: 1, duration: DURACION_ANIMACION, useNativeDriver: true }).start(() => {
+                animacionInicio.fadeIn().start(() => {
                   setTimeout(() => {
-                    Animated.timing(animacionInicio, { toValue: 0, duration: DURACION_ANIMACION, useNativeDriver: true }).start();
-                    Animated.timing(animacionFondo, { toValue: 0, duration: DURACION_ANIMACION, useNativeDriver: true }).start(() => {
-                      setMostrarBotones(true);
+                    animacionInicio.fadeOut().start(() => {
+                      animacionFondo.fadeOut().start(() => {
+                        setMostrarBotones(true);
+                      });
                     });
-                  }, RETRASO_ANIMACION);
+                  }, animationManager.RETRASO_ANIMACION);
                 });
               });
-            }, RETRASO_ANIMACION);
+            }, animationManager.RETRASO_ANIMACION);
           });
         });
-      }, RETRASO_ANIMACION);
+      }, animationManager.RETRASO_ANIMACION);
     });
   }, []);
+
   useEffect(() => {
     if (mostrarBotones) {
       setTemporizadorActivo(true);
     }
   }, [mostrarBotones]);
+
   const [fuentesCargadas] = useFonts({
-    Corben: require("@/assets/fonts/Corben-Regular.ttf")
+    Corben: require("@/assets/fonts/Corben-Regular.ttf"),
   });
   if (!fuentesCargadas) return null;
+
   const habilidadInfo = getHabilidadInfo(ROL_USUARIO);
   const roleInfo = getRoleInfo(ROL_USUARIO);
+
   return (
     <View style={estilos.contenedor}>
       <ImageBackground source={IMAGENES.FONDO} style={estilos.fondo} resizeMode="cover" />
-      <Animated.View style={[estilos.superposicion, { opacity: animacionFondo }]} />
+      {/* Use the animated value from our manager */}
+      <Animated.View style={[estilos.superposicion, { opacity: animacionFondo.value }]} />
       {mostrarTextoInicial && (
-        <Animated.View style={[estilos.contenedorTexto, { opacity: animacionTexto }]}>
+        <Animated.View style={[estilos.contenedorTexto, { opacity: animacionTexto.value }]}>
           <Text style={estilos.texto}>{TEXTOS.INICIAL}</Text>
         </Animated.View>
       )}
       {mostrarRol && (
-        <Animated.View style={[estilos.contenedorRol, { opacity: animacionRol }]}>
+        <Animated.View style={[estilos.contenedorRol, { opacity: animacionRol.value }]}>
           <View style={estilos.contenedorTextoRol}>
             <Text style={estilos.textoRol}>{TEXTOS.ROL_TITULO}</Text>
           </View>
@@ -158,7 +186,7 @@ const PantallaJugando: React.FC = () => {
         </Animated.View>
       )}
       {mostrarInicio && (
-        <Animated.View style={[estilos.contenedorTexto, { opacity: animacionInicio }]}>
+        <Animated.View style={[estilos.contenedorTexto, { opacity: animacionInicio.value }]}>
           <Text style={estilos.textoInicio}>{TEXTOS.INICIO_PARTIDA}</Text>
         </Animated.View>
       )}
@@ -187,12 +215,30 @@ const PantallaJugando: React.FC = () => {
               <Text style={estilos.textoBoton}>{TEXTOS.BOTON_VOTAR}</Text>
             </TouchableOpacity>
           </View>
-          <VotingCircle imagenes={imagenes} votes={votes} selectedPlayer={selectedPlayer} onSelectPlayer={setSelectedPlayer} />
+          <VotingCircle
+            imagenes={imagenes}
+            votes={votes}
+            selectedPlayer={selectedPlayer}
+            onSelectPlayer={setSelectedPlayer}
+          />
         </>
       )}
-      {mostrarChat && <ChatComponent mensajes={TEXTOS.CHAT.MENSAJES_INICIALES} posicionChat={posicionChat} onClose={cerrarChat} />}
-      {mostrarHabilidad && <HabilidadPopup habilidadInfo={habilidadInfo} posicionHabilidad={posicionHabilidad} onClose={cerrarHabilidad} />}
+      {mostrarChat && (
+        <ChatComponent
+          mensajes={TEXTOS.CHAT.MENSAJES_INICIALES}
+          posicionChat={posicionChat}
+          onClose={cerrarChat}
+        />
+      )}
+      {mostrarHabilidad && (
+        <HabilidadPopup
+          habilidadInfo={habilidadInfo}
+          posicionHabilidad={posicionHabilidad}
+          onClose={cerrarHabilidad}
+        />
+      )}
     </View>
   );
 };
+
 export default PantallaJugando;
