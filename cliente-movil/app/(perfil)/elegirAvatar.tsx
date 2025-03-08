@@ -14,6 +14,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from "axios";
 
 const imagenFondo = require('@/assets/images/fondo-roles.jpg');
+const imagenAtras = require("@/assets/images/botonAtras.png");
 
 const avatarMap: Record<string, any> = {
   avatar1: require("@/assets/images/imagenPerfil.webp"),
@@ -70,7 +71,11 @@ export default function ElegirAvatarScreen() {
       Alert.alert("Error", "No se pudo actualizar el avatar.");
     }
   };
-  
+
+
+  const irAtras = () => {
+    router.back();
+  };
   
   return (
     <View style={styles.container}>
@@ -84,6 +89,11 @@ export default function ElegirAvatarScreen() {
             </TouchableOpacity>
           ))}
         </View>
+        <TouchableOpacity 
+          style={styles.containerAtras} 
+          onPress={irAtras}>
+          <Image source={imagenAtras} style={styles.imageAtras} />
+        </TouchableOpacity>
       </ImageBackground>
     </View>
   );
@@ -126,5 +136,16 @@ const styles = StyleSheet.create({
   overlay: {
     ...StyleSheet.absoluteFillObject,  // Cubre toda el área de la imagen
     backgroundColor: 'rgba(0, 0, 0, 0.4)', // Fondo negro semitransparente, puedes ajustar la opacidad
-},
+  },
+
+  containerAtras: {
+    position: "absolute",
+    bottom: 20,
+    left: "46%",
+  },
+
+  imageAtras: {
+    height: 40,
+    width: 40,
+  },
 });
