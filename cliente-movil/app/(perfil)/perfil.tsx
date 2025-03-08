@@ -16,6 +16,18 @@ import { useFonts } from "expo-font";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 
+// Mapa de claves de avatar => require(local)
+const avatarMap: Record<string, any> = {
+  avatar1: require("@/assets/images/imagenPerfil.webp"),
+  avatar2: require("@/assets/images/imagenPerfil2.webp"),
+  avatar3: require("@/assets/images/imagenPerfil3.webp"),
+  avatar4: require("@/assets/images/imagenPerfil4.webp"),
+  avatar5: require("@/assets/images/imagenPerfil5.webp"),
+  avatar6: require("@/assets/images/imagenPerfil6.webp"),
+  avatar7: require("@/assets/images/imagenPerfil7.webp"),
+  avatar8: require("@/assets/images/imagenPerfil8.webp"),
+};
+
 const imagenFondoRoles = require("@/assets/images/fondo-roles.jpg");
 const imagenPapiro = require("@/assets/images/papiro.png");
 const imagenAtras = require("@/assets/images/botonAtras.png");
@@ -26,8 +38,9 @@ export default function PerfilScreen() {
   const router = useRouter();
   const [nombre, setNombre] = useState("");
   const [rolFavorito, setRolFavorito] = useState("");
-  const [fechaCreacion, setFechaCreacion] = useState("");
-  const [avatar, setAvatar] = useState<string | null>(null);
+  const [fechaCreacion, setFechaCreacion] = useState<string | null>(null)
+  const [avatar, setAvatar] = useState<any>(null); 
+  const [loading, setLoading] = useState(true); // Estado de carga
 
 
   const BACKEND_URL = Constants.expoConfig?.extra?.backendUrl;
@@ -35,23 +48,70 @@ export default function PerfilScreen() {
   useEffect(() => {
     const cargarDatosUsuario = async () => {
       try {
-        const nombre = await AsyncStorage.getItem("nombreUsuario");
-        const avatar = await AsyncStorage.getItem("avatarUsuario");
-        const rolFavorito = await AsyncStorage.getItem("rolFavorito");
-        const fechaCreacion = await AsyncStorage.getItem("fechaCreacion");
+        const correo = await AsyncStorage.getItem("correoUsuario");
 
-        setNombre(nombre || "Usuario");
-        setAvatar(avatar || null);
-        setRolFavorito(rolFavorito || "aldeano");
-        setFechaCreacion(fechaCreacion || "Fecha desconocida");
+        if (!correo) return;
+  
+        const response = await axios.post(`${BACKEND_URL}/api/usuario/obtener`, { correo });
+  
+        if (response.status === 200) {
+          const data = response.data.usuario;
+          setNombre(data.nombre);
+          setAvatar(data.avatar || ""); // Si no hay avatar, usa string vacío
+
+          // Guardar la fecha en AsyncStorage si aún no está guardada
+          if (data.fechaCreacion) {
+            await AsyncStorage.setItem("fechaCreacion", data.fechaCreacion);
+            setFechaCreacion(data.fechaCreacion);
+          }
+
+          // Mapeamos la clave de avatar a un recurso local
+          if (data.avatar) {
+            const imagenLocal = avatarMap[data.avatar];
+            setAvatar(imagenLocal || null);
+          } else {
+            setAvatar(null);
+          }
+        }
       } catch (error) {
         console.error("Error al obtener usuario:", error);
+      } finally {
+        setLoading(false);
       }
     };
-
+  
     cargarDatosUsuario();
   }, []);
+  
+     // Función para guardar los datos actualizados del usuario
+  const guardarDatosUsuario = async () => {
+    try {
+      const idUsuario = await AsyncStorage.getItem("idUsuario");
 
+      if (!idUsuario) {
+        Alert.alert("Error", "No se pudo obtener el ID del usuario.");
+        return;
+      }
+
+      const response = await axios.put(`${BACKEND_URL}/api/usuario/actualizar`, {
+        idUsuario: parseInt(idUsuario),
+        nombre: nombre,
+        rolFavorito: rolFavorito, 
+      });
+
+      if (response.status === 200) {
+        await AsyncStorage.setItem("nombreUsuario", nombre);
+        await AsyncStorage.setItem("rolFavorito", rolFavorito);
+        Alert.alert("Éxito", "Datos actualizados correctamente.");
+      } else {
+        throw new Error("Error al actualizar los datos.");
+      }
+    } catch (error) {
+      console.error("Error en la solicitud de actualización:", error);
+      Alert.alert("Error", "No se pudieron actualizar los datos.");
+    }
+  };
+  
   const [loaded] = useFonts({
     GhostShadow: require("@/assets/fonts/ghost-shadow.ttf"),
   });
@@ -72,7 +132,9 @@ export default function PerfilScreen() {
         style={styles.image}
       >
         <View style={styles.overlay} />
-        <Image source={avatar ? { uri: avatar } : imagenPerfil} style={styles.profileImage} />
+
+        <Image source={avatar} style={styles.profileImage} />
+
         <TouchableOpacity
           style={styles.botonEditar}
           onPress={() => router.push("/(perfil)/elegirAvatar")}
@@ -91,8 +153,9 @@ export default function PerfilScreen() {
             onChangeText={setNombre}
           />
 
-          <Text style={styles.textoFecha}>Fecha de creación</Text>
-          <Text style={styles.fechaCreacion}>{fechaCreacion}</Text>
+          <Text style={styles.fechaCreacion}>
+            {fechaCreacion ? new Date(fechaCreacion).toLocaleDateString("es-ES") : "Cargando..."}
+          </Text>
 
           <Text style={styles.textoRol}>Rol favorito</Text>
           <View style={styles.pickerContainer}>
@@ -129,14 +192,16 @@ export default function PerfilScreen() {
           </TouchableOpacity>
         </View>
 
-        <TouchableOpacity
-          style={styles.botonGuardar}
-          onPress={() => router.push("/elegirOpciones")}
-        >
-          <Text style={styles.textoGuardar}>GUARDAR</Text>
-        </TouchableOpacity>
+          {/* Reutilizando el mismo botón "GUARDAR" */}
+          <TouchableOpacity 
+            style={styles.botonGuardar} 
+            onPress={guardarDatosUsuario}>
+            <Text style={styles.textoGuardar}>GUARDAR</Text>
+          </TouchableOpacity>
 
-        <TouchableOpacity style={styles.containerAtras} onPress={irAtras}>
+        <TouchableOpacity 
+          style={styles.containerAtras} 
+          onPress={irAtras}>
           <Image source={imagenAtras} style={styles.imageAtras} />
         </TouchableOpacity>
       </ImageBackground>

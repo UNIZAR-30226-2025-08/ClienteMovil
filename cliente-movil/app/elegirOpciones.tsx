@@ -17,6 +17,18 @@ import { useFocusEffect } from "@react-navigation/native";
 import { useCallback } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
+const avatarMap: Record<string, any> = {
+  avatar1: require("@/assets/images/imagenPerfil.webp"),
+  avatar2: require("@/assets/images/imagenPerfil2.webp"),
+  avatar3: require("@/assets/images/imagenPerfil3.webp"),
+  avatar4: require("@/assets/images/imagenPerfil4.webp"),
+  avatar5: require("@/assets/images/imagenPerfil5.webp"),
+  avatar6: require("@/assets/images/imagenPerfil6.webp"),
+  avatar7: require("@/assets/images/imagenPerfil7.webp"),
+  avatar8: require("@/assets/images/imagenPerfil8.webp"),
+};
+
+
 const imagenPortada = require("@/assets/images/imagen-portada.png");
 const imagenPorDefecto = require("@/assets/images/imagenPerfil.webp");
 const imagenNotificaciones = require("@/assets/images/noti_icon.png");
@@ -39,7 +51,10 @@ export default function opcionesScreen() {
       const cargarUsuario = async () => {
         try {
           const nombre = await AsyncStorage.getItem("nombreUsuario");
-          const avatar = await AsyncStorage.getItem("avatarUsuario");
+          const avatarClave = await AsyncStorage.getItem("avatarUsuario");
+
+          // Convertimos la clave en la imagen correspondiente en el mapa
+          const avatar = avatarClave ? avatarMap[avatarClave] : undefined;
 
           setUsuario({
             nombre: nombre ?? "Usuario",
@@ -93,12 +108,12 @@ export default function opcionesScreen() {
               onPress={() => router.push("/perfil")}
               style={styles.contenedorPerfil}
             >
-              <Image
-                source={
-                  usuario?.avatar ? { uri: usuario.avatar } : imagenPorDefecto
-                }
-                style={styles.profileImage}
-              />
+              
+            <Image
+              source={usuario?.avatar ? usuario.avatar : imagenPorDefecto}
+              style={styles.profileImage}
+            />
+
             </TouchableOpacity>
 
             <Text style={styles.nombrePlayer}>

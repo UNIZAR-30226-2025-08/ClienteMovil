@@ -83,14 +83,20 @@ export default function App() {
       if (response.status === 200) {
         const data = response.data;
 
-      // Guardamos el correo en AsyncStorage para su uso posterior
-      await AsyncStorage.setItem('nombreUsuario', data.usuario.nombre);
-      if (data.usuario.avatar) {
-        await AsyncStorage.setItem('avatarUsuario', data.usuario.avatar);
-      }
+        // Guardamos el correo en AsyncStorage para su uso posterior
+        await AsyncStorage.setItem('nombreUsuario', data.usuario.nombre);
+        if (data.usuario.avatar) {
+          await AsyncStorage.setItem('avatarUsuario', data.usuario.avatar);
+        }
 
-      await AsyncStorage.setItem("rolFavorito", data.usuario.rolFavorito || "aldeano");
-      await AsyncStorage.setItem("fechaCreacion", data.usuario.fechaCreacion || "Fecha desconocida");
+        if (data.usuario.idUsuario) {
+          await AsyncStorage.setItem('idUsuario', String(data.usuario.idUsuario));
+        }
+
+        await AsyncStorage.setItem("correoUsuario", data.usuario.correo);
+
+        await AsyncStorage.setItem("rolFavorito", data.usuario.rolFavorito || "aldeano");
+        await AsyncStorage.setItem("fechaCreacion", data.usuario.fechaCreacion || "Fecha desconocida");
 
 
         Alert.alert('Inicio de sesión exitoso', `Bienvenido, ${data.usuario.nombre}`);
