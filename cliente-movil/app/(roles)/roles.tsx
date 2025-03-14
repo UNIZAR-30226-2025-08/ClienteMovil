@@ -1,10 +1,18 @@
-import React, { useState, useEffect } from 'react';  // Importar useState desde React
-import { ImageBackground, StyleSheet, Text, View, Image, TouchableOpacity, Alert } from 'react-native';
+import React from 'react';  // Importar useState desde React
+import { 
+  ImageBackground, 
+  StyleSheet, 
+  Text, 
+  View, 
+  Image, 
+  TouchableOpacity
+} from 'react-native';
 import { Link, useRouter } from 'expo-router';
-
 import { useFonts } from 'expo-font';
 
-
+/**
+ * Imágenes de los roles y fondo de pantalla.
+ */
 const imagenFondoRoles = require('@/assets/images/fondo-roles.jpg');
 const imagenCazador = require('@/assets/images/cazador-icon.jpeg');
 const imagenAlguacil = require('@/assets/images/alguacil-icon.png');
@@ -14,7 +22,13 @@ const imagenAldeano = require('@/assets/images/aldeano-icon.jpeg');
 const imagenLobo = require('@/assets/images/hombre-lobo-icon.jpeg');
 const imagenAtras = require('@/assets/images/botonAtras.png');
 
-export default function rolesScreen() {
+/**
+ * Pantalla que muestra la lista de roles del juego.
+ * Permite seleccionar un rol para ver más información sobre él.
+ * 
+ * @returns {JSX.Element} Pantalla de selección de roles.
+ */
+export default function RolesScreen(): JSX.Element | null {
 
   const router = useRouter();  // Usamos useRouter para manejar la navegación
 
@@ -27,6 +41,9 @@ export default function rolesScreen() {
     return null; // Esperar a que se cargue la fuente
   }
 
+  /**
+   * Función para regresar a la pantalla anterior.
+   */
   const irAtras = () => {
     router.back();  // Regresa a la pantalla anterior
   };
@@ -38,62 +55,71 @@ export default function rolesScreen() {
         resizeMode='cover'
         style={styles.image}
       >
+        <View style={styles.overlay} />
 
-      <View style={styles.overlay} />
-      <Text style={styles.tituloRoles}>ROLES</Text>
+        {/* Título de la pantalla */}
+        <Text style={styles.tituloRoles}>ROLES</Text>
 
-      <TouchableOpacity style={styles.containerCazador}>
-        <Link href="/(roles)/(personajes)/cazador"> {/* Ruta a la que quieres redirigir */}
-            <Image source={imagenCazador} style={styles.imageIconos} />
-        </Link>
-      </TouchableOpacity>
-      <Text style={styles.textoCazador}>CAZADOR</Text>
+        {/* Botón de Cazador */}
+        <TouchableOpacity style={styles.containerCazador}>
+          <Link href="/(roles)/(personajes)/cazador"> {/* Ruta a la que quieres redirigir */}
+              <Image source={imagenCazador} style={styles.imageIconos} />
+          </Link>
+        </TouchableOpacity>
+        <Text style={styles.textoCazador}>CAZADOR</Text>
 
-      <TouchableOpacity style={styles.containerAlguacil}>
-        <Link href="/(roles)/(personajes)/alguacil"> {/* Ruta a la que quieres redirigir */}
-            <Image source={imagenAlguacil} style={styles.imageIconos} />
-        </Link>
-      </TouchableOpacity>
-      <Text style={styles.textoAlguacil}>ALGUACIL</Text>
+        {/* Botón de Alguacil */}
+        <TouchableOpacity style={styles.containerAlguacil}>
+          <Link href="/(roles)/(personajes)/alguacil"> {/* Ruta a la que quieres redirigir */}
+              <Image source={imagenAlguacil} style={styles.imageIconos} />
+          </Link>
+        </TouchableOpacity>
+        <Text style={styles.textoAlguacil}>ALGUACIL</Text>
 
-      <TouchableOpacity style={styles.containerVidente}>
-        <Link href="/(roles)/(personajes)/vidente"> {/* Ruta a la que quieres redirigir */}
-            <Image source={imagenVidente} style={styles.imageIconos} />
-        </Link>
-      </TouchableOpacity>
-      <Text style={styles.textoVidente}>VIDENTE</Text>
+        {/* Botón de Vidente */}
+        <TouchableOpacity style={styles.containerVidente}>
+          <Link href="/(roles)/(personajes)/vidente"> {/* Ruta a la que quieres redirigir */}
+              <Image source={imagenVidente} style={styles.imageIconos} />
+          </Link>
+        </TouchableOpacity>
+        <Text style={styles.textoVidente}>VIDENTE</Text>
 
-      <TouchableOpacity style={styles.containerBruja}>
-        <Link href="/(roles)/(personajes)/bruja"> {/* Ruta a la que quieres redirigir */}
-            <Image source={imagenBruja} style={styles.imageIconos} />
-        </Link>
-      </TouchableOpacity>
-      <Text style={styles.textoBruja}>BRUJA</Text>
+        {/* Botón de Bruja */}
+        <TouchableOpacity style={styles.containerBruja}>
+          <Link href="/(roles)/(personajes)/bruja"> {/* Ruta a la que quieres redirigir */}
+              <Image source={imagenBruja} style={styles.imageIconos} />
+          </Link>
+        </TouchableOpacity>
+        <Text style={styles.textoBruja}>BRUJA</Text>
 
-      <TouchableOpacity style={styles.containerAldeano}>
-        <Link href="/(roles)/(personajes)/aldeano"> {/* Ruta a la que quieres redirigir */}
-            <Image source={imagenAldeano} style={styles.imageIconos} />
-        </Link>
-      </TouchableOpacity>
-      <Text style={styles.textoAldeano}>ALDEANO</Text>
+        {/* Botón de Aldeano */}
+        <TouchableOpacity style={styles.containerAldeano}>
+          <Link href="/(roles)/(personajes)/aldeano"> {/* Ruta a la que quieres redirigir */}
+              <Image source={imagenAldeano} style={styles.imageIconos} />
+          </Link>
+        </TouchableOpacity>
+        <Text style={styles.textoAldeano}>ALDEANO</Text>
 
-      <TouchableOpacity style={styles.containerLobo}>
-        <Link href="/(roles)/(personajes)/lobo"> {/* Ruta a la que quieres redirigir */}
-            <Image source={imagenLobo} style={styles.imageIconos} />
-        </Link>
-      </TouchableOpacity>
-      <Text style={styles.textoLobo}>LOBO</Text>
+        {/* Botón de Lobo */}
+        <TouchableOpacity style={styles.containerLobo}>
+          <Link href="/(roles)/(personajes)/lobo"> {/* Ruta a la que quieres redirigir */}
+              <Image source={imagenLobo} style={styles.imageIconos} />
+          </Link>
+        </TouchableOpacity>
+        <Text style={styles.textoLobo}>LOBO</Text>
 
-
-      <TouchableOpacity style={styles.containerAtras} onPress={irAtras}>
-            <Image source={imagenAtras} style={styles.imageAtras} />
-      </TouchableOpacity>
-
+        {/* Botón de regresar */}
+        <TouchableOpacity style={styles.containerAtras} onPress={irAtras}>
+              <Image source={imagenAtras} style={styles.imageAtras} />
+        </TouchableOpacity>
       </ImageBackground>
     </View>
   );
 }
 
+/**
+ * Estilos de la pantalla de selección de roles.
+ */
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -101,67 +127,67 @@ const styles = StyleSheet.create({
   },
 
   containerCazador: {
-    position: 'absolute', // Asegúrate de que el contenedor tenga un posicionamiento absoluto
-    top: 200,  // Ajusta este valor para mover la imagen más abajo
+    position: 'absolute', 
+    top: 200,  
     left: '28%',
-    marginLeft: -50,  // Asegura que la imagen esté centrada
+    marginLeft: -50,  
   },
 
   containerAlguacil: {
-    position: 'absolute', // Asegúrate de que el contenedor tenga un posicionamiento absoluto
-    top: 200,  // Ajusta este valor para mover la imagen más abajo
+    position: 'absolute', 
+    top: 200,  
     right: '8%',
-    marginLeft: -50,  // Asegura que la imagen esté centrada
+    marginLeft: -50,  
   },
 
   containerVidente: {
-    position: 'absolute', // Asegúrate de que el contenedor tenga un posicionamiento absoluto
-    top: 375,  // Ajusta este valor para mover la imagen más abajo
+    position: 'absolute', 
+    top: 375,  
     left: '28%',
-    marginLeft: -50,  // Asegura que la imagen esté centrada
+    marginLeft: -50,  
   },
 
   containerBruja: {
-    position: 'absolute', // Asegúrate de que el contenedor tenga un posicionamiento absoluto
-    top: 375,  // Ajusta este valor para mover la imagen más abajo
+    position: 'absolute', 
+    top: 375,  
     right: '8%',
-    marginLeft: -50,  // Asegura que la imagen esté centrada
+    marginLeft: -50, 
   },
 
   containerAldeano: {
-    position: 'absolute', // Asegúrate de que el contenedor tenga un posicionamiento absoluto
-    top: 550,  // Ajusta este valor para mover la imagen más abajo
+    position: 'absolute', 
+    top: 550,  
     left: '28%',
-    marginLeft: -50,  // Asegura que la imagen esté centrada
+    marginLeft: -50,  
   },
 
   containerLobo: {
-    position: 'absolute', // Asegúrate de que el contenedor tenga un posicionamiento absoluto
-    top: 550,  // Ajusta este valor para mover la imagen más abajo
+    position: 'absolute', 
+    top: 550,  
     right: '8%',
-    marginLeft: -50,  // Asegura que la imagen esté centrada
+    marginLeft: -50,  
   },
 
   containerAtras: {
     position: 'absolute',
-    bottom: 20,  // Mantén este valor para la distancia desde el fondo
-    left: '46%',  // Centra el contenedor horizontalmente
+    bottom: 20,  
+    left: '46%',  
 
   },
 
   textoCazador: {
     position: 'absolute',
-    top: 310,  // Ajusta la posición según la imagen
+    top: 310, 
     left: '21%',
-    color: 'white',  // Color del texto
-    fontSize: 16,    // Tamaño del texto
+    color: 'white', 
+    fontSize: 16,   
     fontWeight: 'bold',
-    textAlign: 'center',  // Centrado horizontal
+    textAlign: 'center', 
   },
 
   textoAlguacil: {
     position: 'absolute',
-    top: 310,  // Ajusta la posición según la imagen
+    top: 310,  
     right: '12%',
     color: 'white',
     fontSize: 16,
@@ -171,7 +197,7 @@ const styles = StyleSheet.create({
 
   textoVidente: {
     position: 'absolute',
-    top: 490,  // Ajusta la posición según la imagen
+    top: 490,  
     left: '22%',
     color: 'white',
     fontSize: 16,
@@ -181,7 +207,7 @@ const styles = StyleSheet.create({
 
   textoBruja: {
     position: 'absolute',
-    top: 490,  // Ajusta la posición según la imagen
+    top: 490,  
     right: '16%',
     color: 'white',
     fontSize: 16,
@@ -191,7 +217,7 @@ const styles = StyleSheet.create({
 
   textoAldeano: {
     position: 'absolute',
-    top: 670,  // Ajusta la posición según la imagen
+    top: 670,  
     left: '21%',
     color: 'white',
     fontSize: 16,
@@ -201,7 +227,7 @@ const styles = StyleSheet.create({
 
   textoLobo: {
     position: 'absolute',
-    top: 670,  // Ajusta la posición según la imagen
+    top: 670,  
     right: '17%',
     color: 'white',
     fontSize: 16,
@@ -223,49 +249,49 @@ const styles = StyleSheet.create({
   },
 
   overlay: {
-    ...StyleSheet.absoluteFillObject,  // Cubre toda el área de la imagen
-    backgroundColor: 'rgba(0, 0, 0, 0.4)', // Fondo negro semitransparente, puedes ajustar la opacidad
+    ...StyleSheet.absoluteFillObject,  
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
   },
 
   imageIconos: {
-    width: 110,  // Ajusta el tamaño de la imagen
-    height: 110, // Ajusta el tamaño de la imagen
+    width: 110,  
+    height: 110, 
   },
 
   profileImage: {
-    width: 100,  // Ajusta el tamaño de la imagen
-    height: 100, // Ajusta el tamaño de la imagen
+    width: 100,  
+    height: 100,
     position: 'absolute',
-    top: 100,  // Centra la imagen en el eje vertical
+    top: 100,  
     left: '50%',
-    marginLeft: -50,  // Desplaza la imagen hacia la izquierda para que esté completamente centrada (mitad del ancho de la imagen)
+    marginLeft: -50,  
     zIndex: 1, 
     borderRadius: 50,
   },
 
   tituloRoles: {
-    position: 'absolute',  // Para posicionarlo de forma absoluta
-    top: '8%',  // Colocamos el texto justo después de la imagen
-    left: '49%',  // Centrado en el eje horizontal
-    marginTop: 20,  // Ajustamos el margen para que esté justo debajo de la imagen (ajustamos este valor según el tamaño de la imagen)
-    marginLeft: -60,  // Ajuste horizontal para centrar el texto
-    color: 'white',  // Color del texto
-    fontSize: 45,  // Tamaño del texto
-    fontWeight: 'bold',  // Estilo del texto
-    textAlign: 'center',  // Alineamos el texto al centro
+    position: 'absolute',  
+    top: '8%',  
+    left: '49%',  
+    marginTop: 20,  
+    marginLeft: -60,  
+    color: 'white', 
+    fontSize: 45, 
+    fontWeight: 'bold', 
+    textAlign: 'center',  
   },
 
   textoPartida: {
     fontSize: 20,
     fontWeight: 'bold',
     color: 'white',
-    textShadowColor: 'rgba(0, 0, 0, 0.75)', // Sombra de texto
+    textShadowColor: 'rgba(0, 0, 0, 0.75)',
     textShadowOffset: { width: 2, height: 2 },
     textShadowRadius: 10,
     textAlign: 'center',
     backgroundColor: 'rgba(255, 255, 255, 0.6)',
-    position: 'absolute', // Fija el contenedor en la parte inferior
-    top: 250, // Ajusta la distancia desde la parte inferior
+    position: 'absolute', 
+    top: 250, 
     width: '100%',
     paddingVertical: 10,
     borderRadius: 20,
@@ -275,13 +301,13 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     color: 'white',
-    textShadowColor: 'rgba(0, 0, 0, 0.75)', // Sombra de texto
+    textShadowColor: 'rgba(0, 0, 0, 0.75)', 
     textShadowOffset: { width: 2, height: 2 },
     textShadowRadius: 10,
     textAlign: 'center',
     backgroundColor: 'rgba(255, 255, 255, 0.6)',
-    position: 'absolute', // Fija el contenedor en la parte inferior
-    top: 325, // Ajusta la distancia desde la parte inferior
+    position: 'absolute', 
+    top: 325, 
     width: '100%',
     paddingVertical: 10,
     borderRadius: 20,
@@ -291,13 +317,13 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     color: 'white',
-    textShadowColor: 'rgba(0, 0, 0, 0.75)', // Sombra de texto
+    textShadowColor: 'rgba(0, 0, 0, 0.75)',
     textShadowOffset: { width: 2, height: 2 },
     textShadowRadius: 10,
     textAlign: 'center',
     backgroundColor: 'rgba(255, 255, 255, 0.6)',
-    position: 'absolute', // Fija el contenedor en la parte inferior
-    top: 400, // Ajusta la distancia desde la parte inferior
+    position: 'absolute', 
+    top: 400, 
     width: '100%',
     paddingVertical: 10,
     borderRadius: 20,
@@ -307,13 +333,13 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     color: 'white',
-    textShadowColor: 'rgba(0, 0, 0, 0.75)', // Sombra de texto
+    textShadowColor: 'rgba(0, 0, 0, 0.75)', 
     textShadowOffset: { width: 2, height: 2 },
     textShadowRadius: 10,
     textAlign: 'center',
     backgroundColor: 'rgba(255, 255, 255, 0.6)',
-    position: 'absolute', // Fija el contenedor en la parte inferior
-    top: 475, // Ajusta la distancia desde la parte inferior
+    position: 'absolute', 
+    top: 475, 
     width: '100%',
     paddingVertical: 10,
     borderRadius: 20,
@@ -323,13 +349,13 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     color: 'white',
-    textShadowColor: 'rgba(0, 0, 0, 0.75)', // Sombra de texto
+    textShadowColor: 'rgba(0, 0, 0, 0.75)', 
     textShadowOffset: { width: 2, height: 2 },
     textShadowRadius: 10,
     textAlign: 'center',
     backgroundColor: 'rgba(255, 255, 255, 0.6)',
-    position: 'absolute', // Fija el contenedor en la parte inferior
-    top: 550, // Ajusta la distancia desde la parte inferior
+    position: 'absolute', 
+    top: 550,
     width: '100%',
     paddingVertical: 10,
     borderRadius: 20,

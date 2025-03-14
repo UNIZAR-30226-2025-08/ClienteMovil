@@ -13,9 +13,15 @@ import Constants from 'expo-constants';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from "axios";
 
+/**
+ * Imágenes utilizadas en la pantalla de selección de avatar.
+ */
 const imagenFondo = require('@/assets/images/fondo-roles.jpg');
 const imagenAtras = require("@/assets/images/botonAtras.png");
 
+/**
+ * Mapa de avatares disponibles para la selección.
+ */
 const avatarMap: Record<string, any> = {
   avatar1: require("@/assets/images/imagenPerfil.webp"),
   avatar2: require("@/assets/images/imagenPerfil2.webp"),
@@ -27,16 +33,31 @@ const avatarMap: Record<string, any> = {
   avatar8: require("@/assets/images/imagenPerfil8.webp"),
 };
 
-// Lista de avatares para selección
+/**
+ * Lista de identificadores de avatares disponibles.
+ */
 const avatares = Object.keys(avatarMap);
 
-
-export default function ElegirAvatarScreen() {
+/**
+ * Pantalla de selección de avatar del usuario.
+ * Permite elegir un avatar y actualizarlo en el perfil del usuario.
+ * 
+ * @returns {JSX.Element} Pantalla de selección de avatar.
+ */
+export default function ElegirAvatarScreen(): JSX.Element {
   const BACKEND_URL = Constants.expoConfig?.extra?.backendUrl;
   const router = useRouter();
+
+    /**
+   * Estado para almacenar el avatar seleccionado.
+   */
   const [avatarSeleccionado, setAvatarSeleccionado] = useState<string | null>(null);
 
-  // Manejar la selección del avatar
+  /**
+   * Función para manejar la selección del avatar.
+   * 
+   * @param avatarId - Identificador del avatar seleccionado.
+   */
   const seleccionarAvatar = async (avatarId: string) => {
     try {
       const idUsuario = await AsyncStorage.getItem("idUsuario"); // Recuperar ID del usuario
@@ -72,16 +93,24 @@ export default function ElegirAvatarScreen() {
     }
   };
 
-
+  /**
+   * Función para regresar a la pantalla anterior.
+   */
   const irAtras = () => {
     router.back();
   };
   
   return (
     <View style={styles.container}>
+
+      {/* Fondo de la pantalla */}
       <ImageBackground source={imagenFondo} style={styles.imageBackground}>
         <View style={styles.overlay} />
+
+        {/* Título de la pantalla */}
         <Text style={styles.titulo}>Elige tu Avatar</Text>
+
+        {/* Contenedor de avatares disponibles */}
         <View style={styles.avatarContainer}>
           {avatares.map((avatarId) => (
             <TouchableOpacity key={avatarId} onPress={() => seleccionarAvatar(avatarId)}>
@@ -89,6 +118,8 @@ export default function ElegirAvatarScreen() {
             </TouchableOpacity>
           ))}
         </View>
+
+        {/* Botón para regresar a la pantalla anterior */}
         <TouchableOpacity 
           style={styles.containerAtras} 
           onPress={irAtras}>
@@ -99,6 +130,9 @@ export default function ElegirAvatarScreen() {
   );
 }
 
+/**
+ * Estilos de la pantalla de selección de avatar.
+ */
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -134,8 +168,8 @@ const styles = StyleSheet.create({
   },
 
   overlay: {
-    ...StyleSheet.absoluteFillObject,  // Cubre toda el área de la imagen
-    backgroundColor: 'rgba(0, 0, 0, 0.4)', // Fondo negro semitransparente, puedes ajustar la opacidad
+    ...StyleSheet.absoluteFillObject,  
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
   },
 
   containerAtras: {

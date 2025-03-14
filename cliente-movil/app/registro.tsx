@@ -22,35 +22,64 @@ import {
 import { useFonts } from 'expo-font';
 import { useRouter } from 'expo-router';
 
+
+// Importación de imágenes utilizadas en la pantalla
 const imagenPortada = require('@/assets/images/imagen-portada.png');
 const imagenGoogle = require('@/assets/images/google-icon.png');
 const imagenFondoInicioSesion = require('@/assets/images/fondo-inicio-sesion.jpg');
 
-export default function App() {
-  // Recuperar la URL de backend desde Constants
+/**
+ * Pantalla de registro de usuario.
+ * 
+ * Permite a los usuarios registrarse proporcionando un nombre, correo y contraseña.
+ * Incluye validaciones de entrada y encriptación de la contraseña antes de enviarla al servidor.
+ * 
+ * @returns {JSX.Element | null} Pantalla de registro.
+ */
+export default function RegistroScreen() {
+  /**
+   * URL del backend obtenida de las constantes de Expo.
+   */
   const BACKEND_URL = Constants.expoConfig?.extra?.backendUrl;
 
-  // 'nombre' almacena el valor escrito en el campo nombre y 
-  // 'setNombre' es una funcion que actualiza el valor cuando el usuario escribe
+  /**
+   * Estado para almacenar el nombre ingresado por el usuario.
+   */
   const [nombre, setNombre] = useState('');
 
-  // 'correo' almacena el valor escrito en el campo correo y 
-  // 'setCorreo' es una funcion que actualiza el valor cuando el usuario escribe
+  /**
+   * Estado para almacenar el correo ingresado por el usuario.
+   */
   const [correo, setCorreo] = useState('');
 
-  // 'contrasena' almacena el valor escrito en el campo contraseña y 
-  // 'setContrasena' es una funcion que actualiza el valor cuando el usuario escribe
+  /**
+   * Estado para almacenar la contraseña ingresada por el usuario.
+   */
   const [contrasena, setContrasena] = useState('');
 
-  // 'confirmContrasena' almacena el valor escrito en el campo confirmar contraseña y
-  // 'setconfirmContrasena' es una funcion que actualiza el valor cuando el usuario escribe
+  /**
+   * Estado para almacenar la confirmación de la contraseña ingresada.
+   */
   const [confirmContrasena, setconfirmContrasena] = useState('');
   
+  /**
+   * Estado que controla la visibilidad de la contraseña.
+   */
   const [secureText, setSecureText] = useState(true);
+
+  /**
+   * Estado que controla la visibilidad de la confirmación de la contraseña.
+   */
   const [secureTextConfirm, setSecureTextConfirm] = useState(true);
 
+  /**
+   * Hook de navegación para manejar redirecciones dentro de la aplicación.
+   */
   const router = useRouter();
 
+  /**
+   * Carga la fuente personalizada "GhostShadow" utilizada en la aplicación.
+   */
   const [loaded] = useFonts({
     GhostShadow: require('@/assets/fonts/ghost-shadow.ttf'),
   });
@@ -59,7 +88,12 @@ export default function App() {
     return null;
   }
 
-  // Función para registrar al usuario
+  /**
+   * Función que maneja el registro del usuario.
+   * 
+   * Realiza validaciones antes de enviar los datos al backend. 
+   * Si el registro es exitoso, almacena los datos en AsyncStorage y redirige a la pantalla de inicio de sesión.
+   */
   const handleRegister = async () => {
 
     // Si el usuario no ha rellenado el campo de correo o contraseña
@@ -69,7 +103,8 @@ export default function App() {
       Alert.alert('Error', 'Por favor, completa todos los campos.');
       return;
     }
-
+    
+    // Validación de coincidencia de contraseñas
     if (contrasena !== confirmContrasena) {
       Alert.alert('Error', 'Las contraseñas no coinciden.');
       return;

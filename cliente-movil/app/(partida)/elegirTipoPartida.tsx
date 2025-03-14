@@ -6,19 +6,29 @@ import {
   View,
   Image,
   TouchableOpacity,
-  Alert,
 } from "react-native";
 import { Link } from "expo-router";
 import { useRouter } from "expo-router";
 import { useFonts } from "expo-font";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
+/**
+ * Imágenes utilizadas en la pantalla.
+ */
 const imagenPortada = require("@/assets/images/imagen-portada.png");
 const imagenPorDefecto = require("@/assets/images/imagenPerfil.webp");
 const imagenNotificaciones = require("@/assets/images/noti_icon.png");
 
-export default function elegirPartidaScreen() {
-  // Estado para almacenar los datos del usuario
+/**
+ * Pantalla para elegir una partida.
+ * Permite al usuario seleccionar entre partida rápida, buscar salas o crear una nueva partida.
+ *
+ * @returns {JSX.Element} Pantalla de selección de partida.
+ */
+export default function ElegirPartidaScreen(): JSX.Element | null {
+  /**
+   * Estado para almacenar los datos del usuario.
+   */
   const [usuario, setUsuario] = useState<{
     nombre: string;
     avatar?: string;
@@ -26,7 +36,9 @@ export default function elegirPartidaScreen() {
 
   const [loading, setLoading] = useState(true); // Estado de carga
 
-  // Cargar los datos del usuario al entrar a la pantalla
+  /**
+   * Cargar los datos del usuario desde AsyncStorage cuando la pantalla se renderiza.
+   */
   useEffect(() => {
     const cargarUsuario = async () => {
       try {
@@ -59,12 +71,16 @@ export default function elegirPartidaScreen() {
 
   return (
     <View style={styles.container}>
+
+      {/* Fondo de pantalla */}     
       <ImageBackground
         source={imagenPortada}
         resizeMode="cover"
         style={styles.image}
       >
         <View style={styles.overlay} />
+
+        {/* Contenedor del avatar del usuario */}
         <TouchableOpacity
           onPress={() => router.push("/perfil")}
           style={styles.contenedorPerfil}
@@ -76,20 +92,29 @@ export default function elegirPartidaScreen() {
             style={styles.profileImage}
           />
         </TouchableOpacity>
+
+        {/* Nombre del usuario */}
         <Text style={styles.nombrePlayer}>{usuario?.nombre || "Usuario"}</Text>
+
+        {/* Botón de Partida Rápida */}
         <Link href={"/jugando"} style={styles.textoPartida}>
           PARTIDA RÁPIDA
         </Link>
+
+        {/* Botón para Buscar Salas */}
         <Link
           href={"/(buscarpartida)/buscarpartida"}
           style={styles.textoComoJugar}
         >
           BUSCAR SALAS
         </Link>
+
+        {/* Botón para Crear Partida */}
         <Link href={"/(crearsala)/crearsala"} style={styles.textoRoles}>
           CREAR PARTIDA
         </Link>
 
+        {/* Botón de Notificaciones */}
         <TouchableOpacity
           style={styles.botonNotificaciones}
           onPress={() => router.push("/notificaciones")}
@@ -106,6 +131,9 @@ export default function elegirPartidaScreen() {
   );
 }
 
+/**
+ * Estilos de la pantalla de selección de partida.
+ */
 const styles = StyleSheet.create({
   container: {
     flex: 1,

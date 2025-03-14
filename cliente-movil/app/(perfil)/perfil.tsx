@@ -16,7 +16,9 @@ import { useFonts } from "expo-font";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 
-// Mapa de claves de avatar => require(local)
+/**
+ * Mapa de claves de avatar a sus respectivas imágenes.
+ */
 const avatarMap: Record<string, any> = {
   avatar1: require("@/assets/images/imagenPerfil.webp"),
   avatar2: require("@/assets/images/imagenPerfil2.webp"),
@@ -31,20 +33,60 @@ const avatarMap: Record<string, any> = {
 const imagenFondoRoles = require("@/assets/images/fondo-roles.jpg");
 const imagenPapiro = require("@/assets/images/papiro.png");
 const imagenAtras = require("@/assets/images/botonAtras.png");
-const imagenPerfil = require("@/assets/images/imagenPerfil.webp");
 const imagenListaAmigos = require("@/assets/images/imagen-lista-amigos.png");
 
-export default function PerfilScreen() {
+/**
+ * Pantalla de perfil del usuario.
+ *
+ * Permite la edición del nombre, la selección de un rol favorito
+ * y la visualización del avatar. También se pueden acceder a la 
+ * lista de amigos y al historial de partidas.
+ *
+ * @returns {JSX.Element} Pantalla de perfil del usuario.
+ */
+export default function PerfilScreen(): JSX.Element | null {
+  /**
+   * Hook de navegación para manejar redirecciones dentro de la aplicación.
+   */
   const router = useRouter();
+
+  /**
+   * Estado del nombre del usuario.
+   */
   const [nombre, setNombre] = useState("");
+
+  /**
+   * Estado del rol favorito del usuario.
+   */
   const [rolFavorito, setRolFavorito] = useState("");
-  const [fechaCreacion, setFechaCreacion] = useState<string | null>(null)
+
+  /**
+   * Estado que almacena la fecha de creación del perfil del usuario.
+   */
+  const [fechaCreacion, setFechaCreacion] = useState<string | null>(null);
+
+  /**
+   * Estado que almacena la imagen del avatar del usuario.
+   */
   const [avatar, setAvatar] = useState<any>(null); 
+
+  /**
+   * Estado de carga de la pantalla.
+   */
   const [loading, setLoading] = useState(true); // Estado de carga
 
-
+  /**
+   * URL del backend obtenida de las constantes de Expo.
+   */
   const BACKEND_URL = Constants.expoConfig?.extra?.backendUrl;
 
+  /**
+   * Carga los datos del usuario desde el backend y los almacena en el estado.
+   * 
+   * Obtiene el correo del usuario almacenado en AsyncStorage, realiza una
+   * petición a la API para obtener los datos del usuario y los asigna a los
+   * estados correspondientes.
+   */
   useEffect(() => {
     const cargarDatosUsuario = async () => {
       try {
@@ -84,7 +126,13 @@ export default function PerfilScreen() {
     cargarDatosUsuario();
   }, []);
   
-     // Función para guardar los datos actualizados del usuario
+  /**
+   * Guarda los datos del usuario actualizados en el backend.
+   * 
+   * Realiza una petición `PUT` a la API para actualizar los datos del usuario.
+   * Antes de enviar la solicitud, valida que el usuario tenga un ID y un rol favorito seleccionado.
+   * Si la actualización es exitosa, se almacenan los datos localmente.
+   */
   const guardarDatosUsuario = async () => {
     try {
       const idUsuario = await AsyncStorage.getItem("idUsuario");
@@ -119,6 +167,9 @@ export default function PerfilScreen() {
     }
   };
   
+  /**
+   * Carga la fuente personalizada de la aplicación.
+   */
   const [loaded] = useFonts({
     GhostShadow: require("@/assets/fonts/ghost-shadow.ttf"),
   });
@@ -127,6 +178,9 @@ export default function PerfilScreen() {
     return null;
   }
 
+  /**
+   * Redirige a la pantalla principal de opciones.
+   */
   const irAtras = () => {
     router.push('/elegirOpciones');
   };

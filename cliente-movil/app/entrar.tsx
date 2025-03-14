@@ -1,39 +1,65 @@
-import React, { useState, useEffect } from 'react';  // Importar useState desde React
-import { ImageBackground, StyleSheet, Text, View, Image, TouchableOpacity, Alert } from 'react-native';
+import React from 'react';  // Importar useState desde React
+import { 
+  ImageBackground, 
+  StyleSheet, 
+  Text, 
+  View
+ } from 'react-native';
 import { Link } from 'expo-router';
-
 import { useFonts } from 'expo-font';
 
-
+/**
+ * Imagen utilizada como fondo en la pantalla de inicio.
+ */
 const imagenPortada = require('@/assets/images/imagen-portada.png');
 
-export default function entrarScreen() {
+/**
+ * Pantalla de inicio de la aplicación.
+ * 
+ * Muestra el título del juego y un enlace para acceder a la siguiente pantalla.
+ * 
+ * @returns {JSX.Element | null} Pantalla de inicio.
+ */
+export default function EntrarScreen() {
 
-  // Cargar la fuente GhostShadow
+  /**
+   * Carga la fuente personalizada 'GhostShadow'.
+   * 
+   * Se utiliza el hook `useFonts` para gestionar la carga de la fuente antes de renderizar el contenido.
+   */
   const [loaded] = useFonts({
     GhostShadow: require('@/assets/fonts/ghost-shadow.ttf'),
   });
 
+  /**
+   * Si la fuente aún no ha terminado de cargarse, se retorna `null` para evitar errores de renderizado.
+   */
   if (!loaded) {
-    return null; // Esperar a que se cargue la fuente
+    return null; 
   }
 
   return (
     <View style={styles.container}>
+
+      {/* Imagen de fondo cubriendo toda la pantalla */}
       <ImageBackground
         source={imagenPortada}
         resizeMode='cover'
         style={styles.image}
       >
-      <Text style={styles.title}>LOS HOMBRES LOBOS DE CASTRONEGRO</Text>
 
-      <Link href="/elegirOpciones" style={styles.textoEntrar}>PULSA PARA ENTRAR</Link>
+        {/* Título principal del juego */}
+        <Text style={styles.title}>LOS HOMBRES LOBOS DE CASTRONEGRO</Text>
+
+        {/* Enlace para continuar a la pantalla de opciones */}
+        <Link href="/elegirOpciones" style={styles.textoEntrar}>PULSA PARA ENTRAR</Link>
 
       </ImageBackground>
     </View>
   );
 }
 
+// Estilos de la pantalla
 const styles = StyleSheet.create({
   container: {
     flex: 1,

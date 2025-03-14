@@ -11,13 +11,18 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 
+/**
+ * Imágenes utilizadas en la pantalla de lista de amigos.
+ */
 const imagenFondoRoles = require("@/assets/images/fondo-roles.jpg");
 const imagenAtras = require("@/assets/images/botonAtras.png");
 
 // Imagen por defecto para nuevos amigos (o la que prefieras)
 const imagenPerfilDefecto = require("@/assets/images/imagenPerfil.webp");
 
-// Lista de amigos inicial (Simulación de datos)
+/**
+ * Lista inicial de amigos (Datos simulados).
+ */
 const amigosIniciales = [
   {
     id: 1,
@@ -66,7 +71,13 @@ const amigosIniciales = [
   },
 ];
 
-export default function AmigosScreen() {
+/**
+ * Pantalla de lista de amigos.
+ * Permite visualizar amigos, agregar nuevos y regresar a la pantalla anterior.
+ * 
+ * @returns {JSX.Element} Pantalla de lista de amigos.
+ */
+export default function AmigosScreen(): JSX.Element {
   const router = useRouter();
 
   // Lista de amigos en estado para poder modificarla
@@ -75,7 +86,9 @@ export default function AmigosScreen() {
   // Estado para almacenar el nombre del nuevo amigo
   const [nuevoAmigo, setNuevoAmigo] = useState("");
 
-  // Función para añadir un nuevo amigo a la lista
+  /**
+   * Función para agregar un nuevo amigo a la lista.
+   */
   const anadirAmigo = () => {
     // 1) Comprobamos que no esté vacío
     if (!nuevoAmigo.trim()) return;
@@ -147,7 +160,9 @@ export default function AmigosScreen() {
   );
 }
 
-// Estilos
+/**
+ * Estilos de la pantalla de lista de amigos.
+ */
 const styles = StyleSheet.create({
   container: { flex: 1 },
   image: {
@@ -157,10 +172,12 @@ const styles = StyleSheet.create({
     resizeMode: "cover",
     justifyContent: "center",
   },
+
   overlay: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: "rgba(0, 0, 0, 0.4)",
   },
+
   titulo: {
     fontSize: 28,
     fontWeight: "bold",
@@ -177,6 +194,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
     marginHorizontal: 20,
   },
+
   input: {
     flex: 1,
     backgroundColor: "#fff",
@@ -186,12 +204,14 @@ const styles = StyleSheet.create({
     marginRight: 10,
     color: "#000",
   },
+
   botonAnadir: {
     backgroundColor: "#008f39",
     borderRadius: 10,
     paddingVertical: 10,
     paddingHorizontal: 15,
   },
+
   botonAnadirTexto: {
     color: "#fff",
     fontWeight: "bold",
@@ -211,12 +231,14 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     marginBottom: 15,
   },
+
   imagenPerfil: {
     width: 50,
     height: 50,
     borderRadius: 25,
     marginRight: 15,
   },
+
   nombre: {
     fontSize: 18,
     fontWeight: "bold",
@@ -228,6 +250,7 @@ const styles = StyleSheet.create({
     bottom: 20,
     left: "46%",
   },
+
   imageAtras: {
     height: 40,
     width: 40,

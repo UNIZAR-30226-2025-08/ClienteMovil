@@ -1,16 +1,29 @@
-import React, { useState, useEffect } from 'react';  // Importar useState desde React
-import { ImageBackground, StyleSheet, Text, View, Image, TouchableOpacity, Alert } from 'react-native';
-import { Link, useRouter } from 'expo-router';
-
+import React from 'react';  // Importar useState desde React
+import { 
+  ImageBackground, 
+  StyleSheet, 
+  Text, 
+  View, 
+  Image, 
+  TouchableOpacity } from 'react-native';
+import { useRouter } from 'expo-router';
 import { useFonts } from 'expo-font';
 
-
+/**
+ * Imágenes utilizadas en la pantalla del rol "Bruja".
+ */
 const imagenFondoRoles = require('@/assets/images/fondo-roles.jpg');
 const imagenBruja = require('@/assets/images/bruja-icon.jpeg');
 const imagenPapiro = require('@/assets/images/papiro.png')
 const imagenAtras = require('@/assets/images/botonAtras.png');
 
-export default function brujaScreen() {
+/**
+ * Pantalla que muestra la descripción del rol "Bruja".
+ * Permite al usuario leer la descripción y regresar a la pantalla anterior.
+ * 
+ * @returns {JSX.Element} Pantalla de información sobre el rol "Bruja".
+ */
+export default function BrujaScreen(): JSX.Element | null {
 
   const router = useRouter();  // Usamos useRouter para manejar la navegación
 
@@ -23,42 +36,56 @@ export default function brujaScreen() {
     return null; // Esperar a que se cargue la fuente
   }
 
+  /**
+   * Función para regresar a la pantalla anterior.
+   */
   const irAtras = () => {
     router.back();  // Regresa a la pantalla anterior
   };
 
   return (
     <View style={styles.container}>
+      {/* Fondo de pantalla */}
       <ImageBackground
         source={imagenFondoRoles}
         resizeMode='cover'
         style={styles.image}
       >
+        <View style={styles.overlay} />
 
-      <View style={styles.overlay} />
-      <Text style={styles.tituloBruja}>BRUJA</Text>
-      <Image source={imagenBruja} style={styles.imageBruja}></Image>
-      <Image source={imagenPapiro} style={styles.imagePapiro}></Image>
-      <Text style={styles.textoBruja}>
-            SE SEÑALARÁ AL JUGADOR QUE ESTÉ 
-            APUNTO DE MORIR ESA NOCHE (SI LO HAY) Y ÉSTA DECIDIRÁ
-        QUÉ HACER. PUEDE SALVARLO, GASTANDO LA
-        POCIÓN DE VIDA O DEJARLO MORIR. A CONTINUACIÓN,
-        LA BRUJA TIENE LA OPCIÓN DE GASTAR SU POCIÓN
-        DE LA MUERTE PARA ELIMINAR AL JUGADOR 
-        QUE DESEE. AMBAS POCIONES SOLO SE PUEDEN 
-        USAR UNA VEZ EN LA PARTIDA. 
-      </Text>
+        {/* Título de la pantalla */}
+        <Text style={styles.tituloBruja}>BRUJA</Text>
 
-      <TouchableOpacity style={styles.containerAtras} onPress={irAtras}>
-            <Image source={imagenAtras} style={styles.imageAtras} />
-      </TouchableOpacity>
+        {/* Imagen representativa del rol */}
+        <Image source={imagenBruja} style={styles.imageBruja}></Image>
 
+        {/* Imagen decorativa de papiro */}
+        <Image source={imagenPapiro} style={styles.imagePapiro}></Image>
+
+       {/* Descripción del rol */}
+        <Text style={styles.textoBruja}>
+              SE SEÑALARÁ AL JUGADOR QUE ESTÉ 
+              APUNTO DE MORIR ESA NOCHE (SI LO HAY) Y ÉSTA DECIDIRÁ
+          QUÉ HACER. PUEDE SALVARLO, GASTANDO LA
+          POCIÓN DE VIDA O DEJARLO MORIR. A CONTINUACIÓN,
+          LA BRUJA TIENE LA OPCIÓN DE GASTAR SU POCIÓN
+          DE LA MUERTE PARA ELIMINAR AL JUGADOR 
+          QUE DESEE. AMBAS POCIONES SOLO SE PUEDEN 
+          USAR UNA VEZ EN LA PARTIDA. 
+        </Text>
+
+        {/* Botón para regresar a la pantalla anterior */}
+        <TouchableOpacity style={styles.containerAtras} onPress={irAtras}>
+              <Image source={imagenAtras} style={styles.imageAtras} />
+        </TouchableOpacity>
       </ImageBackground>
     </View>
   );
 }
 
+/**
+ * Estilos de la pantalla del rol "Bruja".
+ */
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -67,8 +94,8 @@ const styles = StyleSheet.create({
 
   containerAtras: {
     position: 'absolute',
-    bottom: 20,  // Mantén este valor para la distancia desde el fondo
-    left: '46%',  // Centra el contenedor horizontalmente
+    bottom: 20,  
+    left: '46%',  
 
   },
 
@@ -94,28 +121,28 @@ const styles = StyleSheet.create({
   },
 
   overlay: {
-    ...StyleSheet.absoluteFillObject,  // Cubre toda el área de la imagen
-    backgroundColor: 'rgba(0, 0, 0, 0.4)', // Fondo negro semitransparente, puedes ajustar la opacidad
+    ...StyleSheet.absoluteFillObject,  
+    backgroundColor: 'rgba(0, 0, 0, 0.4)', 
   },
 
   imageBruja: {
-    width: 170,  // Ajusta el tamaño de la imagen
-    height: 170, // Ajusta el tamaño de la imagen
+    width: 170, 
+    height: 170, 
     left: "30%",
     top: "15%",
     position: 'absolute'
   },
 
   tituloBruja: {
-    position: 'absolute',  // Para posicionarlo de forma absoluta
-    top: '5%',  // Colocamos el texto justo después de la imagen
-    left: '49%',  // Centrado en el eje horizontal
-    marginTop: 20,  // Ajustamos el margen para que esté justo debajo de la imagen (ajustamos este valor según el tamaño de la imagen)
-    marginLeft: -60,  // Ajuste horizontal para centrar el texto
-    color: 'white',  // Color del texto
-    fontSize: 45,  // Tamaño del texto
-    fontWeight: 'bold',  // Estilo del texto
-    textAlign: 'center',  // Alineamos el texto al centro
+    position: 'absolute', 
+    top: '5%',  
+    left: '49%',  
+    marginTop: 20,  
+    marginLeft: -60,  
+    color: 'white',  
+    fontSize: 45, 
+    fontWeight: 'bold',  
+    textAlign: 'center',  
   },
 
   textoBruja: {

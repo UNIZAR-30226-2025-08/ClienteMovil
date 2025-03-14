@@ -11,10 +11,20 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 
+/**
+ * Imagen de fondo de la pantalla.
+ */
 const imagenFondoRoles = require("@/assets/images/fondo-roles.jpg");
+
+/**
+ * Imagen del botón para volver atrás.
+ */
 const imagenAtras = require("@/assets/images/botonAtras.png");
 
-// Lista de amigos (Simulación de datos, habría que cargarlos desde tu Backend)
+/**
+ * Lista de amigos simulada.
+ * En una aplicación real, estos datos deberían ser obtenidos desde un backend.
+ */
 const amigos = [
   {
     id: 1,
@@ -63,10 +73,20 @@ const amigos = [
   },
 ];
 
-export default function AmigosScreen() {
+/**
+ * Pantalla que muestra la lista de amigos del usuario.
+ * Permite invitar amigos a una partida o interactuar con ellos.
+ * 
+ * @returns {JSX.Element} Pantalla de lista de amigos.
+ */
+export default function AmigosScreen(): JSX.Element {
   const router = useRouter();
 
-  // Función para manejar el botón de "Invitar" (puedes modificarla según tu lógica)
+  /**
+   * Muestra un mensaje de confirmación cuando un amigo es invitado.
+   * 
+   * @param amigoNombre Nombre del amigo al que se ha invitado.
+   */
   const handleInvite = (amigoNombre: string) => {
     Alert.alert("Invitación", `Has invitado a ${amigoNombre}`);
   };
@@ -117,6 +137,9 @@ export default function AmigosScreen() {
   );
 }
 
+/**
+ * Estilos de la pantalla.
+ */
 const styles = StyleSheet.create({
   container: { flex: 1 },
 

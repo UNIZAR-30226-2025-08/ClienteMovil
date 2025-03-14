@@ -9,7 +9,9 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 
-// Ejemplo de tipo para un jugador
+/**
+ * Tipo de datos para representar un jugador dentro de la sala.
+ */
 type Player = {
   id: string;
   name: string;
@@ -18,10 +20,19 @@ type Player = {
   isOwner?: boolean; // Indica si es el dueño de la sala
 };
 
-export default function SalaPreviaScreen() {
+/**
+ * Pantalla de sala previa a la partida.
+ * 
+ * Permite a los jugadores unirse, marcarse como listos y al anfitrión iniciar la partida.
+ * 
+ * @returns {JSX.Element} Pantalla de la sala previa al juego.
+ */
+export default function SalaPreviaScreen(): JSX.Element {
   const router = useRouter(); // Usamos useRouter para manejar la navegación
 
-  // Estado con la información de los jugadores
+  /**
+   * Estado con la información de los jugadores en la sala.
+   */
   const [players, setPlayers] = useState<Player[]>([
     { id: "1", name: "Jugador1", level: 106, isReady: true, isOwner: true },
     { id: "2", name: "Jugador2", level: 106, isReady: true },
@@ -29,7 +40,11 @@ export default function SalaPreviaScreen() {
     // Puedes añadir más o dejar placeholders
   ]);
 
-  // Función para alternar el estado de "Listo" de un jugador
+  /**
+   * Alterna el estado de "Listo" de un jugador.
+   * 
+   * @param playerId ID del jugador a modificar.
+   */
   const toggleReady = (playerId: string) => {
     setPlayers((prevState) =>
       prevState.map((p) =>
@@ -38,10 +53,15 @@ export default function SalaPreviaScreen() {
     );
   };
 
-  // Todos los jugadores están listos?
+  /**
+   * Verifica si todos los jugadores en la sala están listos.
+   */
   const allReady = players.every((player) => player.isReady);
 
-  // Maneja el botón "Iniciar Partida"
+  /**
+   * Maneja el botón "Iniciar Partida".
+   * Solo permite avanzar si todos los jugadores están listos.
+   */
   const handleIniciarPartida = () => {
     if (allReady) {
       router.push("/(jugando)/jugando"); // Cambia a la pantalla de juego
@@ -53,17 +73,23 @@ export default function SalaPreviaScreen() {
     }
   };
 
-  // Botón "Volver"
+  /**
+   * Función para manejar el botón "Volver" y regresar a la pantalla anterior.
+   */
   const handleVolver = () => {
     router.back(); // Regresa a la pantalla anterior
   };
 
-  // Botón "Invitar Amigos"
+  /**
+   * Función para manejar la invitación de amigos a la sala.
+   */
   const handleInvitarAmigos = () => {
     router.push("/(sala)/invitaramigos");
   };
 
-  // Renderiza cada tarjeta de jugador
+  /**
+   * Renderiza cada tarjeta de jugador.
+   */
   const renderPlayerItem = ({ item }: { item: Player }) => {
     return (
       <View style={styles.playerCard}>
@@ -87,8 +113,9 @@ export default function SalaPreviaScreen() {
     );
   };
 
-  // Render para las tarjetas vacías (slots disponibles)
-  // Puedes cambiar la cantidad total de tarjetas que quieras mostrar
+  /**
+   * Crea espacios vacíos para representar los slots disponibles en la sala.
+   */
   const totalSlots = 8;
   const emptySlotsCount = totalSlots - players.length;
   const emptySlots = Array.from({ length: emptySlotsCount }, (_, i) => ({
@@ -157,17 +184,20 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#222",
   },
+
   headerContainer: {
     paddingTop: 30,
     paddingBottom: 10,
     alignItems: "center",
     backgroundColor: "#333",
   },
+
   roomName: {
     fontSize: 24,
     color: "#fff",
     fontWeight: "bold",
   },
+
   accountInfo: {
     flexDirection: "row",
     justifyContent: "flex-end",
@@ -175,16 +205,19 @@ const styles = StyleSheet.create({
     padding: 10,
     backgroundColor: "#444",
   },
+
   accountName: {
     color: "#fff",
     fontWeight: "bold",
     marginRight: 10,
   },
+
   playersContainer: {
     flex: 1,
     margin: 10,
     justifyContent: "center",
   },
+
   playerCard: {
     width: 80,
     height: 120,
@@ -196,69 +229,83 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+
   ownerCrown: {
     position: "absolute",
     top: 5,
     right: 5,
     fontSize: 20,
   },
+
   playerName: {
     color: "#fff",
     fontSize: 14,
     marginBottom: 5,
     fontWeight: "bold",
   },
+
   playerLevel: {
     color: "#ccc",
     fontSize: 12,
     marginBottom: 5,
   },
+
   readyButton: {
     paddingHorizontal: 8,
     paddingVertical: 5,
     borderRadius: 4,
   },
+
   ready: {
     backgroundColor: "green",
   },
+
   notReady: {
     backgroundColor: "red",
   },
+
   readyButtonText: {
     color: "#fff",
     fontSize: 12,
   },
+
   bottomButtons: {
     flexDirection: "row",
     justifyContent: "space-around",
     padding: 16,
     backgroundColor: "#333",
   },
+
   buttonBack: {
     backgroundColor: "#222",
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 4,
   },
+
   backText: {
     color: "#fff",
     fontWeight: "bold",
   },
+
   buttonInvite: {
     backgroundColor: "#222",
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 4,
   },
+
   inviteText: {
     color: "#fff",
     fontWeight: "bold",
   },
+
   buttonStart: {
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 4,
   },
+  
   startText: {
     color: "#fff",
     fontWeight: "bold",

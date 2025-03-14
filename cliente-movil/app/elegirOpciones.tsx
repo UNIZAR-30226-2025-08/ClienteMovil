@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react"; // Importar useState desde React
+import React, { useState } from "react"; // Importar useState desde React
 import {
   ImageBackground,
   StyleSheet,
@@ -6,10 +6,9 @@ import {
   View,
   Image,
   TouchableOpacity,
-  Alert,
   ActivityIndicator,
 } from "react-native";
-import { Link } from "expo-router";
+
 import { useRouter } from "expo-router";
 import { useFonts } from "expo-font";
 import Constants from "expo-constants";
@@ -17,6 +16,9 @@ import { useFocusEffect } from "@react-navigation/native";
 import { useCallback } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
+/**
+ * Mapa que relaciona claves de avatar con las imágenes correspondientes.
+ */
 const avatarMap: Record<string, any> = {
   avatar1: require("@/assets/images/imagenPerfil.webp"),
   avatar2: require("@/assets/images/imagenPerfil2.webp"),
@@ -28,24 +30,45 @@ const avatarMap: Record<string, any> = {
   avatar8: require("@/assets/images/imagenPerfil8.webp"),
 };
 
-
+/**
+ * Recursos de imágenes utilizados en la pantalla.
+ */
 const imagenPortada = require("@/assets/images/imagen-portada.png");
 const imagenPorDefecto = require("@/assets/images/imagenPerfil.webp");
 const imagenNotificaciones = require("@/assets/images/noti_icon.png");
 
-export default function opcionesScreen() {
-  // Recuperar la URL de backend desde Constants
+/**
+ * Pantalla de opciones principales del juego.
+ * 
+ * Permite acceder a diferentes secciones como jugar, ver roles, opciones,
+ * contacto y cerrar sesión.
+ * 
+ * @returns {JSX.Element | null} Pantalla de opciones del juego.
+ */
+export default function OpcionesScreen(): JSX.Element | null {
+
+  /**
+   * Recupera la URL del backend desde las configuraciones de la aplicación.
+   */
   const BACKEND_URL = Constants.expoConfig?.extra?.backendUrl;
   const router = useRouter();
 
-  // Estado para almacenar los datos del usuario
+  /**
+   * Estado que almacena la información del usuario.
+   */
   const [usuario, setUsuario] = useState<{
     nombre: string;
     avatar?: string;
   } | null>(null);
-  const [loading, setLoading] = useState(true); // Estado de carga
 
-  // Cargar los datos del usuario al entrar a la pantalla
+    /**
+   * Estado de carga para mostrar un indicador mientras se recuperan los datos.
+   */
+  const [loading, setLoading] = useState(true);
+
+  /**
+   * Carga los datos del usuario cuando la pantalla gana foco.
+   */
   useFocusEffect(
     useCallback(() => {
       const cargarUsuario = async () => {
@@ -71,6 +94,9 @@ export default function opcionesScreen() {
     }, [])
   );
 
+  /**
+   * Cierra la sesión del usuario eliminando los datos almacenados.
+   */
   const cerrarSesion = async () => {
     try {
       await AsyncStorage.removeItem("nombreUsuario");
@@ -82,11 +108,16 @@ export default function opcionesScreen() {
     }
   };
 
-  // Cargar la fuente GhostShadow
+  /**
+   * Carga la fuente personalizada `GhostShadow`.
+   */
   const [loaded] = useFonts({
     GhostShadow: require("@/assets/fonts/ghost-shadow.ttf"),
   });
 
+  /**
+   * Si la fuente aún no ha terminado de cargarse, se retorna `null` para evitar errores.
+   */
   if (!loaded) {
     return null; // Esperar a que se cargue la fuente
   }
@@ -100,26 +131,29 @@ export default function opcionesScreen() {
       >
         <View style={styles.overlay} />
 
+        {/* Muestra un indicador de carga si los datos aún están cargando */}
         {loading ? (
           <ActivityIndicator size="large" color="#fff" style={styles.loader} />
         ) : (
           <>
+
+            {/* Contenedor del perfil del usuario */}
             <TouchableOpacity
               onPress={() => router.push("/perfil")}
               style={styles.contenedorPerfil}
             >
-              
-            <Image
-              source={usuario?.avatar ? usuario.avatar : imagenPorDefecto}
-              style={styles.profileImage}
-            />
-
+              <Image
+                source={usuario?.avatar ? usuario.avatar : imagenPorDefecto}
+                style={styles.profileImage}
+              />
             </TouchableOpacity>
 
+            {/* Nombre del jugador */}
             <Text style={styles.nombrePlayer}>
               {usuario?.nombre || "Usuario"}
             </Text>
 
+            {/* Botón para jugar */}
             <TouchableOpacity
               style={styles.boton}
               onPress={() => router.push("/(partida)/elegirTipoPartida")}
@@ -127,6 +161,7 @@ export default function opcionesScreen() {
               <Text style={styles.textoBoton}>JUGAR</Text>
             </TouchableOpacity>
 
+            {/* Botón para ver cómo jugar */}
             <TouchableOpacity
               style={styles.boton}
               onPress={() => router.push("/(comoJugar)/comoJugar")}
@@ -134,6 +169,7 @@ export default function opcionesScreen() {
               <Text style={styles.textoBoton}>¿CÓMO JUGAR?</Text>
             </TouchableOpacity>
 
+            {/* Botón para ver los roles */}
             <TouchableOpacity
               style={styles.boton}
               onPress={() => router.push("/roles")}
@@ -141,6 +177,7 @@ export default function opcionesScreen() {
               <Text style={styles.textoBoton}>ROLES</Text>
             </TouchableOpacity>
 
+            {/* Botón para acceder a las opciones */}
             <TouchableOpacity
               style={styles.boton}
               onPress={() => router.push("/(opciones)/opciones")}
@@ -148,6 +185,7 @@ export default function opcionesScreen() {
               <Text style={styles.textoBoton}>OPCIONES</Text>
             </TouchableOpacity>
 
+            {/* Botón para ver la sección de contacto */}
             <TouchableOpacity
               style={styles.boton}
               onPress={() => router.push("/(contacto)/contacto")}
@@ -155,6 +193,7 @@ export default function opcionesScreen() {
               <Text style={styles.textoBoton}>CONTACTO</Text>
             </TouchableOpacity>
 
+            {/* Botón para cerrar sesión */}
             <TouchableOpacity
               style={styles.botonCerrarSesion}
               onPress={cerrarSesion}
@@ -164,6 +203,7 @@ export default function opcionesScreen() {
           </>
         )}
 
+        {/* Botón de notificaciones */}
         <TouchableOpacity
           style={styles.botonNotificaciones}
           onPress={() => router.push("/notificaciones")}
@@ -180,6 +220,8 @@ export default function opcionesScreen() {
   );
 }
 
+
+// Estilos de la pantalla
 const styles = StyleSheet.create({
   container: {
     flex: 1,

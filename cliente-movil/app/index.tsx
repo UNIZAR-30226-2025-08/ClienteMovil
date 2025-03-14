@@ -25,22 +25,41 @@ const imagenPortada = require('@/assets/images/imagen-portada.png');
 const imagenGoogle = require('@/assets/images/google-icon.png');
 const imagenFondoInicioSesion = require('@/assets/images/fondo-inicio-sesion.jpg');
 
-export default function App() {
-  // Recuperar la URL de backend desde Constants
+/**
+ * Pantalla de inicio de sesión de la aplicación.
+ * Permite a los usuarios ingresar sus credenciales para autenticarse.
+ * 
+ * @returns {JSX.Element} Pantalla de inicio de sesión.
+ */
+export default function App(): JSX.Element | null {
+  /**
+   * URL del backend obtenida de las constantes de Expo.
+   */
   const BACKEND_URL = Constants.expoConfig?.extra?.backendUrl;
 
+  /**
+   * Hook de navegación de Expo Router.
+   */
   const router = useRouter();
 
-  // 'correo' almacena el valor escrito en el campo correo y 
-  // 'setCorreo' es una funcion que actualiza el valor cuando el usuario escribe  
+  /**
+   * Estado para almacenar el correo electrónico ingresado por el usuario.
+   */ 
   const [correo, setCorreo] = useState('');
 
-  // 'contrasena' almacena el valor escrito en el campo correo y 
-  // 'setContrasena' es una funcion que actualiza el valor cuando el usuario escribe
+  /**
+   * Estado para almacenar la contraseña ingresada por el usuario.
+   */
   const [contrasena, setContrasena] = useState('');
 
+  /**
+   * Estado para controlar la visibilidad de la contraseña.
+   */
   const [secureText, setSecureText] = useState(true);
 
+  /**
+   * Hook para cargar fuentes personalizadas.
+   */
   const [loaded] = useFonts({
     GhostShadow: require('@/assets/fonts/ghost-shadow.ttf'),
   });
@@ -49,8 +68,11 @@ export default function App() {
     return null;
   }
 
-  // Función para enviar los datos al backend
-  const handleLogin = async () => {
+  /**
+   * Maneja la acción de iniciar sesión del usuario.
+   * Valida los campos de entrada y envía una solicitud al backend.
+   */
+  const handleLogin = async (): Promise<void> => {
 
     // Si el usuario no ha rellenado el campo de correo o contraseña
     // lanza un mensaje de que no se han rellenado los campos y no 
@@ -76,10 +98,12 @@ export default function App() {
       // Generar hash SHA256 en el cliente
       const hashContrasena = CryptoJS.SHA256(contrasena).toString(CryptoJS.enc.Hex);
 
+      // Enviar datos al backend
       const response = await axios.post(`${BACKEND_URL}/api/usuario/login`, {
         correo,
         contrasena: hashContrasena // Enviar la contraseña encriptada
       });
+
       if (response.status === 200) {
         const data = response.data;
 
@@ -183,6 +207,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+
   image: {
     width: '100%',
     height: '100%',
@@ -190,6 +215,7 @@ const styles = StyleSheet.create({
     resizeMode: 'cover',
     justifyContent: 'center',
   },
+
   title: {
     width: "90%",
     left: "6%",
@@ -204,6 +230,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 50,
   },
+
   imagenInicioSesion: {
     position: 'absolute',
     width: 320,
@@ -212,29 +239,34 @@ const styles = StyleSheet.create({
     bottom: "13%",
     borderRadius: 30,
   },
+
   formContainer: {
     position: 'absolute',
     width: '100%',
     bottom: "20%",
     alignItems: 'center',
   },
+
   tituloIniciarSesion: {
     fontFamily: 'GhostShadow',
     fontSize: 30,
     color: 'black',
   },
+
   textoCorreo: {
     fontSize: 16,
     fontWeight: 'bold',
     marginTop: 10,
     color: 'black',
   },
+  
   textoContrasena: {
     fontSize: 16,
     fontWeight: 'bold',
     marginTop: 10,
     color: 'black',
   },
+
   input: {
     width: '70%',
     height: 40,
@@ -243,16 +275,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     marginTop: 5,
   },
+
   textoRegistro: {
     fontSize: 14,
     fontWeight: 'bold',
     marginTop: 10,
     color: 'black',
   },
+
   linkRegistro: {
     color: 'blue',
     fontWeight: 'bold',
   },
+
   botonGoogle: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -264,14 +299,17 @@ const styles = StyleSheet.create({
     height: 35,
     elevation: 3,
   },
+
   imagenGoogle: {
     width: 20,
     height: 20,
     marginRight: 10,
   },
+
   textoGoogle: {
     fontSize: 16,
   },
+
   botonEntrar: {
     backgroundColor: '#008f39',
     justifyContent: 'center',
@@ -281,11 +319,13 @@ const styles = StyleSheet.create({
     marginTop: 15,
     borderRadius: 30,
   },
+
   textoEntrar: {
     fontWeight: 'bold',
     fontSize: 20,
     color: 'white',
   },
+  
   contrasenaContainer: {
     flexDirection: 'row',
     alignItems: 'center',

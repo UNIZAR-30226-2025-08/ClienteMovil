@@ -10,14 +10,25 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 
+/**
+ * Imágenes utilizadas en la pantalla de historial de partidas.
+ */
 const imagenFondoRoles = require("@/assets/images/fondo-roles.jpg");
-// Asegúrate de tener tu imagen de "botón atrás"
 const imagenAtras = require("@/assets/images/botonAtras.png");
 
-export default function HistorialPartidasScreen() {
+/**
+ * Pantalla que muestra el historial de partidas del usuario.
+ * Permite visualizar las partidas jugadas con sus resultados.
+ * 
+ * @returns {JSX.Element} Pantalla de historial de partidas.
+ */
+export default function HistorialPartidasScreen(): JSX.Element {
   const router = useRouter();
 
-  // Ejemplo de datos de partidas (puedes reemplazarlos por datos reales)
+  /**
+   * Estado que almacena el historial de partidas del usuario.
+   * Cada partida tiene una fecha y un resultado ("victoria" o "derrota").
+   */
   const [partidas, setPartidas] = useState([
     { id: 1, fecha: "2025-03-01", resultado: "victoria" },
     { id: 2, fecha: "2025-03-02", resultado: "derrota" },
@@ -25,12 +36,17 @@ export default function HistorialPartidasScreen() {
     { id: 4, fecha: "2025-03-04", resultado: "derrota" },
   ]);
 
+  /**
+   * Función para regresar a la pantalla anterior.
+   */
   const irAtras = () => {
     router.back();
   };
 
   return (
     <View style={styles.container}>
+
+      {/* Fondo con imagen de roles */}
       <ImageBackground
         source={imagenFondoRoles}
         resizeMode="cover"
@@ -38,8 +54,10 @@ export default function HistorialPartidasScreen() {
       >
         <View style={styles.overlay} />
 
+        {/* Título de la pantalla */}
         <Text style={styles.titulo}>Historial de Partidas</Text>
 
+        {/* Contenedor de la lista de partidas */}
         <ScrollView style={styles.scrollContainer}>
           {partidas.map((partida) => (
             <View key={partida.id} style={styles.partidaItem}>
@@ -67,10 +85,14 @@ export default function HistorialPartidasScreen() {
   );
 }
 
+/**
+ * Estilos de la pantalla de historial de partidas.
+ */
 const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+
   image: {
     width: "100%",
     height: "100%",
@@ -79,10 +101,12 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+
   overlay: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: "rgba(0, 0, 0, 0.4)",
   },
+
   titulo: {
     fontSize: 22,
     fontWeight: "bold",
@@ -90,35 +114,43 @@ const styles = StyleSheet.create({
     marginTop: 60,
     color: "#fff",
   },
+
   scrollContainer: {
     width: "90%",
   },
+
   partidaItem: {
     backgroundColor: "#f0f0f0",
     padding: 12,
     marginVertical: 8,
     borderRadius: 8,
   },
+
   fecha: {
     fontSize: 16,
     marginBottom: 4,
   },
+
   resultado: {
     fontSize: 18,
     fontWeight: "bold",
   },
+
   victoria: {
     color: "green",
   },
+
   derrota: {
     color: "red",
   },
+
   // Estilos para el nuevo botón de atrás con imagen
   containerAtras: {
     position: "absolute",
     bottom: 20,
     left: "46%",
   },
+  
   imageAtras: {
     width: 40,
     height: 40,

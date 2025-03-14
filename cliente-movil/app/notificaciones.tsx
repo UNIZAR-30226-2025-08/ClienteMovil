@@ -15,11 +15,30 @@ const imagenFondoRoles = require("@/assets/images/fondo-roles.jpg");
 // Reemplaza con la ruta de tu botón de atrás
 const imagenAtras = require("@/assets/images/botonAtras.png");
 
-export default function NotificacionesScreen() {
+/**
+ * Pantalla de notificaciones.
+ * 
+ * Permite a los usuarios ver notificaciones de invitaciones a partidas y solicitudes de amistad.
+ * Se pueden aceptar o denegar las notificaciones.
+ * 
+ * @returns {JSX.Element} Pantalla de notificaciones.
+ */
+export default function NotificacionesScreen(): JSX.Element {
+  /**
+   * Hook de navegación para manejar redirecciones dentro de la aplicación.
+   */
   const router = useRouter();
 
-  // Lista de notificaciones en estado local.
-  // Cada notificación tiene la estructura que necesites.
+  /**
+   * Estado que almacena la lista de notificaciones.
+   * 
+   * Cada notificación tiene:
+   * - `id`: Identificador único.
+   * - `tipo`: Tipo de notificación (ej. invitación a partida, solicitud de amistad).
+   * - `autor`: Nombre del usuario que genera la notificación.
+   * - `fecha`: Fecha en que se generó la notificación.
+   * - `mensaje`: Texto descriptivo de la notificación.
+   */
   const [notificaciones, setNotificaciones] = useState([
     {
       id: 1,
@@ -45,20 +64,30 @@ export default function NotificacionesScreen() {
     // Agrega las notificaciones que quieras...
   ]);
 
-  // Función para manejar la aceptación
+  /**
+   * Maneja la acción de aceptar una notificación.
+   * 
+   * @param {number} id - ID de la notificación que se acepta.
+   */
   const handleAceptar = (id: number) => {
     // Aquí podrías llamar a un backend, etc.
     // Por ahora, simplemente eliminamos la notificación de la lista:
     setNotificaciones((prev) => prev.filter((notif) => notif.id !== id));
   };
 
-  // Función para manejar la denegación
+  /**
+   * Maneja la acción de denegar una notificación.
+   * 
+   * @param {number} id - ID de la notificación que se deniega.
+   */
   const handleDenegar = (id: number) => {
     // Igual que en aceptar, simplemente eliminamos la notificación:
     setNotificaciones((prev) => prev.filter((notif) => notif.id !== id));
   };
 
-  // Navegar hacia atrás
+  /**
+   * Navega a la pantalla anterior.
+   */
   const irAtras = () => {
     router.back();
   };
