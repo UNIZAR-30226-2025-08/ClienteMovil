@@ -6,11 +6,30 @@ import {
   View,
   Image,
   TouchableOpacity,
+  ActivityIndicator,
 } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
+import { useCallback } from "react";
 import { Link } from "expo-router";
+import Constants from "expo-constants";
 import { useRouter } from "expo-router";
 import { useFonts } from "expo-font";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+
+/**
+ * Mapa que relaciona claves de avatar con las imágenes correspondientes.
+ */
+const avatarMap: Record<string, any> = {
+  avatar1: require("@/assets/images/imagenPerfil.webp"),
+  avatar2: require("@/assets/images/imagenPerfil2.webp"),
+  avatar3: require("@/assets/images/imagenPerfil3.webp"),
+  avatar4: require("@/assets/images/imagenPerfil4.webp"),
+  avatar5: require("@/assets/images/imagenPerfil5.webp"),
+  avatar6: require("@/assets/images/imagenPerfil6.webp"),
+  avatar7: require("@/assets/images/imagenPerfil7.webp"),
+  avatar8: require("@/assets/images/imagenPerfil8.webp"),
+};
+
 
 /**
  * Imágenes utilizadas en la pantalla.
@@ -27,6 +46,11 @@ const imagenNotificaciones = require("@/assets/images/noti_icon.png");
  */
 export default function ElegirPartidaScreen(): JSX.Element | null {
   /**
+   * Recupera la URL del backend desde las configuraciones de la aplicación.
+   */
+  const BACKEND_URL = Constants.expoConfig?.extra?.backendUrl;
+
+  /**
    * Estado para almacenar los datos del usuario.
    */
   const [usuario, setUsuario] = useState<{
@@ -34,39 +58,53 @@ export default function ElegirPartidaScreen(): JSX.Element | null {
     avatar?: string;
   } | null>(null);
 
+  /**
+   * Estado de carga para mostrar un indicador mientras se recuperan los datos.
+   */
   const [loading, setLoading] = useState(true); // Estado de carga
 
   /**
-   * Cargar los datos del usuario desde AsyncStorage cuando la pantalla se renderiza.
+   * Carga los datos del usuario cuando la pantalla gana foco.
    */
-  useEffect(() => {
-    const cargarUsuario = async () => {
-      try {
-        const nombre = await AsyncStorage.getItem("nombreUsuario");
-        const avatar = await AsyncStorage.getItem("avatarUsuario");
+  useFocusEffect(
+    useCallback(() => {
+      const cargarUsuario = async () => {
+        try {
+          const nombre = await AsyncStorage.getItem("nombreUsuario");
+          const avatarClave = await AsyncStorage.getItem("avatarUsuario");
 
-        setUsuario({
-          nombre: nombre ?? "Usuario", // Si es null, usa "Usuario"
-          avatar: avatar || undefined, // Si es null, usa undefined
-        });
-      } catch (error) {
-        console.error("Error al cargar usuario:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+          // Convertimos la clave en la imagen correspondiente en el mapa
+          const avatar = avatarClave ? avatarMap[avatarClave] : undefined;
 
-    cargarUsuario();
-  }, []);
+          setUsuario({
+            nombre: nombre ?? "Usuario",
+            avatar: avatar || undefined,
+          });
+        } catch (error) {
+          console.error("Error al cargar usuario:", error);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      cargarUsuario();
+    }, [])
+  );
 
   const router = useRouter();
-  // Cargar la fuente GhostShadow
+
+  /**
+   * Carga la fuente personalizada `GhostShadow`.
+   */
   const [loaded] = useFonts({
     GhostShadow: require("@/assets/fonts/ghost-shadow.ttf"),
   });
 
+  /**
+   * Si la fuente aún no ha terminado de cargarse, se retorna `null` para evitar errores.
+   */
   if (!loaded) {
-    return null; // Esperar a que se cargue la fuente
+    return null;
   }
 
   return (
@@ -80,21 +118,21 @@ export default function ElegirPartidaScreen(): JSX.Element | null {
       >
         <View style={styles.overlay} />
 
-        {/* Contenedor del avatar del usuario */}
-        <TouchableOpacity
-          onPress={() => router.push("/perfil")}
-          style={styles.contenedorPerfil}
-        >
-          <Image
-            source={
-              usuario?.avatar ? { uri: usuario.avatar } : imagenPorDefecto
-            }
-            style={styles.profileImage}
-          />
-        </TouchableOpacity>
+          {/* Contenedor del perfil del usuario */}
+          <TouchableOpacity
+              onPress={() => router.push("/perfil")}
+              style={styles.contenedorPerfil}
+            >
+              <Image
+                source={usuario?.avatar ? usuario.avatar : imagenPorDefecto}
+                style={styles.profileImage}
+              />
+            </TouchableOpacity>
 
-        {/* Nombre del usuario */}
-        <Text style={styles.nombrePlayer}>{usuario?.nombre || "Usuario"}</Text>
+            {/* Nombre del jugador */}
+            <Text style={styles.nombrePlayer}>
+              {usuario?.nombre || "Usuario"}
+            </Text>
 
         {/* Botón de Partida Rápida */}
         <Link href={"/jugando"} style={styles.textoPartida}>

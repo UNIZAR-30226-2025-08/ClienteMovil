@@ -119,7 +119,7 @@ export default function OpcionesScreen(): JSX.Element | null {
    * Si la fuente aún no ha terminado de cargarse, se retorna `null` para evitar errores.
    */
   if (!loaded) {
-    return null; // Esperar a que se cargue la fuente
+    return null;
   }
 
   return (
