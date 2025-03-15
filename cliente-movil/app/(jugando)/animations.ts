@@ -30,6 +30,10 @@
 import { Animated } from "react-native";
 import { CONSTANTES } from "./constants";
 
+/**
+ * Hook para gestionar animaciones en la aplicación.
+ * @returns {Object} Un conjunto de funciones para manejar animaciones.
+ */
 export const useAnimationManager = () => {
   const DURACION_ANIMACION = CONSTANTES.NUMERICAS.DURACION_ANIMACION;
   const RETRASO_ANIMACION = CONSTANTES.NUMERICAS.RETRASO_ANIMACION;
@@ -43,15 +47,36 @@ export const useAnimationManager = () => {
   const createAnimation = (initialValue = 0) => {
     const value = new Animated.Value(initialValue);
     
+    /**
+     * Inicia una animación de entrada.
+     * @param {number} [duration=DURACION_ANIMACION] - Duración de la animación en milisegundos.
+     * @returns {Animated.CompositeAnimation} La animación configurada.
+     */
     const fadeIn = (duration = DURACION_ANIMACION) => 
       Animated.timing(value, { toValue: 1, duration, useNativeDriver: true });
     
+    /**
+     * Inicia una animación de salida.
+     * @param {number} [duration=DURACION_ANIMACION] - Duración de la animación en milisegundos.
+     * @returns {Animated.CompositeAnimation} La animación configurada.
+     */
     const fadeOut = (duration = DURACION_ANIMACION) => 
       Animated.timing(value, { toValue: 0, duration, useNativeDriver: true });
     
+    /**
+     * Ejecuta una secuencia de animaciones en orden.
+     * @param {Animated.CompositeAnimation[]} animations - Lista de animaciones a ejecutar en orden.
+     * @returns {Animated.CompositeAnimation} La secuencia de animaciones configurada.
+     */
     const sequence = (animations: Animated.CompositeAnimation[]) => 
       Animated.sequence(animations);
 
+    /**
+     * Ejecuta una secuencia de animaciones con un retraso entre cada una.
+     * @param {Animated.CompositeAnimation[]} animations - Lista de animaciones a ejecutar.
+     * @param {number} [delay=RETRASO_ANIMACION] - Tiempo de retraso entre cada animación en milisegundos.
+     * @returns {Animated.CompositeAnimation} La secuencia de animaciones con retraso.
+     */
     const stagger = (animations: Animated.CompositeAnimation[], delay = RETRASO_ANIMACION) => 
       Animated.stagger(delay, animations);
 

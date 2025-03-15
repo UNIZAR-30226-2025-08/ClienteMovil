@@ -1,9 +1,17 @@
 /**
  * @file PantallaJugando - Componente principal de la pantalla de juego.
- * Maneja todo lo importante: estados, animaciones, temporizador y lógica de votación, chat y habilidades.
+ * @description Maneja la lógica del juego, incluyendo estados, animaciones, temporizador,
+ * votaciones, chat y habilidades.
  */
 import React, { useState, useEffect, useRef } from "react";
-import { View, ImageBackground, Text, Image, Animated, TouchableOpacity } from "react-native";
+import { 
+  View, 
+  ImageBackground, 
+  Text, 
+  Image, 
+  Animated, 
+  TouchableOpacity 
+} from "react-native";
 import { useFonts } from "expo-font";
 import { estilos } from "./jugando.styles";
 import { CONSTANTES, Rol } from "./constants";
@@ -15,17 +23,17 @@ import VotingCircle from "./components/VotingCircle";
 import { useAnimationManager } from "./animations";
 
 /**
- * Indica si el modo noche está activado globalmente.
+ * @constant MODO_NOCHE_GLOBAL - Indica si el juego está en modo noche.
  */
 export let MODO_NOCHE_GLOBAL = false;
 
 /**
- * Define el rol del usuario.
+ * @constant ROL_USUARIO - Define el rol del usuario en la partida.
  */
 export let ROL_USUARIO: Rol = "aldeano";
 
 /**
- * Bandera para controlar si el texto inicial ya se mostró.
+ * @constant TEXTO_YA_MOSTRADO - Bandera que indica si el texto de inicio ya se mostró.
  */
 let TEXTO_YA_MOSTRADO = false;
 
@@ -34,10 +42,9 @@ const { TEXTOS, NUMERICAS, IMAGENES, DIMENSIONES, COLORES } = CONSTANTES;
 const { ANCHO, ALTO } = DIMENSIONES;
 
 /**
- * PantallaJugando
- * Componente principal que gestiona la lógica de juego, animaciones y renderizado de elementos interactivos.
- *
- * @component
+ * @component PantallaJugando
+ * @description Componente principal que gestiona la lógica del juego, animaciones y renderizado
+ * de elementos interactivos en la pantalla de juego.
  */
 const PantallaJugando: React.FC = () => {
   // Estados locales para controlar visibilidad e interacciones.
@@ -59,8 +66,9 @@ const PantallaJugando: React.FC = () => {
   const animacionError = useRef(new Animated.Value(0)).current;
 
   /**
-   * Maneja la selección de jugadores, evitando que el usuario se seleccione a sí mismo
-   * @param index - Índice del jugador seleccionado
+   * @function handleSelectPlayer
+   * @description Maneja la selección de un jugador para votación.
+   * @param {number} index - Índice del jugador seleccionado.
    */
   const handleSelectPlayer = (index: number) => {
     if (index === indiceUsuario) {
@@ -71,7 +79,8 @@ const PantallaJugando: React.FC = () => {
   };
 
   /**
-   * Reinicia el temporizador al valor inicial y lo activa.
+   * @function reiniciarTemporizador
+   * @description Reinicia el temporizador al valor inicial y lo activa.
    */
   const reiniciarTemporizador = () => {
     setTiempoRestante(NUMERICAS.TIEMPO_INICIAL);
@@ -79,8 +88,8 @@ const PantallaJugando: React.FC = () => {
   };
 
   /**
-   * Incrementa el voto para el jugador seleccionado.
-   * Valida la selección y resetea el jugador seleccionado tras votar.
+   * @function voteForPlayer
+   * @description Incrementa el voto para el jugador seleccionado.
    */
   const voteForPlayer = () => {
     if (selectedPlayer === null) {
@@ -128,9 +137,9 @@ const PantallaJugando: React.FC = () => {
   const RETRASO_ANIMACION = NUMERICAS.RETRASO_ANIMACION;
 
   /**
-   * Cambia el modo noche/día usando animaciones.
-   *
-   * @param mode - true para activar modo noche, false para modo día.
+   * @function setNightDayMode
+   * @description Cambia entre modo noche y modo día.
+   * @param {boolean} mode - Indica si se debe activar el modo noche.
    */
   const [isNight, setIsNight] = useState(false);
   const setNightDayMode = (mode: boolean) => {
@@ -230,9 +239,10 @@ const PantallaJugando: React.FC = () => {
   }, []);
 
   /**
- * Muestra un mensaje de error temporal
- * @param message - Mensaje a mostrar
- */
+   * @function showError
+   * @description Muestra un mensaje de error temporalmente.
+   * @param {string} message - Mensaje de error a mostrar.
+   */
   const showError = (message: string) => {
     setErrorMessage(message);
     // Animación para mostrar y ocultar el mensaje

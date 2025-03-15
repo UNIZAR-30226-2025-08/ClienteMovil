@@ -12,6 +12,9 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 
+/**
+ * Definición de los roles disponibles en el juego con sus imágenes y cantidad inicial.
+ */
 const rolesData = [
   {
     id: 1,
@@ -45,28 +48,62 @@ const rolesData = [
   },
 ];
 
-const CrearSala = () => {
+/**
+ * Componente principal para la creación de una sala de juego.
+ * Permite configurar el nombre del servidor, la privacidad y la cantidad de roles.
+ *
+ * @returns {JSX.Element} Pantalla de creación de sala.
+ */
+const CrearSala = (): JSX.Element => {
   const router = useRouter();
+
+  // Estado para el nombre del servidor
   const [nombreServidor, setNombreServidor] = useState(
     'Servidor de "nombreJugador"'
   );
+
+  // Estado para la privacidad (Privada/Pública)
   const [privacidad, setPrivacidad] = useState("Privada");
+
+  // Estado para la contraseña de la sala (si es privada)
   const [password, setPassword] = useState("");
+
+  // Estado para la cantidad de cada rol en la partida
   const [rolesCantidad, setRolesCantidad] = useState(rolesData);
+
+  // Estado para controlar la visibilidad del popup de información del rol
   const [mostrarPopup, setMostrarPopup] = useState(false);
+
+  // Estado para el rol seleccionado en el popup
   const [rolSeleccionado, setRolSeleccionado] = useState<
     (typeof rolesData)[0] | null
   >(null);
 
+  /**
+   * Cálculo del número total de jugadores en la partida basado en la cantidad de roles.
+   */
   const numJugadores = useMemo(
     () => rolesCantidad.reduce((acc, rol) => acc + rol.cantidad, 0),
     [rolesCantidad]
   );
 
+  /**
+   * Alterna entre "Pública" y "Privada" la privacidad de la sala.
+   */
   const cambiarPrivacidad = () => {
     setPrivacidad(privacidad === "Pública" ? "Privada" : "Pública");
   };
 
+  /**
+   * Modifica la cantidad de un rol específico en la partida.
+   * Se aplican restricciones como:
+   * - Máximo de 3 lobos.
+   * - Máximo de 2 para roles especiales (Bruja, Cazador, Vidente).
+   * - Límite total de 18 jugadores.
+   *
+   * @param rol - El rol a modificar.
+   * @param incremento - Número de jugadores a sumar o restar.
+   */
   const modificarCantidad = (
     rol: (typeof rolesData)[0],
     incremento: number
@@ -90,6 +127,13 @@ const CrearSala = () => {
     );
   };
 
+  /**
+   * Determina si el botón "Crear Sala" debe estar deshabilitado.
+   * Requisitos:
+   * - Mínimo 5 jugadores.
+   * - Al menos un hombre lobo.
+   * - No puede haber más lobos que aldeanos.
+   */
   const botonCrearDeshabilitado = useMemo(() => {
     const lobos =
       rolesCantidad.find((r) => r.nombre === "Hombre Lobo")?.cantidad || 0;
@@ -104,8 +148,10 @@ const CrearSala = () => {
         source={require("@/assets/images/fondo-roles.jpg")}
         style={styles.image}
       >
+        {/* Título */}
         <Text style={styles.header}>Server Settings</Text>
 
+        {/* Input para el nombre del servidor */}
         <Text style={styles.label}>Nombre del Servidor:</Text>
         <TextInput
           style={styles.input}
@@ -114,8 +160,10 @@ const CrearSala = () => {
           placeholder="Introduce un nombre"
         />
 
+        {/* Número de jugadores */}
         <Text style={styles.label}>Número de jugadores: {numJugadores}</Text>
 
+        {/* Selector de privacidad */}
         <View style={styles.privacidadContainer}>
           <Text style={styles.label}>Tipo:</Text>
           <View style={styles.privacidadBotones}>
@@ -125,6 +173,7 @@ const CrearSala = () => {
           </View>
         </View>
 
+        {/* Input de contraseña si la sala es privada */}
         {privacidad === "Privada" && (
           <TextInput
             style={styles.input}
@@ -135,6 +184,7 @@ const CrearSala = () => {
           />
         )}
 
+        {/* Lista de roles disponibles */}
         <Text style={styles.label}>Roles asignados:</Text>
         {rolesCantidad.map((rol) => (
           <View key={rol.id} style={styles.rolContainer}>
@@ -160,12 +210,14 @@ const CrearSala = () => {
           </View>
         ))}
 
+        {/* Botón para crear la sala */}
         <Button
           title="Crear Sala"
           disabled={botonCrearDeshabilitado}
           onPress={() => router.push("/(sala)/sala")}
         />
 
+        {/* Modal de información del rol seleccionado */}
         <Modal visible={mostrarPopup} transparent animationType="slide">
           <View style={styles.modalContainer}>
             <Text style={styles.label}>{rolSeleccionado?.nombre}</Text>
@@ -186,40 +238,58 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     padding: 20,
   },
+
   header: {
     fontSize: 24,
     fontWeight: "bold",
     marginBottom: 10,
     color: "white",
   },
-  label: { color: "white", fontSize: 18, fontWeight: "bold", marginBottom: 10 },
+
+  label: { 
+    color: "white", 
+    fontSize: 18, 
+    fontWeight: "bold", 
+    marginBottom: 10 
+  },
+
   input: {
     borderWidth: 1,
     padding: 10,
     marginBottom: 10,
     backgroundColor: "white",
   },
+
   privacidadContainer: {
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 20,
   },
+
   privacidadBotones: {
     flexDirection: "row",
     alignItems: "center",
     marginLeft: 10,
   },
+
   rolContainer: {
     flexDirection: "row",
     alignItems: "center",
     marginVertical: 10,
   },
-  rolImagen: { width: 50, height: 50, marginRight: 10 },
+
+  rolImagen: { 
+    width: 50, 
+    height: 50, 
+    marginRight: 10 
+  },
+
   botonContainer: {
     flexDirection: "row",
     alignItems: "center",
     marginLeft: 10,
   },
+  
   modalContainer: {
     flex: 1,
     justifyContent: "center",

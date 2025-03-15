@@ -1,16 +1,31 @@
 /**
- * @file Estilos para la pantalla de juego. Define todos los componentes visuales.
+ * @file jugando.styles.ts
+ * @description Estilos para la pantalla de juego. Define la apariencia y disposición de los componentes visuales.
+ * 
  * @module jugando.styles
  */
+
 import { Dimensions, StyleSheet } from "react-native";
 
 // Para que la partida sea épicamente responsiva
+/** 
+ * @constant {number} ancho - Ancho de la pantalla en píxeles.
+ * @constant {number} alto - Alto de la pantalla en píxeles.
+ */
 const { width: ancho, height: alto } = Dimensions.get("window");
 
+/**
+ * @constant BORDE_RADIO_BOTON - Radio del borde de los botones, calculado en base al ancho de la pantalla.
+ * @constant TAMANIO_ICONO_BOTON - Tamaño del ícono dentro de los botones.
+ * @constant TAMANIO_TEMPORIZADOR - Tamaño del temporizador central.
+ */
 const BORDE_RADIO_BOTON = ancho * 0.0556;
 const TAMANIO_ICONO_BOTON = ancho * 0.1;
 const TAMANIO_TEMPORIZADOR = ancho * 0.15;
 
+/**
+ * @constant estilos - Contiene los estilos de la pantalla de juego.
+ */
 export const estilos = StyleSheet.create({
     contenedor: {
     flex: 1,
@@ -18,10 +33,12 @@ export const estilos = StyleSheet.create({
     alignItems: "center",
     paddingTop: alto * 0.07,
     },
+
     fondo: {
     width: "100%",
     height: "100%",
     },
+
     superposicion: {
     backgroundColor: "rgba(38, 37, 34, 0.7)",
     position: "absolute",
@@ -30,6 +47,7 @@ export const estilos = StyleSheet.create({
     right: 0,
     bottom: 0,
     },
+
     contenedorTexto: {
     position: "absolute",
     width: "80%",
@@ -37,6 +55,7 @@ export const estilos = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     },
+
     texto: {
     color: "white",
     fontSize: ancho * 0.09,
@@ -44,6 +63,7 @@ export const estilos = StyleSheet.create({
     textAlign: "center",
     paddingHorizontal: ancho * 0.05,
     },
+
     contenedorRol: {
     position: "absolute",
     justifyContent: "center",
@@ -52,6 +72,7 @@ export const estilos = StyleSheet.create({
     top: "35%",
     flexDirection: "column",
     },
+
     contenedorTextoRol: {
     width: "100%",
     alignItems: "center",
@@ -59,6 +80,7 @@ export const estilos = StyleSheet.create({
     minHeight: alto * 0.1,
     paddingHorizontal: ancho * 0.05,
     },
+
     textoRol: {
     fontSize: ancho * 0.1,
     color: "white",
@@ -68,17 +90,20 @@ export const estilos = StyleSheet.create({
     paddingVertical: alto * 0.005,
     includeFontPadding: true,
     },
+
     imagenRol: {
     width: ancho * 0.35,
     height: ancho * 0.35,
     marginBottom: alto * 0.05,
     },
+
     nombreRol: {
     textAlign: "center",
     fontSize: ancho * 0.12,
     fontFamily: "Corben",
     fontWeight: "bold",
     },
+
     textoInicio: {
     color: "white",
     fontSize: ancho * 0.1,
@@ -87,6 +112,7 @@ export const estilos = StyleSheet.create({
     top: "127%",
     paddingHorizontal: ancho * 0.05,
     },
+
     contenedorBotones: {
     position: "absolute",
     bottom: 0,
@@ -96,6 +122,7 @@ export const estilos = StyleSheet.create({
     justifyContent: "center",
     paddingHorizontal: ancho * 0.10,
     },
+
     botonHabilidad: {
     flex: 1,
     backgroundColor: "#262522",
@@ -107,6 +134,7 @@ export const estilos = StyleSheet.create({
     maxWidth: "45%",
     marginRight: ancho * 0.12,
     },
+
     botonChat: {
     flex: 1,
     backgroundColor: "#262522",
@@ -118,17 +146,20 @@ export const estilos = StyleSheet.create({
     maxWidth: "45%",
     marginLeft: ancho * 0.02,
     },
+
     iconoBoton: {
     width: TAMANIO_ICONO_BOTON,
     height: TAMANIO_ICONO_BOTON,
     marginBottom: ancho * 0.02,
     },
+
     textoBoton: {
     color: "white",
     fontSize: ancho * 0.05,
     fontWeight: "bold",
     textAlign: "center",
     },
+
     contenedorTopBar: {
     position: "absolute",
     top: alto * 0.06,
@@ -140,43 +171,52 @@ export const estilos = StyleSheet.create({
     paddingVertical: alto * 0.03,
     paddingHorizontal: ancho * 0.04,
     },
+
     seccionTopBarIzquierda: {
     flex: 1,
     alignItems: "flex-start",
     },
+
     seccionTopBarCentro: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
     },
+
     seccionTopBarDerecha: {
     flex: 1,
     alignItems: "flex-end",
     },
+
     contenedorTopBarItem: {
     flexDirection: "row",
     alignItems: "center",
     gap: ancho * 0.02,
     },
+
     iconoTopBar: {
     width: ancho * 0.1,
     height: ancho * 0.1,
     borderRadius: ancho * 0.02,
     },
+
     textoTopBarContainer: {
     flexDirection: "column",
     },
+
     textoTopBarTitulo: {
     color: "white",
     fontSize: ancho * 0.04,
     fontWeight: "bold",
     },
+
     textoTopBarSub: {
     color: "white",
     fontSize: ancho * 0.03,
     fontWeight: "bold",
     opacity: 0.9,
     },
+
     contenedorCirculo: {
     position: "absolute",
     top: "56%",
@@ -184,20 +224,24 @@ export const estilos = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     },
+
     contenedorJugador: {
     position: "absolute",
     alignItems: 'center',
     },
+
     contenedorImagenCirculo: {
     borderRadius: 50,
     overflow: "hidden",
     justifyContent: 'center',
     alignItems: 'center',
     },
+
     imagenCirculo: {
     width: "100%",
     height: "100%",
     },
+
     contenedorVotos: {
     position: 'absolute',
     bottom: -alto * 0.025,
@@ -206,18 +250,21 @@ export const estilos = StyleSheet.create({
     alignItems: 'center',
     gap: ancho * 0.005,
     },
+
     barraVoto: {
     width: ancho * 0.008,
     height: alto * 0.015,
     backgroundColor: 'black',
     borderRadius: ancho * 0.002,
     },
+
     contenedorTemporizador: {
     position: "absolute",
     top: alto * 0.2,
     left: ancho * 0.05,
     zIndex: 2,
     },
+
     circuloTemporizador: {
     width: TAMANIO_TEMPORIZADOR,
     height: TAMANIO_TEMPORIZADOR,
@@ -226,11 +273,13 @@ export const estilos = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     },
+
     textoTemporizador: {
     color: "white",
     fontSize: ancho * 0.05,
     fontWeight: "bold",
     },
+
     contenedorBotonesDerecha: {
     position: "absolute",
     top: alto * 0.2,
@@ -238,6 +287,7 @@ export const estilos = StyleSheet.create({
     zIndex: 2,
     gap: ancho * 0.02,
     },
+
     botonAccion: {
     backgroundColor: "#262522",
     paddingVertical: alto * 0.02,
@@ -246,9 +296,11 @@ export const estilos = StyleSheet.create({
     alignItems: "center",
     minWidth: ancho * 0.33,
     },
+
     botonVotar: {
     backgroundColor: "#262522",
     },
+
     contenedorChat: {
     position: "absolute",
     zIndex: 9999,
@@ -267,6 +319,7 @@ export const estilos = StyleSheet.create({
     shadowOpacity: 0.5,
     shadowRadius: ancho * 0.02,
     },
+
     botonCerrarChat: {
     position: "absolute",
     top: alto * 0.02,
@@ -280,6 +333,7 @@ export const estilos = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     },
+
     textoCerrarChat: {
     color: "white",
     fontSize: ancho * 0.07,
@@ -289,6 +343,7 @@ export const estilos = StyleSheet.create({
     textAlignVertical: "center",
     marginBottom: -alto * 0.005,
     },
+
     tituloChat: {
     color: "white",
     fontSize: ancho * 0.07,
@@ -297,16 +352,19 @@ export const estilos = StyleSheet.create({
     marginTop: alto * 0.02,
     fontFamily: "Corben",
     },
+
     separadorChat: {
     height: 1,
     backgroundColor: "white",
     marginVertical: alto * 0.02,
     },
+
     contenedorMensajesChat: {
     flexGrow: 1,
     justifyContent: "flex-end",
     paddingBottom: alto * 0.02,
     },
+
     mensajeChat: {
     color: "white",
     fontSize: ancho * 0.04,
@@ -315,11 +373,13 @@ export const estilos = StyleSheet.create({
     lineHeight: ancho * 0.05,
     includeFontPadding: true,
     },
+
     contenedorEntradaChat: {
     flexDirection: "row",
     alignItems: "center",
     marginTop: alto * 0.02,
     },
+
     entradaChat: {
     flex: 1,
     height: alto * 0.07,
@@ -332,6 +392,7 @@ export const estilos = StyleSheet.create({
     fontSize: ancho * 0.04,
     fontFamily: "Corben",
     },
+
     botonEnviarChat: {
     backgroundColor: "green",
     height: alto * 0.07,
@@ -341,12 +402,14 @@ export const estilos = StyleSheet.create({
     borderWidth: ancho * 0.002,
     marginLeft: ancho * 0.02,
     },
+
     textoBotonEnviarChat: {
     color: "white",
     fontWeight: "bold",
     fontSize: ancho * 0.04,
     fontFamily: "Corben",
     },
+
     contenedorHabilidad: {
     position: "absolute",
     zIndex: 9999,
@@ -365,6 +428,7 @@ export const estilos = StyleSheet.create({
     shadowOpacity: 0.5,
     shadowRadius: ancho * 0.02,
     },
+
     botonCerrarHabilidad: {
     position: "absolute",
     top: alto * 0.02,
@@ -378,6 +442,7 @@ export const estilos = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     },
+
     textoCerrarHabilidad: {
     color: "white",
     fontSize: ancho * 0.07,
@@ -387,17 +452,20 @@ export const estilos = StyleSheet.create({
     textAlignVertical: "center",
     marginBottom: -alto * 0.005,
     },
+
     contenedorTituloHabilidad: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     marginTop: alto * 0.02,
     },
+
     iconoHabilidadPopup: {
     width: ancho * 0.12,
     height: ancho * 0.12,
     marginRight: ancho * 0.02,
     },
+
     tituloHabilidad: {
     color: "white",
     fontSize: ancho * 0.07,
@@ -405,16 +473,19 @@ export const estilos = StyleSheet.create({
     textAlign: "center",
     fontFamily: "Corben",
     },
+    
     separadorHabilidad: {
     height: 1,
     backgroundColor: "white",
     marginVertical: alto * 0.02,
     },
+
     contenedorInfoHabilidad: {
     flexGrow: 1,
     justifyContent: "flex-start",
     paddingBottom: alto * 0.02,
     },
+
     textoHabilidad: {
     color: "white",
     fontSize: ancho * 0.05,
@@ -423,6 +494,7 @@ export const estilos = StyleSheet.create({
     lineHeight: ancho * 0.06,
     includeFontPadding: true,
     },
+
     textoRecuerda: {
     color: "white",
     fontSize: ancho * 0.045,
@@ -431,6 +503,7 @@ export const estilos = StyleSheet.create({
     lineHeight: ancho * 0.055,
     includeFontPadding: true,
     },
+
     contenedorError: {
     position: 'absolute',
     top: alto * 0.08,
@@ -446,6 +519,7 @@ export const estilos = StyleSheet.create({
         width: ancho * 0.005, 
         height: alto * 0.005 
     },
+
     shadowOpacity: 0.25,
     shadowRadius: alto * 0.005,
     maxWidth: ancho * 0.9,
@@ -453,6 +527,7 @@ export const estilos = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     },
+    
     textoError: {
     color: 'white',
     fontFamily: 'Corben',

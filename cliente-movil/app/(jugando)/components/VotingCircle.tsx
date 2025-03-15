@@ -11,10 +11,12 @@
  * @param {number | null} props.selectedPlayer - Índice del jugador actualmente seleccionado.
  * @param {Function} props.onSelectPlayer - Función para manejar la selección de un jugador.
  */
+
 import React from "react";
 import { View, Image, TouchableOpacity } from "react-native";
 import { estilos } from "../jugando.styles";
 import { CONSTANTES } from "../constants";
+
 const { NUMERICAS, DIMENSIONES, COLORES } = CONSTANTES;
 const { ANCHO, ALTO } = DIMENSIONES;
 
@@ -25,6 +27,11 @@ interface VotingCircleProps {
   onSelectPlayer: (index: number) => void;
 }
 
+/**
+ * Componente funcional que muestra los jugadores en un círculo con su respectiva votación.
+ *
+ * @returns {JSX.Element} Círculo con imágenes de los jugadores y sus votos representados como barras.
+ */
 const VotingCircle: React.FC<VotingCircleProps> = ({ imagenes, votes, selectedPlayer, onSelectPlayer }) => {
   // Calcula el radio máximo del círculo basado en las dimensiones mínimas de la pantalla y un multiplicador.
   const radioMaximoCalculado = Math.min(ANCHO, ALTO) * NUMERICAS.MULTIPLICADOR_RADIO;

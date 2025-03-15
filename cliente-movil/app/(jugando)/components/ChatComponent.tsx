@@ -8,18 +8,37 @@
  * @param {Function} props.onClose - Función que se ejecuta al cerrar el chat.
  */
 import React from "react";
-import { Animated, Text, TouchableOpacity, TextInput, ScrollView, View } from "react-native";
+import { 
+  Animated, 
+  Text, 
+  TouchableOpacity, 
+  TextInput, 
+  ScrollView, 
+  View 
+} from "react-native";
+
 import { estilos } from "../jugando.styles";
 import { CONSTANTES } from "../constants";
+
 const { TEXTOS, DIMENSIONES } = CONSTANTES;
 const { ALTO, ANCHO } = DIMENSIONES;
 
+/**
+ * @interface ChatComponentProps
+ * Define las propiedades que recibe el componente ChatComponent.
+ */
 interface ChatComponentProps {
   mensajes: Array<{ id: number; texto: string }>;
   posicionChat: Animated.Value;
   onClose: () => void;
 }
 
+/**
+ * Componente funcional que representa el chat animado.
+ *
+ * @param {ChatComponentProps} props - Propiedades del componente.
+ * @returns {JSX.Element} Componente de chat animado.
+ */
 const ChatComponent: React.FC<ChatComponentProps> = ({ mensajes, posicionChat, onClose }) => (
   // Vista principal animada que se desliza verticalmente usando el valor de posicionChat
   <Animated.View style={[estilos.contenedorChat, { transform: [{ translateY: posicionChat }] }]}>

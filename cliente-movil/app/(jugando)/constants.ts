@@ -1,13 +1,22 @@
 /**
- * @file Constantes globales de la partida.
- * - La mayoría están **hardcoded por diseño**.
- * - Otras están **hardcoded temporalmente** por falta de integración con el backend (marcadas con "TODO").
+ * @file constants.ts
+ * @description Definición de constantes globales utilizadas en la partida.
+ * - Algunas constantes están **hardcoded por diseño**.
+ * - Otras están **hardcoded temporalmente** debido a la falta de integración con el backend (marcadas con "TODO").
+ * 
  * @module constants
  */
 import { Dimensions } from "react-native";
 
+/** 
+ * @constant {number} ANCHO - Ancho de la pantalla en píxeles.
+ * @constant {number} ALTO - Alto de la pantalla en píxeles.
+ */
 const { width: ANCHO, height: ALTO } = Dimensions.get("window");
 
+/**
+ * @constant CONSTANTES - Contiene todos los valores globales utilizados en la partida.
+ */
 export const CONSTANTES = {
   TEXTOS: {
     INICIAL: "AMANECE EN LA ALDEA, TODO EL MUNDO DESPIERTA Y ABRE LOS OJOS",
@@ -23,6 +32,10 @@ export const CONSTANTES = {
     DIA: "DÍA 2", // TODO
     ESTADO_PUEBLO: "5/6 vivos",
     ESTADO_LOBOS: "2/2 vivos",
+
+    /** 
+     * @constant CHAT - Contiene los textos utilizados en el chat.
+     */
     CHAT: {
       PLACEHOLDER: "Enviar un mensaje",
       ENVIAR: "Enviar",
@@ -35,6 +48,9 @@ export const CONSTANTES = {
     },
   },
 
+  /** 
+   * @constant NUMERICAS - Contiene valores numéricos relacionados con la lógica del juego.
+   */
   NUMERICAS: {
     CANTIDAD_IMAGENES: 8,
     TIEMPO_INICIAL: 60, // segundos
@@ -47,6 +63,9 @@ export const CONSTANTES = {
     TAMANIO_TEMPORIZADOR: ANCHO * 0.15,
   },
 
+  /** 
+   * @constant IMAGENES - Contiene referencias a los recursos gráficos utilizados en la partida.
+   */
   IMAGENES: {
     FONDO: require("@/assets/images/fondo-partida.png"),
     LOBO_ROL: require("@/assets/images/hombre-lobo-icon.jpeg"),
@@ -59,6 +78,9 @@ export const CONSTANTES = {
     CAZADOR: require("@/assets/images/cazador-icon.jpeg"),
   },
 
+  /** 
+   * @constant DIMENSIONES - Define dimensiones basadas en la pantalla del dispositivo.
+   */
   DIMENSIONES: {
     ANCHO,
     ALTO,
@@ -66,6 +88,9 @@ export const CONSTANTES = {
     TAMANIO_IMAGEN: Math.min(ANCHO, ALTO) * 0.13,
   },
 
+  /** 
+   * @constant COLORES - Define la paleta de colores utilizada en la UI.
+   */
   COLORES: {
     SELECCIONADO: "#33FF00",
     NOCTURNO: "rgba(38, 37, 34, 0.7)",
@@ -74,4 +99,8 @@ export const CONSTANTES = {
   }
 };
 
+/**
+ * @typedef {"aldeano" | "lobo" | "bruja" | "cazador"} Rol
+ * @description Define los posibles roles en la partida.
+ */
 export type Rol = "aldeano" | "lobo" | "bruja" | "cazador";

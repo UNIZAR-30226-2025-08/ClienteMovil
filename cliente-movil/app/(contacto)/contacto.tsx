@@ -1,16 +1,33 @@
-import React, { useState, useEffect } from 'react';  // Importar useState desde React
-import { ImageBackground, StyleSheet, Text, View, Image, TouchableOpacity, TextInput, Alert } from 'react-native';
-import { Link, useRouter } from 'expo-router';
-
+import React from 'react';  // Importar useState desde React
+import { 
+  ImageBackground, 
+  StyleSheet, 
+  Text, 
+  View, 
+  Image, 
+  TouchableOpacity, 
+  TextInput, 
+  Alert 
+} from 'react-native';
+import { useRouter } from 'expo-router';
 import { useFonts } from 'expo-font';
 
 
+/**
+ * Importación de imágenes utilizadas en la pantalla de contacto.
+ */
 const imagenFondoRoles = require('@/assets/images/fondo-roles.jpg');
 const imagenContacto = require('@/assets/images/logo-soporte-tecnico.png');
 const imagenPapiro = require('@/assets/images/papiro.png')
 const imagenAtras = require('@/assets/images/botonAtras.png');
 
-export default function contactoScreen() {
+/**
+ * Pantalla de contacto.
+ * Permite a los usuarios enviar un mensaje de contacto con su nombre, correo y asunto.
+ *
+ * @returns {JSX.Element} Pantalla de contacto.
+ */
+export default function ContactoScreen(): JSX.Element | null {
 
   const router = useRouter();  // Usamos useRouter para manejar la navegación
 
@@ -23,6 +40,9 @@ export default function contactoScreen() {
     return null; // Esperar a que se cargue la fuente
   }
 
+  /**
+   * Función para volver a la pantalla anterior.
+   */
   const irAtras = () => {
     router.back();  // Regresa a la pantalla anterior
   };
@@ -39,19 +59,24 @@ export default function contactoScreen() {
         <Text style={styles.tituloContacto}>CONTACTO</Text>
         <Image source={imagenContacto} style={styles.imageContacto}></Image>
 
+        {/* Campo de entrada para el nombre */}
         <Text style={styles.textoNombre}>Nombre</Text>
         <TextInput style={styles.smallInput} placeholder='Tu nombre' placeholderTextColor="#444" />
 
+        {/* Campo de entrada para el correo electrónico */}
         <Text style={styles.textoCorreo}>Correo electrónico</Text>
         <TextInput style={styles.smallInput} placeholder='Tu correo' placeholderTextColor="#444" />
 
+        {/* Campo de entrada para el asunto */}
         <Text style={styles.textoAsunto}>Asunto</Text>
         <TextInput style={styles.bigInput} placeholder='Asunto' placeholderTextColor="#444" />
 
+        {/* Botón de enviar mensaje */}
         <TouchableOpacity style={styles.botonEnviar} onPress={ () =>Alert.alert("Reporte enviado")}>
             <Text style={styles.textoEnviar}>ENVIAR</Text>
         </TouchableOpacity>
 
+        {/* Botón de regresar a la pantalla anterior */}
         <TouchableOpacity style={styles.containerAtras} onPress={irAtras}>
             <Image source={imagenAtras} style={styles.imageAtras} />
         </TouchableOpacity>
@@ -61,6 +86,9 @@ export default function contactoScreen() {
   );
 }
 
+/**
+ * Estilos para la pantalla de contacto.
+ */
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -69,8 +97,8 @@ const styles = StyleSheet.create({
 
   containerAtras: {
     position: 'absolute',
-    bottom: 20,  // Mantén este valor para la distancia desde el fondo
-    left: '44%',  // Centra el contenedor horizontalmente
+    bottom: 20,  
+    left: '44%',  
 
   },
 
@@ -88,13 +116,13 @@ const styles = StyleSheet.create({
   },
 
   overlay: {
-    ...StyleSheet.absoluteFillObject,  // Cubre toda el área de la imagen
-    backgroundColor: 'rgba(0, 0, 0, 0.4)', // Fondo negro semitransparente, puedes ajustar la opacidad
+    ...StyleSheet.absoluteFillObject,  
+    backgroundColor: 'rgba(0, 0, 0, 0.4)', 
   },
 
   imageContacto: {
-    width: 170,  // Ajusta el tamaño de la imagen
-    height: 170, // Ajusta el tamaño de la imagen
+    width: 170,  
+    height: 170, 
     left: "28%",
     top: "15%",
     position: 'absolute',
@@ -102,15 +130,15 @@ const styles = StyleSheet.create({
   },
 
   tituloContacto: {
-    position: 'absolute',  // Para posicionarlo de forma absoluta
-    top: '5%',  // Colocamos el texto justo después de la imagen
-    left: '36%',  // Centrado en el eje horizontal
-    marginTop: 20,  // Ajustamos el margen para que esté justo debajo de la imagen (ajustamos este valor según el tamaño de la imagen)
-    marginLeft: -60,  // Ajuste horizontal para centrar el texto
-    color: 'white',  // Color del texto
-    fontSize: 45,  // Tamaño del texto
-    fontWeight: 'bold',  // Estilo del texto
-    textAlign: 'center',  // Alineamos el texto al centro
+    position: 'absolute',  
+    top: '5%',  
+    left: '36%',  
+    marginTop: 20,  
+    marginLeft: -60,  
+    color: 'white', 
+    fontSize: 45, 
+    fontWeight: 'bold', 
+    textAlign: 'center',  
   },
 
   textoNombre: {

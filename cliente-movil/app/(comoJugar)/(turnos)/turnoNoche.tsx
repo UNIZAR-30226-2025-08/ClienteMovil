@@ -1,16 +1,29 @@
-import React, { useState, useEffect } from 'react';  // Importar useState desde React
-import { ImageBackground, StyleSheet, Text, View, Image, TouchableOpacity, Alert } from 'react-native';
-import { Link, useRouter } from 'expo-router';
-
+import React from 'react';  // Importar useState desde React
+import { 
+  ImageBackground, 
+  StyleSheet, 
+  Text, 
+  View, 
+  Image, 
+  TouchableOpacity } from 'react-native';
+import { useRouter } from 'expo-router';
 import { useFonts } from 'expo-font';
 
-
+/**
+ * Importación de imágenes utilizadas en la pantalla del turno de noche.
+ */
 const imagenFondoRoles = require('@/assets/images/fondo-roles.jpg');
 const imagenLuna = require('@/assets/images/imagen-luna.png');
 const imagenPapiro = require('@/assets/images/papiro.png')
 const imagenAtras = require('@/assets/images/botonAtras.png');
 
-export default function turnoNocheScreen() {
+/**
+ * Pantalla del turno de noche en el juego.
+ * Explica las mecánicas que ocurren durante la noche en la partida.
+ *
+ * @returns {JSX.Element} Pantalla explicativa del turno de noche.
+ */
+export default function TurnoNocheScreen(): JSX.Element | null {
 
   const router = useRouter();  // Usamos useRouter para manejar la navegación
 
@@ -23,6 +36,9 @@ export default function turnoNocheScreen() {
     return null; // Esperar a que se cargue la fuente
   }
 
+  /**
+   * Función para regresar a la pantalla anterior.
+   */
   const irAtras = () => {
     router.back();  // Regresa a la pantalla anterior
   };
@@ -34,38 +50,48 @@ export default function turnoNocheScreen() {
         resizeMode='cover'
         style={styles.image}
       >
+        <View style={styles.overlay} />
 
-      <View style={styles.overlay} />
-      <Text style={styles.tituloTurnoNoche}>NOCHE</Text>
-      <Image source={imagenLuna} style={styles.imageLuna}></Image>
-      <Image source={imagenPapiro} style={styles.imagePapiro}></Image>
-      <Text style={styles.textoTurnoNoche}>
-        Todos los jugadores tienen los ojos cerrados, salvo aquellos 
-        que van siendo llamados por el narrador y actúan en silencio.
-        Orden de actuar durante la noche: vidente, hombres lobo, bruja.
-        Vidente: elige un jugador y el Narrador le mostrará la carta de dicho jugador.
-        Hombres Lobo: los hombres lobo abrirán los ojos para elegir a su próxima víctima, 
-        cuya muerte se hará efectiva y anunciada en el próximo turno de día. Si no hay 
-        unanimidad en la designación de la víctima, no hay muerte, por lo que dispondrán 
-        de un tiempo limitado para elegir a su víctima (a discreción del Narrador).
-        Bruja: El Narrador le señala el jugador que está a punto de morir en esa noche 
-        (si lo hay) y ésta decidirá qué hacer. Puede salvarlo, 
-        gastando su Poción de la Vida, o dejarlo morir. A continuación, 
-        la bruja tiene la opción de gastar su Poción de la Muerte para eliminar 
-        al jugador que desee. Ambas pociones son de solo un uso durante la partida.
-        En caso de que suceda la muerte del Cazador: El Narrador le comunicará que ha 
-        sido asesinado y el cazador podrá eliminar a un jugador de su elección.
-      </Text>
+      {/* Título de la pantalla */}
+        <Text style={styles.tituloTurnoNoche}>NOCHE</Text>
 
-      <TouchableOpacity style={styles.containerAtras} onPress={irAtras}>
-            <Image source={imagenAtras} style={styles.imageAtras} />
-      </TouchableOpacity>
+        {/* Imagen representativa del turno de noche */}
+        <Image source={imagenLuna} style={styles.imageLuna}></Image>
 
+        {/* Imagen de papiro para dar contexto al texto descriptivo */}
+        <Image source={imagenPapiro} style={styles.imagePapiro}></Image>
+
+        {/* Descripción de la fase nocturna */}
+        <Text style={styles.textoTurnoNoche}>
+          Todos los jugadores tienen los ojos cerrados, salvo aquellos 
+          que van siendo llamados por el narrador y actúan en silencio.
+          Orden de actuar durante la noche: vidente, hombres lobo, bruja.
+          Vidente: elige un jugador y el Narrador le mostrará la carta de dicho jugador.
+          Hombres Lobo: los hombres lobo abrirán los ojos para elegir a su próxima víctima, 
+          cuya muerte se hará efectiva y anunciada en el próximo turno de día. Si no hay 
+          unanimidad en la designación de la víctima, no hay muerte, por lo que dispondrán 
+          de un tiempo limitado para elegir a su víctima (a discreción del Narrador).
+          Bruja: El Narrador le señala el jugador que está a punto de morir en esa noche 
+          (si lo hay) y ésta decidirá qué hacer. Puede salvarlo, 
+          gastando su Poción de la Vida, o dejarlo morir. A continuación, 
+          la bruja tiene la opción de gastar su Poción de la Muerte para eliminar 
+          al jugador que desee. Ambas pociones son de solo un uso durante la partida.
+          En caso de que suceda la muerte del Cazador: El Narrador le comunicará que ha 
+          sido asesinado y el cazador podrá eliminar a un jugador de su elección.
+        </Text>
+
+        {/* Botón para regresar a la pantalla anterior */}
+        <TouchableOpacity style={styles.containerAtras} onPress={irAtras}>
+              <Image source={imagenAtras} style={styles.imageAtras} />
+        </TouchableOpacity>
       </ImageBackground>
     </View>
   );
 }
 
+/**
+ * Estilos para la pantalla del turno de noche.
+ */
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -74,8 +100,8 @@ const styles = StyleSheet.create({
 
   containerAtras: {
     position: 'absolute',
-    bottom: 20,  // Mantén este valor para la distancia desde el fondo
-    left: '46%',  // Centra el contenedor horizontalmente
+    bottom: 20,  
+    left: '46%', 
 
   },
 
@@ -101,13 +127,13 @@ const styles = StyleSheet.create({
   },
 
   overlay: {
-    ...StyleSheet.absoluteFillObject,  // Cubre toda el área de la imagen
-    backgroundColor: 'rgba(0, 0, 0, 0.4)', // Fondo negro semitransparente, puedes ajustar la opacidad
+    ...StyleSheet.absoluteFillObject,  
+    backgroundColor: 'rgba(0, 0, 0, 0.4)', 
   },
 
   imageLuna: {
-    width: 170,  // Ajusta el tamaño de la imagen
-    height: 170, // Ajusta el tamaño de la imagen
+    width: 170,  
+    height: 170,
     left: "30%",
     top: "15%",
     position: 'absolute',
@@ -115,15 +141,15 @@ const styles = StyleSheet.create({
   },
 
   tituloTurnoNoche: {
-    position: 'absolute',  // Para posicionarlo de forma absoluta
-    top: '5%',  // Colocamos el texto justo después de la imagen
-    left: '47%',  // Centrado en el eje horizontal
-    marginTop: 20,  // Ajustamos el margen para que esté justo debajo de la imagen (ajustamos este valor según el tamaño de la imagen)
-    marginLeft: -60,  // Ajuste horizontal para centrar el texto
-    color: 'white',  // Color del texto
-    fontSize: 45,  // Tamaño del texto
-    fontWeight: 'bold',  // Estilo del texto
-    textAlign: 'center',  // Alineamos el texto al centro
+    position: 'absolute',  
+    top: '5%',  
+    left: '47%',  
+    marginTop: 20,  
+    marginLeft: -60,  
+    color: 'white', 
+    fontSize: 45, 
+    fontWeight: 'bold', 
+    textAlign: 'center',  
   },
 
   textoTurnoNoche: {

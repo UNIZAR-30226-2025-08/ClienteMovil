@@ -156,8 +156,8 @@ const styles = StyleSheet.create({
   },
 
   overlay: {
-    ...StyleSheet.absoluteFillObject, // Cubre toda el área de la imagen
-    backgroundColor: "rgba(0, 0, 0, 0.4)", // Fondo negro semitransparente, puedes ajustar la opacidad
+    ...StyleSheet.absoluteFillObject, 
+    backgroundColor: "rgba(0, 0, 0, 0.4)", 
   },
 
   profileImage: {
@@ -168,26 +168,26 @@ const styles = StyleSheet.create({
 
   nombrePlayer: {
     position: "absolute",
-    top: 205, // Ajusta la distancia desde la parte superior
-    alignSelf: "center", // Centra horizontalmente
+    top: 205, 
+    alignSelf: "center", 
     color: "white",
     fontSize: 20,
     fontWeight: "bold",
     textAlign: "center",
-    width: "100%", // Asegura que el texto se centre correctamente
+    width: "100%", 
   },
 
   textoPartida: {
     fontSize: 20,
     fontWeight: "bold",
     color: "white",
-    textShadowColor: "rgba(0, 0, 0, 0.75)", // Sombra de texto
+    textShadowColor: "rgba(0, 0, 0, 0.75)", 
     textShadowOffset: { width: 2, height: 2 },
     textShadowRadius: 10,
     textAlign: "center",
     backgroundColor: "rgba(255, 255, 255, 0.6)",
-    position: "absolute", // Fija el contenedor en la parte inferior
-    top: 250, // Ajusta la distancia desde la parte inferior
+    position: "absolute", 
+    top: 250, 
     width: "100%",
     paddingVertical: 10,
     borderRadius: 20,
@@ -197,13 +197,13 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "bold",
     color: "white",
-    textShadowColor: "rgba(0, 0, 0, 0.75)", // Sombra de texto
+    textShadowColor: "rgba(0, 0, 0, 0.75)", 
     textShadowOffset: { width: 2, height: 2 },
     textShadowRadius: 10,
     textAlign: "center",
     backgroundColor: "rgba(255, 255, 255, 0.6)",
-    position: "absolute", // Fija el contenedor en la parte inferior
-    top: 325, // Ajusta la distancia desde la parte inferior
+    position: "absolute", 
+    top: 325, 
     width: "100%",
     paddingVertical: 10,
     borderRadius: 20,
@@ -213,13 +213,13 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "bold",
     color: "white",
-    textShadowColor: "rgba(0, 0, 0, 0.75)", // Sombra de texto
+    textShadowColor: "rgba(0, 0, 0, 0.75)", 
     textShadowOffset: { width: 2, height: 2 },
     textShadowRadius: 10,
     textAlign: "center",
     backgroundColor: "rgba(255, 255, 255, 0.6)",
-    position: "absolute", // Fija el contenedor en la parte inferior
-    top: 400, // Ajusta la distancia desde la parte inferior
+    position: "absolute", 
+    top: 400, 
     width: "100%",
     paddingVertical: 10,
     borderRadius: 20,
@@ -233,13 +233,13 @@ const styles = StyleSheet.create({
   },
 
   iconoNotificacionesContainer: {
-    backgroundColor: "rgba(0, 0, 0, 0.6)", // Fondo negro semitransparente
+    backgroundColor: "rgba(0, 0, 0, 0.6)", 
     borderRadius: 10,
     padding: 5,
   },
 
   iconoNotificaciones: {
-    width: 40, // Aumenta el tamaño de la imagen
-    height: 40, // Aumenta el tamaño de la imagen
+    width: 40, 
+    height: 40, 
   },
 });

@@ -12,8 +12,14 @@ import React from "react";
 import { View, Image, Text } from "react-native";
 import { estilos } from "../jugando.styles";
 import { CONSTANTES } from "../constants";
+
 const { TEXTOS, IMAGENES } = CONSTANTES;
 
+/**
+ * Componente funcional que representa la barra superior del juego.
+ *
+ * @returns {JSX.Element} Barra superior con información del pueblo, la jornada y los lobos.
+ */
 const TopBar: React.FC = () => (
   // Contenedor principal de la barra superior
   <View style={estilos.contenedorTopBar}>

@@ -8,18 +8,37 @@
  * @param {Function} props.onClose - Función que se ejecuta al cerrar el popup.
  */
 import React from "react";
-import { Animated, Text, TouchableOpacity, Image, ScrollView, View } from "react-native";
+import { 
+  Animated, 
+  Text, 
+  TouchableOpacity, 
+  Image, 
+  ScrollView, 
+  View 
+} from "react-native";
+
 import { estilos } from "../jugando.styles";
 import { CONSTANTES } from "../constants";
+
 const { TEXTOS, DIMENSIONES } = CONSTANTES;
 const { ALTO, ANCHO } = DIMENSIONES;
 
+/**
+ * @interface HabilidadPopupProps
+ * Define las propiedades esperadas por el componente HabilidadPopup.
+ */
 interface HabilidadPopupProps {
   habilidadInfo: { descripcion: string; recuerda: string; imagen: any };
   posicionHabilidad: Animated.Value;
   onClose: () => void;
 }
 
+/**
+ * Componente funcional que representa un popup animado con información de una habilidad.
+ *
+ * @param {HabilidadPopupProps} props - Propiedades del componente.
+ * @returns {JSX.Element} Popup animado con detalles de una habilidad.
+ */
 const HabilidadPopup: React.FC<HabilidadPopupProps> = ({ habilidadInfo, posicionHabilidad, onClose }) => (
   // Contenedor principal animado que se desliza verticalmente según el valor de posicionHabilidad
   <Animated.View style={[estilos.contenedorHabilidad, { transform: [{ translateY: posicionHabilidad }] }]}>

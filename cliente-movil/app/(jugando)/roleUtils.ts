@@ -1,13 +1,26 @@
 /**
- * @file Funciones para devoler información sobre los roles durante la partida.
- * Son arrow y puras.
+ * @file roleUtils.ts
+ * @description Funciones utilitarias para obtener información sobre los roles dentro de la partida.
+ * Todas las funciones son **puras** y utilizan arrow functions.
  */
+
 import { CONSTANTES, Rol } from "./constants";
 const { TEXTOS, IMAGENES } = CONSTANTES;
 
 /**
- * Obtiene la información necesaria para mostrar el pop-up de "HABILIDAD" dentro de la partida
- * Incluye descripción, recordatorio e imagen.
+ * @function getHabilidadInfo
+ * @description Obtiene la información necesaria para mostrar el pop-up de "HABILIDAD" dentro de la partida.
+ * Incluye descripción de la habilidad, recordatorio e imagen representativa del rol.
+ *
+ * @param {Rol} rol - El rol del jugador actual.
+ * @returns {Object} Objeto con los detalles de la habilidad.
+ * @returns {string} return.descripcion - Explicación de la habilidad del rol.
+ * @returns {string} return.recuerda - Recordatorio importante sobre el uso de la habilidad.
+ * @returns {any} return.imagen - Imagen asociada al rol.
+ *
+ * @example
+ * const info = getHabilidadInfo("bruja");
+ * console.log(info.descripcion); // "Como bruja, tienes dos pociones: una para salvar a un jugador y otra para envenenar."
  */
 export const getHabilidadInfo = (rol: Rol) => {
   switch (rol) {
@@ -44,8 +57,19 @@ export const getHabilidadInfo = (rol: Rol) => {
   }
 };
 
+
 /**
- * Obtiene la información necesaria para mostrar el rol del jugador en la animación de comienzo de partida.
+ * @function getRoleInfo
+ * @description Obtiene la información visual para mostrar el rol del jugador durante la animación de inicio de la partida.
+ *
+ * @param {Rol} rol - El rol del jugador actual.
+ * @returns {Object} Objeto con el nombre del rol y su imagen correspondiente.
+ * @returns {string} return.roleName - Nombre del rol en mayúsculas.
+ * @returns {any} return.image - Imagen representativa del rol.
+ *
+ * @example
+ * const info = getRoleInfo("cazador");
+ * console.log(info.roleName); // "CAZADOR"
  */
 export const getRoleInfo = (rol: Rol) => {
   switch (rol) {
