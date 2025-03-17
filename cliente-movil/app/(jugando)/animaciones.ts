@@ -3,20 +3,20 @@
  * 
  * @hook
  * @returns {Object} Métodos y constantes para manejar animaciones.
- * @returns {Function} createAnimation - Crea una nueva animación con un valor inicial.
- * @returns {Function} runAnimationSequence - Ejecuta una secuencia de animaciones.
+ * @returns {Function} crearAnimacion - Crea una nueva animación con un valor inicial.
+ * @returns {Function} ejecutarSecuenciaAnimaciones - Ejecuta una secuencia de animaciones.
  * @returns {number} DURACION_ANIMACION - Duración predeterminada de las animaciones (500ms).
  * @returns {number} RETRASO_ANIMACION - Tiempo de retraso predeterminado entre animaciones en `stagger` (300ms).
  * 
  * @example Uso básico en componente:
  * // 1. Importar el hook
- * import { useAnimationManager } from "./animaciones";
+ * import { administradorAnimaciones } from "./animaciones";
  * 
  * // 2. Inicializar en componente
- * const animationManager = useAnimationManager();
+ * const animationManager = administradorAnimaciones();
  * 
  * // 3. Crear animaciones con useRef para persistencia
- * const animacionTexto = useRef(animationManager.createAnimation(0)).current;
+ * const animacionTexto = useRef(animationManager.crearAnimacion(0)).current;
  * 
  * // 4. Usar en efectos
  * useEffect(() => {
@@ -28,9 +28,9 @@
  * @module animationss
  */
 import { Animated } from "react-native";
-import { CONSTANTES } from "./constants";
+import { CONSTANTES } from "./constantes";
 
-export const useAnimationManager = () => {
+export const administradorAnimaciones = () => {
   const DURACION_ANIMACION = CONSTANTES.NUMERICAS.DURACION_ANIMACION;
   const RETRASO_ANIMACION = CONSTANTES.NUMERICAS.RETRASO_ANIMACION;
 
@@ -40,7 +40,7 @@ export const useAnimationManager = () => {
    * @param {number} [initialValue=0] - Valor inicial de la animación (0 = invisible, 1 = visible).
    * @returns {Object} Objeto con valor animado y métodos.
    */
-  const createAnimation = (initialValue = 0) => {
+  const crearAnimacion = (initialValue = 0) => {
     const value = new Animated.Value(initialValue);
     
     const fadeIn = (duration = DURACION_ANIMACION) => 
@@ -70,7 +70,7 @@ export const useAnimationManager = () => {
    * @param {Animated.CompositeAnimation[]} animations - Lista de animaciones a ejecutar en orden.
    * @param {Function} [onComplete] - Callback al finalizar la secuencia.
    */
-  const runAnimationSequence = (
+  const ejecutarSecuenciaAnimaciones = (
     animations: Animated.CompositeAnimation[],
     onComplete?: () => void
   ) => {
@@ -78,8 +78,8 @@ export const useAnimationManager = () => {
   };
 
   return {
-    createAnimation,
-    runAnimationSequence,
+    crearAnimacion,
+    ejecutarSecuenciaAnimaciones,
     DURACION_ANIMACION,
     RETRASO_ANIMACION,
   };

@@ -129,7 +129,7 @@ export const estilos = StyleSheet.create({
     fontWeight: "bold",
     textAlign: "center",
     },
-    contenedorTopBar: {
+    contenedorBarraSuperior: {
     position: "absolute",
     top: alto * 0.06,
     width: "100%",
@@ -140,38 +140,38 @@ export const estilos = StyleSheet.create({
     paddingVertical: alto * 0.03,
     paddingHorizontal: ancho * 0.04,
     },
-    seccionTopBarIzquierda: {
+    seccionBarraSuperiorIzquierda: {
     flex: 1,
     alignItems: "flex-start",
     },
-    seccionTopBarCentro: {
+    seccionBarraSuperiorCentro: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
     },
-    seccionTopBarDerecha: {
+    seccionBarraSuperiorDerecha: {
     flex: 1,
     alignItems: "flex-end",
     },
-    contenedorTopBarItem: {
+    contenedorBarraSuperiorItem: {
     flexDirection: "row",
     alignItems: "center",
     gap: ancho * 0.02,
     },
-    iconoTopBar: {
+    iconoBarraSuperior: {
     width: ancho * 0.1,
     height: ancho * 0.1,
     borderRadius: ancho * 0.02,
     },
-    textoTopBarContainer: {
+    textoBarraSuperiorContainer: {
     flexDirection: "column",
     },
-    textoTopBarTitulo: {
+    textoBarraSuperiorTitulo: {
     color: "white",
     fontSize: ancho * 0.04,
     fontWeight: "bold",
     },
-    textoTopBarSub: {
+    textoBarraSuperiorSub: {
     color: "white",
     fontSize: ancho * 0.03,
     fontWeight: "bold",

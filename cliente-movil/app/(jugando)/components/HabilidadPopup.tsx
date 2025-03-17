@@ -10,7 +10,7 @@
 import React from "react";
 import { Animated, Text, TouchableOpacity, Image, ScrollView, View } from "react-native";
 import { estilos } from "../jugando.styles";
-import { CONSTANTES } from "../constants";
+import { CONSTANTES } from "../constantes";
 const { TEXTOS, DIMENSIONES } = CONSTANTES;
 const { ALTO, ANCHO } = DIMENSIONES;
 

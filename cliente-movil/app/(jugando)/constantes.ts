@@ -2,7 +2,7 @@
  * @file Constantes globales de la partida.
  * - La mayoría están **hardcoded por diseño**.
  * - Otras están **hardcoded temporalmente** por falta de integración con el backend (marcadas con "TODO").
- * @module constants
+ * @module constantes
  */
 import { Dimensions } from "react-native";
 

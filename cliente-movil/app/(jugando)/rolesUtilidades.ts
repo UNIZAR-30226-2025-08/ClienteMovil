@@ -2,7 +2,7 @@
  * @file Funciones para devoler información sobre los roles durante la partida.
  * Son arrow y puras.
  */
-import { CONSTANTES, Rol } from "./constants";
+import { CONSTANTES, Rol } from "./constantes";
 const { TEXTOS, IMAGENES } = CONSTANTES;
 
 /**
