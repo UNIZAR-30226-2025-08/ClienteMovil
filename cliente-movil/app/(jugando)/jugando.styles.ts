@@ -210,7 +210,7 @@ export const estilos = StyleSheet.create({
 
   contenedorCirculo: {
     position: "absolute",
-    top: "56%",
+    top: "65%", // 56% con el fondo antiguo fondo-partida.png
     left: "50%",
     alignItems: "center",
     justifyContent: "center",

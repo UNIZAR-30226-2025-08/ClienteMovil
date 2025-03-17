@@ -65,7 +65,7 @@ export const CONSTANTES = {
    * @constant IMAGENES - Contiene referencias a los recursos gráficos utilizados en la partida.
    */
   IMAGENES: {
-    FONDO: require("@/assets/images/fondo-partida.png"),
+    FONDO: require("@/assets/images/fondo-partida-v2.png"),
     LOBO_ROL: require("@/assets/images/hombre-lobo-icon.jpeg"),
     HABILIDAD: require("@/assets/images/hombre-lobo-icon.jpeg"),
     PUEBLO: require("@/assets/images/pueblo-barra-arriba-juego.png"),
