@@ -28,11 +28,6 @@ import { administradorAnimaciones } from "./animaciones";
 export let MODO_NOCHE_GLOBAL = false;
 
 /**
- * @constant ROL_USUARIO - Define el rol del usuario en la partida.
- */
-export let ROL_USUARIO: Rol = "aldeano";
-
-/**
  * @constant TEXTO_YA_MOSTRADO - Bandera que indica si el texto de inicio ya se mostró.
  */
 let TEXTO_YA_MOSTRADO = false;
@@ -72,6 +67,11 @@ const PantallaJugando: React.FC = () => {
   const [indiceUsuario] = useState(0);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const animacionError = useRef(new Animated.Value(0)).current;
+
+  /**
+   * @constant rolUsuario - Rol del usuario actual, seleccionado aleatoriamente al inicio.
+   */
+  const [rolUsuario, setRolUsuario] = useState<Rol>("aldeano");
 
   /**
    * @function handleSelectPlayer
@@ -227,6 +227,10 @@ const PantallaJugando: React.FC = () => {
    * Encadena múltiples animaciones para la transición de estados en la interfaz.
    */
   useEffect(() => {
+    const roles: Rol[] = ["aldeano", "lobo", "bruja", "cazador"];
+    const indiceAleatorio = Math.floor(Math.random() * roles.length);
+    setRolUsuario(roles[indiceAleatorio]);
+
     if (TEXTO_YA_MOSTRADO) {
       setMostrarTextoInicial(false);
       setMostrarRol(false);
@@ -300,8 +304,8 @@ const PantallaJugando: React.FC = () => {
   if (!fuentesCargadas) return null;
 
   // Obtiene la información de la habilidad y del rol actual.
-  const habilidadInfo = getHabilidadInfo(ROL_USUARIO);
-  const roleInfo = getRoleInfo(ROL_USUARIO);
+  const habilidadInfo = getHabilidadInfo(rolUsuario);
+  const roleInfo = getRoleInfo(rolUsuario);
 
   return (
     // Contenedor principal de la pantalla de juego
@@ -361,7 +365,7 @@ const PantallaJugando: React.FC = () => {
           <Text
             style={[
               estilos.nombreRol,
-              { color: ROL_USUARIO === "lobo" ? "red" : "blue" },
+              { color: rolUsuario === "lobo" ? "red" : "blue" },
             ]}
           >
             {roleInfo.roleName}
