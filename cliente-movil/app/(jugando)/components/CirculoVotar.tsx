@@ -59,7 +59,10 @@ const CirculoVotar: React.FC<CirculoVotarProps> = ({
         const angulo = (indice * 2 * Math.PI) / NUMERICAS.CANTIDAD_IMAGENES;
         // Calcula la posición X e Y basadas en el ángulo y el radio máximo.
         const x = radioMaximo * Math.cos(angulo);
-        const y = radioMaximo * Math.sin(angulo);
+        const y =
+          radioMaximo *
+          Math.sin(angulo) *
+          (1 - NUMERICAS.FACTOR_ENCOGIMIENTO_VERTICAL);
         // Determina si el jugador actual está seleccionado para resaltar su imagen.
         const isSelected = selectedPlayer === indice;
         return (
