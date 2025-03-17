@@ -4,13 +4,13 @@
  * votaciones, chat y habilidades.
  */
 import React, { useState, useEffect, useRef } from "react";
-import { 
-  View, 
-  ImageBackground, 
-  Text, 
-  Image, 
-  Animated, 
-  TouchableOpacity 
+import {
+  View,
+  ImageBackground,
+  Text,
+  Image,
+  Animated,
+  TouchableOpacity,
 } from "react-native";
 import { useFonts } from "expo-font";
 import { estilos } from "./jugando.styles";
@@ -52,14 +52,22 @@ const PantallaJugando: React.FC = () => {
   const [mostrarInicio, setMostrarInicio] = useState(false);
   const [mostrarBotones, setMostrarBotones] = useState(false);
   const [mostrarChat, setMostrarChat] = useState(false);
-  const [mostrarTextoInicial, setMostrarTextoInicial] = useState(!TEXTO_YA_MOSTRADO);
+  const [mostrarTextoInicial, setMostrarTextoInicial] = useState(
+    !TEXTO_YA_MOSTRADO
+  );
   const [selectedPlayer, setSelectedPlayer] = useState<number | null>(null);
-  const [votes, setVotes] = useState(Array(NUMERICAS.CANTIDAD_IMAGENES).fill(0));
+  const [votes, setVotes] = useState(
+    Array(NUMERICAS.CANTIDAD_IMAGENES).fill(0)
+  );
   const [mostrarHabilidad, setMostrarHabilidad] = useState(false);
   const [cantidadImagenes] = useState(NUMERICAS.CANTIDAD_IMAGENES);
-  const [imagenes] = useState(new Array(NUMERICAS.CANTIDAD_IMAGENES).fill(IMAGENES.JUGADORES));
+  const [imagenes] = useState(
+    new Array(NUMERICAS.CANTIDAD_IMAGENES).fill(IMAGENES.JUGADORES)
+  );
   const [mensajes] = useState(TEXTOS.CHAT.MENSAJES_INICIALES);
-  const [tiempoRestante, setTiempoRestante] = useState(NUMERICAS.TIEMPO_INICIAL);
+  const [tiempoRestante, setTiempoRestante] = useState(
+    NUMERICAS.TIEMPO_INICIAL
+  );
   const [temporizadorActivo, setTemporizadorActivo] = useState(false);
   const [indiceUsuario] = useState(0);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -96,17 +104,16 @@ const PantallaJugando: React.FC = () => {
       console.log("No se ha seleccionado ningún jugador para votar.");
       return;
     }
-    
+
     setVotes((prevVotes) => {
       const newVotes = [...prevVotes];
       newVotes[selectedPlayer] += 1;
       return newVotes;
     });
-    
+
     console.log(`Votado al jugador ${selectedPlayer + 1}`, votes);
     setSelectedPlayer(null);
   };
-
 
   /**
    * Efecto que maneja el temporizador decrementándolo cada segundo y alterna el modo noche cuando llega a 0.
@@ -170,13 +177,21 @@ const PantallaJugando: React.FC = () => {
    */
   const abrirChat = () => {
     setMostrarChat(true);
-    Animated.timing(posicionChat, { toValue: 0, duration: 300, useNativeDriver: true }).start();
+    Animated.timing(posicionChat, {
+      toValue: 0,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
   };
   /**
    * Cierra el chat animándolo hacia la parte inferior.
    */
   const cerrarChat = () => {
-    Animated.timing(posicionChat, { toValue: ALTO, duration: 300, useNativeDriver: true }).start(() => {
+    Animated.timing(posicionChat, {
+      toValue: ALTO,
+      duration: 300,
+      useNativeDriver: true,
+    }).start(() => {
       setMostrarChat(false);
     });
   };
@@ -188,13 +203,21 @@ const PantallaJugando: React.FC = () => {
    */
   const abrirHabilidad = () => {
     setMostrarHabilidad(true);
-    Animated.timing(posicionHabilidad, { toValue: 0, duration: 300, useNativeDriver: true }).start();
+    Animated.timing(posicionHabilidad, {
+      toValue: 0,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
   };
   /**
    * Cierra el popup de habilidad animándolo hacia la parte inferior.
    */
   const cerrarHabilidad = () => {
-    Animated.timing(posicionHabilidad, { toValue: ALTO, duration: 300, useNativeDriver: true }).start(() => {
+    Animated.timing(posicionHabilidad, {
+      toValue: ALTO,
+      duration: 300,
+      useNativeDriver: true,
+    }).start(() => {
       setMostrarHabilidad(false);
     });
   };
@@ -281,23 +304,31 @@ const PantallaJugando: React.FC = () => {
   const roleInfo = getRoleInfo(ROL_USUARIO);
 
   return (
-      // Contenedor principal de la pantalla de juego
-      <View style={estilos.contenedor}>
-        {/* Imagen de fondo que cubre toda la pantalla */}
-        <ImageBackground source={IMAGENES.FONDO} style={estilos.fondo} resizeMode="cover" />
-        
-        {/* Superposición animada para efectos visuales en el fondo */}
-        <Animated.View style={[estilos.superposicion, { opacity: animacionFondo.value }]} />
-        
-        {/* Condicional: Muestra el texto inicial animado si aún no se ha ocultado */}
-        {mostrarTextoInicial && (
-          <Animated.View style={[estilos.contenedorTexto, { opacity: animacionTexto.value }]}>
-            <Text style={estilos.texto}>{TEXTOS.INICIAL}</Text>
-          </Animated.View>
-        )}
+    // Contenedor principal de la pantalla de juego
+    <View style={estilos.contenedor}>
+      {/* Imagen de fondo que cubre toda la pantalla */}
+      <ImageBackground
+        source={IMAGENES.FONDO}
+        style={estilos.fondo}
+        resizeMode="cover"
+      />
 
-        {/* Condicional: Mensaje de error animado */}
-        {errorMessage && (
+      {/* Superposición animada para efectos visuales en el fondo */}
+      <Animated.View
+        style={[estilos.superposicion, { opacity: animacionFondo.value }]}
+      />
+
+      {/* Condicional: Muestra el texto inicial animado si aún no se ha ocultado */}
+      {mostrarTextoInicial && (
+        <Animated.View
+          style={[estilos.contenedorTexto, { opacity: animacionTexto.value }]}
+        >
+          <Text style={estilos.texto}>{TEXTOS.INICIAL}</Text>
+        </Animated.View>
+      )}
+
+      {/* Condicional: Mensaje de error animado */}
+      {errorMessage && (
         <Animated.View
           style={[
             estilos.contenedorError,
@@ -317,32 +348,44 @@ const PantallaJugando: React.FC = () => {
           <Text style={estilos.textoError}>{errorMessage}</Text>
         </Animated.View>
       )}
-      
+
       {/* Condicional: Muestra la información del rol del usuario con animación */}
       {mostrarRol && (
-        <Animated.View style={[estilos.contenedorRol, { opacity: animacionRol.value }]}>
+        <Animated.View
+          style={[estilos.contenedorRol, { opacity: animacionRol.value }]}
+        >
           <View style={estilos.contenedorTextoRol}>
             <Text style={estilos.textoRol}>{TEXTOS.ROL_TITULO}</Text>
           </View>
           <Image source={roleInfo.image} style={estilos.imagenRol} />
-          <Text style={[estilos.nombreRol, { color: ROL_USUARIO === "lobo" ? "red" : "blue" }]}>
+          <Text
+            style={[
+              estilos.nombreRol,
+              { color: ROL_USUARIO === "lobo" ? "red" : "blue" },
+            ]}
+          >
             {roleInfo.roleName}
           </Text>
         </Animated.View>
       )}
-      
+
       {/* Condicional: Muestra el mensaje de inicio de partida animado */}
       {mostrarInicio && (
-        <Animated.View style={[estilos.contenedorTexto, { opacity: animacionInicio.value }]}>
+        <Animated.View
+          style={[estilos.contenedorTexto, { opacity: animacionInicio.value }]}
+        >
           <Text style={estilos.textoInicio}>{TEXTOS.INICIO_PARTIDA}</Text>
         </Animated.View>
       )}
-      
+
       {/* Condicional: Renderiza los botones de acción, temporizador, barra superior y votación */}
       {mostrarBotones && (
         <>
           <View style={estilos.contenedorBotones}>
-            <TouchableOpacity style={estilos.botonHabilidad} onPress={abrirHabilidad}>
+            <TouchableOpacity
+              style={estilos.botonHabilidad}
+              onPress={abrirHabilidad}
+            >
               <Image source={habilidadInfo.imagen} style={estilos.iconoBoton} />
               <Text style={estilos.textoBoton}>{TEXTOS.BOTON_HABILIDAD}</Text>
             </TouchableOpacity>
@@ -363,7 +406,10 @@ const PantallaJugando: React.FC = () => {
             <TouchableOpacity style={estilos.botonAccion}>
               <Text style={estilos.textoBoton}>{TEXTOS.BOTON_PASAR_TURNO}</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={[estilos.botonAccion, estilos.botonVotar]} onPress={voteForPlayer}>
+            <TouchableOpacity
+              style={[estilos.botonAccion, estilos.botonVotar]}
+              onPress={voteForPlayer}
+            >
               <Text style={estilos.textoBoton}>{TEXTOS.BOTON_VOTAR}</Text>
             </TouchableOpacity>
           </View>
@@ -376,7 +422,7 @@ const PantallaJugando: React.FC = () => {
           />
         </>
       )}
-      
+
       {/* Condicional: Muestra el componente de chat si está activado */}
       {mostrarChat && (
         <Chat
@@ -385,7 +431,7 @@ const PantallaJugando: React.FC = () => {
           onClose={cerrarChat}
         />
       )}
-      
+
       {/* Condicional: Muestra el popup de habilidad del jugador si está activado */}
       {mostrarHabilidad && (
         <HabilidadPopup
@@ -413,13 +459,13 @@ const PantallaJugando: React.FC = () => {
             },
           ]}
         >
-        <Text 
-          style={estilos.textoError}
-          numberOfLines={2}
-          ellipsizeMode="tail"
-        >
-          {errorMessage}
-        </Text>  
+          <Text
+            style={estilos.textoError}
+            numberOfLines={2}
+            ellipsizeMode="tail"
+          >
+            {errorMessage}
+          </Text>
         </Animated.View>
       )}
     </View>

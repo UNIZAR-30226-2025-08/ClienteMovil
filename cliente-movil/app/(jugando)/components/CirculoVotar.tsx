@@ -26,14 +26,21 @@ interface CirculoVotarProps {
   onSelectPlayer: (index: number) => void;
 }
 
-const CirculoVotar: React.FC<CirculoVotarProps> = ({ imagenes, votes, selectedPlayer, onSelectPlayer }) => {
+const CirculoVotar: React.FC<CirculoVotarProps> = ({
+  imagenes,
+  votes,
+  selectedPlayer,
+  onSelectPlayer,
+}) => {
   // Calcula el radio máximo del círculo basado en las dimensiones mínimas de la pantalla y un multiplicador.
-  const radioMaximoCalculado = Math.min(ANCHO, ALTO) * NUMERICAS.MULTIPLICADOR_RADIO;
+  const radioMaximoCalculado =
+    Math.min(ANCHO, ALTO) * NUMERICAS.MULTIPLICADOR_RADIO;
   // Calcula el tamaño de cada imagen proporcional al tamaño de la pantalla.
-  const tamanioImagen = Math.min(ANCHO, ALTO) * NUMERICAS.MULTIPLICADOR_TAMANIO_IMAGEN;
+  const tamanioImagen =
+    Math.min(ANCHO, ALTO) * NUMERICAS.MULTIPLICADOR_TAMANIO_IMAGEN;
   // Ajusta el radio máximo restando la mitad del tamaño de la imagen para asegurar que la imagen se vea completa.
   const radioMaximo = radioMaximoCalculado - tamanioImagen / 2;
-  
+
   return (
     // Contenedor principal del círculo. Se establece el tamaño del contenedor en función del radio calculado.
     <View

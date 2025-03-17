@@ -17,35 +17,37 @@ const { TEXTOS, IMAGENES } = CONSTANTES;
 const BarraSuperior: React.FC = () => (
   // Contenedor principal de la barra superior
   <View style={estilos.contenedorBarraSuperior}>
-    
     {/* Sección izquierda: Información del pueblo */}
     <View style={estilos.seccionBarraSuperiorIzquierda}>
       <View style={estilos.contenedorBarraSuperiorItem}>
         <Image source={IMAGENES.PUEBLO} style={estilos.iconoBarraSuperior} />
         <View style={estilos.textoBarraSuperiorContainer}>
           <Text style={estilos.textoBarraSuperiorTitulo}>{TEXTOS.PUEBLO}</Text>
-          <Text style={estilos.textoBarraSuperiorSub}>{TEXTOS.ESTADO_PUEBLO}</Text>
+          <Text style={estilos.textoBarraSuperiorSub}>
+            {TEXTOS.ESTADO_PUEBLO}
+          </Text>
         </View>
       </View>
     </View>
-    
+
     {/* Sección central: Información de la jornada */}
     <View style={estilos.seccionBarraSuperiorCentro}>
       <Text style={estilos.textoBarraSuperiorTitulo}>{TEXTOS.JORNADA}</Text>
       <Text style={estilos.textoBarraSuperiorSub}>{TEXTOS.DIA}</Text>
     </View>
-    
+
     {/* Sección derecha: Información de los lobos */}
     <View style={estilos.seccionBarraSuperiorDerecha}>
       <View style={estilos.contenedorBarraSuperiorItem}>
         <View style={estilos.textoBarraSuperiorContainer}>
           <Text style={estilos.textoBarraSuperiorTitulo}>{TEXTOS.LOBOS}</Text>
-          <Text style={estilos.textoBarraSuperiorSub}>{TEXTOS.ESTADO_LOBOS}</Text>
+          <Text style={estilos.textoBarraSuperiorSub}>
+            {TEXTOS.ESTADO_LOBOS}
+          </Text>
         </View>
         <Image source={IMAGENES.LOBOS} style={estilos.iconoBarraSuperior} />
       </View>
     </View>
-    
   </View>
 );
 

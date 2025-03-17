@@ -6,7 +6,7 @@
  */
 import { Dimensions } from "react-native";
 
-/** 
+/**
  * @constant {number} ANCHO - Ancho de la pantalla en píxeles.
  * @constant {number} ALTO - Alto de la pantalla en píxeles.
  */
@@ -31,7 +31,7 @@ export const CONSTANTES = {
     ESTADO_PUEBLO: "5/6 vivos",
     ESTADO_LOBOS: "2/2 vivos",
 
-    /** 
+    /**
      * @constant CHAT - Contiene los textos utilizados en el chat.
      */
     CHAT: {
@@ -46,7 +46,7 @@ export const CONSTANTES = {
     },
   },
 
-  /** 
+  /**
    * @constant NUMERICAS - Contiene valores numéricos relacionados con la lógica del juego.
    */
   NUMERICAS: {
@@ -61,7 +61,7 @@ export const CONSTANTES = {
     TAMANIO_TEMPORIZADOR: ANCHO * 0.15,
   },
 
-  /** 
+  /**
    * @constant IMAGENES - Contiene referencias a los recursos gráficos utilizados en la partida.
    */
   IMAGENES: {
@@ -76,7 +76,7 @@ export const CONSTANTES = {
     CAZADOR: require("@/assets/images/cazador-icon.jpeg"),
   },
 
-  /** 
+  /**
    * @constant DIMENSIONES - Define dimensiones basadas en la pantalla del dispositivo.
    */
   DIMENSIONES: {
@@ -86,7 +86,7 @@ export const CONSTANTES = {
     TAMANIO_IMAGEN: Math.min(ANCHO, ALTO) * 0.13,
   },
 
-  /** 
+  /**
    * @constant COLORES - Define la paleta de colores utilizada en la UI.
    */
   COLORES: {
@@ -94,7 +94,7 @@ export const CONSTANTES = {
     NOCTURNO: "rgba(38, 37, 34, 0.7)",
     TEXTO_PRINCIPAL: "white",
     FONDO_CHAT: "#262522",
-  }
+  },
 };
 
 /**

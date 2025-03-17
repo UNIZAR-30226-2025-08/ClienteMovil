@@ -1,14 +1,14 @@
 /**
  * @file jugando.styles.ts
  * @description Estilos para la pantalla de juego. Define la apariencia y disposición de los componentes visuales.
- * 
+ *
  * @module jugando.styles
  */
 
 import { Dimensions, StyleSheet } from "react-native";
 
 // Para que la partida sea épicamente responsiva
-/** 
+/**
  * @constant {number} ancho - Ancho de la pantalla en píxeles.
  * @constant {number} alto - Alto de la pantalla en píxeles.
  */
@@ -27,61 +27,61 @@ const TAMANIO_TEMPORIZADOR = ancho * 0.15;
  * @constant estilos - Contiene los estilos de la pantalla de juego.
  */
 export const estilos = StyleSheet.create({
-    contenedor: {
+  contenedor: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
     paddingTop: alto * 0.07,
-    },
+  },
 
-    fondo: {
+  fondo: {
     width: "100%",
     height: "100%",
-    },
+  },
 
-    superposicion: {
+  superposicion: {
     backgroundColor: "rgba(38, 37, 34, 0.7)",
     position: "absolute",
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-    },
+  },
 
-    contenedorTexto: {
+  contenedorTexto: {
     position: "absolute",
     width: "80%",
     top: "21%",
     justifyContent: "center",
     alignItems: "center",
-    },
+  },
 
-    texto: {
+  texto: {
     color: "white",
     fontSize: ancho * 0.09,
     fontFamily: "Corben",
     textAlign: "center",
     paddingHorizontal: ancho * 0.05,
-    },
+  },
 
-    contenedorRol: {
+  contenedorRol: {
     position: "absolute",
     justifyContent: "center",
     alignItems: "center",
     width: "100%",
     top: "35%",
     flexDirection: "column",
-    },
+  },
 
-    contenedorTextoRol: {
+  contenedorTextoRol: {
     width: "100%",
     alignItems: "center",
     justifyContent: "center",
     minHeight: alto * 0.1,
     paddingHorizontal: ancho * 0.05,
-    },
+  },
 
-    textoRol: {
+  textoRol: {
     fontSize: ancho * 0.1,
     color: "white",
     fontFamily: "Corben",
@@ -89,41 +89,41 @@ export const estilos = StyleSheet.create({
     lineHeight: ancho * 0.12,
     paddingVertical: alto * 0.005,
     includeFontPadding: true,
-    },
+  },
 
-    imagenRol: {
+  imagenRol: {
     width: ancho * 0.35,
     height: ancho * 0.35,
     marginBottom: alto * 0.05,
-    },
+  },
 
-    nombreRol: {
+  nombreRol: {
     textAlign: "center",
     fontSize: ancho * 0.12,
     fontFamily: "Corben",
     fontWeight: "bold",
-    },
+  },
 
-    textoInicio: {
+  textoInicio: {
     color: "white",
     fontSize: ancho * 0.1,
     fontFamily: "Corben",
     textAlign: "center",
     top: "127%",
     paddingHorizontal: ancho * 0.05,
-    },
+  },
 
-    contenedorBotones: {
+  contenedorBotones: {
     position: "absolute",
     bottom: 0,
     width: "100%",
     flexDirection: "row",
     alignItems: "flex-end",
     justifyContent: "center",
-    paddingHorizontal: ancho * 0.10,
-    },
+    paddingHorizontal: ancho * 0.1,
+  },
 
-    botonHabilidad: {
+  botonHabilidad: {
     flex: 1,
     backgroundColor: "#262522",
     height: alto * 0.13,
@@ -133,9 +133,9 @@ export const estilos = StyleSheet.create({
     borderTopRightRadius: BORDE_RADIO_BOTON,
     maxWidth: "45%",
     marginRight: ancho * 0.12,
-    },
+  },
 
-    botonChat: {
+  botonChat: {
     flex: 1,
     backgroundColor: "#262522",
     height: alto * 0.07,
@@ -145,21 +145,21 @@ export const estilos = StyleSheet.create({
     borderTopRightRadius: BORDE_RADIO_BOTON,
     maxWidth: "45%",
     marginLeft: ancho * 0.02,
-    },
+  },
 
-    iconoBoton: {
+  iconoBoton: {
     width: TAMANIO_ICONO_BOTON,
     height: TAMANIO_ICONO_BOTON,
     marginBottom: ancho * 0.02,
-    },
+  },
 
-    textoBoton: {
+  textoBoton: {
     color: "white",
     fontSize: ancho * 0.05,
     fontWeight: "bold",
     textAlign: "center",
-    },
-    contenedorBarraSuperior: {
+  },
+  contenedorBarraSuperior: {
     position: "absolute",
     top: alto * 0.06,
     width: "100%",
@@ -169,130 +169,130 @@ export const estilos = StyleSheet.create({
     backgroundColor: "#262522",
     paddingVertical: alto * 0.03,
     paddingHorizontal: ancho * 0.04,
-    },
-    seccionBarraSuperiorIzquierda: {
+  },
+  seccionBarraSuperiorIzquierda: {
     flex: 1,
     alignItems: "flex-start",
-    },
-    seccionBarraSuperiorCentro: {
+  },
+  seccionBarraSuperiorCentro: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    },
-    seccionBarraSuperiorDerecha: {
+  },
+  seccionBarraSuperiorDerecha: {
     flex: 1,
     alignItems: "flex-end",
-    },
-    contenedorBarraSuperiorItem: {
+  },
+  contenedorBarraSuperiorItem: {
     flexDirection: "row",
     alignItems: "center",
     gap: ancho * 0.02,
-    },
-    iconoBarraSuperior: {
+  },
+  iconoBarraSuperior: {
     width: ancho * 0.1,
     height: ancho * 0.1,
     borderRadius: ancho * 0.02,
-    },
-    textoBarraSuperiorContainer: {
+  },
+  textoBarraSuperiorContainer: {
     flexDirection: "column",
-    },
-    textoBarraSuperiorTitulo: {
+  },
+  textoBarraSuperiorTitulo: {
     color: "white",
     fontSize: ancho * 0.04,
     fontWeight: "bold",
-    },
-    textoBarraSuperiorSub: {
+  },
+  textoBarraSuperiorSub: {
     color: "white",
     fontSize: ancho * 0.03,
     fontWeight: "bold",
     opacity: 0.9,
-    },
+  },
 
-    contenedorCirculo: {
+  contenedorCirculo: {
     position: "absolute",
     top: "56%",
     left: "50%",
     alignItems: "center",
     justifyContent: "center",
-    },
+  },
 
-    contenedorJugador: {
+  contenedorJugador: {
     position: "absolute",
-    alignItems: 'center',
-    },
+    alignItems: "center",
+  },
 
-    contenedorImagenCirculo: {
+  contenedorImagenCirculo: {
     borderRadius: 50,
     overflow: "hidden",
-    justifyContent: 'center',
-    alignItems: 'center',
-    },
+    justifyContent: "center",
+    alignItems: "center",
+  },
 
-    imagenCirculo: {
+  imagenCirculo: {
     width: "100%",
     height: "100%",
-    },
+  },
 
-    contenedorVotos: {
-    position: 'absolute',
+  contenedorVotos: {
+    position: "absolute",
     bottom: -alto * 0.025,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
     gap: ancho * 0.005,
-    },
+  },
 
-    barraVoto: {
+  barraVoto: {
     width: ancho * 0.008,
     height: alto * 0.015,
-    backgroundColor: 'black',
+    backgroundColor: "black",
     borderRadius: ancho * 0.002,
-    },
+  },
 
-    contenedorTemporizador: {
+  contenedorTemporizador: {
     position: "absolute",
     top: alto * 0.2,
     left: ancho * 0.05,
     zIndex: 2,
-    },
+  },
 
-    circuloTemporizador: {
+  circuloTemporizador: {
     width: TAMANIO_TEMPORIZADOR,
     height: TAMANIO_TEMPORIZADOR,
     borderRadius: TAMANIO_TEMPORIZADOR / 2,
     backgroundColor: "#262522",
     justifyContent: "center",
     alignItems: "center",
-    },
+  },
 
-    textoTemporizador: {
+  textoTemporizador: {
     color: "white",
     fontSize: ancho * 0.05,
     fontWeight: "bold",
-    },
+  },
 
-    contenedorBotonesDerecha: {
+  contenedorBotonesDerecha: {
     position: "absolute",
     top: alto * 0.2,
     right: ancho * 0.05,
     zIndex: 2,
     gap: ancho * 0.02,
-    },
+  },
 
-    botonAccion: {
+  botonAccion: {
     backgroundColor: "#262522",
     paddingVertical: alto * 0.02,
     paddingHorizontal: ancho * 0.06,
     borderRadius: ancho * 0.07,
     alignItems: "center",
     minWidth: ancho * 0.33,
-    },
+  },
 
-    botonVotar: {
+  botonVotar: {
     backgroundColor: "#262522",
-    },
+  },
 
-    contenedorChat: {
+  contenedorChat: {
     position: "absolute",
     zIndex: 9999,
     left: ancho * 0.05,
@@ -309,9 +309,9 @@ export const estilos = StyleSheet.create({
     shadowOffset: { width: 0, height: alto * 0.003 },
     shadowOpacity: 0.5,
     shadowRadius: ancho * 0.02,
-    },
+  },
 
-    botonCerrarChat: {
+  botonCerrarChat: {
     position: "absolute",
     top: alto * 0.02,
     right: ancho * 0.04,
@@ -323,9 +323,9 @@ export const estilos = StyleSheet.create({
     minHeight: ancho * 0.08,
     justifyContent: "center",
     alignItems: "center",
-    },
+  },
 
-    textoCerrarChat: {
+  textoCerrarChat: {
     color: "white",
     fontSize: ancho * 0.07,
     fontWeight: "bold",
@@ -333,45 +333,45 @@ export const estilos = StyleSheet.create({
     includeFontPadding: true,
     textAlignVertical: "center",
     marginBottom: -alto * 0.005,
-    },
+  },
 
-    tituloChat: {
+  tituloChat: {
     color: "white",
     fontSize: ancho * 0.07,
     fontWeight: "bold",
     textAlign: "center",
     marginTop: alto * 0.02,
     fontFamily: "Corben",
-    },
+  },
 
-    separadorChat: {
+  separadorChat: {
     height: 1,
     backgroundColor: "white",
     marginVertical: alto * 0.02,
-    },
+  },
 
-    contenedorMensajesChat: {
+  contenedorMensajesChat: {
     flexGrow: 1,
     justifyContent: "flex-end",
     paddingBottom: alto * 0.02,
-    },
+  },
 
-    mensajeChat: {
+  mensajeChat: {
     color: "white",
     fontSize: ancho * 0.04,
     marginBottom: alto * 0.015,
     fontFamily: "Corben",
     lineHeight: ancho * 0.05,
     includeFontPadding: true,
-    },
+  },
 
-    contenedorEntradaChat: {
+  contenedorEntradaChat: {
     flexDirection: "row",
     alignItems: "center",
     marginTop: alto * 0.02,
-    },
+  },
 
-    entradaChat: {
+  entradaChat: {
     flex: 1,
     height: alto * 0.07,
     borderWidth: ancho * 0.002,
@@ -382,9 +382,9 @@ export const estilos = StyleSheet.create({
     color: "white",
     fontSize: ancho * 0.04,
     fontFamily: "Corben",
-    },
+  },
 
-    botonEnviarChat: {
+  botonEnviarChat: {
     backgroundColor: "green",
     height: alto * 0.07,
     justifyContent: "center",
@@ -392,16 +392,16 @@ export const estilos = StyleSheet.create({
     borderRadius: ancho * 0.02,
     borderWidth: ancho * 0.002,
     marginLeft: ancho * 0.02,
-    },
+  },
 
-    textoBotonEnviarChat: {
+  textoBotonEnviarChat: {
     color: "white",
     fontWeight: "bold",
     fontSize: ancho * 0.04,
     fontFamily: "Corben",
-    },
+  },
 
-    contenedorHabilidad: {
+  contenedorHabilidad: {
     position: "absolute",
     zIndex: 9999,
     left: ancho * 0.05,
@@ -418,9 +418,9 @@ export const estilos = StyleSheet.create({
     shadowOffset: { width: 0, height: alto * 0.003 },
     shadowOpacity: 0.5,
     shadowRadius: ancho * 0.02,
-    },
+  },
 
-    botonCerrarHabilidad: {
+  botonCerrarHabilidad: {
     position: "absolute",
     top: alto * 0.02,
     right: ancho * 0.04,
@@ -432,9 +432,9 @@ export const estilos = StyleSheet.create({
     minHeight: ancho * 0.08,
     justifyContent: "center",
     alignItems: "center",
-    },
+  },
 
-    textoCerrarHabilidad: {
+  textoCerrarHabilidad: {
     color: "white",
     fontSize: ancho * 0.07,
     fontWeight: "bold",
@@ -442,90 +442,90 @@ export const estilos = StyleSheet.create({
     includeFontPadding: true,
     textAlignVertical: "center",
     marginBottom: -alto * 0.005,
-    },
+  },
 
-    contenedorTituloHabilidad: {
+  contenedorTituloHabilidad: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     marginTop: alto * 0.02,
-    },
+  },
 
-    iconoHabilidadPopup: {
+  iconoHabilidadPopup: {
     width: ancho * 0.12,
     height: ancho * 0.12,
     marginRight: ancho * 0.02,
-    },
+  },
 
-    tituloHabilidad: {
+  tituloHabilidad: {
     color: "white",
     fontSize: ancho * 0.07,
     fontWeight: "bold",
     textAlign: "center",
     fontFamily: "Corben",
-    },
-    
-    separadorHabilidad: {
+  },
+
+  separadorHabilidad: {
     height: 1,
     backgroundColor: "white",
     marginVertical: alto * 0.02,
-    },
+  },
 
-    contenedorInfoHabilidad: {
+  contenedorInfoHabilidad: {
     flexGrow: 1,
     justifyContent: "flex-start",
     paddingBottom: alto * 0.02,
-    },
+  },
 
-    textoHabilidad: {
+  textoHabilidad: {
     color: "white",
     fontSize: ancho * 0.05,
     marginBottom: alto * 0.015,
     fontFamily: "Corben",
     lineHeight: ancho * 0.06,
     includeFontPadding: true,
-    },
+  },
 
-    textoRecuerda: {
+  textoRecuerda: {
     color: "white",
     fontSize: ancho * 0.045,
     marginTop: alto * 0.02,
     fontFamily: "Corben",
     lineHeight: ancho * 0.055,
     includeFontPadding: true,
-    },
+  },
 
-    contenedorError: {
-    position: 'absolute',
+  contenedorError: {
+    position: "absolute",
     top: alto * 0.08,
-    alignSelf: 'center',
-    backgroundColor: '#ff4444',
+    alignSelf: "center",
+    backgroundColor: "#ff4444",
     paddingVertical: alto * 0.02,
     paddingHorizontal: ancho * 0.05,
     borderRadius: alto * 0.03,
     zIndex: 1000,
     elevation: 5,
-    shadowColor: '#000',
-    shadowOffset: { 
-        width: ancho * 0.005, 
-        height: alto * 0.005 
+    shadowColor: "#000",
+    shadowOffset: {
+      width: ancho * 0.005,
+      height: alto * 0.005,
     },
 
     shadowOpacity: 0.25,
     shadowRadius: alto * 0.005,
     maxWidth: ancho * 0.9,
     minHeight: alto * 0.06,
-    alignItems: 'center',
-    justifyContent: 'center',
-    },
-    
-    textoError: {
-    color: 'white',
-    fontFamily: 'Corben',
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  textoError: {
+    color: "white",
+    fontFamily: "Corben",
     fontSize: alto * 0.022,
-    textAlign: 'center',
-    lineHeight: alto * 0.030,
+    textAlign: "center",
+    lineHeight: alto * 0.03,
     includeFontPadding: false,
-    textAlignVertical: 'center',
-    },
+    textAlignVertical: "center",
+  },
 });
