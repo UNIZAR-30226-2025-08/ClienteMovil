@@ -14,13 +14,13 @@ import {
 } from "react-native";
 import { useFonts } from "expo-font";
 import { estilos } from "./jugando.styles";
-import { CONSTANTES, Rol } from "./constants";
-import { getHabilidadInfo, getRoleInfo } from "./roleUtils";
-import ChatComponent from "./components/ChatComponent";
+import { CONSTANTES, Rol } from "./constantes";
+import { getHabilidadInfo, getRoleInfo } from "./rolesUtilidades";
+import Chat from "./components/Chat";
 import HabilidadPopup from "./components/HabilidadPopup";
-import TopBar from "./components/TopBar";
-import VotingCircle from "./components/VotingCircle";
-import { useAnimationManager } from "./animations";
+import BarraSuperior from "./components/BarraSuperior";
+import CirculoVotar from "./components/CirculoVotar";
+import { administradorAnimaciones } from "./animaciones";
 
 /**
  * @constant MODO_NOCHE_GLOBAL - Indica si el juego está en modo noche.
@@ -125,12 +125,12 @@ const PantallaJugando: React.FC = () => {
   }, [temporizadorActivo, tiempoRestante]);
 
   // Inicializa el gestor de animaciones.
-  const animationManager = useAnimationManager();
-  const animacionTexto = useRef(animationManager.createAnimation(0)).current;
-  const animacionRol = useRef(animationManager.createAnimation(0)).current;
-  const animacionInicio = useRef(animationManager.createAnimation(0)).current;
+  const animationManager = administradorAnimaciones();
+  const animacionTexto = useRef(animationManager.crearAnimacion(0)).current;
+  const animacionRol = useRef(animationManager.crearAnimacion(0)).current;
+  const animacionInicio = useRef(animationManager.crearAnimacion(0)).current;
   // Nota: animacionFondo se utiliza en dos contextos diferentes.
-  const animacionFondo = useRef(animationManager.createAnimation(1)).current;
+  const animacionFondo = useRef(animationManager.crearAnimacion(1)).current;
 
   // Constantes para la duración y retraso de animaciones.
   const DURACION_ANIMACION = NUMERICAS.DURACION_ANIMACION;
@@ -351,7 +351,7 @@ const PantallaJugando: React.FC = () => {
             </TouchableOpacity>
           </View>
           {/* Barra superior con información adicional del juego */}
-          <TopBar />
+          <BarraSuperior />
           {/* Temporizador central que muestra el tiempo restante */}
           <View style={estilos.contenedorTemporizador}>
             <View style={estilos.circuloTemporizador}>
@@ -368,7 +368,7 @@ const PantallaJugando: React.FC = () => {
             </TouchableOpacity>
           </View>
           {/* Componente para la votación de jugadores */}
-          <VotingCircle
+          <CirculoVotar
             imagenes={imagenes}
             votes={votes}
             selectedPlayer={selectedPlayer}
@@ -379,7 +379,7 @@ const PantallaJugando: React.FC = () => {
       
       {/* Condicional: Muestra el componente de chat si está activado */}
       {mostrarChat && (
-        <ChatComponent
+        <Chat
           mensajes={TEXTOS.CHAT.MENSAJES_INICIALES}
           posicionChat={posicionChat}
           onClose={cerrarChat}

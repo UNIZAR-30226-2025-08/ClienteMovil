@@ -1,5 +1,5 @@
 /**
- * @file ChatComponent - Componente de chat animado que muestra mensajes y permite enviar nuevos.
+ * @file Chat - Componente de chat animado que muestra mensajes y permite enviar nuevos.
  *
  * @component
  * @param {Object} props - Props del componente.
@@ -18,8 +18,7 @@ import {
 } from "react-native";
 
 import { estilos } from "../jugando.styles";
-import { CONSTANTES } from "../constants";
-
+import { CONSTANTES } from "../constantes";
 const { TEXTOS, DIMENSIONES } = CONSTANTES;
 const { ALTO, ANCHO } = DIMENSIONES;
 

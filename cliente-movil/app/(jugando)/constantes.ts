@@ -1,10 +1,8 @@
 /**
- * @file constants.ts
- * @description Definición de constantes globales utilizadas en la partida.
- * - Algunas constantes están **hardcoded por diseño**.
- * - Otras están **hardcoded temporalmente** debido a la falta de integración con el backend (marcadas con "TODO").
- * 
- * @module constants
+ * @file Constantes globales de la partida.
+ * - La mayoría están **hardcoded por diseño**.
+ * - Otras están **hardcoded temporalmente** por falta de integración con el backend (marcadas con "TODO").
+ * @module constantes
  */
 import { Dimensions } from "react-native";
 

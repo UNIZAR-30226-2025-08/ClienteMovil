@@ -3,8 +3,7 @@
  * @description Funciones utilitarias para obtener información sobre los roles dentro de la partida.
  * Todas las funciones son **puras** y utilizan arrow functions.
  */
-
-import { CONSTANTES, Rol } from "./constants";
+import { CONSTANTES, Rol } from "./constantes";
 const { TEXTOS, IMAGENES } = CONSTANTES;
 
 /**
