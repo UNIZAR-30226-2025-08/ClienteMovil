@@ -69,6 +69,14 @@ const PantallaJugando: React.FC = () => {
   const animacionError = useRef(new Animated.Value(0)).current;
 
   /**
+   * Determina si se deben mostrar los botones de acción
+   * @returns {boolean} True si los botones deben ser visibles
+   */
+  const mostrarBotonesAccion = () => {
+    return !MODO_NOCHE_GLOBAL || rolUsuario === "lobo";
+  };
+
+  /**
    * @constant rolUsuario - Rol del usuario actual, seleccionado aleatoriamente al inicio.
    */
   const [rolUsuario, setRolUsuario] = useState<Rol>("aldeano");
@@ -406,17 +414,22 @@ const PantallaJugando: React.FC = () => {
             </View>
           </View>
           {/* Botones de acciones complementarias: pasar turno y votar */}
-          <View style={estilos.contenedorBotonesDerecha}>
-            <TouchableOpacity style={estilos.botonAccion}>
-              <Text style={estilos.textoBoton}>{TEXTOS.BOTON_PASAR_TURNO}</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[estilos.botonAccion, estilos.botonVotar]}
-              onPress={voteForPlayer}
-            >
-              <Text style={estilos.textoBoton}>{TEXTOS.BOTON_VOTAR}</Text>
-            </TouchableOpacity>
-          </View>
+          {mostrarBotonesAccion() && (
+            <View style={estilos.contenedorBotonesDerecha}>
+              <TouchableOpacity style={estilos.botonAccion}>
+                <Text style={estilos.textoBoton}>
+                  {TEXTOS.BOTON_PASAR_TURNO}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[estilos.botonAccion, estilos.botonVotar]}
+                onPress={voteForPlayer}
+              >
+                <Text style={estilos.textoBoton}>{TEXTOS.BOTON_VOTAR}</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+
           {/* Componente para la votación de jugadores */}
           <CirculoVotar
             imagenes={imagenes}
