@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -7,7 +7,8 @@ import {
   Alert,
   FlatList,
 } from "react-native";
-import { useRouter } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
+import socket from "@/app/(sala)/socket"; // Módulo de conexión
 
 /**
  * Tipo de datos para representar un jugador dentro de la sala.
@@ -30,27 +31,61 @@ type Player = {
 export default function SalaPreviaScreen(): JSX.Element {
   const router = useRouter(); // Usamos useRouter para manejar la navegación
 
+  // Obtén el idSala pasado como parámetro al navegar
+  const { idSala, salaData } = useLocalSearchParams<{ idSala: string; salaData: string }>();
+  const [players, setPlayers] = useState<Player[]>([]);
+  const salaInfo = salaData ? JSON.parse(salaData) : null;
+  
+
   /**
    * Estado con la información de los jugadores en la sala.
    */
-  const [players, setPlayers] = useState<Player[]>([
+  /*const [players, setPlayers] = useState<Player[]>([
     { id: "1", name: "Jugador1", level: 106, isReady: true, isOwner: true },
     { id: "2", name: "Jugador2", level: 106, isReady: true },
     { id: "3", name: "Jugador3", level: 106, isReady: false },
     // Puedes añadir más o dejar placeholders
-  ]);
+  ]);*/
+
+  useEffect(() => {
+    if (salaData) {
+      const sala = JSON.parse(salaData);
+      setPlayers(sala.jugadores.map((j: any) => ({
+        id: j.id,
+        name: j.nombre || j.id,
+        level: 106,
+        isReady: j.listo || false,
+        isOwner: sala.lider === j.id,
+      })));
+    }
+    // Suscribirte a "actualizarSala" para cambios futuros...
+    socket.on("actualizarSala", (sala) => {
+      setPlayers(sala.jugadores.map((j: any) => ({
+        id: j.id,
+        name: j.nombre || j.id,
+        level: 106,
+        isReady: j.listo || false,
+        isOwner: sala.lider === j.id,
+      })));
+    });
+  
+    return () => {
+      socket.off("actualizarSala");
+    };
+  }, []);
 
   /**
    * Alterna el estado de "Listo" de un jugador.
    * 
    * @param playerId ID del jugador a modificar.
    */
+  // Función para marcar el estado listo (emite evento al servidor)
   const toggleReady = (playerId: string) => {
-    setPlayers((prevState) =>
-      prevState.map((p) =>
-        p.id === playerId ? { ...p, isReady: !p.isReady } : p
-      )
-    );
+    // Aquí enviarías el nuevo estado al servidor para actualizarlo
+    const jugador = players.find((p) => p.id === playerId);
+    if (jugador) {
+      socket.emit("marcarEstado", { idSala, idUsuario: playerId, estado: !jugador.isReady });
+    }
   };
 
   /**
@@ -116,7 +151,7 @@ export default function SalaPreviaScreen(): JSX.Element {
   /**
    * Crea espacios vacíos para representar los slots disponibles en la sala.
    */
-  const totalSlots = 8;
+  const totalSlots = salaInfo?.maxJugadores || 8; // Si no hay data, se queda en 8 por defecto
   const emptySlotsCount = totalSlots - players.length;
   const emptySlots = Array.from({ length: emptySlotsCount }, (_, i) => ({
     id: `empty-${i}`,
@@ -129,15 +164,22 @@ export default function SalaPreviaScreen(): JSX.Element {
     <View style={styles.container}>
       {/* Encabezado (Nombre De La Sala) */}
       <View style={styles.headerContainer}>
-        <Text style={styles.roomName}>Nombre De La Sala</Text>
+        <Text style={styles.roomName}>
+          {salaData ? JSON.parse(salaData).nombre : "Sala sin nombre"}
+        </Text>
       </View>
 
       {/* Info de la cuenta */}
       <View style={styles.accountInfo}>
-        <Text style={styles.accountName}>NombreCuenta</Text>
-        <Text>Nivel 10</Text>
-        <Text>2000S</Text>
+      <Text style={styles.accountName}>
+        {salaInfo && salaInfo.jugadores 
+          ? salaInfo.jugadores.find((jug: any) => jug.id === salaInfo.lider)?.nombre 
+          : "Noom"}
+      </Text>
+        <Text style={styles.accountName}>Nivel 10</Text>
+        <Text style={styles.accountName}>2000S</Text>
       </View>
+
 
       {/* Lista de jugadores + slots vacíos */}
       <View style={styles.playersContainer}>
