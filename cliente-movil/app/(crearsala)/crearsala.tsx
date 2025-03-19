@@ -8,10 +8,11 @@ import {
   Image,
   StyleSheet,
   ImageBackground,
+  Alert,
+  Modal,
 } from "react-native";
 import { useRouter } from "expo-router";
-import { Modal } from "react-native";
-import socket from "@/app/(sala)/socket"; // Importa el módulo de conexión
+import socket from "@/app/(sala)/socket"; // Módulo de conexión con socket.io
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 /**
@@ -52,228 +53,274 @@ const rolesData = [
 
 /**
  * Componente principal para la creación de una sala de juego.
- * Permite configurar el nombre del servidor, la privacidad y la cantidad de roles.
+ * Permite configurar el nombre del servidor, la privacidad, la cantidad de jugadores y los roles asignados.
  *
  * @returns {JSX.Element} Pantalla de creación de sala.
  */
 const CrearSala = (): JSX.Element => {
   const router = useRouter();
 
-  // Estado para el nombre del servidor
-  const [nombreServidor, setNombreServidor] = useState(
-    'Servidor de "nombreJugador"'
-  );
+  // Estados para usuario y nombre del servidor
+  const [usuario, setUsuario] = useState<{ nombre: string } | null>(null);
+  const [nombreServidor, setNombreServidor] = useState("");
 
-  // Estado para la privacidad (Privada/Pública)
+  // Estado para la privacidad ("publica" o "Privada")
   const [privacidad, setPrivacidad] = useState("Privada");
 
-  // Estado para la contraseña de la sala (si es privada)
+  // Estado para la contraseña (si la sala es privada)
   const [password, setPassword] = useState("");
 
   // Estado para la cantidad de cada rol en la partida
   const [rolesCantidad, setRolesCantidad] = useState(rolesData);
 
-  // Estado para controlar la visibilidad del popup de información del rol
+  // Estados para el popup (mostrar información de un rol)
   const [mostrarPopup, setMostrarPopup] = useState(false);
+  const [rolSeleccionado, setRolSeleccionado] = useState<{
+    id: number;
+    nombre: string;
+    imagen: any;
+    cantidad: number;
+  } | null>(null);
 
-  // Estado para el rol seleccionado en el popup
-  const [rolSeleccionado, setRolSeleccionado] = useState<
-    (typeof rolesData)[0] | null
-  >(null);
-
-  // Función para crear la sala
-  const crearSala = async () => {
-    // Obtener el nombre del usuario real
-    const nombreUsuario = await AsyncStorage.getItem("nombreUsuario");
-    const usuarioData = {
-      nombre: nombreUsuario || "Usuario",
+  // Al iniciar el componente, se busca el usuario guardado (simulando la autenticación)
+  useEffect(() => {
+    const fetchUsuario = async () => {
+      try {
+        //comentar para evitar iniciar sesion para pruebas
+        const usuarioGuardado = await AsyncStorage.getItem("nombreUsuario");
+        if (usuarioGuardado) {
+          const usuarioObj = { nombre: usuarioGuardado }; // Ajusta según cómo se almacena
+          setUsuario(usuarioObj);
+          setNombreServidor(`Servidor de "${usuarioObj.nombre}"`);
+        } else {
+          Alert.alert("Debes iniciar sesión para crear una sala.");
+          router.push("/");
+        }
+      } catch (error) {
+        console.error("Error obteniendo el usuario:", error);
+      }
     };
+    fetchUsuario();
+  }, []);
+
+  // Número total de jugadores calculado a partir de los roles
+  const numJugadores = useMemo(
+    () =>
+      rolesCantidad.reduce((acum, rol) => {
+        return acum + rol.cantidad;
+      }, 0),
+    [rolesCantidad]
+  );
+
+  // Determina si el botón de "Crear Sala" debe estar deshabilitado (mínimo 5 jugadores)
+  const botonCrearDeshabilitado = useMemo(
+    () => numJugadores < 5,
+    [numJugadores]
+  );
+
+  /**
+   * Ajusta automáticamente las cantidades de cada rol según el número de jugadores y la privacidad.
+   * Para salas públicas se asignan roles especiales fijos y se calcula la cantidad de aldeanos;
+   * para salas privadas se aplican otros ajustes según ciertas condiciones.
+   */
+  const ajustarRoles = () => {
+    let jugadores = numJugadores;
+    let newRoles = [...rolesCantidad];
+    // Ajuste del número de "Hombre Lobo"
+    let lobos = jugadores >= 12 ? 3 : jugadores >= 8 ? 2 : 1;
+    newRoles = newRoles.map((r) =>
+      r.nombre === "Hombre Lobo" ? { ...r, cantidad: lobos } : r
+    );
+
+    if (privacidad === "publica") {
+      // Para sala pública, se fijan ciertos roles
+      newRoles = newRoles.map((r) => {
+        if (r.nombre === "Vidente") return { ...r, cantidad: 1 };
+        if (r.nombre === "Bruja")
+          return { ...r, cantidad: jugadores >= 8 ? 1 : 0 };
+        if (r.nombre === "Cazador")
+          return { ...r, cantidad: jugadores >= 12 ? 1 : 0 };
+        return r;
+      });
+      const totalRolesEspeciales = newRoles.reduce(
+        (sum, rol) => (rol.nombre !== "Aldeano" ? sum + rol.cantidad : sum),
+        0
+      );
+      newRoles = newRoles.map((r) =>
+        r.nombre === "Aldeano"
+          ? { ...r, cantidad: jugadores - totalRolesEspeciales }
+          : r
+      );
+    } else {
+      // Para sala privada se aplican otros ajustes
+      if (jugadores !== 7 && jugadores !== 11) {
+        const totalRolesEspeciales = newRoles.reduce(
+          (sum, rol) => (rol.nombre !== "Aldeano" ? sum + rol.cantidad : sum),
+          0
+        );
+        newRoles = newRoles.map((r) =>
+          r.nombre === "Aldeano"
+            ? { ...r, cantidad: jugadores - totalRolesEspeciales }
+            : r
+        );
+      }
+      if (jugadores !== 8 && jugadores !== 12) {
+        const totalRolesEspeciales = newRoles.reduce(
+          (sum, rol) => (rol.nombre !== "Aldeano" ? sum - rol.cantidad : sum),
+          0
+        );
+        newRoles = newRoles.map((r) =>
+          r.nombre === "Aldeano"
+            ? { ...r, cantidad: jugadores + totalRolesEspeciales }
+            : r
+        );
+      }
+    }
+    setRolesCantidad(newRoles);
+  };
+
+  // Se ejecuta el ajuste de roles cada vez que cambie la privacidad o el número de jugadores
+  useEffect(() => {
+    ajustarRoles();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [privacidad, numJugadores]);
+
+  /**
+   * Alterna entre "publica" y "Privada" la privacidad de la sala.
+   */
+  const cambiarPrivacidad = () => {
+    setPrivacidad((prev) => (prev === "publica" ? "Privada" : "publica"));
+  };
+
+  /**
+   * Incrementa el número de jugadores (aumenta la cantidad de "Aldeano") siempre que no se supere el máximo.
+   */
+  const incrementarJugadores = () => {
+    if (numJugadores < 18) {
+      setRolesCantidad((prevRoles) =>
+        prevRoles.map((r) =>
+          r.nombre === "Aldeano" ? { ...r, cantidad: r.cantidad + 1 } : r
+        )
+      );
+    }
+  };
+
+  /**
+   * Decrementa el número de jugadores (disminuye la cantidad de "Aldeano") siempre que se mantenga el mínimo.
+   */
+  const decrementarJugadores = () => {
+    if (numJugadores > 5) {
+      setRolesCantidad((prevRoles) =>
+        prevRoles.map((r) =>
+          r.nombre === "Aldeano" && r.cantidad > 0
+            ? { ...r, cantidad: r.cantidad - 1 }
+            : r
+        )
+      );
+    }
+  };
+
+  /**
+   * Incrementa la cantidad de un rol específico en partidas privadas.
+   * Se evitan incrementos para salas públicas, para "Hombre Lobo" o si se alcanzó el máximo.
+   */
+  const incrementarRol = (rol: {
+    id: number;
+    nombre: string;
+    imagen: any;
+    cantidad: number;
+  }) => {
+    if (
+      privacidad === "publica" ||
+      rol.nombre === "Hombre Lobo" ||
+      numJugadores >= 18
+    )
+      return;
+    if (
+      (rol.nombre === "Bruja" || rol.nombre === "Vidente") &&
+      rol.cantidad >= 1
+    )
+      return;
+    if (rol.nombre === "Cazador" && rol.cantidad >= 2) return;
+    setRolesCantidad((prevRoles) =>
+      prevRoles.map((r) =>
+        r.id === rol.id ? { ...r, cantidad: r.cantidad + 1 } : r
+      )
+    );
+  };
+
+  /**
+   * Decrementa la cantidad de un rol específico en partidas privadas.
+   */
+  const decrementarRol = (rol: {
+    id: number;
+    nombre: string;
+    imagen: any;
+    cantidad: number;
+  }) => {
+    if (
+      privacidad === "publica" ||
+      rol.nombre === "Hombre Lobo" ||
+      rol.cantidad <= 0
+    )
+      return;
+    setRolesCantidad((prevRoles) =>
+      prevRoles.map((r) =>
+        r.id === rol.id ? { ...r, cantidad: r.cantidad - 1 } : r
+      )
+    );
+  };
+
+  /**
+   * Función para crear la sala utilizando websockets.
+   */
+  const crearSala = () => {
+    const maxRolesEspeciales = rolesCantidad
+      .filter((rol) => rol.nombre !== "Aldeano")
+      .reduce((sum, rol) => sum + rol.cantidad, 0);
 
     const datosSala = {
       nombreSala: nombreServidor,
-      tipo: privacidad.toLowerCase(), // "privada" o "pública"
-      contrasena: password,
-      maxJugadores: numJugadores, // Puedes parametrizarlo según la cantidad de roles o slots
-      // Incluye otros parámetros necesarios (por ejemplo, roles)
-      usuario: usuarioData, // Usamos los datos reales del usuario
+      tipo: privacidad.toLowerCase(),
+      contrasena: privacidad === "Privada" ? password : null,
+      maxJugadores: numJugadores,
+      maxRolesEspeciales,
+      usuario: usuario,
     };
 
-    // Emite el evento "crearSala" al servidor
+    console.log("Enviando datos de sala:", datosSala);
     socket.emit("crearSala", datosSala);
   };
 
-  // Escuchar la respuesta de creación
+  // Escuchar respuesta del servidor sobre la creación de la sala
   React.useEffect(() => {
     socket.on("salaCreada", (sala) => {
-      console.log("Sala creada", sala);
-      // Pasa la data de la sala para inicializar el estado en la siguiente pantalla
-      router.push({
-        pathname: "/(sala)/sala",
-        params: {
-          idSala: sala.id,
-          salaData: JSON.stringify(sala),
-        },
-      });
+      if (sala && sala.id) {
+        AsyncStorage.setItem("salaActual", JSON.stringify(sala));
+        router.push({
+          pathname: "/(sala)/sala",
+          params: {
+            idSala: sala.id,
+            salaData: JSON.stringify(sala),
+          },
+        });
+      } else {
+        Alert.alert(
+          "Error",
+          "Hubo un error al crear la sala. Por favor, inténtalo nuevamente."
+        );
+      }
+    });
+
+    socket.on("errorSala", (msg) => {
+      Alert.alert("Error al crear la sala", msg);
     });
 
     return () => {
       socket.off("salaCreada");
+      socket.off("errorSala");
     };
-  }, []);
-
-  /**
-   * Cálculo del número total de jugadores en la partida basado en la cantidad de roles.
-   */
-  const numJugadores = useMemo(
-    () => rolesCantidad.reduce((acc, rol) => acc + rol.cantidad, 0),
-    [rolesCantidad]
-  );
-
-  /**
-   * Alterna entre "Pública" y "Privada" la privacidad de la sala.
-   */
-  const cambiarPrivacidad = () => {
-    setPrivacidad(privacidad === "Pública" ? "Privada" : "Pública");
-  };
-
-  /**
-   * Modifica la cantidad de un rol específico en la partida.
-   * Se aplican restricciones como:
-   * - Máximo de 3 lobos.
-   * - Máximo de 2 para roles especiales (Bruja, Cazador, Vidente).
-   * - Límite total de 18 jugadores.
-   *
-   * @param rol - El rol a modificar.
-   * @param incremento - Número de jugadores a sumar o restar.
-   */
-  const modificarCantidad = (
-    rol: (typeof rolesData)[0],
-    incremento: number
-  ) => {
-    setRolesCantidad((prevRoles) =>
-      prevRoles.map((r) => {
-        if (r.id === rol.id) {
-          let nuevaCantidad = r.cantidad + incremento;
-          if (nuevaCantidad < 0) nuevaCantidad = 0;
-          if (numJugadores >= 18 && incremento > 0) return r;
-          if (rol.nombre === "Hombre Lobo" && nuevaCantidad > 3) return r;
-          if (
-            ["Bruja", "Cazador", "Vidente"].includes(rol.nombre) &&
-            nuevaCantidad > 2
-          )
-            return r;
-          return { ...r, cantidad: nuevaCantidad };
-        }
-        return r;
-      })
-    );
-  };
-
-  /**
-   * Determina si el botón "Crear Sala" debe estar deshabilitado.
-   * Requisitos:
-   * - Mínimo 5 jugadores.
-   * - Al menos un hombre lobo.
-   * - No puede haber más lobos que aldeanos.
-   */
-  const botonCrearDeshabilitado = useMemo(() => {
-    const lobos =
-      rolesCantidad.find((r) => r.nombre === "Hombre Lobo")?.cantidad || 0;
-    const aldeanos =
-      rolesCantidad.find((r) => r.nombre === "Aldeano")?.cantidad || 0;
-    return numJugadores < 5 || lobos === 0 || lobos >= aldeanos;
-  }, [rolesCantidad, numJugadores]);
-
-  const ajustarRoles = () => {
-    let jugadores = numJugadores;
-    let lobos = jugadores >= 12 ? 3 : jugadores >= 8 ? 2 : 1;
-
-    setRolesCantidad((prevRoles) =>
-      prevRoles.map((rol) => {
-        if (rol.nombre === "Hombre Lobo") {
-          return { ...rol, cantidad: lobos };
-        }
-        if (privacidad === "publica") {
-          if (rol.nombre === "Vidente") return { ...rol, cantidad: 1 };
-          if (rol.nombre === "Bruja") return { ...rol, cantidad: jugadores >= 8 ? 1 : 0 };
-          if (rol.nombre === "Cazador") return { ...rol, cantidad: jugadores >= 12 ? 1 : 0 };
-        }
-        return rol;
-      })
-    );
-
-    const totalRolesEspeciales = rolesCantidad.reduce(
-      (sum, rol) => (rol.nombre !== "Aldeano" ? sum + rol.cantidad : sum),
-      0
-    );
-
-    setRolesCantidad((prevRoles) =>
-      prevRoles.map((rol) => {
-        if (rol.nombre === "Aldeano") {
-          return { ...rol, cantidad: jugadores - totalRolesEspeciales };
-        }
-        return rol;
-      })
-    );
-  };
-
-  useEffect(() => {
-    ajustarRoles();
-  }, [privacidad, numJugadores]);
-
-  const incrementarJugadores = () => {
-    if (numJugadores < 18) {
-      setRolesCantidad((prevRoles) =>
-        prevRoles.map((rol) => {
-          if (rol.nombre === "Aldeano") {
-            return { ...rol, cantidad: rol.cantidad + 1 };
-          }
-          return rol;
-        })
-      );
-    }
-  };
-
-  const decrementarJugadores = () => {
-    if (numJugadores > 5) {
-      setRolesCantidad((prevRoles) =>
-        prevRoles.map((rol) => {
-          if (rol.nombre === "Aldeano" && rol.cantidad > 0) {
-            return { ...rol, cantidad: rol.cantidad - 1 };
-          }
-          return rol;
-        })
-      );
-    }
-  };
-
-  const incrementarRol = (rol: (typeof rolesData)[0]) => {
-    if (privacidad === "publica" || numJugadores >= 18) return;
-    setRolesCantidad((prevRoles) =>
-      prevRoles.map((r) => {
-        if (r.id === rol.id) {
-          if (rol.nombre === "Bruja" || rol.nombre === "Vidente") {
-            if (rol.cantidad >= 1) return r;
-          }
-          if (rol.nombre === "Cazador" && rol.cantidad >= 2) return r;
-          return { ...r, cantidad: r.cantidad + 1 };
-        }
-        return r;
-      })
-    );
-  };
-
-  const decrementarRol = (rol: (typeof rolesData)[0]) => {
-    if (privacidad === "publica") return;
-    setRolesCantidad((prevRoles) =>
-      prevRoles.map((r) => {
-        if (r.id === rol.id && r.cantidad > 0) {
-          return { ...r, cantidad: r.cantidad - 1 };
-        }
-        return r;
-      })
-    );
-  };
+  }, [router]);
 
   return (
     <View style={styles.container}>
@@ -290,11 +337,28 @@ const CrearSala = (): JSX.Element => {
           style={styles.input}
           value={nombreServidor}
           onChangeText={setNombreServidor}
-          placeholder="Introduce un nombre"
+          placeholder="Servidor de..."
         />
 
         {/* Número de jugadores */}
-        <Text style={styles.label}>Número de jugadores: {numJugadores}</Text>
+        <View style={styles.jugadoresContainer}>
+          {/* Texto y número de jugadores juntos */}
+          <Text style={styles.label}>Número de jugadores: {numJugadores}</Text>
+
+          {/* Contenedor de los botones - y + */}
+          <View style={styles.botonesJugadores}>
+            <Button
+              title="-"
+              onPress={decrementarJugadores}
+              disabled={numJugadores <= 5}
+            />
+            <Button
+              title="+"
+              onPress={incrementarJugadores}
+              disabled={numJugadores >= 18}
+            />
+          </View>
+        </View>
 
         {/* Selector de privacidad */}
         <View style={styles.privacidadContainer}>
@@ -317,7 +381,7 @@ const CrearSala = (): JSX.Element => {
           />
         )}
 
-        {/* Lista de roles disponibles */}
+        {/* Lista de roles asignados */}
         <Text style={styles.label}>Roles asignados:</Text>
         {rolesCantidad.map((rol) => (
           <View key={rol.id} style={styles.rolContainer}>
@@ -333,11 +397,11 @@ const CrearSala = (): JSX.Element => {
               {rol.nombre}: {rol.cantidad}
             </Text>
             <View style={styles.botonContainer}>
-              <Button
-                title="-"
-                onPress={() => decrementarRol(rol)}
-                disabled={rol.cantidad === 0}
-              />
+              {rol.cantidad > 0 &&
+                privacidad !== "publica" &&
+                rol.nombre !== "Hombre Lobo" && (
+                  <Button title="-" onPress={() => decrementarRol(rol)} />
+                )}
               <Button title="+" onPress={() => incrementarRol(rol)} />
             </View>
           </View>
@@ -350,6 +414,7 @@ const CrearSala = (): JSX.Element => {
           onPress={crearSala}
         />
 
+        {/* Modal para mostrar información del rol */}
         <Modal visible={mostrarPopup} transparent animationType="slide">
           <View style={styles.modalContainer}>
             <Text style={styles.label}>{rolSeleccionado?.nombre}</Text>
@@ -372,58 +437,72 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     padding: 20,
   },
-
   header: {
     fontSize: 24,
     fontWeight: "bold",
     marginBottom: 10,
     color: "white",
+    textAlign: "center",
   },
-
   label: {
     color: "white",
     fontSize: 18,
     fontWeight: "bold",
     marginBottom: 10,
   },
-
   input: {
     borderWidth: 1,
     padding: 10,
     marginBottom: 10,
     backgroundColor: "white",
   },
-
   privacidadContainer: {
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 20,
   },
-
   privacidadBotones: {
     flexDirection: "row",
     alignItems: "center",
     marginLeft: 10,
   },
-
+  botonesJugadores: {
+    flexDirection: "row",
+    marginLeft: 20, // Espacio entre el texto y los botones
+    gap: 8, // Espacio entre los botones - y +
+  },
+  jugadoresContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  jugadoresSubContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginLeft: 10,
+  },
+  numText: {
+    color: "white",
+    fontSize: 18,
+    fontWeight: "bold",
+    marginRight: 10,
+  },
   rolContainer: {
     flexDirection: "row",
     alignItems: "center",
     marginVertical: 10,
   },
-
   rolImagen: {
     width: 50,
     height: 50,
     marginRight: 10,
   },
-
   botonContainer: {
     flexDirection: "row",
     alignItems: "center",
     marginLeft: 10,
+    gap: 8, // Espacio entre los botones - y +
   },
-
   modalContainer: {
     flex: 1,
     justifyContent: "center",
