@@ -4,6 +4,7 @@
  * votaciones, chat y habilidades.
  */
 import React, { useState, useEffect, useRef } from "react";
+import { useNavigation } from "@react-navigation/native";
 import {
   View,
   ImageBackground,
@@ -152,13 +153,13 @@ const PantallaJugando: React.FC = () => {
   const RETRASO_ANIMACION = NUMERICAS.RETRASO_ANIMACION;
 
   /**
-   * @function setNightDayMode
+   * @function setModoDiaNoche
    * @description Cambia entre modo noche y modo día.
    * @param {boolean} mode - Indica si se debe activar el modo noche.
    */
-  const [isNight, setIsNight] = useState(false);
-  const setNightDayMode = (mode: boolean) => {
-    setIsNight(mode);
+  const [esDeNoche, setEsDeNoche] = useState(false);
+  const setModoDiaNoche = (mode: boolean) => {
+    setEsDeNoche(mode);
     if (mode) {
       animacionFondo.fadeIn(500).start();
     } else {
@@ -171,12 +172,12 @@ const PantallaJugando: React.FC = () => {
    */
   useEffect(() => {
     const interval = setInterval(() => {
-      if (MODO_NOCHE_GLOBAL !== isNight) {
-        setNightDayMode(MODO_NOCHE_GLOBAL);
+      if (MODO_NOCHE_GLOBAL !== esDeNoche) {
+        setModoDiaNoche(MODO_NOCHE_GLOBAL);
       }
     }, 100);
     return () => clearInterval(interval);
-  }, [isNight]);
+  }, [esDeNoche]);
 
   // Animación para la posición del chat.
   const posicionChat = useRef(new Animated.Value(ALTO)).current;
