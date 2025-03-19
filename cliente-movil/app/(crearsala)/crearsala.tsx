@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import {
   View,
   Text,
@@ -7,10 +7,10 @@ import {
   TouchableOpacity,
   Image,
   StyleSheet,
-  Modal,
   ImageBackground,
 } from "react-native";
 import { useRouter } from "expo-router";
+import { Modal } from "react-native";
 import socket from "@/app/(sala)/socket"; // Importa el módulo de conexión
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
@@ -34,13 +34,13 @@ const rolesData = [
     id: 3,
     nombre: "Vidente",
     imagen: require("@/assets/images/vidente-icon.jpeg"),
-    cantidad: 0,
+    cantidad: 1,
   },
   {
     id: 4,
     nombre: "Aldeano",
     imagen: require("@/assets/images/aldeano-icon.jpeg"),
-    cantidad: 4,
+    cantidad: 3,
   },
   {
     id: 5,
@@ -184,6 +184,97 @@ const CrearSala = (): JSX.Element => {
     return numJugadores < 5 || lobos === 0 || lobos >= aldeanos;
   }, [rolesCantidad, numJugadores]);
 
+  const ajustarRoles = () => {
+    let jugadores = numJugadores;
+    let lobos = jugadores >= 12 ? 3 : jugadores >= 8 ? 2 : 1;
+
+    setRolesCantidad((prevRoles) =>
+      prevRoles.map((rol) => {
+        if (rol.nombre === "Hombre Lobo") {
+          return { ...rol, cantidad: lobos };
+        }
+        if (privacidad === "publica") {
+          if (rol.nombre === "Vidente") return { ...rol, cantidad: 1 };
+          if (rol.nombre === "Bruja") return { ...rol, cantidad: jugadores >= 8 ? 1 : 0 };
+          if (rol.nombre === "Cazador") return { ...rol, cantidad: jugadores >= 12 ? 1 : 0 };
+        }
+        return rol;
+      })
+    );
+
+    const totalRolesEspeciales = rolesCantidad.reduce(
+      (sum, rol) => (rol.nombre !== "Aldeano" ? sum + rol.cantidad : sum),
+      0
+    );
+
+    setRolesCantidad((prevRoles) =>
+      prevRoles.map((rol) => {
+        if (rol.nombre === "Aldeano") {
+          return { ...rol, cantidad: jugadores - totalRolesEspeciales };
+        }
+        return rol;
+      })
+    );
+  };
+
+  useEffect(() => {
+    ajustarRoles();
+  }, [privacidad, numJugadores]);
+
+  const incrementarJugadores = () => {
+    if (numJugadores < 18) {
+      setRolesCantidad((prevRoles) =>
+        prevRoles.map((rol) => {
+          if (rol.nombre === "Aldeano") {
+            return { ...rol, cantidad: rol.cantidad + 1 };
+          }
+          return rol;
+        })
+      );
+    }
+  };
+
+  const decrementarJugadores = () => {
+    if (numJugadores > 5) {
+      setRolesCantidad((prevRoles) =>
+        prevRoles.map((rol) => {
+          if (rol.nombre === "Aldeano" && rol.cantidad > 0) {
+            return { ...rol, cantidad: rol.cantidad - 1 };
+          }
+          return rol;
+        })
+      );
+    }
+  };
+
+  const incrementarRol = (rol: (typeof rolesData)[0]) => {
+    if (privacidad === "publica" || numJugadores >= 18) return;
+    setRolesCantidad((prevRoles) =>
+      prevRoles.map((r) => {
+        if (r.id === rol.id) {
+          if (rol.nombre === "Bruja" || rol.nombre === "Vidente") {
+            if (rol.cantidad >= 1) return r;
+          }
+          if (rol.nombre === "Cazador" && rol.cantidad >= 2) return r;
+          return { ...r, cantidad: r.cantidad + 1 };
+        }
+        return r;
+      })
+    );
+  };
+
+  const decrementarRol = (rol: (typeof rolesData)[0]) => {
+    if (privacidad === "publica") return;
+    setRolesCantidad((prevRoles) =>
+      prevRoles.map((r) => {
+        if (r.id === rol.id && r.cantidad > 0) {
+          return { ...r, cantidad: r.cantidad - 1 };
+        }
+        return r;
+      })
+    );
+  };
+
   return (
     <View style={styles.container}>
       <ImageBackground
@@ -244,10 +335,10 @@ const CrearSala = (): JSX.Element => {
             <View style={styles.botonContainer}>
               <Button
                 title="-"
-                onPress={() => modificarCantidad(rol, -1)}
+                onPress={() => decrementarRol(rol)}
                 disabled={rol.cantidad === 0}
               />
-              <Button title="+" onPress={() => modificarCantidad(rol, 1)} />
+              <Button title="+" onPress={() => incrementarRol(rol)} />
             </View>
           </View>
         ))}
@@ -259,11 +350,12 @@ const CrearSala = (): JSX.Element => {
           onPress={crearSala}
         />
 
-        {/* Modal de información del rol seleccionado */}
         <Modal visible={mostrarPopup} transparent animationType="slide">
           <View style={styles.modalContainer}>
             <Text style={styles.label}>{rolSeleccionado?.nombre}</Text>
-            <Image source={rolSeleccionado?.imagen} style={styles.rolImagen} />
+            {rolSeleccionado?.imagen && (
+              <Image source={rolSeleccionado.imagen} style={styles.rolImagen} />
+            )}
             <Button title="Cerrar" onPress={() => setMostrarPopup(false)} />
           </View>
         </Modal>
