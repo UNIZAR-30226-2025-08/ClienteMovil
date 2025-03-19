@@ -215,6 +215,16 @@ export default function OpcionesScreen(): JSX.Element | null {
             />
           </View>
         </TouchableOpacity>
+
+          {/* Nuevo Botón de Ranking */}
+                <TouchableOpacity
+          style={styles.botonRanking}
+          onPress={() => router.push("/ranking")}
+        >
+          <View style={styles.iconoRankingContainer}>
+            <Text style={styles.iconoRanking}>🏆</Text>
+          </View>
+        </TouchableOpacity>
       </ImageBackground>
     </View>
   );
@@ -394,5 +404,23 @@ const styles = StyleSheet.create({
   iconoNotificaciones: {
     width: 40, // Aumenta el tamaño de la imagen
     height: 40, // Aumenta el tamaño de la imagen
+  },
+
+  botonRanking: {
+    position: "absolute",
+    top: 40,
+    left: 20,
+    padding: 10,
+  },
+
+  iconoRankingContainer: {
+    backgroundColor: "rgba(0,0,0,0.6)",
+    borderRadius: 10,
+    padding: 5,
+  },
+
+  iconoRanking: {
+    fontSize: 30,
+    color: "white",
   },
 });
