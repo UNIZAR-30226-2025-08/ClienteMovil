@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   ImageBackground,
   StyleSheet,
@@ -9,8 +9,10 @@ import {
   Alert,
   TextInput,
   Modal,
+  ScrollView, 
 } from "react-native";
 import { useRouter } from "expo-router";
+import socket from "@/app/(sala)/socket"; // Módulo de conexión
 
 /**
  * Imágenes utilizadas en la pantalla de búsqueda de salas.
@@ -23,7 +25,7 @@ const iconoCandado = require("@/assets/images/candado.png");
  * Lista de salas disponibles para unirse.
  * Las salas pueden ser públicas o privadas.
  */
-const salas = [
+/*const salas = [
   { estado: "Sala", tipo: "Privada", nombre: "SADADDSADADSSAS", privada: true },
   {
     estado: "En Partida",
@@ -32,7 +34,7 @@ const salas = [
     privada: false,
   },
   { estado: "Empezando", tipo: "Privada", nombre: "Empezando", privada: true },
-];
+];*/
 
 /**
  * Pantalla para buscar y unirse a salas.
@@ -42,6 +44,8 @@ const salas = [
  */
 export default function BuscarSalasScreen(): JSX.Element {
   const router = useRouter();
+
+  const [salas, setSalas] = useState<any[]>([]);
 
   /**
    * Estado para controlar la visibilidad del modal de contraseña.
@@ -56,12 +60,29 @@ export default function BuscarSalasScreen(): JSX.Element {
   /**
    * Estado para almacenar la sala seleccionada cuando es privada.
    */
-  const [salaSeleccionada, setSalaSeleccionada] = useState<{
+  /*const [salaSeleccionada, setSalaSeleccionada] = useState<{
     estado: string;
     tipo: string;
     nombre: string;
     privada: boolean;
-  } | null>(null);
+  } | null>(null);*/
+  const [salaSeleccionada, setSalaSeleccionada] = useState<any>(null);
+
+  // Al montar la pantalla, solicita la lista de salas activas
+  useEffect(() => {
+    // Solicitar al servidor la lista de salas
+    socket.emit("obtenerSalas");
+
+    // Escuchar el evento con la lista de salas
+    socket.on("listaSalas", (listaSalas) => {
+      console.log("Salas activas:", listaSalas);
+      setSalas(listaSalas);
+    });
+
+    return () => {
+      socket.off("listaSalas");
+    };
+  }, []);
 
   /**
    * Maneja la selección de una sala.
@@ -70,7 +91,7 @@ export default function BuscarSalasScreen(): JSX.Element {
    *
    * @param sala Sala seleccionada.
    */
-  const handleSalaPress = (sala: {
+  /*const handleSalaPress = (sala: {
     estado: string;
     tipo: string;
     nombre: string;
@@ -82,12 +103,29 @@ export default function BuscarSalasScreen(): JSX.Element {
     } else {
       router.push("/(sala)/sala");
     }
+  };*/
+
+  /**
+   * Al presionar una sala:
+   * - Si es privada, se muestra el modal para ingresar la contraseña.
+   * - Si es pública, se une directamente a la sala.
+   */
+  const handleSalaPress = (sala: any) => {
+    if (sala.tipo.toLowerCase() === "privada") {
+      setSalaSeleccionada(sala);
+      setMostrarModal(true);
+    } else {
+      // Simula los datos de otro usuario, por ejemplo "user2"
+      const usuarioData = { id: "user2", nombre: "OtroUsuario" };
+      socket.emit("unirseSala", { idSala: sala.id, usuario: usuarioData });
+      router.push({ pathname: "/(sala)/sala", params: { idSala: sala.id } });
+    }
   };
 
   /**
    * Maneja la validación de la contraseña de una sala privada.
    */
-  const handleConfirmarPassword = () => {
+  /*const handleConfirmarPassword = () => {
     // Aquí puedes agregar la lógica para verificar la contraseña
     if (password === "1234") {
       // Ejemplo de contraseña
@@ -96,50 +134,62 @@ export default function BuscarSalasScreen(): JSX.Element {
     } else {
       Alert.alert("Contraseña incorrecta", "Por favor, intenta de nuevo.");
     }
-  };
+  };*/
+    /**
+   * Al confirmar la contraseña en una sala privada, se emite el evento de unión.
+   */
+    const handleConfirmarPassword = () => {
+      // Aquí puedes hacer la validación real; en este ejemplo se compara con la contraseña de la sala
+      if (password === salaSeleccionada.contrasena) {
+        const usuarioData = { id: "user2", nombre: "OtroUsuario" };
+        socket.emit("unirseSala", {
+          idSala: salaSeleccionada.id,
+          usuario: usuarioData,
+          contrasena: password,
+        });
+        setMostrarModal(false);
+        router.push({ pathname: "/(sala)/sala", params: { idSala: salaSeleccionada.id } });
+      } else {
+        Alert.alert("Contraseña incorrecta", "Por favor, intenta de nuevo.");
+      }
+    };
 
   return (
     <View style={styles.container}>
       <ImageBackground source={imagenFondo} style={styles.image}>
+        <ScrollView contentContainerStyle={styles.scrollContenido}>
+          {/* Título principal */}
+          <Text style={styles.titulo}>BUSCAR{"\n"}SALAS</Text>
 
-        {/* Título principal */}
-        <Text style={styles.titulo}>BUSCAR{"\n"}SALAS</Text>
+          {salas.map((sala, index) => (
+            <TouchableOpacity
+              key={index}
+              style={styles.salaContainer}
+              onPress={() => handleSalaPress(sala)}
+            >
+              <Text style={styles.texto}>
+                <Text style={styles.label}>ESTADO: </Text> {sala.estado}
+              </Text>
+              <Text style={styles.texto}>
+                <Text style={styles.label}>TIPO: </Text> {sala.tipo}
+              </Text>
+              {sala.privada && (
+                <Image source={iconoCandado} style={styles.iconoCandado} />
+              )}
+              <Text style={styles.texto}>
+                <Text style={styles.label}>NOMBRE: </Text> {sala.nombre}
+              </Text>
+            </TouchableOpacity>
+          ))}
 
-        {/* Lista de salas disponibles */}
-        <View style={styles.rectanglesContainer}>
-          <View style={styles.rectangle} />
-          <View style={styles.rectangle} />
-          <View style={styles.rectangle} />
-        </View>
-
-        {salas.map((sala, index) => (
+          {/* Botón para regresar */}
           <TouchableOpacity
-            key={index}
-            style={styles.salaContainer}
-            onPress={() => handleSalaPress(sala)}
+            style={styles.botonAtras}
+            onPress={() => router.back()}
           >
-            <Text style={styles.texto}>
-              <Text style={styles.label}>ESTADO: </Text> {sala.estado}
-            </Text>
-            <Text style={styles.texto}>
-              <Text style={styles.label}>TIPO: </Text> {sala.tipo}
-            </Text>
-            {sala.privada && (
-              <Image source={iconoCandado} style={styles.iconoCandado} />
-            )}
-            <Text style={styles.texto}>
-              <Text style={styles.label}>NOMBRE: </Text> {sala.nombre}
-            </Text>
+            <Image source={imagenAtras} style={styles.imagenAtras} />
           </TouchableOpacity>
-        ))}
-
-        {/* Botón para regresar */}
-        <TouchableOpacity
-          style={styles.botonAtras}
-          onPress={() => router.back()}
-        >
-          <Image source={imagenAtras} style={styles.imagenAtras} />
-        </TouchableOpacity>
+        </ScrollView>
 
         {/* Modal de ingreso de contraseña para salas privadas */}
         <Modal visible={mostrarModal} transparent animationType="slide">
@@ -296,5 +346,11 @@ const styles = StyleSheet.create({
   textoBotonCancelar: {
     color: "white",
     fontWeight: "bold",
+  },
+
+  scrollContenido: {
+    paddingBottom: 20,
+    alignItems: "center",
+    width: "80%"
   },
 });

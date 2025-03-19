@@ -11,6 +11,8 @@ import {
   ImageBackground,
 } from "react-native";
 import { useRouter } from "expo-router";
+import socket from "@/app/(sala)/socket"; // Importa el módulo de conexión
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 /**
  * Definición de los roles disponibles en el juego con sus imágenes y cantidad inicial.
@@ -78,6 +80,43 @@ const CrearSala = (): JSX.Element => {
   const [rolSeleccionado, setRolSeleccionado] = useState<
     (typeof rolesData)[0] | null
   >(null);
+
+  // Función para crear la sala
+  const crearSala = async () => {
+    // Obtener el nombre del usuario real
+    const nombreUsuario = await AsyncStorage.getItem("nombreUsuario");
+    const usuarioData = {
+      nombre: nombreUsuario || "Usuario",
+    };
+
+    const datosSala = {
+      nombreSala: nombreServidor,
+      tipo: privacidad.toLowerCase(), // "privada" o "pública"
+      contrasena: password,
+      maxJugadores: numJugadores, // Puedes parametrizarlo según la cantidad de roles o slots
+      // Incluye otros parámetros necesarios (por ejemplo, roles)
+      usuario: usuarioData, // Usamos los datos reales del usuario
+    };
+
+    // Emite el evento "crearSala" al servidor
+    socket.emit("crearSala", datosSala);
+  };
+  
+  // Escuchar la respuesta de creación
+  React.useEffect(() => {
+    socket.on("salaCreada", (sala) => {
+      console.log("Sala creada", sala);
+      // Pasa la data de la sala para inicializar el estado en la siguiente pantalla
+      router.push({ pathname: "/(sala)/sala", 
+        params: { 
+          idSala: sala.id, 
+          salaData: JSON.stringify(sala) } });
+    });
+
+    return () => {
+      socket.off("salaCreada");
+    };
+  }, []);
 
   /**
    * Cálculo del número total de jugadores en la partida basado en la cantidad de roles.
@@ -214,7 +253,7 @@ const CrearSala = (): JSX.Element => {
         <Button
           title="Crear Sala"
           disabled={botonCrearDeshabilitado}
-          onPress={() => router.push("/(sala)/sala")}
+          onPress={crearSala}
         />
 
         {/* Modal de información del rol seleccionado */}
