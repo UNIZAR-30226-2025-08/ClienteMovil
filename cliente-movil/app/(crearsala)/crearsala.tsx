@@ -101,16 +101,19 @@ const CrearSala = (): JSX.Element => {
     // Emite el evento "crearSala" al servidor
     socket.emit("crearSala", datosSala);
   };
-  
+
   // Escuchar la respuesta de creación
   React.useEffect(() => {
     socket.on("salaCreada", (sala) => {
       console.log("Sala creada", sala);
       // Pasa la data de la sala para inicializar el estado en la siguiente pantalla
-      router.push({ pathname: "/(sala)/sala", 
-        params: { 
-          idSala: sala.id, 
-          salaData: JSON.stringify(sala) } });
+      router.push({
+        pathname: "/(sala)/sala",
+        params: {
+          idSala: sala.id,
+          salaData: JSON.stringify(sala),
+        },
+      });
     });
 
     return () => {
@@ -285,11 +288,11 @@ const styles = StyleSheet.create({
     color: "white",
   },
 
-  label: { 
-    color: "white", 
-    fontSize: 18, 
-    fontWeight: "bold", 
-    marginBottom: 10 
+  label: {
+    color: "white",
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 10,
   },
 
   input: {
@@ -317,10 +320,10 @@ const styles = StyleSheet.create({
     marginVertical: 10,
   },
 
-  rolImagen: { 
-    width: 50, 
-    height: 50, 
-    marginRight: 10 
+  rolImagen: {
+    width: 50,
+    height: 50,
+    marginRight: 10,
   },
 
   botonContainer: {
@@ -328,7 +331,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginLeft: 10,
   },
-  
+
   modalContainer: {
     flex: 1,
     justifyContent: "center",
