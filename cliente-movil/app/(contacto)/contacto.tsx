@@ -23,26 +23,38 @@ const imagenContacto = require('@/assets/images/logo-soporte-tecnico.png');
 const imagenAtras = require('@/assets/images/botonAtras.png');
 
 /**
- * Pantalla de contacto.
- * Permite a los usuarios enviar un mensaje de contacto con su nombre, correo y asunto.
+ * Componente que representa la pantalla de contacto.
  *
- * @returns {JSX.Element} Pantalla de contacto.
+ * Este componente permite a los usuarios enviar una sugerencia de contacto,
+ * ingresando su nombre, correo y asunto. La sugerencia se envía a un backend
+ * para ser almacenada en la base de datos.
+ *
+ * @returns {JSX.Element | null} Retorna el componente de contacto o null si no se ha cargado la fuente.
  */
 export default function ContactoScreen(): JSX.Element | null {
 
   /**
- * URL del backend obtenida de las constantes de Expo.
- */
+   * URL del backend obtenida de las constantes de Expo.
+   *
+   * @constant {string | undefined}
+   */
   const BACKEND_URL = Constants.expoConfig?.extra?.backendUrl;
 
-  const router = useRouter();  // Usamos useRouter para manejar la navegación
+  /**
+   * Hook de navegación para manejar la navegación en la aplicación.
+   */
+  const router = useRouter();  
 
     // Estados para cada input
     const [nombre, setNombre] = useState('');
     const [correo, setCorreo] = useState('');
     const [asunto, setAsunto] = useState('');
 
-  // Cargar la fuente GhostShadow
+  /**
+   * Carga la fuente personalizada GhostShadow.
+   *
+   * @constant {boolean} loaded - Indica si la fuente ha sido cargada.
+   */
   const [loaded] = useFonts({
     GhostShadow: require('@/assets/fonts/ghost-shadow.ttf'),
   });
@@ -52,13 +64,28 @@ export default function ContactoScreen(): JSX.Element | null {
   }
 
   /**
-   * Función para volver a la pantalla anterior.
+   * Navega a la pantalla anterior.
+   *
+   * @remarks
+   * Utiliza el hook `useRouter` para retroceder en el stack de navegación.
    */
-  const irAtras = () => {
+  const irAtras = (): void => {
     router.back();  // Regresa a la pantalla anterior
   };
 
-  const enviarSugerencia = async () => {
+  /**
+   * Envía la sugerencia ingresada al backend para su almacenamiento.
+   *
+   * @async
+   * @returns {Promise<void>} Promesa que se resuelve cuando la sugerencia se envía o se produce un error.
+   *
+   * @remarks
+   * - Valida que los campos de nombre, correo y asunto estén completos.
+   * - Obtiene el ID del usuario desde AsyncStorage.
+   * - Realiza una petición POST al endpoint `${BACKEND_URL}/api/sugerencias/enviar`.
+   * - Si la petición es exitosa, limpia los campos de entrada.
+   */
+  const enviarSugerencia = async (): Promise<void> => {
     // Validar que se hayan ingresado los campos requeridos
     if (!nombre || !correo || !asunto) {
       Alert.alert("Por favor, completa todos los campos.");
@@ -104,6 +131,11 @@ export default function ContactoScreen(): JSX.Element | null {
     }
   };
 
+/**
+ * Estilos utilizados en la pantalla de contacto.
+ *
+ * @constant {StyleSheet.NamedStyles<any>}
+ */
   return (
     <View style={styles.container}>
         <ImageBackground
