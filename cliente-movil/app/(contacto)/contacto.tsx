@@ -1,4 +1,4 @@
-import React from 'react';  // Importar useState desde React
+import React, {useState} from 'react';  // Importar useState desde React
 import { 
   ImageBackground, 
   StyleSheet, 
@@ -9,8 +9,10 @@ import {
   TextInput, 
   Alert 
 } from 'react-native';
+import Constants from 'expo-constants';
 import { useRouter } from 'expo-router';
 import { useFonts } from 'expo-font';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 /**
@@ -18,7 +20,6 @@ import { useFonts } from 'expo-font';
  */
 const imagenFondoRoles = require('@/assets/images/fondo-roles.jpg');
 const imagenContacto = require('@/assets/images/logo-soporte-tecnico.png');
-const imagenPapiro = require('@/assets/images/papiro.png')
 const imagenAtras = require('@/assets/images/botonAtras.png');
 
 /**
@@ -29,7 +30,17 @@ const imagenAtras = require('@/assets/images/botonAtras.png');
  */
 export default function ContactoScreen(): JSX.Element | null {
 
+  /**
+ * URL del backend obtenida de las constantes de Expo.
+ */
+  const BACKEND_URL = Constants.expoConfig?.extra?.backendUrl;
+
   const router = useRouter();  // Usamos useRouter para manejar la navegación
+
+    // Estados para cada input
+    const [nombre, setNombre] = useState('');
+    const [correo, setCorreo] = useState('');
+    const [asunto, setAsunto] = useState('');
 
   // Cargar la fuente GhostShadow
   const [loaded] = useFonts({
@@ -47,6 +58,52 @@ export default function ContactoScreen(): JSX.Element | null {
     router.back();  // Regresa a la pantalla anterior
   };
 
+  const enviarSugerencia = async () => {
+    // Validar que se hayan ingresado los campos requeridos
+    if (!nombre || !correo || !asunto) {
+      Alert.alert("Por favor, completa todos los campos.");
+      return;
+    }
+
+    /*
+    * Obtenemos el ID del usuario que envía la sugerencia al Backend
+    * para que se guarde en los registros de la BD
+    */
+    const idUsuarioString = await AsyncStorage.getItem('idUsuario');
+    if (!idUsuarioString) {
+      Alert.alert("Error", "No se encontró el id de usuario.");
+      return;
+    }
+    const idUsuario = parseInt(idUsuarioString, 10);
+    // Depuración del id del usuario
+    console.log("ID usuario enviado:", idUsuario);
+
+    try {
+      const respuesta = await fetch(`${BACKEND_URL}/api/sugerencias/enviar`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          idUsuario,
+          contenido: asunto  // O puedes combinar los campos si lo prefieres
+        })
+      });
+      const data = await respuesta.json();
+      if (respuesta.ok) {
+        Alert.alert("Sugerencia enviada", "Gracias por tu sugerencia.");
+        // Limpiar campos después de enviar
+        setNombre('');
+        setCorreo('');
+        setAsunto('');
+      } else {
+        Alert.alert("Error", data.error || "Ocurrió un error al enviar la sugerencia.");
+      }
+    } catch (error) {
+      Alert.alert("Error", "No se pudo conectar con el servidor.");
+    }
+  };
+
   return (
     <View style={styles.container}>
         <ImageBackground
@@ -61,18 +118,38 @@ export default function ContactoScreen(): JSX.Element | null {
 
         {/* Campo de entrada para el nombre */}
         <Text style={styles.textoNombre}>Nombre</Text>
-        <TextInput style={styles.smallInput} placeholder='Tu nombre' placeholderTextColor="#444" />
+        <TextInput 
+          style={styles.smallInput} 
+          placeholder='Tu nombre' 
+          placeholderTextColor="#444" 
+          value={nombre}
+          onChangeText={setNombre}
+        />
 
         {/* Campo de entrada para el correo electrónico */}
         <Text style={styles.textoCorreo}>Correo electrónico</Text>
-        <TextInput style={styles.smallInput} placeholder='Tu correo' placeholderTextColor="#444" />
+        <TextInput 
+          style={styles.smallInput} 
+          placeholder='Tu correo' 
+          placeholderTextColor="#444" 
+          value={correo}
+          onChangeText={setCorreo}
+        />
 
         {/* Campo de entrada para el asunto */}
         <Text style={styles.textoAsunto}>Asunto</Text>
-        <TextInput style={styles.bigInput} placeholder='Asunto' placeholderTextColor="#444" />
+        <TextInput 
+          style={styles.bigInput} 
+          placeholder='Asunto' 
+          placeholderTextColor="#444" 
+          value={asunto}
+          onChangeText={setAsunto}
+        />
 
         {/* Botón de enviar mensaje */}
-        <TouchableOpacity style={styles.botonEnviar} onPress={ () =>Alert.alert("Reporte enviado")}>
+        <TouchableOpacity 
+          style={styles.botonEnviar} 
+          onPress={enviarSugerencia}>
             <Text style={styles.textoEnviar}>ENVIAR</Text>
         </TouchableOpacity>
 
