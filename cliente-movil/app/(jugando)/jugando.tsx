@@ -8,16 +8,19 @@ import { View, ImageBackground, Text, Image, Animated } from "react-native";
 import { useFonts } from "expo-font";
 import { CONSTANTES, Rol } from "./constantes";
 import { estilos } from "./styles/jugando.styles";
+
+// Funciones auxiliares (puras)
 import { getHabilidadInfo, getRoleInfo } from "./utilidades/rolesUtilidades";
-// Componentes existentes
+
+// Módulos UI
 import Chat from "./componentes/Chat";
 import HabilidadPopup from "./componentes/HabilidadPopup";
 import BarraSuperior from "./componentes/BarraSuperior";
 import CirculoVotar from "./componentes/CirculoVotar";
-// Componentes modulares
 import ControlesAccion from "./componentes/ControlesAccion";
 import MensajeError from "./componentes/MensajeError";
-// Hooks personalizados
+
+// Funciones auxiliares (administradores de estado)
 import useTemporizador from "./hooks/useTemporizador";
 import useAnimacionesPantalla from "./hooks/useAnimacionesPantalla";
 import useModoDiaNoche from "./hooks/useModoDiaNoche";
@@ -26,110 +29,149 @@ import useAnimacionHabilidad from "./hooks/useAnimacionHabilidad";
 import useMensajeError from "./hooks/useMensajeError";
 
 /**
- * @constant MODO_NOCHE_GLOBAL - Indica si el juego está en modo noche.
+ * @constant {boolean} MODO_NOCHE_GLOBAL - Indica si el juego está en modo noche. Si es falso, es de día.
  */
 export let MODO_NOCHE_GLOBAL = false;
 
 /**
- * @constant TEXTO_YA_MOSTRADO - Bandera que indica si el texto de inicio ya se mostró.
+ * @constant {boolean} TEXTO_YA_MOSTRADO - Bandera que indica si el texto de inicio ya se ha mostrado.
+ * Si es verdadera, se omitirá la presentación inicial.
  */
 export let TEXTO_YA_MOSTRADO = false;
 
+/**
+ * Componente principal de la pantalla de juego.
+ *
+ * @component
+ * @returns {JSX.Element} La interfaz de la pantalla de juego.
+ */
 const PantallaJugando: React.FC = () => {
-  // Estados locales para controlar visibilidad e interacciones.
-  const [mostrarRol, setMostrarRol] = useState(false);
-  const [mostrarInicio, setMostrarInicio] = useState(false);
-  const [mostrarBotones, setMostrarBotones] = useState(false);
-  const [mostrarChat, setMostrarChat] = useState(false);
+  // Estados para controlar la visibilidad e interacciones del UI:
+  const [mostrarRol, setMostrarRol] = useState(false); // Muestra u oculta la sección del rol del jugador.
+  const [mostrarInicio, setMostrarInicio] = useState(false); // Controla la visualización del mensaje de inicio de partida.
+  const [mostrarBotones, setMostrarBotones] = useState(false); // Activa o desactiva los botones de acción.
+  const [mostrarChat, setMostrarChat] = useState(false); // Determina si se muestra el componente de chat.
   const [mostrarTextoInicial, setMostrarTextoInicial] = useState(
     !TEXTO_YA_MOSTRADO
-  );
-  const [selectedPlayer, setSelectedPlayer] = useState<number | null>(null);
-  const [votes, setVotes] = useState(
+  ); // Indica si se debe mostrar el texto inicial.
+  const [JugadorSeleccionado, setJugadorSeleccionado] = useState<number | null>(
+    null
+  ); // Guarda el índice del jugador seleccionado para votar.
+  const [votes, setVotos] = useState(
     Array(CONSTANTES.NUMERICAS.CANTIDAD_IMAGENES).fill(0)
-  );
-  const [mostrarHabilidad, setMostrarHabilidad] = useState(false);
-  const [cantidadImagenes] = useState(CONSTANTES.NUMERICAS.CANTIDAD_IMAGENES);
+  ); // Almacena los votos asignados a cada jugador.
+  const [mostrarHabilidad, setMostrarHabilidad] = useState(false); // Muestra u oculta el popup de la habilidad.
   const [imagenes] = useState(
     new Array(CONSTANTES.NUMERICAS.CANTIDAD_IMAGENES).fill(
       CONSTANTES.IMAGENES.JUGADORES
     )
-  );
-  const [indiceUsuario] = useState(0);
-  const [rolUsuario, setRolUsuario] = useState<Rol>("aldeano");
+  ); // Array con las imágenes predeterminadas para cada jugador.
+  const [indiceUsuario] = useState(0); // Índice que identifica al usuario actual.
+  const [rolUsuario, setRolUsuario] = useState<Rol>("aldeano"); // Rol asignado al jugador, por defecto "aldeano".
 
-  // Obtiene la información de la habilidad y del rol actual.
-  const habilidadInfo = getHabilidadInfo(rolUsuario);
-  const roleInfo = getRoleInfo(rolUsuario);
+  // Obtención de información derivada del rol del jugador:
+  const habilidadInfo = getHabilidadInfo(rolUsuario); // Datos relacionados con la habilidad del rol.
+  const roleInfo = getRoleInfo(rolUsuario); // Datos descriptivos e imagen del rol.
 
-  // Uso de hooks personalizados
+  // Administración de estados temporales y animaciones mediante hooks:
   const { tiempoRestante, reiniciarTemporizador, setTemporizadorActivo } =
-    useTemporizador(CONSTANTES.NUMERICAS.TIEMPO_INICIAL, false);
+    useTemporizador(CONSTANTES.NUMERICAS.TIEMPO_INICIAL, false); // Maneja el temporizador del juego.
   const {
     animationManager,
     animacionTexto,
     animacionRol,
     animacionInicio,
     animacionFondo,
-  } = useAnimacionesPantalla();
-  const { esDeNoche, setModoDiaNoche } = useModoDiaNoche(animacionFondo);
-  const { posicionChat, abrirChat, cerrarChat } = useAnimacionChat();
+  } = useAnimacionesPantalla(); // Proporciona y gestiona las animaciones de la pantalla.
+  const { esDeNoche, setModoDiaNoche } = useModoDiaNoche(animacionFondo); // Controla la transición entre modo día y noche.
+  const { posicionChat, abrirChat, cerrarChat } = useAnimacionChat(); // Administra la animación y posición del chat.
   const { posicionHabilidad, abrirHabilidad, cerrarHabilidad } =
-    useAnimacionHabilidad();
-  const { errorMessage, showError, animacionError } = useMensajeError();
+    useAnimacionHabilidad(); // Gestiona la animación del popup de habilidad.
+  const { errorMessage, mostrarError, animacionError } = useMensajeError(); // Maneja mensajes de error y sus animaciones.
+
+  /**
+   * Activa y abre el chat, mostrando su animación.
+   */
+  const handleAbrirChat = () => {
+    setMostrarChat(true);
+    abrirChat();
+  };
+
+  /**
+   * Cierra el chat y oculta su animación.
+   */
+  const handleCerrarChat = () => {
+    cerrarChat();
+    setMostrarChat(false);
+  };
+
+  /**
+   * Activa y muestra el popup de habilidad, iniciando su animación.
+   */
+  const handleAbrirHabilidad = () => {
+    setMostrarHabilidad(true);
+    abrirHabilidad();
+  };
+
+  /**
+   * Cierra el popup de habilidad y oculta su animación.
+   */
+  const handleCerrarHabilidad = () => {
+    cerrarHabilidad();
+    setMostrarHabilidad(false);
+  };
 
   /**
    * Determina si se deben mostrar los botones de acción.
-   * @returns {boolean} True si los botones deben ser visibles.
+   *
+   * @returns {boolean} True si los botones deben ser visibles, basado en el modo de juego y el rol del usuario.
    */
   const mostrarBotonesAccion = () => {
     return !MODO_NOCHE_GLOBAL || rolUsuario === "lobo";
   };
 
   /**
-   * @function handleSelectPlayer
-   * @description Maneja la selección de un jugador para votación.
+   * Maneja la selección de un jugador para votación.
+   *
    * @param {number} index - Índice del jugador seleccionado.
    */
-  const handleSelectPlayer = (index: number) => {
+  const administrarSeleccionJugadorVotacionDiurna = (index: number) => {
     if (index === indiceUsuario) {
-      showError("¡No puedes votarte a ti mismo!");
+      mostrarError("¡No puedes votarte a ti mismo!");
       return;
     }
-    setSelectedPlayer(index);
+    setJugadorSeleccionado(index);
   };
 
   /**
-   * @function voteForPlayer
-   * @description Incrementa el voto para el jugador seleccionado.
+   * Incrementa el voto para el jugador seleccionado.
    */
-  const voteForPlayer = () => {
-    if (selectedPlayer === null) {
+  const votarAJugador = () => {
+    if (JugadorSeleccionado === null) {
       console.log("No se ha seleccionado ningún jugador para votar.");
       return;
     }
-    setVotes((prevVotes) => {
-      const newVotes = [...prevVotes];
-      newVotes[selectedPlayer] += 1;
-      return newVotes;
+    setVotos((votosAnteriores) => {
+      const nuevosVotos = [...votosAnteriores];
+      nuevosVotos[JugadorSeleccionado] += 1;
+      return nuevosVotos;
     });
-    console.log(`Votado al jugador ${selectedPlayer + 1}`, votes);
-    setSelectedPlayer(null);
+    console.log(`Votado al jugador ${JugadorSeleccionado + 1}`, votes);
+    setJugadorSeleccionado(null);
   };
 
   /**
-   * Efecto que maneja el temporizador y reinicia cuando llega a 0.
+   * Efecto: Reinicia el temporizador cuando llega a 0.
    */
   useEffect(() => {
     if (tiempoRestante === 0) {
-      // Aquí se alternaría el modo noche/día (lógica según tus necesidades)
       reiniciarTemporizador();
     }
   }, [tiempoRestante]);
 
   /**
-   * Secuencia de animaciones para mostrar el texto inicial, rol, inicio de partida y botones.
-   * Encadena múltiples animaciones para la transición de estados en la interfaz.
+   * Efecto: Ejecuta la secuencia de animaciones para mostrar el texto inicial, el rol, el inicio de partida y los botones.
+   * También establece el rol del usuario de forma aleatoria.
    */
   useEffect(() => {
     const roles: Rol[] = ["aldeano", "lobo", "bruja", "cazador"];
@@ -172,7 +214,7 @@ const PantallaJugando: React.FC = () => {
   }, []);
 
   /**
-   * Activa el temporizador una vez que se muestran los botones de acción.
+   * Efecto: Activa el temporizador una vez que se muestran los botones de acción.
    */
   useEffect(() => {
     if (mostrarBotones) {
@@ -201,7 +243,7 @@ const PantallaJugando: React.FC = () => {
         style={[estilos.superposicion, { opacity: animacionFondo.value }]}
       />
 
-      {/* Condicional: Muestra el texto inicial animado si aún no se ha ocultado */}
+      {/* Texto inicial animado */}
       {mostrarTextoInicial && (
         <Animated.View
           style={[estilos.contenedorTexto, { opacity: animacionTexto.value }]}
@@ -218,7 +260,7 @@ const PantallaJugando: React.FC = () => {
         />
       )}
 
-      {/* Condicional: Muestra la información del rol del usuario con animación */}
+      {/* Información del rol del usuario animada */}
       {mostrarRol && (
         <Animated.View
           style={[estilos.contenedorRol, { opacity: animacionRol.value }]}
@@ -238,7 +280,7 @@ const PantallaJugando: React.FC = () => {
         </Animated.View>
       )}
 
-      {/* Condicional: Muestra el mensaje de inicio de partida animado */}
+      {/* Mensaje de inicio de partida animado */}
       {mostrarInicio && (
         <Animated.View
           style={[estilos.contenedorTexto, { opacity: animacionInicio.value }]}
@@ -249,48 +291,48 @@ const PantallaJugando: React.FC = () => {
         </Animated.View>
       )}
 
-      {/* Renderizado de controles y componentes de juego cuando se muestran los botones */}
+      {/* Controles y componentes de juego */}
       {mostrarBotones && (
         <>
           <ControlesAccion
             habilidadInfo={habilidadInfo}
-            abrirHabilidad={abrirHabilidad}
-            abrirChat={abrirChat}
-            voteForPlayer={voteForPlayer}
+            abrirHabilidad={handleAbrirHabilidad}
+            abrirChat={handleAbrirChat}
+            votarAJugador={votarAJugador}
             mostrarBotonesAccion={mostrarBotonesAccion}
           />
           <BarraSuperior />
-          {/* Temporizador central que muestra el tiempo restante */}
+          {/* Temporizador central */}
           <View style={estilos.contenedorTemporizador}>
             <View style={estilos.circuloTemporizador}>
               <Text style={estilos.textoTemporizador}>{tiempoRestante}</Text>
             </View>
           </View>
-          {/* Componente para la votación de jugadores */}
+          {/* Componente para votación de jugadores */}
           <CirculoVotar
             imagenes={imagenes}
             votes={votes}
-            selectedPlayer={selectedPlayer}
-            onSelectPlayer={handleSelectPlayer}
+            JugadorSeleccionado={JugadorSeleccionado}
+            onSelectPlayer={administrarSeleccionJugadorVotacionDiurna}
           />
         </>
       )}
 
-      {/* Condicional: Muestra el componente de chat si está activado */}
+      {/* Componente de chat */}
       {mostrarChat && (
         <Chat
           mensajes={CONSTANTES.TEXTOS.CHAT.MENSAJES_INICIALES}
           posicionChat={posicionChat}
-          onClose={cerrarChat}
+          onClose={handleCerrarChat}
         />
       )}
 
-      {/* Condicional: Muestra el popup de habilidad del jugador si está activado */}
+      {/* Popup de habilidad */}
       {mostrarHabilidad && (
         <HabilidadPopup
           habilidadInfo={habilidadInfo}
           posicionHabilidad={posicionHabilidad}
-          onClose={cerrarHabilidad}
+          onClose={handleCerrarHabilidad}
         />
       )}
     </View>

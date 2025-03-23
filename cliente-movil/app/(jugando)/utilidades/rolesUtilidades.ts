@@ -1,7 +1,7 @@
 /**
  * @file roleUtils.ts
  * @description Funciones utilitarias para obtener información sobre los roles dentro de la partida.
- * Todas las funciones son **puras** y utilizan arrow functions.
+ * Todas las funciones son **puras** y utilizan arrow syntax.
  */
 import { CONSTANTES, Rol } from "../constantes";
 const { TEXTOS, IMAGENES } = CONSTANTES;
@@ -88,6 +88,6 @@ export const getRoleInfo = (rol: Rol) => {
     case "cazador":
       return { roleName: "CAZADOR", image: IMAGENES.CAZADOR };
     default:
-      return { roleName: "HOMBRE LOBO", image: IMAGENES.LOBO_ROL };
+      return { roleName: "ALDEANO", image: IMAGENES.ALDEANO }; // Si hay un error el ususario tendrá información de que es un aldeano lel.
   }
 };

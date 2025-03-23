@@ -7,7 +7,7 @@ interface ControlesAccionProps {
   habilidadInfo: any;
   abrirHabilidad: () => void;
   abrirChat: () => void;
-  voteForPlayer: () => void;
+  votarAJugador: () => void;
   mostrarBotonesAccion: () => boolean;
 }
 
@@ -19,7 +19,7 @@ const ControlesAccion: React.FC<ControlesAccionProps> = ({
   habilidadInfo,
   abrirHabilidad,
   abrirChat,
-  voteForPlayer,
+  votarAJugador,
   mostrarBotonesAccion,
 }) => {
   return (
@@ -47,7 +47,7 @@ const ControlesAccion: React.FC<ControlesAccionProps> = ({
           </TouchableOpacity>
           <TouchableOpacity
             style={[estilos.botonAccion, estilos.botonVotar]}
-            onPress={voteForPlayer}
+            onPress={votarAJugador}
           >
             <Text style={estilos.textoBoton}>
               {CONSTANTES.TEXTOS.BOTON_VOTAR}

@@ -8,7 +8,7 @@
  * @param {Object} props - Props del componente.
  * @param {any[]} props.imagenes - Arreglo de imágenes de los jugadores.
  * @param {number[]} props.votes - Arreglo con la cantidad de votos para cada jugador.
- * @param {number | null} props.selectedPlayer - Índice del jugador actualmente seleccionado.
+ * @param {number | null} props.JugadorSeleccionado - Índice del jugador actualmente seleccionado.
  * @param {Function} props.onSelectPlayer - Función para manejar la selección de un jugador.
  */
 
@@ -22,14 +22,14 @@ const { ANCHO, ALTO } = DIMENSIONES;
 interface CirculoVotarProps {
   imagenes: any[];
   votes: number[];
-  selectedPlayer: number | null;
+  JugadorSeleccionado: number | null;
   onSelectPlayer: (index: number) => void;
 }
 
 const CirculoVotar: React.FC<CirculoVotarProps> = ({
   imagenes,
   votes,
-  selectedPlayer,
+  JugadorSeleccionado,
   onSelectPlayer,
 }) => {
   // Calcula el radio máximo del círculo basado en las dimensiones mínimas de la pantalla y un multiplicador.
@@ -64,7 +64,7 @@ const CirculoVotar: React.FC<CirculoVotarProps> = ({
           Math.sin(angulo) *
           (1 - NUMERICAS.FACTOR_ENCOGIMIENTO_VERTICAL);
         // Determina si el jugador actual está seleccionado para resaltar su imagen.
-        const isSelected = selectedPlayer === indice;
+        const isSelected = JugadorSeleccionado === indice;
         return (
           // Botón que representa cada jugador; al pulsar se ejecuta onSelectPlayer.
           <TouchableOpacity

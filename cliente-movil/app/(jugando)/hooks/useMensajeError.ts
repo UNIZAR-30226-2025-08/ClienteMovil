@@ -10,11 +10,11 @@ const useMensajeError = () => {
   const animacionError = useRef(new Animated.Value(0)).current;
 
   /**
-   * @function showError
+   * @function mostrarError
    * @description Muestra un mensaje de error temporalmente.
    * @param {string} message - Mensaje de error a mostrar.
    */
-  const showError = (message: string) => {
+  const mostrarError = (message: string) => {
     setErrorMessage(message);
     Animated.sequence([
       Animated.timing(animacionError, {
@@ -31,7 +31,7 @@ const useMensajeError = () => {
     ]).start(() => setErrorMessage(null));
   };
 
-  return { errorMessage, showError, animacionError };
+  return { errorMessage, mostrarError, animacionError };
 };
 
 export default useMensajeError;
