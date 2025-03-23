@@ -207,20 +207,6 @@ const PantallaJugando: React.FC = () => {
   }, [tiempoRestante, esDeNoche]);
 
   /**
-   * TODO_API
-   * Habrá que hacer que el backend diga cuando cambiar de día a noche y no el timer visual
-   */
-  // Se comenta el siguiente efecto ya que provoca que al reiniciar el temporizador se cambie erróneamente el modo,
-  // haciendo que tras el segundo ciclo nunca se vuelva a ver el modo día (y por ende los botones de acción no se muestren en día).
-  // useEffect(() => {
-  //   if (tiempoRestante === CONSTANTES.NUMERICAS.TIEMPO_INICIAL) {
-  //     const nuevoModo = !esDeNoche;
-  //     MODO_NOCHE_GLOBAL = nuevoModo;
-  //     setModoDiaNoche(nuevoModo);
-  //   }
-  // }, [tiempoRestante]);
-
-  /**
    * Efecto: Ejecuta la secuencia de animaciones para mostrar el texto inicial, el rol, el inicio de partida y los botones.
    * También establece el rol del usuario de forma aleatoria.
    */
