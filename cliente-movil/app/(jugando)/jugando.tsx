@@ -55,59 +55,55 @@ export let TEXTO_YA_MOSTRADO = false;
  */
 const PantallaJugando: React.FC = () => {
   // Estados para controlar la visibilidad e interacciones del UI:
-  const [mostrarRol, setMostrarRol] = useState(false); // Muestra u oculta la sección del rol del jugador.
-  const [mostrarInicio, setMostrarInicio] = useState(false); // Controla la visualización del mensaje de inicio de partida.
-  const [mostrarBotones, setMostrarBotones] = useState(false); // Activa o desactiva los botones de acción.
-  const [mostrarChat, setMostrarChat] = useState(false); // Determina si se muestra el componente de chat.
+  const [mostrarRol, setMostrarRol] = useState(false);
+  const [mostrarInicio, setMostrarInicio] = useState(false);
+  const [mostrarBotones, setMostrarBotones] = useState(false);
+  const [mostrarChat, setMostrarChat] = useState(false);
   const [mostrarTextoInicial, setMostrarTextoInicial] = useState(
     !TEXTO_YA_MOSTRADO
-  ); // Indica si se debe mostrar el texto inicial.
+  );
   const [JugadorSeleccionado, setJugadorSeleccionado] = useState<number | null>(
     null
-  ); // Guarda el índice del jugador seleccionado para votar.
+  );
   const [votes, setVotos] = useState(
     Array(CONSTANTES.NUMERICAS.CANTIDAD_IMAGENES).fill(0)
-  ); // Almacena los votos asignados a cada jugador.
-  const [mostrarHabilidad, setMostrarHabilidad] = useState(false); // Muestra u oculta el popup de la habilidad.
+  );
+  const [mostrarHabilidad, setMostrarHabilidad] = useState(false);
   const [imagenes] = useState(
     new Array(CONSTANTES.NUMERICAS.CANTIDAD_IMAGENES).fill(
       CONSTANTES.IMAGENES.JUGADORES
     )
-  ); // Array con las imágenes predeterminadas para cada jugador.
-  const [indiceUsuario] = useState(0); // Índice que identifica al usuario actual.
-  const [rolUsuario, setRolUsuario] = useState<Rol>("aldeano"); // Rol asignado al jugador, por defecto "aldeano".
-  const [votoRealizado, setVotoRealizado] = useState(false); // Estado que indica si ya se realizó la votación en el turno
-
-  // Nuevo estado: indica si se ha pasado turno
+  );
+  const [indiceUsuario] = useState(0);
+  const [rolUsuario, setRolUsuario] = useState<Rol>("aldeano");
+  const [votoRealizado, setVotoRealizado] = useState(false);
   const [pasoTurno, setPasoTurno] = useState(false);
-
-  // Estado para identificar la animación actual (ej: "texto-fadeIn", "rol-delay", etc.)
   const [currentAnimacion, setCurrentAnimacion] = useState("");
 
-  // Ref para almacenar la función callback de la animación actual (o para iniciar el fadeOut de forma inmediata)
+  // Ref para almacenar la función callback de la animación actual o iniciar el fadeOut inmediatamente
   const startFadeOutNowRef = useRef<(() => void) | null>(null);
   // Ref para almacenar el id de cualquier timeout pendiente (durante los delays)
   const currentTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Obtención de información derivada del rol del jugador:
-  const habilidadInfo = getHabilidadInfo(rolUsuario); // Datos relacionados con la habilidad del rol.
-  const roleInfo = getRoleInfo(rolUsuario); // Datos descriptivos e imagen del rol.
+  const habilidadInfo = getHabilidadInfo(rolUsuario);
+  const roleInfo = getRoleInfo(rolUsuario);
 
   // Administración de estados temporales y animaciones mediante hooks:
   const { tiempoRestante, reiniciarTemporizador, setTemporizadorActivo } =
-    useTemporizador(CONSTANTES.NUMERICAS.TIEMPO_INICIAL, false); // Maneja el temporizador del juego.
+    useTemporizador(CONSTANTES.NUMERICAS.TIEMPO_INICIAL, false);
   const {
     administrador_animaciones,
     animacionTexto,
     animacionRol,
     animacionInicio,
     animacionFondo,
-  } = useAnimacionesPantalla(); // Proporciona y gestiona las animaciones de la pantalla.
-  const { esDeNoche, setModoDiaNoche } = useModoDiaNoche(animacionFondo); // Controla la transición entre modo día y noche.
-  const { posicionChat, abrirChat, cerrarChat } = useAnimacionChat(); // Administra la animación y posición del chat.
+  } = useAnimacionesPantalla();
+  const { esDeNoche, setModoDiaNoche } = useModoDiaNoche(animacionFondo);
+  const { posicionChat, abrirChat, cerrarChat } = useAnimacionChat();
   const { posicionHabilidad, abrirHabilidad, cerrarHabilidad } =
-    useAnimacionHabilidad(); // Gestiona la animación del popup de habilidad.
-  const { errorMessage, mostrarError, animacionError } = useMensajeError(); // Maneja mensajes de error y sus animaciones.
+    useAnimacionHabilidad();
+  const { errorMessage, mostrarError, animacionError } = useMensajeError();
 
   /**
    * Función para iniciar una animación y almacenar su callback.
@@ -190,10 +186,8 @@ const PantallaJugando: React.FC = () => {
   };
 
   /**
-   * Cadena de animaciones para el texto, rol e inicio de partida.
-   *
-   * Se utiliza startFadeOutNowRef para forzar el inicio inmediato del fadeOut
-   * en caso de que se toque durante el fadeIn o durante el delay.
+   * Efecto: Ejecuta la secuencia de animaciones para mostrar el texto inicial, el rol, el inicio de partida y los botones.
+   * También establece el rol del usuario de forma aleatoria.
    */
   useEffect(() => {
     const roles: Rol[] = ["aldeano", "lobo", "bruja", "cazador"];
@@ -217,20 +211,17 @@ const PantallaJugando: React.FC = () => {
         TEXTO_YA_MOSTRADO = true;
         setMostrarTextoInicial(false);
         setMostrarRol(true);
-        // --- Cadena para el rol ---
         ejecutarCadenaAnimacion(
           "rol",
           animacionRol,
           administrador_animaciones.RETRASO_ANIMACION,
           () => {
             setMostrarInicio(true);
-            // --- Cadena para el inicio ---
             ejecutarCadenaAnimacion(
               "inicio",
               animacionInicio,
               administrador_animaciones.RETRASO_ANIMACION,
               () => {
-                // --- Cadena para el fondo (última animación) ---
                 setCurrentAnimacion("fondo-fadeOut");
                 iniciarAnimacion(
                   "fondo-fadeOut",
@@ -270,6 +261,105 @@ const PantallaJugando: React.FC = () => {
       setTemporizadorActivo(true);
     }
   }, [mostrarBotones]);
+
+  /**
+   * Efecto: Alterna el modo día/noche al terminar el ciclo del temporizador.
+   * Además, resetea los valores de votación y los estados de voto para permitir una nueva ronda.
+   */
+  useEffect(() => {
+    if (tiempoRestante === 0) {
+      const nuevoModo = !esDeNoche;
+      MODO_NOCHE_GLOBAL = nuevoModo;
+      setModoDiaNoche(nuevoModo);
+      // Reiniciar valores de votación y estados asociados
+      setVotos(Array(CONSTANTES.NUMERICAS.CANTIDAD_IMAGENES).fill(0));
+      setVotoRealizado(false);
+      setPasoTurno(false);
+      setJugadorSeleccionado(null);
+      reiniciarTemporizador();
+    }
+  }, [tiempoRestante, esDeNoche, reiniciarTemporizador, setModoDiaNoche]);
+
+  // Funciones para el manejo del chat
+  const handleAbrirChat = () => {
+    setMostrarChat(true);
+    abrirChat();
+  };
+
+  const handleCerrarChat = () => {
+    cerrarChat();
+    setMostrarChat(false);
+  };
+
+  // Funciones para el manejo del popup de habilidad
+  const handleAbrirHabilidad = () => {
+    setMostrarHabilidad(true);
+    abrirHabilidad();
+  };
+
+  const handleCerrarHabilidad = () => {
+    cerrarHabilidad();
+    setMostrarHabilidad(false);
+  };
+
+  // Función para administrar la selección del jugador para la votación.
+  const administrarSeleccionJugadorVotacion = (index: number) => {
+    // Si es de noche y el usuario no es lobo, no se permite seleccionar jugadores
+    if (esDeNoche && rolUsuario !== "lobo") {
+      mostrarError(
+        "Solo los lobos pueden seleccionar jugadores durante la noche"
+      );
+      return;
+    }
+    if (pasoTurno) {
+      mostrarError("Has pasado turno");
+      return;
+    }
+    if (votoRealizado) {
+      mostrarError("Solo puedes votar a un jugador por turno");
+      return;
+    }
+    if (index === indiceUsuario) {
+      mostrarError("¡No puedes votarte a ti mismo!");
+      return;
+    }
+    setJugadorSeleccionado(index);
+  };
+
+  // Función para votar a un jugador.
+  const votarAJugador = () => {
+    if (pasoTurno) {
+      mostrarError("Has pasado turno");
+      return;
+    }
+    if (votoRealizado) {
+      mostrarError("Solo puedes votar a un jugador por turno");
+      return;
+    }
+    if (JugadorSeleccionado === null) {
+      console.log("No se ha seleccionado ningún jugador para votar.");
+      return;
+    }
+    setVotos((votosAnteriores) => {
+      const nuevosVotos = [...votosAnteriores];
+      nuevosVotos[JugadorSeleccionado] += 1;
+      return nuevosVotos;
+    });
+    console.log(`Votado al jugador ${JugadorSeleccionado + 1}`, votes);
+    setVotoRealizado(true);
+    setJugadorSeleccionado(null);
+  };
+
+  // Función para pasar turno.
+  const manejarPasarTurno = () => {
+    if (votoRealizado || pasoTurno) {
+      mostrarError("Has pasado turno");
+      return;
+    }
+    setPasoTurno(true);
+    setVotoRealizado(true);
+    setJugadorSeleccionado(null);
+  };
 
   // Carga de fuente personalizada.
   const [fuentesCargadas] = useFonts({
@@ -381,52 +471,13 @@ const PantallaJugando: React.FC = () => {
           <>
             <ControlesAccion
               habilidadInfo={habilidadInfo}
-              abrirHabilidad={() => {
-                setMostrarHabilidad(true);
-                abrirHabilidad();
-              }}
-              abrirChat={() => {
-                setMostrarChat(true);
-                abrirChat();
-              }}
-              votarAJugador={() => {
-                if (pasoTurno) {
-                  mostrarError("Has pasado turno");
-                  return;
-                }
-                if (votoRealizado) {
-                  mostrarError("Solo puedes votar a un jugador por turno");
-                  return;
-                }
-                if (JugadorSeleccionado === null) {
-                  console.log(
-                    "No se ha seleccionado ningún jugador para votar."
-                  );
-                  return;
-                }
-                setVotos((votosAnteriores) => {
-                  const nuevosVotos = [...votosAnteriores];
-                  nuevosVotos[JugadorSeleccionado] += 1;
-                  return nuevosVotos;
-                });
-                console.log(
-                  `Votado al jugador ${JugadorSeleccionado + 1}`,
-                  votes
-                );
-                setVotoRealizado(true);
-              }}
-              manejarPasarTurno={() => {
-                if (votoRealizado || pasoTurno) {
-                  mostrarError("Has pasado turno");
-                  return;
-                }
-                setPasoTurno(true);
-                setVotoRealizado(true);
-                setJugadorSeleccionado(null);
-              }}
-              mostrarBotonesAccion={() => {
-                return !MODO_NOCHE_GLOBAL || rolUsuario === "lobo";
-              }}
+              abrirHabilidad={handleAbrirHabilidad}
+              abrirChat={handleAbrirChat}
+              votarAJugador={votarAJugador}
+              manejarPasarTurno={manejarPasarTurno}
+              mostrarBotonesAccion={() =>
+                !MODO_NOCHE_GLOBAL || rolUsuario === "lobo"
+              }
               votoRealizado={votoRealizado}
               turnoPasado={pasoTurno}
             />
@@ -442,21 +493,7 @@ const PantallaJugando: React.FC = () => {
               imagenes={imagenes}
               votes={votes}
               JugadorSeleccionado={JugadorSeleccionado}
-              onSelectPlayer={(index: number) => {
-                if (pasoTurno) {
-                  mostrarError("Has pasado turno");
-                  return;
-                }
-                if (votoRealizado) {
-                  mostrarError("Solo puedes votar a un jugador por turno");
-                  return;
-                }
-                if (index === indiceUsuario) {
-                  mostrarError("¡No puedes votarte a ti mismo!");
-                  return;
-                }
-                setJugadorSeleccionado(index);
-              }}
+              onSelectPlayer={administrarSeleccionJugadorVotacion}
             />
           </>
         )}
@@ -465,10 +502,7 @@ const PantallaJugando: React.FC = () => {
           <Chat
             mensajes={CONSTANTES.TEXTOS.CHAT.MENSAJES_INICIALES}
             posicionChat={posicionChat}
-            onClose={() => {
-              cerrarChat();
-              setMostrarChat(false);
-            }}
+            onClose={handleCerrarChat}
           />
         )}
         {/* Popup de habilidad */}
@@ -476,10 +510,7 @@ const PantallaJugando: React.FC = () => {
           <HabilidadPopup
             habilidadInfo={habilidadInfo}
             posicionHabilidad={posicionHabilidad}
-            onClose={() => {
-              cerrarHabilidad();
-              setMostrarHabilidad(false);
-            }}
+            onClose={handleCerrarHabilidad}
           />
         )}
       </View>
