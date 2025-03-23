@@ -522,7 +522,7 @@ export const estilos = StyleSheet.create({
   textoError: {
     color: "white",
     fontFamily: "Corben",
-    fontSize: alto * 0.022,
+    fontSize: alto * 0.02,
     textAlign: "center",
     lineHeight: alto * 0.03,
     includeFontPadding: false,

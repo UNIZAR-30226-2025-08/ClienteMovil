@@ -1,6 +1,6 @@
 import React from "react";
 import { View, TouchableOpacity, Text, Image } from "react-native";
-import { CONSTANTES } from "../constantes"; // Asegúrate de ajustar la importación de estilos y constantes según tu proyecto
+import { CONSTANTES } from "../constantes";
 import { estilos } from "../styles/jugando.styles";
 
 interface ControlesAccionProps {
@@ -9,6 +9,7 @@ interface ControlesAccionProps {
   abrirChat: () => void;
   votarAJugador: () => void;
   mostrarBotonesAccion: () => boolean;
+  votoRealizado: boolean;
 }
 
 /**
@@ -21,9 +22,11 @@ const ControlesAccion: React.FC<ControlesAccionProps> = ({
   abrirChat,
   votarAJugador,
   mostrarBotonesAccion,
+  votoRealizado,
 }) => {
   return (
     <>
+      {/* Contenedor de botones principales (Habilidad y Chat) */}
       <View style={estilos.contenedorBotones}>
         <TouchableOpacity
           style={estilos.botonHabilidad}
@@ -38,6 +41,8 @@ const ControlesAccion: React.FC<ControlesAccionProps> = ({
           <Text style={estilos.textoBoton}>{CONSTANTES.TEXTOS.BOTON_CHAT}</Text>
         </TouchableOpacity>
       </View>
+
+      {/* Botones adicionales (Pasar turno y Votar) que sólo se muestran si mostrarBotonesAccion() es true */}
       {mostrarBotonesAccion() && (
         <View style={estilos.contenedorBotonesDerecha}>
           <TouchableOpacity style={estilos.botonAccion}>
@@ -45,8 +50,16 @@ const ControlesAccion: React.FC<ControlesAccionProps> = ({
               {CONSTANTES.TEXTOS.BOTON_PASAR_TURNO}
             </Text>
           </TouchableOpacity>
+          {/*
+            Si votoRealizado es true, se aplica un borde rojo al botón de votar.
+            Esto se logra usando la propiedad style en un array y aplicando un estilo adicional condicionalmente.
+          */}
           <TouchableOpacity
-            style={[estilos.botonAccion, estilos.botonVotar]}
+            style={[
+              estilos.botonAccion,
+              estilos.botonVotar,
+              votoRealizado && { borderWidth: 2, borderColor: "red" },
+            ]}
             onPress={votarAJugador}
           >
             <Text style={estilos.textoBoton}>

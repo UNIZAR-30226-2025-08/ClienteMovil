@@ -68,6 +68,7 @@ const PantallaJugando: React.FC = () => {
   ); // Array con las imágenes predeterminadas para cada jugador.
   const [indiceUsuario] = useState(0); // Índice que identifica al usuario actual.
   const [rolUsuario, setRolUsuario] = useState<Rol>("aldeano"); // Rol asignado al jugador, por defecto "aldeano".
+  const [votoRealizado, setVotoRealizado] = useState(false); // Estado que indica si ya se realizó la votación en el turno
 
   // Obtención de información derivada del rol del jugador:
   const habilidadInfo = getHabilidadInfo(rolUsuario); // Datos relacionados con la habilidad del rol.
@@ -136,6 +137,11 @@ const PantallaJugando: React.FC = () => {
    * @param {number} index - Índice del jugador seleccionado.
    */
   const administrarSeleccionJugadorVotacionDiurna = (index: number) => {
+    if (votoRealizado) {
+      // Si ya se realizó un voto, no permitir seleccionar otro jugador
+      mostrarError("Solo puedes votar a un jugador por turno");
+      return;
+    }
     if (index === indiceUsuario) {
       mostrarError("¡No puedes votarte a ti mismo!");
       return;
@@ -147,6 +153,11 @@ const PantallaJugando: React.FC = () => {
    * Incrementa el voto para el jugador seleccionado.
    */
   const votarAJugador = () => {
+    if (votoRealizado) {
+      // Si ya se realizó la votación, no permitir votar de nuevo
+      mostrarError("Solo puedes votar a un jugador por turno");
+      return;
+    }
     if (JugadorSeleccionado === null) {
       console.log("No se ha seleccionado ningún jugador para votar.");
       return;
@@ -165,7 +176,9 @@ const PantallaJugando: React.FC = () => {
      * backend.vota(indiceUsuario.toString(), JugadorSeleccionado.toString())
      */
     console.log(`Votado al jugador ${JugadorSeleccionado + 1}`, votes);
-    setJugadorSeleccionado(null);
+    // Marcar que ya se realizó la votación en este turno para no permitir más votos
+    setVotoRealizado(true);
+    // No se limpia la selección para mantener el estado visual (borde rojo en el botón de votar)
   };
 
   /**
@@ -364,6 +377,7 @@ const PantallaJugando: React.FC = () => {
             abrirChat={handleAbrirChat}
             votarAJugador={votarAJugador}
             mostrarBotonesAccion={mostrarBotonesAccion}
+            votoRealizado={votoRealizado} // Se pasa el estado para aplicar borde rojo al botón de votar
           />
           <BarraSuperior />
           {/* Temporizador */}
