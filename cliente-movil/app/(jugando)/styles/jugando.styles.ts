@@ -298,7 +298,7 @@ export const estilos = StyleSheet.create({
     left: ancho * 0.05,
     right: ancho * 0.05,
     bottom: 0,
-    height: alto * 0.85,
+    height: alto * 0.87,
     backgroundColor: "#262522",
     borderTopLeftRadius: ancho * 0.05,
     borderTopRightRadius: ancho * 0.05,
