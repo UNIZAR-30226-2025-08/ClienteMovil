@@ -70,6 +70,9 @@ const PantallaJugando: React.FC = () => {
   const [rolUsuario, setRolUsuario] = useState<Rol>("aldeano"); // Rol asignado al jugador, por defecto "aldeano".
   const [votoRealizado, setVotoRealizado] = useState(false); // Estado que indica si ya se realizó la votación en el turno
 
+  // Nuevo estado: indica si se ha pasado turno
+  const [pasoTurno, setPasoTurno] = useState(false);
+
   // Obtención de información derivada del rol del jugador:
   const habilidadInfo = getHabilidadInfo(rolUsuario); // Datos relacionados con la habilidad del rol.
   const roleInfo = getRoleInfo(rolUsuario); // Datos descriptivos e imagen del rol.
@@ -132,11 +135,32 @@ const PantallaJugando: React.FC = () => {
   };
 
   /**
+   * Maneja la acción de pasar turno.
+   */
+  const manejarPasarTurno = () => {
+    if (votoRealizado || pasoTurno) {
+      // Si ya se votó o se pasó turno, mostrar mensaje de error
+      mostrarError("Has pasado turno");
+      return;
+    }
+    // Marca que se ha pasado turno y deshabilita votación
+    setPasoTurno(true);
+    setVotoRealizado(true);
+    // Restablece la selección para que el borde del jugador vuelva a blanco
+    setJugadorSeleccionado(null);
+  };
+
+  /**
    * Maneja la selección de un jugador para votación.
    *
    * @param {number} index - Índice del jugador seleccionado.
    */
   const administrarSeleccionJugadorVotacionDiurna = (index: number) => {
+    if (pasoTurno) {
+      // Si ya se pasó turno, no permitir seleccionar jugador
+      mostrarError("Has pasado turno");
+      return;
+    }
     if (votoRealizado) {
       // Si ya se realizó un voto, no permitir seleccionar otro jugador
       mostrarError("Solo puedes votar a un jugador por turno");
@@ -153,6 +177,11 @@ const PantallaJugando: React.FC = () => {
    * Incrementa el voto para el jugador seleccionado.
    */
   const votarAJugador = () => {
+    if (pasoTurno) {
+      // Si se pasó turno, no permitir votar
+      mostrarError("Has pasado turno");
+      return;
+    }
     if (votoRealizado) {
       // Si ya se realizó la votación, no permitir votar de nuevo
       mostrarError("Solo puedes votar a un jugador por turno");
@@ -199,6 +228,8 @@ const PantallaJugando: React.FC = () => {
       // Reseteamos los votos y el estado de votación
       setVotos(Array(CONSTANTES.NUMERICAS.CANTIDAD_IMAGENES).fill(0));
       setVotoRealizado(false);
+      // Reiniciamos el estado de pasar turno
+      setPasoTurno(false);
       // Quitamos la selección de jugador para que el círculo recupere su color por defecto
       setJugadorSeleccionado(null);
 
@@ -296,6 +327,7 @@ const PantallaJugando: React.FC = () => {
           animacionError={animacionError}
         />
       )}
+
       {/* Información del rol del usuario */}
       {mostrarRol && (
         <Animated.View
@@ -373,8 +405,14 @@ const PantallaJugando: React.FC = () => {
             abrirHabilidad={handleAbrirHabilidad}
             abrirChat={handleAbrirChat}
             votarAJugador={votarAJugador}
+            manejarPasarTurno={
+              manejarPasarTurno
+            } /* Propiedad para pasar turno */
             mostrarBotonesAccion={mostrarBotonesAccion}
-            votoRealizado={votoRealizado} // Pasar el estado para aplicar borde rojo al botón de votar :)
+            votoRealizado={votoRealizado} // Propiedad para aplicar borde rojo al botón de votar :)
+            turnoPasado={
+              pasoTurno
+            } /* Propiedad para indicar que se ha pasado turno y mostrar borde rojo */
           />
           <BarraSuperior />
           {/* Temporizador */}

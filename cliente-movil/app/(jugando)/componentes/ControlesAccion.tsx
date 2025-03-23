@@ -3,6 +3,10 @@ import { View, TouchableOpacity, Text, Image } from "react-native";
 import { CONSTANTES } from "../constantes";
 import { estilos } from "../styles/jugando.styles";
 
+/**
+ * @interface ControlesAccionProps
+ * @description Propiedades que recibe el componente ControlesAccion.
+ */
 interface ControlesAccionProps {
   habilidadInfo: any;
   abrirHabilidad: () => void;
@@ -10,6 +14,8 @@ interface ControlesAccionProps {
   votarAJugador: () => void;
   mostrarBotonesAccion: () => boolean;
   votoRealizado: boolean;
+  manejarPasarTurno: () => void; // Para manejar la acción de pasar turno
+  turnoPasado: boolean; // Para indicar si el turno se ha pasado
 }
 
 /**
@@ -23,6 +29,8 @@ const ControlesAccion: React.FC<ControlesAccionProps> = ({
   votarAJugador,
   mostrarBotonesAccion,
   votoRealizado,
+  manejarPasarTurno,
+  turnoPasado,
 }) => {
   return (
     <>
@@ -45,11 +53,21 @@ const ControlesAccion: React.FC<ControlesAccionProps> = ({
       {/* Botones adicionales (Pasar turno y Votar) que sólo se muestran si mostrarBotonesAccion() es true */}
       {mostrarBotonesAccion() && (
         <View style={estilos.contenedorBotonesDerecha}>
-          <TouchableOpacity style={estilos.botonAccion}>
+          {/*
+            Si turnoPasado es true, se aplica un borde rojo al botón de pasar turno.
+          */}
+          <TouchableOpacity
+            style={[
+              estilos.botonAccion,
+              turnoPasado && { borderWidth: 2, borderColor: "red" },
+            ]}
+            onPress={manejarPasarTurno}
+          >
             <Text style={estilos.textoBoton}>
               {CONSTANTES.TEXTOS.BOTON_PASAR_TURNO}
             </Text>
           </TouchableOpacity>
+
           {/*
             Si votoRealizado es true, se aplica un borde rojo al botón de votar.
             Esto se logra usando la propiedad style en un array y aplicando un estilo adicional condicionalmente.
