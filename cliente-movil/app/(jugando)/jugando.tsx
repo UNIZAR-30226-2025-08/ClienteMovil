@@ -151,11 +151,19 @@ const PantallaJugando: React.FC = () => {
       console.log("No se ha seleccionado ningún jugador para votar.");
       return;
     }
+    /**
+     * TODO_API
+     * Probablemente habrá que adaptar la lógica de contar los votos para simplemente leerlos del backend
+     */
     setVotos((votosAnteriores) => {
       const nuevosVotos = [...votosAnteriores];
       nuevosVotos[JugadorSeleccionado] += 1;
       return nuevosVotos;
     });
+    /**
+     * TODO_API
+     * backend.vota(indiceUsuario.toString(), JugadorSeleccionado.toString())
+     */
     console.log(`Votado al jugador ${JugadorSeleccionado + 1}`, votes);
     setJugadorSeleccionado(null);
   };
@@ -166,6 +174,18 @@ const PantallaJugando: React.FC = () => {
   useEffect(() => {
     if (tiempoRestante === 0) {
       reiniciarTemporizador();
+    }
+  }, [tiempoRestante]);
+
+  /**
+   * TODO_API
+   * Habrá que hacer que el backend diga cuando cambiar de día a noche y no el timer visual
+   */
+  useEffect(() => {
+    if (tiempoRestante === CONSTANTES.NUMERICAS.TIEMPO_INICIAL) {
+      const nuevoModo = !esDeNoche;
+      MODO_NOCHE_GLOBAL = nuevoModo;
+      setModoDiaNoche(nuevoModo);
     }
   }, [tiempoRestante]);
 
@@ -188,7 +208,7 @@ const PantallaJugando: React.FC = () => {
     animacionTexto.fadeIn().start(() => {
       setTimeout(() => {
         animacionTexto.fadeOut().start(() => {
-          // Actualizamos la bandera global
+          // Actualizar la bandera global para que no se vuelve a mostar más esta animación durante la partida
           TEXTO_YA_MOSTRADO = true;
           setMostrarTextoInicial(false);
           setMostrarRol(true);
@@ -231,7 +251,7 @@ const PantallaJugando: React.FC = () => {
   return (
     // Contenedor principal de la pantalla de juego
     <View style={estilos.contenedor}>
-      {/* Imagen de fondo que cubre toda la pantalla */}
+      {/* Fondo */}
       <ImageBackground
         source={CONSTANTES.IMAGENES.FONDO}
         style={estilos.fondo}
@@ -243,7 +263,7 @@ const PantallaJugando: React.FC = () => {
         style={[estilos.superposicion, { opacity: animacionFondo.value }]}
       />
 
-      {/* Texto inicial animado */}
+      {/* Texto inicial */}
       {mostrarTextoInicial && (
         <Animated.View
           style={[estilos.contenedorTexto, { opacity: animacionTexto.value }]}
@@ -252,7 +272,7 @@ const PantallaJugando: React.FC = () => {
         </Animated.View>
       )}
 
-      {/* Mensaje de error animado */}
+      {/* Mensaje de error */}
       {errorMessage && (
         <MensajeError
           errorMessage={errorMessage}
@@ -260,7 +280,7 @@ const PantallaJugando: React.FC = () => {
         />
       )}
 
-      {/* Información del rol del usuario animada */}
+      {/* Información del rol del usuario */}
       {mostrarRol && (
         <Animated.View
           style={[estilos.contenedorRol, { opacity: animacionRol.value }]}
@@ -302,7 +322,7 @@ const PantallaJugando: React.FC = () => {
             mostrarBotonesAccion={mostrarBotonesAccion}
           />
           <BarraSuperior />
-          {/* Temporizador central */}
+          {/* Temporizador */}
           <View style={estilos.contenedorTemporizador}>
             <View style={estilos.circuloTemporizador}>
               <Text style={estilos.textoTemporizador}>{tiempoRestante}</Text>

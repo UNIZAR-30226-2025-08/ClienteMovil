@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-// Importamos la variable global para mantener la lógica existente
 import { MODO_NOCHE_GLOBAL } from "../jugando";
 
 /**
