@@ -28,7 +28,7 @@
  * @module animationss
  */
 import { Animated } from "react-native";
-import { CONSTANTES } from "./constantes";
+import { CONSTANTES } from "../constantes";
 
 export const administradorAnimaciones = () => {
   const DURACION_ANIMACION = CONSTANTES.NUMERICAS.DURACION_ANIMACION;

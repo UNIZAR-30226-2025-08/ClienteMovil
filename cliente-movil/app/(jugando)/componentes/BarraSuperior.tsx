@@ -10,7 +10,7 @@
  */
 import React from "react";
 import { View, Image, Text } from "react-native";
-import { estilos } from "../jugando.styles";
+import { estilos } from "../styles/jugando.styles";
 import { CONSTANTES } from "../constantes";
 const { TEXTOS, IMAGENES } = CONSTANTES;
 

@@ -10,7 +10,7 @@ import { Dimensions } from "react-native";
  * @constant {number} ANCHO - Ancho de la pantalla en píxeles.
  * @constant {number} ALTO - Alto de la pantalla en píxeles.
  */
-const { width: ANCHO, height: ALTO } = Dimensions.get("window");
+export const { width: ANCHO, height: ALTO } = Dimensions.get("window");
 
 /**
  * @constant CONSTANTES - Contiene todos los valores globales utilizados en la partida.
