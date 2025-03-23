@@ -18,6 +18,7 @@ import { estilos } from "./styles/jugando.styles";
 
 // Funciones auxiliares (puras)
 import { getHabilidadInfo, getRoleInfo } from "./utilidades/rolesUtilidades";
+import { ejecutarCadenaAnimacion } from "./utilidades/gestorCadenaAnimaciones";
 
 // Módulos UI
 import Chat from "./componentes/Chat";
@@ -207,152 +208,57 @@ const PantallaJugando: React.FC = () => {
       return;
     }
 
-    // --- Cadena para el texto ---
-    const onTextoFadeOutComplete = () => {
-      TEXTO_YA_MOSTRADO = true;
-      setMostrarTextoInicial(false);
-      setMostrarRol(true);
-
-      // --- Cadena para el rol ---
-      setCurrentAnimacion("rol-fadeIn");
-      startFadeOutNowRef.current = () => {
-        animacionRol.value.stopAnimation(() => {
-          animacionRol.value.setValue(1);
-          if (currentTimeoutRef.current) {
-            clearTimeout(currentTimeoutRef.current);
-            currentTimeoutRef.current = null;
-          }
-          setCurrentAnimacion("rol-fadeOut");
-          iniciarAnimacion(
-            "rol-fadeOut",
-            animacionRol.fadeOut(),
-            animacionRol.value,
-            0,
-            onRolFadeOutComplete
-          );
-          startFadeOutNowRef.current = null;
-        });
-      };
-      iniciarAnimacion(
-        "rol-fadeIn",
-        animacionRol.fadeIn(),
-        animacionRol.value,
-        1,
-        () => {
-          setCurrentAnimacion("rol-delay");
-          iniciarDelay(administrador_animaciones.RETRASO_ANIMACION, () => {
-            setCurrentAnimacion("rol-fadeOut");
-            iniciarAnimacion(
-              "rol-fadeOut",
-              animacionRol.fadeOut(),
-              animacionRol.value,
-              0,
-              onRolFadeOutComplete
-            );
-            startFadeOutNowRef.current = null;
-          });
-        }
-      );
-    };
-
-    const onRolFadeOutComplete = () => {
-      setMostrarInicio(true);
-      // --- Cadena para el inicio ---
-      setCurrentAnimacion("inicio-fadeIn");
-      startFadeOutNowRef.current = () => {
-        animacionInicio.value.stopAnimation(() => {
-          animacionInicio.value.setValue(1);
-          if (currentTimeoutRef.current) {
-            clearTimeout(currentTimeoutRef.current);
-            currentTimeoutRef.current = null;
-          }
-          setCurrentAnimacion("inicio-fadeOut");
-          iniciarAnimacion(
-            "inicio-fadeOut",
-            animacionInicio.fadeOut(),
-            animacionInicio.value,
-            0,
-            onInicioFadeOutComplete
-          );
-          startFadeOutNowRef.current = null;
-        });
-      };
-      iniciarAnimacion(
-        "inicio-fadeIn",
-        animacionInicio.fadeIn(),
-        animacionInicio.value,
-        1,
-        () => {
-          setCurrentAnimacion("inicio-delay");
-          iniciarDelay(administrador_animaciones.RETRASO_ANIMACION, () => {
-            setCurrentAnimacion("inicio-fadeOut");
-            iniciarAnimacion(
-              "inicio-fadeOut",
-              animacionInicio.fadeOut(),
-              animacionInicio.value,
-              0,
-              onInicioFadeOutComplete
-            );
-            startFadeOutNowRef.current = null;
-          });
-        }
-      );
-    };
-
-    const onInicioFadeOutComplete = () => {
-      // --- Cadena para el fondo (última animación) ---
-      setCurrentAnimacion("fondo-fadeOut");
-      iniciarAnimacion(
-        "fondo-fadeOut",
-        animacionFondo.fadeOut(),
-        animacionFondo.value,
-        0,
-        () => {
-          setMostrarBotones(true);
-          setCurrentAnimacion("");
-        }
-      );
-    };
-
-    // Iniciar cadena para el texto:
-    setCurrentAnimacion("texto-fadeIn");
-    startFadeOutNowRef.current = () => {
-      animacionTexto.value.stopAnimation(() => {
-        animacionTexto.value.setValue(1);
-        if (currentTimeoutRef.current) {
-          clearTimeout(currentTimeoutRef.current);
-          currentTimeoutRef.current = null;
-        }
-        setCurrentAnimacion("texto-fadeOut");
-        iniciarAnimacion(
-          "texto-fadeOut",
-          animacionTexto.fadeOut(),
-          animacionTexto.value,
-          0,
-          onTextoFadeOutComplete
-        );
-        startFadeOutNowRef.current = null;
-      });
-    };
-    iniciarAnimacion(
-      "texto-fadeIn",
-      animacionTexto.fadeIn(),
-      animacionTexto.value,
-      1,
+    // --- Cadena de animaciones utilizando el helper ejecutarCadenaAnimacion ---
+    ejecutarCadenaAnimacion(
+      "texto",
+      animacionTexto,
+      administrador_animaciones.RETRASO_ANIMACION,
       () => {
-        setCurrentAnimacion("texto-delay");
-        iniciarDelay(administrador_animaciones.RETRASO_ANIMACION, () => {
-          setCurrentAnimacion("texto-fadeOut");
-          iniciarAnimacion(
-            "texto-fadeOut",
-            animacionTexto.fadeOut(),
-            animacionTexto.value,
-            0,
-            onTextoFadeOutComplete
-          );
-          startFadeOutNowRef.current = null;
-        });
-      }
+        TEXTO_YA_MOSTRADO = true;
+        setMostrarTextoInicial(false);
+        setMostrarRol(true);
+        // --- Cadena para el rol ---
+        ejecutarCadenaAnimacion(
+          "rol",
+          animacionRol,
+          administrador_animaciones.RETRASO_ANIMACION,
+          () => {
+            setMostrarInicio(true);
+            // --- Cadena para el inicio ---
+            ejecutarCadenaAnimacion(
+              "inicio",
+              animacionInicio,
+              administrador_animaciones.RETRASO_ANIMACION,
+              () => {
+                // --- Cadena para el fondo (última animación) ---
+                setCurrentAnimacion("fondo-fadeOut");
+                iniciarAnimacion(
+                  "fondo-fadeOut",
+                  animacionFondo.fadeOut(),
+                  animacionFondo.value,
+                  0,
+                  () => {
+                    setMostrarBotones(true);
+                    setCurrentAnimacion("");
+                  }
+                );
+              },
+              setCurrentAnimacion,
+              iniciarAnimacion,
+              iniciarDelay,
+              startFadeOutNowRef
+            );
+          },
+          setCurrentAnimacion,
+          iniciarAnimacion,
+          iniciarDelay,
+          startFadeOutNowRef
+        );
+      },
+      setCurrentAnimacion,
+      iniciarAnimacion,
+      iniciarDelay,
+      startFadeOutNowRef
     );
   }, []);
 
