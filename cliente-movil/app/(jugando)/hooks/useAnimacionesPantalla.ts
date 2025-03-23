@@ -6,19 +6,27 @@ import { administradorAnimaciones } from "../utilidades/animaciones";
  * @description Crea y devuelve las animaciones usadas en la pantalla de juego.
  */
 const useAnimacionesPantalla = () => {
-  const animationManager = administradorAnimaciones();
+  const administrador_animaciones = administradorAnimaciones();
 
   // Animación para el texto inicial
-  const animacionTexto = useRef(animationManager.crearAnimacion(0)).current;
+  const animacionTexto = useRef(
+    administrador_animaciones.crearAnimacion(0)
+  ).current;
   // Animación para la información del rol
-  const animacionRol = useRef(animationManager.crearAnimacion(0)).current;
+  const animacionRol = useRef(
+    administrador_animaciones.crearAnimacion(0)
+  ).current;
   // Animación para el inicio de partida
-  const animacionInicio = useRef(animationManager.crearAnimacion(0)).current;
+  const animacionInicio = useRef(
+    administrador_animaciones.crearAnimacion(0)
+  ).current;
   // Animación para el fondo
-  const animacionFondo = useRef(animationManager.crearAnimacion(1)).current;
+  const animacionFondo = useRef(
+    administrador_animaciones.crearAnimacion(1)
+  ).current;
 
   return {
-    animationManager,
+    administrador_animaciones,
     animacionTexto,
     animacionRol,
     animacionInicio,

@@ -13,10 +13,10 @@
  * import { administradorAnimaciones } from "./animaciones";
  *
  * // 2. Inicializar en componente
- * const animationManager = administradorAnimaciones();
+ * const administrador_animaciones = administradorAnimaciones();
  *
  * // 3. Crear animaciones con useRef para persistencia
- * const animacionTexto = useRef(animationManager.crearAnimacion(0)).current;
+ * const animacionTexto = useRef(administrador_animaciones.crearAnimacion(0)).current;
  *
  * // 4. Usar en efectos
  * useEffect(() => {

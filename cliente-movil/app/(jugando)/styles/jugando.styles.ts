@@ -51,7 +51,7 @@ export const estilos = StyleSheet.create({
   contenedorTexto: {
     position: "absolute",
     width: "80%",
-    top: "21%",
+    top: "25%",
     justifyContent: "center",
     alignItems: "center",
   },
@@ -109,7 +109,7 @@ export const estilos = StyleSheet.create({
     fontSize: ancho * 0.1,
     fontFamily: "Corben",
     textAlign: "center",
-    top: "127%",
+    top: "115%",
     paddingHorizontal: ancho * 0.05,
   },
 

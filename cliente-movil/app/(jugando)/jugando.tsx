@@ -77,7 +77,7 @@ const PantallaJugando: React.FC = () => {
   const { tiempoRestante, reiniciarTemporizador, setTemporizadorActivo } =
     useTemporizador(CONSTANTES.NUMERICAS.TIEMPO_INICIAL, false); // Maneja el temporizador del juego.
   const {
-    animationManager,
+    administrador_animaciones,
     animacionTexto,
     animacionRol,
     animacionInicio,
@@ -170,24 +170,31 @@ const PantallaJugando: React.FC = () => {
 
   /**
    * Efecto: Reinicia el temporizador cuando llega a 0.
+   * Se alterna el modo día/noche al terminar cada ciclo.
    */
   useEffect(() => {
     if (tiempoRestante === 0) {
+      // Alterna el modo de día a noche al terminar el ciclo
+      const nuevoModo = !esDeNoche;
+      MODO_NOCHE_GLOBAL = nuevoModo;
+      setModoDiaNoche(nuevoModo);
       reiniciarTemporizador();
     }
-  }, [tiempoRestante]);
+  }, [tiempoRestante, esDeNoche]);
 
   /**
    * TODO_API
    * Habrá que hacer que el backend diga cuando cambiar de día a noche y no el timer visual
    */
-  useEffect(() => {
-    if (tiempoRestante === CONSTANTES.NUMERICAS.TIEMPO_INICIAL) {
-      const nuevoModo = !esDeNoche;
-      MODO_NOCHE_GLOBAL = nuevoModo;
-      setModoDiaNoche(nuevoModo);
-    }
-  }, [tiempoRestante]);
+  // Se comenta el siguiente efecto ya que provoca que al reiniciar el temporizador se cambie erróneamente el modo,
+  // haciendo que tras el segundo ciclo nunca se vuelva a ver el modo día (y por ende los botones de acción no se muestren en día).
+  // useEffect(() => {
+  //   if (tiempoRestante === CONSTANTES.NUMERICAS.TIEMPO_INICIAL) {
+  //     const nuevoModo = !esDeNoche;
+  //     MODO_NOCHE_GLOBAL = nuevoModo;
+  //     setModoDiaNoche(nuevoModo);
+  //   }
+  // }, [tiempoRestante]);
 
   /**
    * Efecto: Ejecuta la secuencia de animaciones para mostrar el texto inicial, el rol, el inicio de partida y los botones.
@@ -223,13 +230,13 @@ const PantallaJugando: React.FC = () => {
                         setMostrarBotones(true);
                       });
                     });
-                  }, animationManager.RETRASO_ANIMACION);
+                  }, administrador_animaciones.RETRASO_ANIMACION);
                 });
               });
-            }, animationManager.RETRASO_ANIMACION);
+            }, administrador_animaciones.RETRASO_ANIMACION);
           });
         });
-      }, animationManager.RETRASO_ANIMACION);
+      }, administrador_animaciones.RETRASO_ANIMACION);
     });
   }, []);
 
@@ -279,24 +286,61 @@ const PantallaJugando: React.FC = () => {
           animacionError={animacionError}
         />
       )}
-
       {/* Información del rol del usuario */}
       {mostrarRol && (
         <Animated.View
           style={[estilos.contenedorRol, { opacity: animacionRol.value }]}
         >
+          {/* Título "Tu rol es..." */}
           <View style={estilos.contenedorTextoRol}>
             <Text style={estilos.textoRol}>{CONSTANTES.TEXTOS.ROL_TITULO}</Text>
           </View>
+
+          {/* Imagen del rol (bruja, lobo, etc.) */}
           <Image source={roleInfo.image} style={estilos.imagenRol} />
-          <Text
-            style={[
-              estilos.nombreRol,
-              { color: rolUsuario === "lobo" ? "red" : "blue" },
-            ]}
+
+          {/* Nombre del rol con borde blanco simulado */}
+          <View
+            style={{
+              position: "relative",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
           >
-            {roleInfo.roleName}
-          </Text>
+            {/* Capas del borde blanco en 4 direcciones usando transform */}
+            {[-1, 1].map((dx) =>
+              [-1, 1].map((dy) => (
+                <Text
+                  key={`${dx}-${dy}`}
+                  style={[
+                    estilos.nombreRol,
+                    {
+                      color: "white",
+                      position: "absolute",
+                      transform: [{ translateX: dx }, { translateY: dy }],
+                      textAlign: "center",
+                    },
+                  ]}
+                >
+                  {roleInfo.roleName}
+                </Text>
+              ))
+            )}
+
+            {/* Texto principal */}
+            <Text
+              style={[
+                estilos.nombreRol,
+                {
+                  color: rolUsuario === "lobo" ? "red" : "blue",
+                  position: "absolute",
+                  textAlign: "center",
+                },
+              ]}
+            >
+              {roleInfo.roleName}
+            </Text>
+          </View>
         </Animated.View>
       )}
 
