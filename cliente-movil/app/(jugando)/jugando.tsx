@@ -184,6 +184,10 @@ const PantallaJugando: React.FC = () => {
   /**
    * Efecto: Reinicia el temporizador cuando llega a 0.
    * Se alterna el modo día/noche al terminar cada ciclo.
+   * Cuando se pasa de día a noche o de noche a día, reseteamos:
+   * - el array de votos (votes),
+   * - el estado de votación (votoRealizado),
+   * - y la selección de jugador (JugadorSeleccionado) para que el círculo vuelva a su estilo original.
    */
   useEffect(() => {
     if (tiempoRestante === 0) {
@@ -191,6 +195,13 @@ const PantallaJugando: React.FC = () => {
       const nuevoModo = !esDeNoche;
       MODO_NOCHE_GLOBAL = nuevoModo;
       setModoDiaNoche(nuevoModo);
+
+      // Reseteamos los votos y el estado de votación
+      setVotos(Array(CONSTANTES.NUMERICAS.CANTIDAD_IMAGENES).fill(0));
+      setVotoRealizado(false);
+      // Quitamos la selección de jugador para que el círculo recupere su color por defecto
+      setJugadorSeleccionado(null);
+
       reiniciarTemporizador();
     }
   }, [tiempoRestante, esDeNoche]);
@@ -228,7 +239,7 @@ const PantallaJugando: React.FC = () => {
     animacionTexto.fadeIn().start(() => {
       setTimeout(() => {
         animacionTexto.fadeOut().start(() => {
-          // Actualizar la bandera global para que no se vuelve a mostar más esta animación durante la partida
+          // Actualizar la bandera global para que no se vuelva a mostar más esta animación durante la partida
           TEXTO_YA_MOSTRADO = true;
           setMostrarTextoInicial(false);
           setMostrarRol(true);
@@ -377,7 +388,7 @@ const PantallaJugando: React.FC = () => {
             abrirChat={handleAbrirChat}
             votarAJugador={votarAJugador}
             mostrarBotonesAccion={mostrarBotonesAccion}
-            votoRealizado={votoRealizado} // Se pasa el estado para aplicar borde rojo al botón de votar
+            votoRealizado={votoRealizado} // Pasar el estado para aplicar borde rojo al botón de votar :)
           />
           <BarraSuperior />
           {/* Temporizador */}
