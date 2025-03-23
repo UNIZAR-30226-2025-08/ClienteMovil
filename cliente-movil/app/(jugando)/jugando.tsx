@@ -3,8 +3,15 @@
  * @description Maneja la lógica del juego, incluyendo estados, animaciones, temporizador,
  * votaciones, chat y habilidades.
  */
-import React, { useState, useEffect } from "react";
-import { View, ImageBackground, Text, Image, Animated } from "react-native";
+import React, { useState, useEffect, useRef } from "react";
+import {
+  View,
+  ImageBackground,
+  Text,
+  Image,
+  Animated,
+  TouchableWithoutFeedback,
+} from "react-native";
 import { useFonts } from "expo-font";
 import { CONSTANTES, Rol } from "./constantes";
 import { estilos } from "./styles/jugando.styles";
@@ -73,6 +80,14 @@ const PantallaJugando: React.FC = () => {
   // Nuevo estado: indica si se ha pasado turno
   const [pasoTurno, setPasoTurno] = useState(false);
 
+  // Estado para identificar la animación actual (ej: "texto-fadeIn", "rol-delay", etc.)
+  const [currentAnimacion, setCurrentAnimacion] = useState("");
+
+  // Ref para almacenar la función callback de la animación actual (o para iniciar el fadeOut de forma inmediata)
+  const startFadeOutNowRef = useRef<(() => void) | null>(null);
+  // Ref para almacenar el id de cualquier timeout pendiente (durante los delays)
+  const currentTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   // Obtención de información derivada del rol del jugador:
   const habilidadInfo = getHabilidadInfo(rolUsuario); // Datos relacionados con la habilidad del rol.
   const roleInfo = getRoleInfo(rolUsuario); // Datos descriptivos e imagen del rol.
@@ -94,152 +109,90 @@ const PantallaJugando: React.FC = () => {
   const { errorMessage, mostrarError, animacionError } = useMensajeError(); // Maneja mensajes de error y sus animaciones.
 
   /**
-   * Activa y abre el chat, mostrando su animación.
-   */
-  const handleAbrirChat = () => {
-    setMostrarChat(true);
-    abrirChat();
-  };
-
-  /**
-   * Cierra el chat y oculta su animación.
-   */
-  const handleCerrarChat = () => {
-    cerrarChat();
-    setMostrarChat(false);
-  };
-
-  /**
-   * Activa y muestra el popup de habilidad, iniciando su animación.
-   */
-  const handleAbrirHabilidad = () => {
-    setMostrarHabilidad(true);
-    abrirHabilidad();
-  };
-
-  /**
-   * Cierra el popup de habilidad y oculta su animación.
-   */
-  const handleCerrarHabilidad = () => {
-    cerrarHabilidad();
-    setMostrarHabilidad(false);
-  };
-
-  /**
-   * Determina si se deben mostrar los botones de acción.
+   * Función para iniciar una animación y almacenar su callback.
    *
-   * @returns {boolean} True si los botones deben ser visibles, basado en el modo de juego y el rol del usuario.
+   * @param {string} nombreAnimacion - Identificador de la animación (ej. "texto-fadeIn").
+   * @param {Animated.CompositeAnimation} animacion - La animación a ejecutar.
+   * @param {Animated.Value} animatedValue - El valor animado correspondiente.
+   * @param {number} valorFinal - El valor final que debe tomar el animatedValue.
+   * @param {Function} callback - Función a ejecutar al finalizar la animación.
    */
-  const mostrarBotonesAccion = () => {
-    return !MODO_NOCHE_GLOBAL || rolUsuario === "lobo";
-  };
-
-  /**
-   * Maneja la acción de pasar turno.
-   */
-  const manejarPasarTurno = () => {
-    if (votoRealizado || pasoTurno) {
-      // Si ya se votó o se pasó turno, mostrar mensaje de error
-      mostrarError("Has pasado turno");
-      return;
-    }
-    // Marca que se ha pasado turno y deshabilita votación
-    setPasoTurno(true);
-    setVotoRealizado(true);
-    // Restablece la selección para que el borde del jugador vuelva a blanco
-    setJugadorSeleccionado(null);
-  };
-
-  /**
-   * Maneja la selección de un jugador para votación.
-   *
-   * @param {number} index - Índice del jugador seleccionado.
-   */
-  const administrarSeleccionJugadorVotacionDiurna = (index: number) => {
-    if (pasoTurno) {
-      // Si ya se pasó turno, no permitir seleccionar jugador
-      mostrarError("Has pasado turno");
-      return;
-    }
-    if (votoRealizado) {
-      // Si ya se realizó un voto, no permitir seleccionar otro jugador
-      mostrarError("Solo puedes votar a un jugador por turno");
-      return;
-    }
-    if (index === indiceUsuario) {
-      mostrarError("¡No puedes votarte a ti mismo!");
-      return;
-    }
-    setJugadorSeleccionado(index);
-  };
-
-  /**
-   * Incrementa el voto para el jugador seleccionado.
-   */
-  const votarAJugador = () => {
-    if (pasoTurno) {
-      // Si se pasó turno, no permitir votar
-      mostrarError("Has pasado turno");
-      return;
-    }
-    if (votoRealizado) {
-      // Si ya se realizó la votación, no permitir votar de nuevo
-      mostrarError("Solo puedes votar a un jugador por turno");
-      return;
-    }
-    if (JugadorSeleccionado === null) {
-      console.log("No se ha seleccionado ningún jugador para votar.");
-      return;
-    }
-    /**
-     * TODO_API
-     * Probablemente habrá que adaptar la lógica de contar los votos para simplemente leerlos del backend
-     */
-    setVotos((votosAnteriores) => {
-      const nuevosVotos = [...votosAnteriores];
-      nuevosVotos[JugadorSeleccionado] += 1;
-      return nuevosVotos;
+  const iniciarAnimacion = (
+    nombreAnimacion: string,
+    animacion: Animated.CompositeAnimation,
+    animatedValue: Animated.Value,
+    valorFinal: number,
+    callback: () => void
+  ) => {
+    setCurrentAnimacion(nombreAnimacion);
+    animacion.start(() => {
+      callback();
     });
-    /**
-     * TODO_API
-     * backend.vota(indiceUsuario.toString(), JugadorSeleccionado.toString())
-     */
-    console.log(`Votado al jugador ${JugadorSeleccionado + 1}`, votes);
-    // Marcar que ya se realizó la votación en este turno para no permitir más votos
-    setVotoRealizado(true);
-    // No se limpia la selección para mantener el estado visual (borde rojo en el botón de votar)
   };
 
   /**
-   * Efecto: Reinicia el temporizador cuando llega a 0.
-   * Se alterna el modo día/noche al terminar cada ciclo.
-   * Cuando se pasa de día a noche o de noche a día, reseteamos:
-   * - el array de votos (votes),
-   * - el estado de votación (votoRealizado),
-   * - y la selección de jugador (JugadorSeleccionado) para que el círculo vuelva a su estilo original.
+   * Función para iniciar un delay (tiempo de espera) que se pueda saltar.
+   *
+   * @param {number} delay - Milisegundos a esperar.
+   * @param {Function} callback - Función a ejecutar al finalizar el delay.
    */
-  useEffect(() => {
-    if (tiempoRestante === 0) {
-      // Alterna el modo de día a noche al terminar el ciclo
-      const nuevoModo = !esDeNoche;
-      MODO_NOCHE_GLOBAL = nuevoModo;
-      setModoDiaNoche(nuevoModo);
-
-      // Reseteamos los votos y el estado de votación
-      setVotos(Array(CONSTANTES.NUMERICAS.CANTIDAD_IMAGENES).fill(0));
-      setVotoRealizado(false);
-      // Reiniciamos el estado de pasar turno
-      setPasoTurno(false);
-      // Quitamos la selección de jugador para que el círculo recupere su color por defecto
-      setJugadorSeleccionado(null);
-
-      reiniciarTemporizador();
-    }
-  }, [tiempoRestante, esDeNoche]);
+  const iniciarDelay = (delay: number, callback: () => void) => {
+    setCurrentAnimacion("delay");
+    currentTimeoutRef.current = setTimeout(() => {
+      currentTimeoutRef.current = null;
+      callback();
+    }, delay);
+  };
 
   /**
-   * Efecto: Ejecuta la secuencia de animaciones para mostrar el texto inicial, el rol, el inicio de partida y los botones.
-   * También establece el rol del usuario de forma aleatoria.
+   * Handler global para saltar la animación o delay actual.
+   *
+   * Si se toca durante un fadeIn o durante un delay, se invoca la función almacenada
+   * en startFadeOutNowRef para iniciar inmediatamente el fadeOut. Si ya se está en fadeOut,
+   * se fuerza la finalización.
+   */
+  const handleSkipAnimaciones = () => {
+    // Si hay un timeout activo (delay), cancelarlo y pasar al fadeOut
+    if (currentTimeoutRef.current) {
+      clearTimeout(currentTimeoutRef.current);
+      currentTimeoutRef.current = null;
+      if (startFadeOutNowRef.current) {
+        startFadeOutNowRef.current();
+        return;
+      }
+    }
+    // Si se tiene una función para saltar al fadeOut, ejecutarla
+    if (startFadeOutNowRef.current) {
+      startFadeOutNowRef.current();
+      return;
+    }
+    // Si se está en fadeOut, detener la animación y fijar el valor final
+    if (currentAnimacion.includes("fadeOut")) {
+      if (currentAnimacion.includes("texto")) {
+        animacionTexto.value.stopAnimation(() => {
+          animacionTexto.value.setValue(0);
+        });
+      } else if (currentAnimacion.includes("rol")) {
+        animacionRol.value.stopAnimation(() => {
+          animacionRol.value.setValue(0);
+        });
+      } else if (currentAnimacion.includes("inicio")) {
+        animacionInicio.value.stopAnimation(() => {
+          animacionInicio.value.setValue(0);
+        });
+      } else if (currentAnimacion.includes("fondo")) {
+        animacionFondo.value.stopAnimation(() => {
+          animacionFondo.value.setValue(0);
+        });
+      }
+    }
+  };
+
+  /**
+   * Cadena de animaciones para el texto, rol e inicio de partida.
+   *
+   * Se utiliza startFadeOutNowRef para forzar el inicio inmediato del fadeOut
+   * en caso de que se toque durante el fadeIn o durante el delay.
    */
   useEffect(() => {
     const roles: Rol[] = ["aldeano", "lobo", "bruja", "cazador"];
@@ -253,32 +206,154 @@ const PantallaJugando: React.FC = () => {
       setMostrarBotones(true);
       return;
     }
-    animacionTexto.fadeIn().start(() => {
-      setTimeout(() => {
-        animacionTexto.fadeOut().start(() => {
-          // Actualizar la bandera global para que no se vuelva a mostar más esta animación durante la partida
-          TEXTO_YA_MOSTRADO = true;
-          setMostrarTextoInicial(false);
-          setMostrarRol(true);
-          animacionRol.fadeIn().start(() => {
-            setTimeout(() => {
-              animacionRol.fadeOut().start(() => {
-                setMostrarInicio(true);
-                animacionInicio.fadeIn().start(() => {
-                  setTimeout(() => {
-                    animacionInicio.fadeOut().start(() => {
-                      animacionFondo.fadeOut().start(() => {
-                        setMostrarBotones(true);
-                      });
-                    });
-                  }, administrador_animaciones.RETRASO_ANIMACION);
-                });
-              });
-            }, administrador_animaciones.RETRASO_ANIMACION);
-          });
+
+    // --- Cadena para el texto ---
+    const onTextoFadeOutComplete = () => {
+      TEXTO_YA_MOSTRADO = true;
+      setMostrarTextoInicial(false);
+      setMostrarRol(true);
+
+      // --- Cadena para el rol ---
+      setCurrentAnimacion("rol-fadeIn");
+      startFadeOutNowRef.current = () => {
+        animacionRol.value.stopAnimation(() => {
+          animacionRol.value.setValue(1);
+          if (currentTimeoutRef.current) {
+            clearTimeout(currentTimeoutRef.current);
+            currentTimeoutRef.current = null;
+          }
+          setCurrentAnimacion("rol-fadeOut");
+          iniciarAnimacion(
+            "rol-fadeOut",
+            animacionRol.fadeOut(),
+            animacionRol.value,
+            0,
+            onRolFadeOutComplete
+          );
+          startFadeOutNowRef.current = null;
         });
-      }, administrador_animaciones.RETRASO_ANIMACION);
-    });
+      };
+      iniciarAnimacion(
+        "rol-fadeIn",
+        animacionRol.fadeIn(),
+        animacionRol.value,
+        1,
+        () => {
+          setCurrentAnimacion("rol-delay");
+          iniciarDelay(administrador_animaciones.RETRASO_ANIMACION, () => {
+            setCurrentAnimacion("rol-fadeOut");
+            iniciarAnimacion(
+              "rol-fadeOut",
+              animacionRol.fadeOut(),
+              animacionRol.value,
+              0,
+              onRolFadeOutComplete
+            );
+            startFadeOutNowRef.current = null;
+          });
+        }
+      );
+    };
+
+    const onRolFadeOutComplete = () => {
+      setMostrarInicio(true);
+      // --- Cadena para el inicio ---
+      setCurrentAnimacion("inicio-fadeIn");
+      startFadeOutNowRef.current = () => {
+        animacionInicio.value.stopAnimation(() => {
+          animacionInicio.value.setValue(1);
+          if (currentTimeoutRef.current) {
+            clearTimeout(currentTimeoutRef.current);
+            currentTimeoutRef.current = null;
+          }
+          setCurrentAnimacion("inicio-fadeOut");
+          iniciarAnimacion(
+            "inicio-fadeOut",
+            animacionInicio.fadeOut(),
+            animacionInicio.value,
+            0,
+            onInicioFadeOutComplete
+          );
+          startFadeOutNowRef.current = null;
+        });
+      };
+      iniciarAnimacion(
+        "inicio-fadeIn",
+        animacionInicio.fadeIn(),
+        animacionInicio.value,
+        1,
+        () => {
+          setCurrentAnimacion("inicio-delay");
+          iniciarDelay(administrador_animaciones.RETRASO_ANIMACION, () => {
+            setCurrentAnimacion("inicio-fadeOut");
+            iniciarAnimacion(
+              "inicio-fadeOut",
+              animacionInicio.fadeOut(),
+              animacionInicio.value,
+              0,
+              onInicioFadeOutComplete
+            );
+            startFadeOutNowRef.current = null;
+          });
+        }
+      );
+    };
+
+    const onInicioFadeOutComplete = () => {
+      // --- Cadena para el fondo (última animación) ---
+      setCurrentAnimacion("fondo-fadeOut");
+      iniciarAnimacion(
+        "fondo-fadeOut",
+        animacionFondo.fadeOut(),
+        animacionFondo.value,
+        0,
+        () => {
+          setMostrarBotones(true);
+          setCurrentAnimacion("");
+        }
+      );
+    };
+
+    // Iniciar cadena para el texto:
+    setCurrentAnimacion("texto-fadeIn");
+    startFadeOutNowRef.current = () => {
+      animacionTexto.value.stopAnimation(() => {
+        animacionTexto.value.setValue(1);
+        if (currentTimeoutRef.current) {
+          clearTimeout(currentTimeoutRef.current);
+          currentTimeoutRef.current = null;
+        }
+        setCurrentAnimacion("texto-fadeOut");
+        iniciarAnimacion(
+          "texto-fadeOut",
+          animacionTexto.fadeOut(),
+          animacionTexto.value,
+          0,
+          onTextoFadeOutComplete
+        );
+        startFadeOutNowRef.current = null;
+      });
+    };
+    iniciarAnimacion(
+      "texto-fadeIn",
+      animacionTexto.fadeIn(),
+      animacionTexto.value,
+      1,
+      () => {
+        setCurrentAnimacion("texto-delay");
+        iniciarDelay(administrador_animaciones.RETRASO_ANIMACION, () => {
+          setCurrentAnimacion("texto-fadeOut");
+          iniciarAnimacion(
+            "texto-fadeOut",
+            animacionTexto.fadeOut(),
+            animacionTexto.value,
+            0,
+            onTextoFadeOutComplete
+          );
+          startFadeOutNowRef.current = null;
+        });
+      }
+    );
   }, []);
 
   /**
@@ -297,158 +372,212 @@ const PantallaJugando: React.FC = () => {
   if (!fuentesCargadas) return null;
 
   return (
-    // Contenedor principal de la pantalla de juego
-    <View style={estilos.contenedor}>
-      {/* Fondo */}
-      <ImageBackground
-        source={CONSTANTES.IMAGENES.FONDO}
-        style={estilos.fondo}
-        resizeMode="cover"
-      />
-
-      {/* Superposición animada para efectos visuales en el fondo */}
-      <Animated.View
-        style={[estilos.superposicion, { opacity: animacionFondo.value }]}
-      />
-
-      {/* Texto inicial */}
-      {mostrarTextoInicial && (
-        <Animated.View
-          style={[estilos.contenedorTexto, { opacity: animacionTexto.value }]}
-        >
-          <Text style={estilos.texto}>{CONSTANTES.TEXTOS.INICIAL}</Text>
-        </Animated.View>
-      )}
-
-      {/* Mensaje de error */}
-      {errorMessage && (
-        <MensajeError
-          errorMessage={errorMessage}
-          animacionError={animacionError}
+    // Se envuelve el contenedor principal en TouchableWithoutFeedback para que al tocar se invoque handleSkipAnimaciones
+    <TouchableWithoutFeedback onPress={handleSkipAnimaciones}>
+      {/* Contenedor principal de la pantalla de juego */}
+      <View style={estilos.contenedor}>
+        {/* Fondo */}
+        <ImageBackground
+          source={CONSTANTES.IMAGENES.FONDO}
+          style={estilos.fondo}
+          resizeMode="cover"
         />
-      )}
-
-      {/* Información del rol del usuario */}
-      {mostrarRol && (
+        {/* Superposición animada para efectos visuales en el fondo */}
         <Animated.View
-          style={[estilos.contenedorRol, { opacity: animacionRol.value }]}
-        >
-          {/* Título "Tu rol es..." */}
-          <View style={estilos.contenedorTextoRol}>
-            <Text style={estilos.textoRol}>{CONSTANTES.TEXTOS.ROL_TITULO}</Text>
-          </View>
-
-          {/* Imagen del rol (bruja, lobo, etc.) */}
-          <Image source={roleInfo.image} style={estilos.imagenRol} />
-
-          {/* Nombre del rol con borde blanco simulado */}
-          <View
-            style={{
-              position: "relative",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
+          style={[estilos.superposicion, { opacity: animacionFondo.value }]}
+        />
+        {/* Texto inicial */}
+        {mostrarTextoInicial && (
+          <Animated.View
+            style={[estilos.contenedorTexto, { opacity: animacionTexto.value }]}
           >
-            {/* Capas del borde blanco en 4 direcciones usando transform */}
-            {[-1, 1].map((dx) =>
-              [-1, 1].map((dy) => (
-                <Text
-                  key={`${dx}-${dy}`}
-                  style={[
-                    estilos.nombreRol,
-                    {
-                      color: "white",
-                      position: "absolute",
-                      transform: [{ translateX: dx }, { translateY: dy }],
-                      textAlign: "center",
-                    },
-                  ]}
-                >
-                  {roleInfo.roleName}
-                </Text>
-              ))
-            )}
-
-            {/* Texto principal */}
-            <Text
-              style={[
-                estilos.nombreRol,
-                {
-                  color: rolUsuario === "lobo" ? "red" : "blue",
-                  position: "absolute",
-                  textAlign: "center",
-                },
-              ]}
-            >
-              {roleInfo.roleName}
-            </Text>
-          </View>
-        </Animated.View>
-      )}
-
-      {/* Mensaje de inicio de partida animado */}
-      {mostrarInicio && (
-        <Animated.View
-          style={[estilos.contenedorTexto, { opacity: animacionInicio.value }]}
-        >
-          <Text style={estilos.textoInicio}>
-            {CONSTANTES.TEXTOS.INICIO_PARTIDA}
-          </Text>
-        </Animated.View>
-      )}
-
-      {/* Controles y componentes de juego */}
-      {mostrarBotones && (
-        <>
-          <ControlesAccion
-            habilidadInfo={habilidadInfo}
-            abrirHabilidad={handleAbrirHabilidad}
-            abrirChat={handleAbrirChat}
-            votarAJugador={votarAJugador}
-            manejarPasarTurno={
-              manejarPasarTurno
-            } /* Propiedad para pasar turno */
-            mostrarBotonesAccion={mostrarBotonesAccion}
-            votoRealizado={votoRealizado} // Propiedad para aplicar borde rojo al botón de votar :)
-            turnoPasado={
-              pasoTurno
-            } /* Propiedad para indicar que se ha pasado turno y mostrar borde rojo */
+            <Text style={estilos.texto}>{CONSTANTES.TEXTOS.INICIAL}</Text>
+          </Animated.View>
+        )}
+        {/* Mensaje de error */}
+        {errorMessage && (
+          <MensajeError
+            errorMessage={errorMessage}
+            animacionError={animacionError}
           />
-          <BarraSuperior />
-          {/* Temporizador */}
-          <View style={estilos.contenedorTemporizador}>
-            <View style={estilos.circuloTemporizador}>
-              <Text style={estilos.textoTemporizador}>{tiempoRestante}</Text>
+        )}
+        {/* Información del rol del usuario */}
+        {mostrarRol && (
+          <Animated.View
+            style={[estilos.contenedorRol, { opacity: animacionRol.value }]}
+          >
+            {/* Título "Tu rol es..." */}
+            <View style={estilos.contenedorTextoRol}>
+              <Text style={estilos.textoRol}>
+                {CONSTANTES.TEXTOS.ROL_TITULO}
+              </Text>
             </View>
-          </View>
-          {/* Componente para votación de jugadores */}
-          <CirculoVotar
-            imagenes={imagenes}
-            votes={votes}
-            JugadorSeleccionado={JugadorSeleccionado}
-            onSelectPlayer={administrarSeleccionJugadorVotacionDiurna}
+            {/* Imagen del rol (bruja, lobo, etc.) */}
+            <Image source={roleInfo.image} style={estilos.imagenRol} />
+            {/* Nombre del rol con borde blanco simulado */}
+            <View
+              style={{
+                position: "relative",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              {/* Capas del borde blanco en 4 direcciones usando transform */}
+              {[-1, 1].map((dx) =>
+                [-1, 1].map((dy) => (
+                  <Text
+                    key={`${dx}-${dy}`}
+                    style={[
+                      estilos.nombreRol,
+                      {
+                        color: "white",
+                        position: "absolute",
+                        transform: [{ translateX: dx }, { translateY: dy }],
+                        textAlign: "center",
+                      },
+                    ]}
+                  >
+                    {roleInfo.roleName}
+                  </Text>
+                ))
+              )}
+              {/* Texto principal */}
+              <Text
+                style={[
+                  estilos.nombreRol,
+                  {
+                    color: rolUsuario === "lobo" ? "red" : "blue",
+                    position: "absolute",
+                    textAlign: "center",
+                  },
+                ]}
+              >
+                {roleInfo.roleName}
+              </Text>
+            </View>
+          </Animated.View>
+        )}
+        {/* Mensaje de inicio de partida animado */}
+        {mostrarInicio && (
+          <Animated.View
+            style={[
+              estilos.contenedorTexto,
+              { opacity: animacionInicio.value },
+            ]}
+          >
+            <Text style={estilos.textoInicio}>
+              {CONSTANTES.TEXTOS.INICIO_PARTIDA}
+            </Text>
+          </Animated.View>
+        )}
+        {/* Controles y componentes de juego */}
+        {mostrarBotones && (
+          <>
+            <ControlesAccion
+              habilidadInfo={habilidadInfo}
+              abrirHabilidad={() => {
+                setMostrarHabilidad(true);
+                abrirHabilidad();
+              }}
+              abrirChat={() => {
+                setMostrarChat(true);
+                abrirChat();
+              }}
+              votarAJugador={() => {
+                if (pasoTurno) {
+                  mostrarError("Has pasado turno");
+                  return;
+                }
+                if (votoRealizado) {
+                  mostrarError("Solo puedes votar a un jugador por turno");
+                  return;
+                }
+                if (JugadorSeleccionado === null) {
+                  console.log(
+                    "No se ha seleccionado ningún jugador para votar."
+                  );
+                  return;
+                }
+                setVotos((votosAnteriores) => {
+                  const nuevosVotos = [...votosAnteriores];
+                  nuevosVotos[JugadorSeleccionado] += 1;
+                  return nuevosVotos;
+                });
+                console.log(
+                  `Votado al jugador ${JugadorSeleccionado + 1}`,
+                  votes
+                );
+                setVotoRealizado(true);
+              }}
+              manejarPasarTurno={() => {
+                if (votoRealizado || pasoTurno) {
+                  mostrarError("Has pasado turno");
+                  return;
+                }
+                setPasoTurno(true);
+                setVotoRealizado(true);
+                setJugadorSeleccionado(null);
+              }}
+              mostrarBotonesAccion={() => {
+                return !MODO_NOCHE_GLOBAL || rolUsuario === "lobo";
+              }}
+              votoRealizado={votoRealizado}
+              turnoPasado={pasoTurno}
+            />
+            <BarraSuperior />
+            {/* Temporizador */}
+            <View style={estilos.contenedorTemporizador}>
+              <View style={estilos.circuloTemporizador}>
+                <Text style={estilos.textoTemporizador}>{tiempoRestante}</Text>
+              </View>
+            </View>
+            {/* Componente para votación de jugadores */}
+            <CirculoVotar
+              imagenes={imagenes}
+              votes={votes}
+              JugadorSeleccionado={JugadorSeleccionado}
+              onSelectPlayer={(index: number) => {
+                if (pasoTurno) {
+                  mostrarError("Has pasado turno");
+                  return;
+                }
+                if (votoRealizado) {
+                  mostrarError("Solo puedes votar a un jugador por turno");
+                  return;
+                }
+                if (index === indiceUsuario) {
+                  mostrarError("¡No puedes votarte a ti mismo!");
+                  return;
+                }
+                setJugadorSeleccionado(index);
+              }}
+            />
+          </>
+        )}
+        {/* Componente de chat */}
+        {mostrarChat && (
+          <Chat
+            mensajes={CONSTANTES.TEXTOS.CHAT.MENSAJES_INICIALES}
+            posicionChat={posicionChat}
+            onClose={() => {
+              cerrarChat();
+              setMostrarChat(false);
+            }}
           />
-        </>
-      )}
-
-      {/* Componente de chat */}
-      {mostrarChat && (
-        <Chat
-          mensajes={CONSTANTES.TEXTOS.CHAT.MENSAJES_INICIALES}
-          posicionChat={posicionChat}
-          onClose={handleCerrarChat}
-        />
-      )}
-
-      {/* Popup de habilidad */}
-      {mostrarHabilidad && (
-        <HabilidadPopup
-          habilidadInfo={habilidadInfo}
-          posicionHabilidad={posicionHabilidad}
-          onClose={handleCerrarHabilidad}
-        />
-      )}
-    </View>
+        )}
+        {/* Popup de habilidad */}
+        {mostrarHabilidad && (
+          <HabilidadPopup
+            habilidadInfo={habilidadInfo}
+            posicionHabilidad={posicionHabilidad}
+            onClose={() => {
+              cerrarHabilidad();
+              setMostrarHabilidad(false);
+            }}
+          />
+        )}
+      </View>
+    </TouchableWithoutFeedback>
   );
 };
 

@@ -34,6 +34,17 @@ export const administradorAnimaciones = () => {
   const DURACION_ANIMACION = CONSTANTES.NUMERICAS.DURACION_ANIMACION;
   const RETRASO_ANIMACION = CONSTANTES.NUMERICAS.RETRASO_ANIMACION;
 
+  // Flag para determinar si se deben saltar las animaciones
+  let skipAnimaciones = false;
+
+  /**
+   * Permite establecer el flag para saltar las animaciones.
+   * @param {boolean} skip - True para saltar las animaciones, false para ejecutarlas normalmente.
+   */
+  const setSkipAnimaciones = (skip: boolean) => {
+    skipAnimaciones = skip;
+  };
+
   /**
    * Crea una animación con un valor inicial y métodos de control.
    *
@@ -48,24 +59,58 @@ export const administradorAnimaciones = () => {
      * @param {number} [duration=DURACION_ANIMACION] - Duración de la animación en milisegundos.
      * @returns {Animated.CompositeAnimation} La animación configurada.
      */
-    const fadeIn = (duration = DURACION_ANIMACION) =>
-      Animated.timing(value, { toValue: 1, duration, useNativeDriver: true });
+    const fadeIn = (duration = DURACION_ANIMACION) => {
+      if (skipAnimaciones) {
+        // Solo se salta esta animación y se reinicia el flag
+        skipAnimaciones = false;
+        value.setValue(1);
+        return {
+          start: (callback?: () => void) => callback && callback(),
+        };
+      }
+      return Animated.timing(value, {
+        toValue: 1,
+        duration,
+        useNativeDriver: true,
+      });
+    };
 
     /**
      * Inicia una animación de salida.
      * @param {number} [duration=DURACION_ANIMACION] - Duración de la animación en milisegundos.
      * @returns {Animated.CompositeAnimation} La animación configurada.
      */
-    const fadeOut = (duration = DURACION_ANIMACION) =>
-      Animated.timing(value, { toValue: 0, duration, useNativeDriver: true });
+    const fadeOut = (duration = DURACION_ANIMACION) => {
+      if (skipAnimaciones) {
+        // Solo se salta esta animación y se reinicia el flag
+        skipAnimaciones = false;
+        value.setValue(0);
+        return {
+          start: (callback?: () => void) => callback && callback(),
+        };
+      }
+      return Animated.timing(value, {
+        toValue: 0,
+        duration,
+        useNativeDriver: true,
+      });
+    };
 
     /**
      * Ejecuta una secuencia de animaciones en orden.
      * @param {Animated.CompositeAnimation[]} animations - Lista de animaciones a ejecutar en orden.
      * @returns {Animated.CompositeAnimation} La secuencia de animaciones configurada.
      */
-    const sequence = (animations: Animated.CompositeAnimation[]) =>
-      Animated.sequence(animations);
+    const sequence = (animations: Animated.CompositeAnimation[]) => {
+      if (skipAnimaciones) {
+        // Solo se salta esta secuencia y se reinicia el flag
+        skipAnimaciones = false;
+        return {
+          start: (callback?: () => void) => callback && callback(),
+        };
+      }
+      return Animated.sequence(animations);
+    };
 
     /**
      * Ejecuta una secuencia de animaciones con un retraso entre cada una.
@@ -76,7 +121,16 @@ export const administradorAnimaciones = () => {
     const stagger = (
       animations: Animated.CompositeAnimation[],
       delay = RETRASO_ANIMACION
-    ) => Animated.stagger(delay, animations);
+    ) => {
+      if (skipAnimaciones) {
+        // Solo se salta esta secuencia y se reinicia el flag
+        skipAnimaciones = false;
+        return {
+          start: (callback?: () => void) => callback && callback(),
+        };
+      }
+      return Animated.stagger(delay, animations);
+    };
 
     return {
       value,
@@ -97,6 +151,12 @@ export const administradorAnimaciones = () => {
     animations: Animated.CompositeAnimation[],
     onComplete?: () => void
   ) => {
+    if (skipAnimaciones) {
+      // Solo se salta esta secuencia y se reinicia el flag
+      skipAnimaciones = false;
+      if (onComplete) onComplete();
+      return;
+    }
     Animated.sequence(animations).start(onComplete);
   };
 
@@ -105,5 +165,6 @@ export const administradorAnimaciones = () => {
     ejecutarSecuenciaAnimaciones,
     DURACION_ANIMACION,
     RETRASO_ANIMACION,
+    setSkipAnimaciones,
   };
 };
