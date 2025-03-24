@@ -28,7 +28,7 @@ import CirculoVotar from "./componentes/CirculoVotar";
 import ControlesAccion from "./componentes/ControlesAccion";
 import MensajeError from "./componentes/MensajeError";
 
-// Funciones auxiliares (administradores de estado)
+// Hooks y administradores de estado
 import useTemporizador from "./hooks/useTemporizador";
 import useAnimacionesPantalla from "./hooks/useAnimacionesPantalla";
 import useModoDiaNoche from "./hooks/useModoDiaNoche";
@@ -54,7 +54,7 @@ export let TEXTO_YA_MOSTRADO = false;
  * @returns {JSX.Element} La interfaz de la pantalla de juego.
  */
 const PantallaJugando: React.FC = () => {
-  // Estados para controlar la visibilidad e interacciones del UI:
+  // Estados para controlar la visibilidad e interacciones de la UI:
   const [mostrarRol, setMostrarRol] = useState(false);
   const [mostrarInicio, setMostrarInicio] = useState(false);
   const [mostrarBotones, setMostrarBotones] = useState(false);
@@ -80,12 +80,20 @@ const PantallaJugando: React.FC = () => {
   const [pasoTurno, setPasoTurno] = useState(false);
   const [currentAnimacion, setCurrentAnimacion] = useState("");
 
-  // Ref para almacenar la función callback de la animación actual o iniciar el fadeOut inmediatamente
+  // Estados para las nuevas animaciones (que se comportan como las iniciales)
+  const [mostrarAlguacil, setMostrarAlguacil] = useState(false);
+  const [
+    mostrarEmpiezanVotacionesSospechososSerLobo1,
+    setMostrarEmpiezanVotacionesSospechososSerLobo1,
+  ] = useState(false);
+  const [mostrarVotaciones, setMostrarVotaciones] = useState(false);
+
+  // Refs para callbacks y timeouts en animaciones
   const startFadeOutNowRef = useRef<(() => void) | null>(null);
   // Ref para almacenar el id de cualquier timeout pendiente (durante los delays)
   const currentTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Obtención de información derivada del rol del jugador:
+  // Información derivada del rol del jugador:
   const habilidadInfo = getHabilidadInfo(rolUsuario);
   const roleInfo = getRoleInfo(rolUsuario);
 
@@ -98,6 +106,9 @@ const PantallaJugando: React.FC = () => {
     animacionRol,
     animacionInicio,
     animacionFondo,
+    animacionEmpiezanVotacionesAlguacil,
+    animacionEmpiezanVotacionesSospechososSerLobo1,
+    animacionEmpiezanVotacionesSospechososSerLobo2,
   } = useAnimacionesPantalla();
   const { esDeNoche, setModoDiaNoche } = useModoDiaNoche(animacionFondo);
   const { posicionChat, abrirChat, cerrarChat } = useAnimacionChat();
@@ -186,8 +197,7 @@ const PantallaJugando: React.FC = () => {
   };
 
   /**
-   * Efecto: Ejecuta la secuencia de animaciones para mostrar el texto inicial, el rol, el inicio de partida y los botones.
-   * También establece el rol del usuario de forma aleatoria.
+   * Efecto: Cadena de animaciones iniciales (texto, rol, inicio).
    */
   useEffect(() => {
     const roles: Rol[] = ["aldeano", "lobo", "bruja", "cazador"];
@@ -254,7 +264,7 @@ const PantallaJugando: React.FC = () => {
   }, []);
 
   /**
-   * Efecto: Activa el temporizador una vez que se muestran los botones de acción.
+   * Activa el temporizador cuando se muestran los botones.
    */
   useEffect(() => {
     if (mostrarBotones) {
@@ -263,8 +273,7 @@ const PantallaJugando: React.FC = () => {
   }, [mostrarBotones]);
 
   /**
-   * Efecto: Alterna el modo día/noche al terminar el ciclo del temporizador.
-   * Además, resetea los valores de votación y los estados de voto para permitir una nueva ronda.
+   * Alterna el modo día/noche y reinicia estados al finalizar el temporizador.
    */
   useEffect(() => {
     if (tiempoRestante === 0) {
@@ -280,7 +289,7 @@ const PantallaJugando: React.FC = () => {
     }
   }, [tiempoRestante, esDeNoche, reiniciarTemporizador, setModoDiaNoche]);
 
-  // Funciones para el manejo del chat
+  // Manejo del chat
   const handleAbrirChat = () => {
     setMostrarChat(true);
     abrirChat();
@@ -291,7 +300,7 @@ const PantallaJugando: React.FC = () => {
     setMostrarChat(false);
   };
 
-  // Funciones para el manejo del popup de habilidad
+  // Manejo del popup de habilidad
   const handleAbrirHabilidad = () => {
     setMostrarHabilidad(true);
     abrirHabilidad();
@@ -302,9 +311,8 @@ const PantallaJugando: React.FC = () => {
     setMostrarHabilidad(false);
   };
 
-  // Función para administrar la selección del jugador para la votación.
+  // Selección de jugador para votación
   const administrarSeleccionJugadorVotacion = (index: number) => {
-    // Si es de noche y el usuario no es lobo, no se permite seleccionar jugadores
     if (esDeNoche && rolUsuario !== "lobo") {
       mostrarError(
         "Solo los lobos pueden seleccionar jugadores durante la noche"
@@ -326,7 +334,7 @@ const PantallaJugando: React.FC = () => {
     setJugadorSeleccionado(index);
   };
 
-  // Función para votar a un jugador.
+  // Votación de jugador
   const votarAJugador = () => {
     if (pasoTurno) {
       mostrarError("Has pasado turno");
@@ -350,7 +358,7 @@ const PantallaJugando: React.FC = () => {
     setJugadorSeleccionado(null);
   };
 
-  // Función para pasar turno.
+  // Pasar turno
   const manejarPasarTurno = () => {
     if (votoRealizado || pasoTurno) {
       mostrarError("Has pasado turno");
@@ -361,14 +369,162 @@ const PantallaJugando: React.FC = () => {
     setJugadorSeleccionado(null);
   };
 
-  // Carga de fuente personalizada.
+  const ejecutaranimacionEmpiezanVotacionesAlguacil = () => {
+    // Reiniciamos la opacidad del fondo para que se oscurezca
+    animacionFondo.value.setValue(1);
+    setMostrarAlguacil(true);
+    ejecutarCadenaAnimacion(
+      "alguacil",
+      animacionEmpiezanVotacionesAlguacil,
+      administrador_animaciones.RETRASO_ANIMACION,
+      () => {
+        // Al finalizar, se ejecuta el efecto de oscurecimiento (fadeOut) en el fondo
+        setCurrentAnimacion("fondo-fadeOut");
+        iniciarAnimacion(
+          "fondo-fadeOut",
+          animacionFondo.fadeOut(),
+          animacionFondo.value,
+          0,
+          () => {
+            setMostrarAlguacil(false);
+            setCurrentAnimacion("");
+          }
+        );
+      },
+      setCurrentAnimacion,
+      iniciarAnimacion,
+      iniciarDelay,
+      startFadeOutNowRef
+    );
+  };
+
+  const ejecutarAnimacionEmpiezanVotacionesSospechososSerLobo1 = () => {
+    animacionFondo.value.setValue(1);
+    setMostrarEmpiezanVotacionesSospechososSerLobo1(true);
+    ejecutarCadenaAnimacion(
+      "EmpiezanVotacionesSospechososSerLobo1",
+      animacionEmpiezanVotacionesSospechososSerLobo1,
+      administrador_animaciones.RETRASO_ANIMACION,
+      () => {
+        setCurrentAnimacion("fondo-fadeOut");
+        iniciarAnimacion(
+          "fondo-fadeOut",
+          animacionFondo.fadeOut(),
+          animacionFondo.value,
+          0,
+          () => {
+            setMostrarEmpiezanVotacionesSospechososSerLobo1(false);
+            setCurrentAnimacion("");
+          }
+        );
+      },
+      setCurrentAnimacion,
+      iniciarAnimacion,
+      iniciarDelay,
+      startFadeOutNowRef
+    );
+  };
+
+  const ejecutaranimacionEmpiezanVotacionesSospechososSerLobo2 = () => {
+    animacionFondo.value.setValue(1);
+    setMostrarVotaciones(true);
+    ejecutarCadenaAnimacion(
+      "votaciones",
+      animacionEmpiezanVotacionesSospechososSerLobo2,
+      administrador_animaciones.RETRASO_ANIMACION,
+      () => {
+        setCurrentAnimacion("fondo-fadeOut");
+        iniciarAnimacion(
+          "fondo-fadeOut",
+          animacionFondo.fadeOut(),
+          animacionFondo.value,
+          0,
+          () => {
+            setMostrarVotaciones(false);
+            setCurrentAnimacion("");
+          }
+        );
+      },
+      setCurrentAnimacion,
+      iniciarAnimacion,
+      iniciarDelay,
+      startFadeOutNowRef
+    );
+  };
+
+  // Carga de fuente personalizada
   const [fuentesCargadas] = useFonts({
     Corben: require("@/assets/fonts/Corben-Regular.ttf"),
   });
   if (!fuentesCargadas) return null;
 
+  const debugOverlayActive =
+    mostrarAlguacil ||
+    mostrarEmpiezanVotacionesSospechososSerLobo1 ||
+    mostrarVotaciones;
+
+  if (debugOverlayActive) {
+    return (
+      <TouchableWithoutFeedback onPress={handleSkipAnimaciones}>
+        <View style={estilos.contenedor}>
+          <ImageBackground
+            source={CONSTANTES.IMAGENES.FONDO}
+            style={estilos.fondo}
+            resizeMode="cover"
+          />
+          <Animated.View
+            style={[estilos.superposicion, { opacity: animacionFondo.value }]}
+          />
+
+          {mostrarAlguacil && (
+            <Animated.View
+              style={[
+                estilos.contenedorEmpiezanVotacionesAlguacil,
+                { opacity: animacionEmpiezanVotacionesAlguacil.value },
+              ]}
+            >
+              <Text style={estilos.textoEmpiezanVotacionesAlguacil}>
+                {CONSTANTES.TEXTOS.ALGUACIL}
+              </Text>
+            </Animated.View>
+          )}
+
+          {mostrarEmpiezanVotacionesSospechososSerLobo1 && (
+            <Animated.View
+              style={[
+                estilos.contenedorEmpiezanVotacionesSospechososSerLobo1,
+                {
+                  opacity: animacionEmpiezanVotacionesSospechososSerLobo1.value,
+                },
+              ]}
+            >
+              <Text style={estilos.textoEmpiezanVotacionesSospechososSerLobo1}>
+                {CONSTANTES.TEXTOS.ELIMINAR_LOBO}
+              </Text>
+            </Animated.View>
+          )}
+
+          {mostrarVotaciones && (
+            <Animated.View
+              style={[
+                estilos.contenedorEmpiezanVotacionesSospechososSerLobo2,
+                {
+                  opacity: animacionEmpiezanVotacionesSospechososSerLobo2.value,
+                },
+              ]}
+            >
+              <Text style={estilos.textoEmpiezanVotacionesSospechososSerLobo2}>
+                {CONSTANTES.TEXTOS.VOTACIONES}
+              </Text>
+            </Animated.View>
+          )}
+        </View>
+      </TouchableWithoutFeedback>
+    );
+  }
+
+  // Renderizado normal de la UI cuando no hay overlay de animación activa
   return (
-    // Se envuelve el contenedor principal en TouchableWithoutFeedback para que al tocar se invoque handleSkipAnimaciones
     <TouchableWithoutFeedback onPress={handleSkipAnimaciones}>
       {/* Contenedor principal de la pantalla de juego */}
       <View style={estilos.contenedor}>
@@ -512,6 +668,61 @@ const PantallaJugando: React.FC = () => {
             posicionHabilidad={posicionHabilidad}
             onClose={handleCerrarHabilidad}
           />
+        )}
+        {__DEV__ && (
+          <View
+            style={{
+              position: "absolute",
+              bottom: 50,
+              left: 0,
+              right: 0,
+              alignItems: "center",
+            }}
+          >
+            <TouchableWithoutFeedback
+              onPress={ejecutaranimacionEmpiezanVotacionesAlguacil}
+            >
+              <View
+                style={{
+                  padding: 10,
+                  backgroundColor: "rgba(0,0,0,0.5)",
+                  margin: 5,
+                }}
+              >
+                <Text style={{ color: "white" }}>
+                  Empiezan Votaciones Alguacil
+                </Text>
+              </View>
+            </TouchableWithoutFeedback>
+            <TouchableWithoutFeedback
+              onPress={ejecutarAnimacionEmpiezanVotacionesSospechososSerLobo1}
+            >
+              <View
+                style={{
+                  padding: 10,
+                  backgroundColor: "rgba(0,0,0,0.5)",
+                  margin: 5,
+                }}
+              >
+                <Text style={{ color: "white" }}>
+                  Empiezan Votaciones Sospechosos Ser Lobo
+                </Text>
+              </View>
+            </TouchableWithoutFeedback>
+            <TouchableWithoutFeedback
+              onPress={ejecutaranimacionEmpiezanVotacionesSospechososSerLobo2}
+            >
+              <View
+                style={{
+                  padding: 10,
+                  backgroundColor: "rgba(0,0,0,0.5)",
+                  margin: 5,
+                }}
+              >
+                <Text style={{ color: "white" }}>Comienzan votaciones</Text>
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
         )}
       </View>
     </TouchableWithoutFeedback>

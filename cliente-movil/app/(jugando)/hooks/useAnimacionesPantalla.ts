@@ -1,5 +1,5 @@
 import { useRef } from "react";
-import { administradorAnimaciones } from "../utilidades/animaciones";
+import { administradorAnimaciones } from "../hooks/animaciones";
 
 /**
  * @hook useAnimacionesPantalla
@@ -24,6 +24,18 @@ const useAnimacionesPantalla = () => {
   const animacionFondo = useRef(
     administrador_animaciones.crearAnimacion(1)
   ).current;
+  // Animación para antes de elegir el alguacil
+  const animacionEmpiezanVotacionesAlguacil = useRef(
+    administrador_animaciones.crearAnimacion(0)
+  ).current;
+  // Animación para antes de eliminar sospechoso lobo parte 1
+  const animacionEmpiezanVotacionesSospechososSerLobo1 = useRef(
+    administrador_animaciones.crearAnimacion(0)
+  ).current;
+  // Animación para antes de eliminar sospechoso lobo parte 2
+  const animacionEmpiezanVotacionesSospechososSerLobo2 = useRef(
+    administrador_animaciones.crearAnimacion(0)
+  ).current;
 
   return {
     administrador_animaciones,
@@ -31,6 +43,9 @@ const useAnimacionesPantalla = () => {
     animacionRol,
     animacionInicio,
     animacionFondo,
+    animacionEmpiezanVotacionesAlguacil,
+    animacionEmpiezanVotacionesSospechososSerLobo1,
+    animacionEmpiezanVotacionesSospechososSerLobo2,
   };
 };
 

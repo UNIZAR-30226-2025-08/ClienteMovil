@@ -44,6 +44,23 @@ export const CONSTANTES = {
         { id: 2, texto: "Jugador 5: Otro mensaje" }, // TODO
       ],
     },
+
+    /**
+     * @constant ALGUACIL - TODO COMENTAR.
+     */
+    ALGUACIL:
+      "LOS JUGADORES DEBEN ELEGIR DE MANERA CONSENSUADA QUIEN EJERCERÁ DE ALGUACIL",
+
+    /**
+     * @constant ELIMINAR_LOBO - TODO COMENTAR.
+     */
+    ELIMINAR_LOBO:
+      "LOS JUGADORES DEBEN ELIMINAR DE MANERA CONSENSUADA A UN SOSPECHOSO DE SER HOMBRE LOBO",
+
+    /**
+     * @constant VOTACIONES - TODO COMENTAR.
+     */
+    VOTACIONES: "COMIENZAN LAS VOTACIONES",
   },
 
   /**
