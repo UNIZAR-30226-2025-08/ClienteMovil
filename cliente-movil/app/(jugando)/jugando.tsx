@@ -378,7 +378,6 @@ const PantallaJugando: React.FC = () => {
       animacionEmpiezanVotacionesAlguacil,
       administrador_animaciones.RETRASO_ANIMACION,
       () => {
-        // Al finalizar, se ejecuta el efecto de oscurecimiento (fadeOut) en el fondo
         setCurrentAnimacion("fondo-fadeOut");
         iniciarAnimacion(
           "fondo-fadeOut",
@@ -398,7 +397,16 @@ const PantallaJugando: React.FC = () => {
     );
   };
 
-  const ejecutarAnimacionEmpiezanVotacionesSospechososSerLobo1 = () => {
+  /**
+   * Función que encadena las dos animaciones de "Sospechosos Ser Lobo" de forma
+   * secuencial, tal como se encadenan las animaciones del inicio:
+   *
+   * 1. Se muestra la animación "EmpiezanVotacionesSospechososSerLobo1". Al finalizar,
+   *    se oculta su contenedor.
+   * 2. Se muestra la animación "votaciones" (textoEmpiezanVotacionesSospechososSerLobo2).
+   * 3. Finalizadas ambas animaciones, se aplica el efecto de oscurecimiento (fadeOut) al fondo.
+   */
+  const ejecutarCadenaAnimacionSospechososSerLobo = () => {
     animacionFondo.value.setValue(1);
     setMostrarEmpiezanVotacionesSospechososSerLobo1(true);
     ejecutarCadenaAnimacion(
@@ -406,43 +414,29 @@ const PantallaJugando: React.FC = () => {
       animacionEmpiezanVotacionesSospechososSerLobo1,
       administrador_animaciones.RETRASO_ANIMACION,
       () => {
-        setCurrentAnimacion("fondo-fadeOut");
-        iniciarAnimacion(
-          "fondo-fadeOut",
-          animacionFondo.fadeOut(),
-          animacionFondo.value,
-          0,
+        setMostrarEmpiezanVotacionesSospechososSerLobo1(false);
+        setMostrarVotaciones(true);
+        ejecutarCadenaAnimacion(
+          "votaciones",
+          animacionEmpiezanVotacionesSospechososSerLobo2,
+          administrador_animaciones.RETRASO_ANIMACION,
           () => {
-            setMostrarEmpiezanVotacionesSospechososSerLobo1(false);
-            setCurrentAnimacion("");
-          }
-        );
-      },
-      setCurrentAnimacion,
-      iniciarAnimacion,
-      iniciarDelay,
-      startFadeOutNowRef
-    );
-  };
-
-  const ejecutaranimacionEmpiezanVotacionesSospechososSerLobo2 = () => {
-    animacionFondo.value.setValue(1);
-    setMostrarVotaciones(true);
-    ejecutarCadenaAnimacion(
-      "votaciones",
-      animacionEmpiezanVotacionesSospechososSerLobo2,
-      administrador_animaciones.RETRASO_ANIMACION,
-      () => {
-        setCurrentAnimacion("fondo-fadeOut");
-        iniciarAnimacion(
-          "fondo-fadeOut",
-          animacionFondo.fadeOut(),
-          animacionFondo.value,
-          0,
-          () => {
-            setMostrarVotaciones(false);
-            setCurrentAnimacion("");
-          }
+            setCurrentAnimacion("fondo-fadeOut");
+            iniciarAnimacion(
+              "fondo-fadeOut",
+              animacionFondo.fadeOut(),
+              animacionFondo.value,
+              0,
+              () => {
+                setMostrarVotaciones(false);
+                setCurrentAnimacion("");
+              }
+            );
+          },
+          setCurrentAnimacion,
+          iniciarAnimacion,
+          iniciarDelay,
+          startFadeOutNowRef
         );
       },
       setCurrentAnimacion,
@@ -695,7 +689,7 @@ const PantallaJugando: React.FC = () => {
               </View>
             </TouchableWithoutFeedback>
             <TouchableWithoutFeedback
-              onPress={ejecutarAnimacionEmpiezanVotacionesSospechososSerLobo1}
+              onPress={ejecutarCadenaAnimacionSospechososSerLobo}
             >
               <View
                 style={{
@@ -707,19 +701,6 @@ const PantallaJugando: React.FC = () => {
                 <Text style={{ color: "white" }}>
                   Empiezan Votaciones Sospechosos Ser Lobo
                 </Text>
-              </View>
-            </TouchableWithoutFeedback>
-            <TouchableWithoutFeedback
-              onPress={ejecutaranimacionEmpiezanVotacionesSospechososSerLobo2}
-            >
-              <View
-                style={{
-                  padding: 10,
-                  backgroundColor: "rgba(0,0,0,0.5)",
-                  margin: 5,
-                }}
-              >
-                <Text style={{ color: "white" }}>Comienzan votaciones</Text>
               </View>
             </TouchableWithoutFeedback>
           </View>

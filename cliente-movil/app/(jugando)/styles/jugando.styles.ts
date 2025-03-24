@@ -48,7 +48,7 @@ export const estilos = StyleSheet.create({
   },
 
   superposicion: {
-    backgroundColor: "rgba(38, 37, 34, 0.7)",
+    backgroundColor: "rgba(38, 37, 34, 0.85)",
     position: "absolute",
     top: 0,
     left: 0,
