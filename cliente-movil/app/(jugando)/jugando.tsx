@@ -568,7 +568,7 @@ const PantallaJugando: React.FC = () => {
                 justifyContent: "center",
               }}
             >
-              {/* Capas del borde blanco en 4 direcciones usando transform */}
+              {/* Capas del borde blanco en 4 direcciones usando transform
               {[-1, 1].map((dx) =>
                 [-1, 1].map((dy) => (
                   <Text
@@ -586,13 +586,13 @@ const PantallaJugando: React.FC = () => {
                     {roleInfo.roleName}
                   </Text>
                 ))
-              )}
+              )} */}
               {/* Texto principal */}
               <Text
                 style={[
                   estilos.nombreRol,
                   {
-                    color: rolUsuario === "lobo" ? "red" : "blue",
+                    color: rolUsuario === "lobo" ? "red" : "rgb(0, 42, 252)",
                     position: "absolute",
                     textAlign: "center",
                   },
