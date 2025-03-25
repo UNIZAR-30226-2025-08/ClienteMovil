@@ -17,7 +17,7 @@ import { CONSTANTES, Rol } from "./constantes";
 import { estilos } from "./styles/jugando.styles";
 
 // Funciones auxiliares (puras)
-import { getHabilidadInfo, getRoleInfo } from "./utilidades/rolesUtilidades";
+import { getInfoRol } from "./utilidades/rolesUtilidades";
 import { ejecutarCadenaAnimacion } from "./utilidades/gestorCadenaAnimaciones";
 
 // Módulos UI
@@ -116,8 +116,7 @@ const PantallaJugando: React.FC = () => {
   const currentTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Información derivada del rol del jugador:
-  const habilidadInfo = getHabilidadInfo(rolUsuario);
-  const roleInfo = getRoleInfo(rolUsuario);
+  const { habilidadInfo, roleInfo } = getInfoRol(rolUsuario);
 
   // Administración de estados temporales y animaciones mediante hooks:
   const { tiempoRestante, reiniciarTemporizador, setTemporizadorActivo } =

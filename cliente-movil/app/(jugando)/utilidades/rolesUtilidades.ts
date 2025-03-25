@@ -7,87 +7,72 @@ import { CONSTANTES, Rol } from "../constantes";
 const { TEXTOS, IMAGENES } = CONSTANTES;
 
 /**
- * @function getHabilidadInfo
- * @description Obtiene la información necesaria para mostrar el pop-up de "HABILIDAD" dentro de la partida.
- * Incluye descripción de la habilidad, recordatorio e imagen representativa del rol.
+ * @function getInfoRol
+ * @description Obtiene la información necesaria para mostrar el pop-up de "HABILIDAD" y el rol
+ * durante la partida, combinando los detalles de la habilidad y la representación visual del rol.
  *
  * @param {Rol} rol - El rol del jugador actual.
- * @returns {Object} Objeto con los detalles de la habilidad.
- * @returns {string} return.descripcion - Explicación de la habilidad del rol.
- * @returns {string} return.recuerda - Recordatorio importante sobre el uso de la habilidad.
- * @returns {any} return.imagen - Imagen asociada al rol.
+ * @returns {Object} Objeto que contiene:
+ *   - habilidadInfo: { descripcion, recuerda, imagen }
+ *   - roleInfo: { roleName, image }
  *
  * @example
- * const info = getHabilidadInfo("bruja");
- * console.log(info.descripcion); // "Como bruja, tienes dos pociones: una para salvar a un jugador y otra para envenenar."
+ * const info = getInfoRol("bruja");
+ * console.log(info.habilidadInfo.descripcion); // "Como bruja, tienes dos pociones: una para salvar a un jugador y otra para envenenar..."
+ * console.log(info.roleInfo.roleName); // "BRUJA"
  */
-export const getHabilidadInfo = (rol: Rol) => {
+export const getInfoRol = (rol: Rol) => {
+  let habilidadInfo;
+  let roleInfo;
   switch (rol) {
     case "aldeano":
-      return {
+      habilidadInfo = {
         descripcion:
           "Como aldeano, no posees una habilidad especial, pero tu voto es crucial para la aldea.",
         recuerda: "",
         imagen: IMAGENES.ALDEANO,
       };
+      roleInfo = { roleName: "ALDEANO", image: IMAGENES.ALDEANO };
+      break;
     case "lobo":
-      return {
+      habilidadInfo = {
         descripcion:
           "Eres El Lobo. Tienes el poder de matar a un jugador durante la noche, pero ten cuidado de no ser descubierto.",
         recuerda:
           "Recuerda: Los lobos deben ponerse de acuerdo sobre a quién asesinar en la noche.",
         imagen: IMAGENES.HABILIDAD,
       };
+      roleInfo = { roleName: "HOMBRE LOBO", image: IMAGENES.LOBO_ROL };
+      break;
     case "bruja":
-      return {
+      habilidadInfo = {
         descripcion:
           "Como bruja, tienes dos pociones: una para salvar a un jugador y otra para envenenar. Úsalas con sabiduría.",
         recuerda: "Recuerda: Cada poción solo se puede usar una vez.",
         imagen: IMAGENES.BRUJA,
       };
+      roleInfo = { roleName: "BRUJA", image: IMAGENES.BRUJA };
+      break;
     case "cazador":
-      return {
+      habilidadInfo = {
         descripcion:
           "Si mueres, puedes disparar a otro jugador en venganza. Usa tu habilidad para proteger a la aldea.",
         recuerda:
           "Recuerda: Tu disparo final puede cambiar el destino del juego.",
         imagen: IMAGENES.CAZADOR,
       };
+      roleInfo = { roleName: "CAZADOR", image: IMAGENES.CAZADOR };
+      break;
     default:
-      return {
+      habilidadInfo = {
         descripcion:
           "Eres El Lobo. Tienes el poder de matar a un jugador durante la noche, pero ten cuidado de no ser descubierto.",
         recuerda:
           "Recuerda: Los lobos deben ponerse de acuerdo sobre a quién asesinar en la noche.",
         imagen: IMAGENES.HABILIDAD,
       };
+      roleInfo = { roleName: "ALDEANO", image: IMAGENES.ALDEANO };
+      break;
   }
-};
-
-/**
- * @function getRoleInfo
- * @description Obtiene la información visual para mostrar el rol del jugador durante la animación de inicio de la partida.
- *
- * @param {Rol} rol - El rol del jugador actual.
- * @returns {Object} Objeto con el nombre del rol y su imagen correspondiente.
- * @returns {string} return.roleName - Nombre del rol en mayúsculas.
- * @returns {any} return.image - Imagen representativa del rol.
- *
- * @example
- * const info = getRoleInfo("cazador");
- * console.log(info.roleName); // "CAZADOR"
- */
-export const getRoleInfo = (rol: Rol) => {
-  switch (rol) {
-    case "aldeano":
-      return { roleName: "ALDEANO", image: IMAGENES.ALDEANO };
-    case "lobo":
-      return { roleName: "HOMBRE LOBO", image: IMAGENES.LOBO_ROL };
-    case "bruja":
-      return { roleName: "BRUJA", image: IMAGENES.BRUJA };
-    case "cazador":
-      return { roleName: "CAZADOR", image: IMAGENES.CAZADOR };
-    default:
-      return { roleName: "ALDEANO", image: IMAGENES.ALDEANO }; // Si hay un error el ususario tendrá información de que es un aldeano lel.
-  }
+  return { habilidadInfo, roleInfo };
 };
