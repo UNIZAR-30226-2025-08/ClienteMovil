@@ -4,7 +4,6 @@
  */
 
 import { administradorAnimaciones } from "../hooks/animaciones";
-import { ejecutarCadenaAnimacion } from "../utilidades/gestorCadenaAnimaciones";
 
 const adminAnim = administradorAnimaciones();
 
@@ -60,10 +59,10 @@ export function ejecutarAnimacionCazadorDisparo(
 ) {
   animFondo.value.setValue(1);
   setMostrar(true);
-  ejecutarCadenaAnimacion(
+  adminAnim.ejecutarCadenaAnimacion(
     "cazador-disparo",
     animacionCazadorDisparo,
-    administrador_animaciones.RETRASO_ANIMACION,
+    adminAnim.RETRASO_ANIMACION,
     () => {
       setCurrentAnimacion("fondo-fadeOut");
       iniciarAnimacion(
@@ -103,10 +102,10 @@ export function ejecutarAnimacionEmpiezanVotacionesAlguacil(
 ) {
   animFondo.value.setValue(1);
   setMostrar(true);
-  ejecutarCadenaAnimacion(
+  adminAnim.ejecutarCadenaAnimacion(
     "empiezan-votaciones-alguacil",
     animacionEmpiezanVotacionesAlguacil,
-    administrador_animaciones.RETRASO_ANIMACION,
+    adminAnim.RETRASO_ANIMACION,
     () => {
       setCurrentAnimacion("fondo-fadeOut");
       iniciarAnimacion(
@@ -147,10 +146,10 @@ export function ejecutarAnimacionBrujaCura(
 ) {
   animFondo.value.setValue(1);
   setMostrar(true);
-  ejecutarCadenaAnimacion(
+  adminAnim.ejecutarCadenaAnimacion(
     "bruja-cura",
     animacionBrujaCura,
-    administrador_animaciones.RETRASO_ANIMACION,
+    adminAnim.RETRASO_ANIMACION,
     () => {
       setCurrentAnimacion("fondo-fadeOut");
       iniciarAnimacion(
@@ -191,10 +190,10 @@ export function ejecutarAnimacionBrujaVeneno(
 ) {
   animFondo.value.setValue(1);
   setMostrar(true);
-  ejecutarCadenaAnimacion(
+  adminAnim.ejecutarCadenaAnimacion(
     "bruja-veneno",
     animacionBrujaVeneno,
-    administrador_animaciones.RETRASO_ANIMACION,
+    adminAnim.RETRASO_ANIMACION,
     () => {
       setCurrentAnimacion("fondo-fadeOut");
       iniciarAnimacion(
@@ -234,10 +233,10 @@ export function ejecutarAnimacionDormir(
 ) {
   animFondo.value.setValue(1);
   setMostrar(true);
-  ejecutarCadenaAnimacion(
+  adminAnim.ejecutarCadenaAnimacion(
     "dormir",
     animacionDormir,
-    administrador_animaciones.RETRASO_ANIMACION,
+    adminAnim.RETRASO_ANIMACION,
     () => {
       setCurrentAnimacion("fondo-fadeOut");
       iniciarAnimacion(
@@ -278,10 +277,10 @@ export function ejecutarAnimacionDevoraHombresLobo(
 ) {
   animFondo.value.setValue(1);
   setMostrar(true);
-  ejecutarCadenaAnimacion(
+  adminAnim.ejecutarCadenaAnimacion(
     "devora-hombres-lobo",
     animacionDevoraHombresLobo,
-    administrador_animaciones.RETRASO_ANIMACION,
+    adminAnim.RETRASO_ANIMACION,
     () => {
       setCurrentAnimacion("fondo-fadeOut");
       iniciarAnimacion(
@@ -322,10 +321,10 @@ export function ejecutarAnimacionHombresLoboDormir(
 ) {
   animFondo.value.setValue(1);
   setMostrar(true);
-  ejecutarCadenaAnimacion(
+  adminAnim.ejecutarCadenaAnimacion(
     "hombres-lobo-dormir",
     animacionHombresLoboDormir,
-    administrador_animaciones.RETRASO_ANIMACION,
+    adminAnim.RETRASO_ANIMACION,
     () => {
       setCurrentAnimacion("fondo-fadeOut");
       iniciarAnimacion(
@@ -366,10 +365,10 @@ export function ejecutarAnimacionBrujaDespierta(
 ) {
   animFondo.value.setValue(1);
   setMostrar(true);
-  ejecutarCadenaAnimacion(
+  adminAnim.ejecutarCadenaAnimacion(
     "bruja-despierta",
     animacionBrujaDespierta,
-    administrador_animaciones.RETRASO_ANIMACION,
+    adminAnim.RETRASO_ANIMACION,
     () => {
       setCurrentAnimacion("fondo-fadeOut");
       iniciarAnimacion(
@@ -410,10 +409,10 @@ export function ejecutarAnimacionBrujaDuerme(
 ) {
   animFondo.value.setValue(1);
   setMostrar(true);
-  ejecutarCadenaAnimacion(
+  adminAnim.ejecutarCadenaAnimacion(
     "bruja-duerme",
     animacionBrujaDuerme,
-    administrador_animaciones.RETRASO_ANIMACION,
+    adminAnim.RETRASO_ANIMACION,
     () => {
       setCurrentAnimacion("fondo-fadeOut");
       iniciarAnimacion(
@@ -454,10 +453,10 @@ export function ejecutarAnimacionVidenteDuerme(
 ) {
   animFondo.value.setValue(1);
   setMostrar(true);
-  ejecutarCadenaAnimacion(
+  adminAnim.ejecutarCadenaAnimacion(
     "vidente-duerme",
     animacionVidenteDuerme,
-    administrador_animaciones.RETRASO_ANIMACION,
+    adminAnim.RETRASO_ANIMACION,
     () => {
       setCurrentAnimacion("fondo-fadeOut");
       iniciarAnimacion(
@@ -498,10 +497,10 @@ export function ejecutarAnimacionVidenteDespierta(
 ) {
   animFondo.value.setValue(1);
   setMostrar(true);
-  ejecutarCadenaAnimacion(
+  adminAnim.ejecutarCadenaAnimacion(
     "vidente-despierta",
     animacionVidenteDespierta,
-    administrador_animaciones.RETRASO_ANIMACION,
+    adminAnim.RETRASO_ANIMACION,
     () => {
       setCurrentAnimacion("fondo-fadeOut");
       iniciarAnimacion(
@@ -541,10 +540,10 @@ export function ejecutarAnimacionNocheSupervivientes(
 ) {
   animFondo.value.setValue(1);
   setMostrar(true);
-  ejecutarCadenaAnimacion(
+  adminAnim.ejecutarCadenaAnimacion(
     "noche-supervivientes",
     animacionNocheSupervivientes,
-    administrador_animaciones.RETRASO_ANIMACION,
+    adminAnim.RETRASO_ANIMACION,
     () => {
       setCurrentAnimacion("fondo-fadeOut");
       iniciarAnimacion(
@@ -587,10 +586,10 @@ export function ejecutarAnimacionJugadorAlguacil(
   animFondo.value.setValue(1);
   setMostrar(true);
   // Se puede utilizar numeroAlguacil para personalizar el mensaje si es necesario.
-  ejecutarCadenaAnimacion(
+  adminAnim.ejecutarCadenaAnimacion(
     "jugador-alguacil",
     animacionJugadorAlguacil,
-    administrador_animaciones.RETRASO_ANIMACION,
+    adminAnim.RETRASO_ANIMACION,
     () => {
       setCurrentAnimacion("fondo-fadeOut");
       iniciarAnimacion(
@@ -630,10 +629,10 @@ export function ejecutarAnimacionVotacionesConcluidas(
 ) {
   animFondo.value.setValue(1);
   setMostrar(true);
-  ejecutarCadenaAnimacion(
+  adminAnim.ejecutarCadenaAnimacion(
     "votaciones-concluidas",
     animacionVotacionesConcluidas,
-    administrador_animaciones.RETRASO_ANIMACION,
+    adminAnim.RETRASO_ANIMACION,
     () => {
       setCurrentAnimacion("fondo-fadeOut");
       iniciarAnimacion(
@@ -674,10 +673,10 @@ export function ejecutarAnimacionElegidoPueblo(
 ) {
   animFondo.value.setValue(1);
   setMostrar(true);
-  ejecutarCadenaAnimacion(
+  adminAnim.ejecutarCadenaAnimacion(
     "elegido-pueblo",
     animacionElegidoPueblo,
-    administrador_animaciones.RETRASO_ANIMACION,
+    adminAnim.RETRASO_ANIMACION,
     () => {
       setCurrentAnimacion("fondo-fadeOut");
       iniciarAnimacion(

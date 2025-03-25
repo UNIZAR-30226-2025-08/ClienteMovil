@@ -644,7 +644,7 @@ export const estilos = StyleSheet.create({
   contenedorAnimacionHombresLoboDormir: {
     position: "absolute",
     width: "80%",
-    top: "15%",
+    top: "25%",
     justifyContent: "center",
     alignItems: "center",
     padding: 10,

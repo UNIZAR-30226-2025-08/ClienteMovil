@@ -18,7 +18,6 @@ import { estilos } from "./styles/jugando.styles";
 
 // Funciones auxiliares (puras)
 import { getInfoRol } from "./utilidades/rolesUtilidades";
-import { ejecutarCadenaAnimacion } from "./utilidades/gestorCadenaAnimaciones";
 
 // Módulos UI
 import Chat from "./componentes/Chat";
@@ -37,7 +36,7 @@ import useAnimacionChat from "./hooks/useAnimacionChat";
 import useAnimacionHabilidad from "./hooks/useAnimacionHabilidad";
 import useMensajeError from "./hooks/useMensajeError";
 import * as animacionesPantalla from "./hooks/useAnimacionesPantalla";
-import { administrador_animaciones } from "./hooks/useAnimacionesPantalla";
+import { administradorAnimaciones } from "./hooks/animaciones";
 
 /**
  * @constant {boolean} MODO_NOCHE_GLOBAL - Indica si el juego está en modo noche. Si es falso, es de día.
@@ -50,12 +49,6 @@ export let MODO_NOCHE_GLOBAL = false;
  */
 export let TEXTO_YA_MOSTRADO = false;
 
-/**
- * Componente principal de la pantalla de juego.
- *
- * @component
- * @returns {JSX.Element} La interfaz de la pantalla de juego.
- */
 const PantallaJugando: React.FC = () => {
   // Estados para controlar la visibilidad e interacciones de la UI:
   const [mostrarRol, setMostrarRol] = useState(false);
@@ -128,6 +121,9 @@ const PantallaJugando: React.FC = () => {
   const { posicionHabilidad, abrirHabilidad, cerrarHabilidad } =
     useAnimacionHabilidad();
   const { errorMessage, mostrarError, animacionError } = useMensajeError();
+
+  // Se crea la instancia del hook unificado de animaciones.
+  const adminAnimaciones = administradorAnimaciones();
 
   /**
    * Función para iniciar una animación y almacenar su callback.
@@ -209,24 +205,25 @@ const PantallaJugando: React.FC = () => {
       return;
     }
 
-    ejecutarCadenaAnimacion(
+    // Se invoca la cadena de animación a través de adminAnimaciones.
+    adminAnimaciones.ejecutarCadenaAnimacion(
       "texto",
       animacionesPantalla.animacionTexto,
-      animacionesPantalla.administrador_animaciones.RETRASO_ANIMACION,
+      adminAnimaciones.RETRASO_ANIMACION,
       () => {
         TEXTO_YA_MOSTRADO = true;
         setMostrarTextoInicial(false);
         setMostrarRol(true);
-        ejecutarCadenaAnimacion(
+        adminAnimaciones.ejecutarCadenaAnimacion(
           "rol",
           animacionesPantalla.animacionRol,
-          animacionesPantalla.administrador_animaciones.RETRASO_ANIMACION,
+          adminAnimaciones.RETRASO_ANIMACION,
           () => {
             setMostrarInicio(true);
-            ejecutarCadenaAnimacion(
+            adminAnimaciones.ejecutarCadenaAnimacion(
               "inicio",
               animacionesPantalla.animacionInicio,
-              animacionesPantalla.administrador_animaciones.RETRASO_ANIMACION,
+              adminAnimaciones.RETRASO_ANIMACION,
               () => {
                 setCurrentAnimacion("fondo-fadeOut");
                 iniciarAnimacion(
@@ -369,17 +366,17 @@ const PantallaJugando: React.FC = () => {
   const ejecutarCadenaAnimacionSospechososSerLobo = () => {
     animacionesPantalla.animacionFondo.value.setValue(1);
     setMostrarEmpiezanVotacionesSospechososSerLobo1(true);
-    ejecutarCadenaAnimacion(
+    adminAnimaciones.ejecutarCadenaAnimacion(
       "EmpiezanVotacionesSospechososSerLobo1",
       animacionesPantalla.animacionEmpiezanVotacionesSospechososSerLobo1,
-      animacionesPantalla.administrador_animaciones.RETRASO_ANIMACION,
+      adminAnimaciones.RETRASO_ANIMACION,
       () => {
         setMostrarEmpiezanVotacionesSospechososSerLobo1(false);
         setMostrarVotaciones(true);
-        ejecutarCadenaAnimacion(
+        adminAnimaciones.ejecutarCadenaAnimacion(
           "votaciones",
           animacionesPantalla.animacionEmpiezanVotacionesSospechososSerLobo2,
-          animacionesPantalla.administrador_animaciones.RETRASO_ANIMACION,
+          adminAnimaciones.RETRASO_ANIMACION,
           () => {
             setCurrentAnimacion("fondo-fadeOut");
             iniciarAnimacion(

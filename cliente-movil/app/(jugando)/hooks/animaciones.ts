@@ -5,6 +5,7 @@
  * @returns {Object} Métodos y constantes para manejar animaciones.
  * @returns {Function} crearAnimacion - Crea una nueva animación con un valor inicial.
  * @returns {Function} ejecutarSecuenciaAnimaciones - Ejecuta una secuencia de animaciones.
+ * @returns {Function} ejecutarCadenaAnimacion - Ejecuta una cadena de animaciones (fadeIn → delay → fadeOut).
  * @returns {number} DURACION_ANIMACION - Duración predeterminada de las animaciones (500ms).
  * @returns {number} RETRASO_ANIMACION - Tiempo de retraso predeterminado entre animaciones en `stagger` (300ms).
  *
@@ -106,6 +107,8 @@ export const administradorAnimaciones = () => {
     };
   };
 
+  // para ejecutar animaciones genéricas, lo dejo por si es útil
+  /*
   const ejecutarSecuenciaAnimaciones = (
     animations: Animated.CompositeAnimation[],
     onComplete?: () => void
@@ -118,9 +121,86 @@ export const administradorAnimaciones = () => {
     Animated.sequence(animations).start(onComplete);
   };
 
+  */
+
+  /**
+   * Ejecuta una secuencia de animación que incluye:
+   * - fadeIn (animación de entrada)
+   * - delay (tiempo de espera configurable)
+   * - fadeOut (animación de salida)
+   *
+   * Se establecen callbacks para permitir saltar la animación actual mediante startFadeOutNowRef.
+   *
+   * @param {string} nombre - Nombre base de la animación (ej. "texto", "rol", "inicio").
+   * @param {Object} animacion - Objeto que contiene el valor animado y los métodos fadeIn y fadeOut.
+   * @param {number} delay - Tiempo de espera en milisegundos entre fadeIn y fadeOut.
+   * @param {Function} onFadeOutComplete - Callback a ejecutar al finalizar el fadeOut.
+   * @param {Function} setCurrentAnimacion - Función para actualizar el estado de la animación actual.
+   * @param {Function} iniciarAnimacion - Función para iniciar una animación (fadeIn o fadeOut).
+   * @param {Function} iniciarDelay - Función para iniciar un delay.
+   * @param {React.MutableRefObject<(() => void) | null>} startFadeOutNowRef - Ref para almacenar el callback de salto.
+   */
+  const ejecutarCadenaAnimacion = (
+    nombre: string,
+    animacion: {
+      value: Animated.Value;
+      fadeIn: (duration?: number) => Animated.CompositeAnimation;
+      fadeOut: (duration?: number) => Animated.CompositeAnimation;
+    },
+    delay: number,
+    onFadeOutComplete: () => void,
+    setCurrentAnimacion: (anim: string) => void,
+    iniciarAnimacion: (
+      nombreAnimacion: string,
+      animacion: Animated.CompositeAnimation,
+      animatedValue: Animated.Value,
+      valorFinal: number,
+      callback: () => void
+    ) => void,
+    iniciarDelay: (delay: number, callback: () => void) => void,
+    startFadeOutNowRef: React.MutableRefObject<(() => void) | null>
+  ) => {
+    setCurrentAnimacion(`${nombre}-fadeIn`);
+    startFadeOutNowRef.current = () => {
+      animacion.value.stopAnimation(() => {
+        animacion.value.setValue(1);
+        setCurrentAnimacion(`${nombre}-fadeOut`);
+        iniciarAnimacion(
+          `${nombre}-fadeOut`,
+          animacion.fadeOut(),
+          animacion.value,
+          0,
+          onFadeOutComplete
+        );
+        startFadeOutNowRef.current = null;
+      });
+    };
+    iniciarAnimacion(
+      `${nombre}-fadeIn`,
+      animacion.fadeIn(),
+      animacion.value,
+      1,
+      () => {
+        setCurrentAnimacion(`${nombre}-delay`);
+        iniciarDelay(delay, () => {
+          setCurrentAnimacion(`${nombre}-fadeOut`);
+          iniciarAnimacion(
+            `${nombre}-fadeOut`,
+            animacion.fadeOut(),
+            animacion.value,
+            0,
+            onFadeOutComplete
+          );
+          startFadeOutNowRef.current = null;
+        });
+      }
+    );
+  };
+
   return {
     crearAnimacion,
-    ejecutarSecuenciaAnimaciones,
+    //ejecutarSecuenciaAnimaciones,
+    ejecutarCadenaAnimacion,
     DURACION_ANIMACION,
     RETRASO_ANIMACION,
     setSkipAnimaciones,
