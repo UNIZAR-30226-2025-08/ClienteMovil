@@ -30,11 +30,12 @@ import MensajeError from "./componentes/MensajeError";
 
 // Hooks y administradores de estado
 import useTemporizador from "./hooks/useTemporizador";
-import useAnimacionesPantalla from "./hooks/useAnimacionesPantalla";
 import useModoDiaNoche from "./hooks/useModoDiaNoche";
 import useAnimacionChat from "./hooks/useAnimacionChat";
 import useAnimacionHabilidad from "./hooks/useAnimacionHabilidad";
 import useMensajeError from "./hooks/useMensajeError";
+import * as animacionesPantalla from "./hooks/useAnimacionesPantalla";
+import { administrador_animaciones } from "./hooks/useAnimacionesPantalla";
 
 /**
  * @constant {boolean} MODO_NOCHE_GLOBAL - Indica si el juego está en modo noche. Si es falso, es de día.
@@ -80,13 +81,33 @@ const PantallaJugando: React.FC = () => {
   const [pasoTurno, setPasoTurno] = useState(false);
   const [currentAnimacion, setCurrentAnimacion] = useState("");
 
-  // Estados para las nuevas animaciones (que se comportan como las iniciales)
+  // Estados para las animaciones ya existentes
   const [mostrarAlguacil, setMostrarAlguacil] = useState(false);
   const [
     mostrarEmpiezanVotacionesSospechososSerLobo1,
     setMostrarEmpiezanVotacionesSospechososSerLobo1,
   ] = useState(false);
   const [mostrarVotaciones, setMostrarVotaciones] = useState(false);
+
+  // NUEVOS ESTADOS para las animaciones agregadas
+  const [mostrarCazadorDisparo, setMostrarCazadorDisparo] = useState(false);
+  const [mostrarBrujaCura, setMostrarBrujaCura] = useState(false);
+  const [mostrarBrujaVeneno, setMostrarBrujaVeneno] = useState(false);
+  const [mostrarDormir, setMostrarDormir] = useState(false);
+  const [mostrarDevoraHombresLobo, setMostrarDevoraHombresLobo] =
+    useState(false);
+  const [mostrarHombresLoboDormir, setMostrarHombresLoboDormir] =
+    useState(false);
+  const [mostrarBrujaDespierta, setMostrarBrujaDespierta] = useState(false);
+  const [mostrarBrujaDuerme, setMostrarBrujaDuerme] = useState(false);
+  const [mostrarVidenteDuerme, setMostrarVidenteDuerme] = useState(false);
+  const [mostrarVidenteDespierta, setMostrarVidenteDespierta] = useState(false);
+  const [mostrarNocheSupervivientes, setMostrarNocheSupervivientes] =
+    useState(false);
+  const [mostrarJugadorAlguacil, setMostrarJugadorAlguacil] = useState(false);
+  const [mostrarVotacionesConcluidas, setMostrarVotacionesConcluidas] =
+    useState(false);
+  const [mostrarElegidoPueblo, setMostrarElegidoPueblo] = useState(false);
 
   // Refs para callbacks y timeouts en animaciones
   const startFadeOutNowRef = useRef<(() => void) | null>(null);
@@ -100,17 +121,9 @@ const PantallaJugando: React.FC = () => {
   // Administración de estados temporales y animaciones mediante hooks:
   const { tiempoRestante, reiniciarTemporizador, setTemporizadorActivo } =
     useTemporizador(CONSTANTES.NUMERICAS.TIEMPO_INICIAL, false);
-  const {
-    administrador_animaciones,
-    animacionTexto,
-    animacionRol,
-    animacionInicio,
-    animacionFondo,
-    animacionEmpiezanVotacionesAlguacil,
-    animacionEmpiezanVotacionesSospechososSerLobo1,
-    animacionEmpiezanVotacionesSospechososSerLobo2,
-  } = useAnimacionesPantalla();
-  const { esDeNoche, setModoDiaNoche } = useModoDiaNoche(animacionFondo);
+  const { esDeNoche, setModoDiaNoche } = useModoDiaNoche(
+    animacionesPantalla.animacionFondo
+  );
   const { posicionChat, abrirChat, cerrarChat } = useAnimacionChat();
   const { posicionHabilidad, abrirHabilidad, cerrarHabilidad } =
     useAnimacionHabilidad();
@@ -177,20 +190,20 @@ const PantallaJugando: React.FC = () => {
     // Si se está en fadeOut, detener la animación y fijar el valor final
     if (currentAnimacion.includes("fadeOut")) {
       if (currentAnimacion.includes("texto")) {
-        animacionTexto.value.stopAnimation(() => {
-          animacionTexto.value.setValue(0);
+        animacionesPantalla.animacionTexto.value.stopAnimation(() => {
+          animacionesPantalla.animacionTexto.value.setValue(0);
         });
       } else if (currentAnimacion.includes("rol")) {
-        animacionRol.value.stopAnimation(() => {
-          animacionRol.value.setValue(0);
+        animacionesPantalla.animacionRol.value.stopAnimation(() => {
+          animacionesPantalla.animacionRol.value.setValue(0);
         });
       } else if (currentAnimacion.includes("inicio")) {
-        animacionInicio.value.stopAnimation(() => {
-          animacionInicio.value.setValue(0);
+        animacionesPantalla.animacionInicio.value.stopAnimation(() => {
+          animacionesPantalla.animacionInicio.value.setValue(0);
         });
       } else if (currentAnimacion.includes("fondo")) {
-        animacionFondo.value.stopAnimation(() => {
-          animacionFondo.value.setValue(0);
+        animacionesPantalla.animacionFondo.value.stopAnimation(() => {
+          animacionesPantalla.animacionFondo.value.setValue(0);
         });
       }
     }
@@ -215,28 +228,28 @@ const PantallaJugando: React.FC = () => {
     // --- Cadena de animaciones utilizando el helper ejecutarCadenaAnimacion ---
     ejecutarCadenaAnimacion(
       "texto",
-      animacionTexto,
-      administrador_animaciones.RETRASO_ANIMACION,
+      animacionesPantalla.animacionTexto,
+      animacionesPantalla.administrador_animaciones.RETRASO_ANIMACION,
       () => {
         TEXTO_YA_MOSTRADO = true;
         setMostrarTextoInicial(false);
         setMostrarRol(true);
         ejecutarCadenaAnimacion(
           "rol",
-          animacionRol,
-          administrador_animaciones.RETRASO_ANIMACION,
+          animacionesPantalla.animacionRol,
+          animacionesPantalla.administrador_animaciones.RETRASO_ANIMACION,
           () => {
             setMostrarInicio(true);
             ejecutarCadenaAnimacion(
               "inicio",
-              animacionInicio,
-              administrador_animaciones.RETRASO_ANIMACION,
+              animacionesPantalla.animacionInicio,
+              animacionesPantalla.administrador_animaciones.RETRASO_ANIMACION,
               () => {
                 setCurrentAnimacion("fondo-fadeOut");
                 iniciarAnimacion(
                   "fondo-fadeOut",
-                  animacionFondo.fadeOut(),
-                  animacionFondo.value,
+                  animacionesPantalla.animacionFondo.fadeOut(),
+                  animacionesPantalla.animacionFondo.value,
                   0,
                   () => {
                     setMostrarBotones(true);
@@ -369,34 +382,6 @@ const PantallaJugando: React.FC = () => {
     setJugadorSeleccionado(null);
   };
 
-  const ejecutaranimacionEmpiezanVotacionesAlguacil = () => {
-    // Reiniciamos la opacidad del fondo para que se oscurezca
-    animacionFondo.value.setValue(1);
-    setMostrarAlguacil(true);
-    ejecutarCadenaAnimacion(
-      "alguacil",
-      animacionEmpiezanVotacionesAlguacil,
-      administrador_animaciones.RETRASO_ANIMACION,
-      () => {
-        setCurrentAnimacion("fondo-fadeOut");
-        iniciarAnimacion(
-          "fondo-fadeOut",
-          animacionFondo.fadeOut(),
-          animacionFondo.value,
-          0,
-          () => {
-            setMostrarAlguacil(false);
-            setCurrentAnimacion("");
-          }
-        );
-      },
-      setCurrentAnimacion,
-      iniciarAnimacion,
-      iniciarDelay,
-      startFadeOutNowRef
-    );
-  };
-
   /**
    * Función que encadena las dos animaciones de "Sospechosos Ser Lobo" de forma
    * secuencial, tal como se encadenan las animaciones del inicio:
@@ -407,25 +392,25 @@ const PantallaJugando: React.FC = () => {
    * 3. Finalizadas ambas animaciones, se aplica el efecto de oscurecimiento (fadeOut) al fondo.
    */
   const ejecutarCadenaAnimacionSospechososSerLobo = () => {
-    animacionFondo.value.setValue(1);
+    animacionesPantalla.animacionFondo.value.setValue(1);
     setMostrarEmpiezanVotacionesSospechososSerLobo1(true);
     ejecutarCadenaAnimacion(
       "EmpiezanVotacionesSospechososSerLobo1",
-      animacionEmpiezanVotacionesSospechososSerLobo1,
-      administrador_animaciones.RETRASO_ANIMACION,
+      animacionesPantalla.animacionEmpiezanVotacionesSospechososSerLobo1,
+      animacionesPantalla.administrador_animaciones.RETRASO_ANIMACION,
       () => {
         setMostrarEmpiezanVotacionesSospechososSerLobo1(false);
         setMostrarVotaciones(true);
         ejecutarCadenaAnimacion(
           "votaciones",
-          animacionEmpiezanVotacionesSospechososSerLobo2,
-          administrador_animaciones.RETRASO_ANIMACION,
+          animacionesPantalla.animacionEmpiezanVotacionesSospechososSerLobo2,
+          animacionesPantalla.administrador_animaciones.RETRASO_ANIMACION,
           () => {
             setCurrentAnimacion("fondo-fadeOut");
             iniciarAnimacion(
               "fondo-fadeOut",
-              animacionFondo.fadeOut(),
-              animacionFondo.value,
+              animacionesPantalla.animacionFondo.fadeOut(),
+              animacionesPantalla.animacionFondo.value,
               0,
               () => {
                 setMostrarVotaciones(false);
@@ -452,10 +437,25 @@ const PantallaJugando: React.FC = () => {
   });
   if (!fuentesCargadas) return null;
 
+  // Definir si hay algún overlay de animación activo (incluyendo las nuevas)
   const debugOverlayActive =
     mostrarAlguacil ||
     mostrarEmpiezanVotacionesSospechososSerLobo1 ||
-    mostrarVotaciones;
+    mostrarVotaciones ||
+    mostrarCazadorDisparo ||
+    mostrarBrujaCura ||
+    mostrarBrujaVeneno ||
+    mostrarDormir ||
+    mostrarDevoraHombresLobo ||
+    mostrarHombresLoboDormir ||
+    mostrarBrujaDespierta ||
+    mostrarBrujaDuerme ||
+    mostrarVidenteDuerme ||
+    mostrarVidenteDespierta ||
+    mostrarNocheSupervivientes ||
+    mostrarJugadorAlguacil ||
+    mostrarVotacionesConcluidas ||
+    mostrarElegidoPueblo;
 
   if (debugOverlayActive) {
     return (
@@ -467,14 +467,21 @@ const PantallaJugando: React.FC = () => {
             resizeMode="cover"
           />
           <Animated.View
-            style={[estilos.superposicion, { opacity: animacionFondo.value }]}
+            style={[
+              estilos.superposicion,
+              { opacity: animacionesPantalla.animacionFondo.value },
+            ]}
           />
 
           {mostrarAlguacil && (
             <Animated.View
               style={[
                 estilos.contenedorEmpiezanVotacionesAlguacil,
-                { opacity: animacionEmpiezanVotacionesAlguacil.value },
+                {
+                  opacity:
+                    animacionesPantalla.animacionEmpiezanVotacionesAlguacil
+                      .value,
+                },
               ]}
             >
               <Text style={estilos.textoEmpiezanVotacionesAlguacil}>
@@ -488,7 +495,9 @@ const PantallaJugando: React.FC = () => {
               style={[
                 estilos.contenedorEmpiezanVotacionesSospechososSerLobo1,
                 {
-                  opacity: animacionEmpiezanVotacionesSospechososSerLobo1.value,
+                  opacity:
+                    animacionesPantalla
+                      .animacionEmpiezanVotacionesSospechososSerLobo1.value,
                 },
               ]}
             >
@@ -503,12 +512,394 @@ const PantallaJugando: React.FC = () => {
               style={[
                 estilos.contenedorEmpiezanVotacionesSospechososSerLobo2,
                 {
-                  opacity: animacionEmpiezanVotacionesSospechososSerLobo2.value,
+                  opacity:
+                    animacionesPantalla
+                      .animacionEmpiezanVotacionesSospechososSerLobo2.value,
                 },
               ]}
             >
               <Text style={estilos.textoEmpiezanVotacionesSospechososSerLobo2}>
                 {CONSTANTES.TEXTOS.VOTACIONES}
+              </Text>
+            </Animated.View>
+          )}
+
+          {/* Overlays para las nuevas animaciones */}
+          {mostrarCazadorDisparo && (
+            <Animated.View
+              style={[
+                {
+                  position: "absolute",
+                  width: "80%",
+                  top: "15%",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  padding: 10,
+                },
+                { opacity: animacionesPantalla.animacionCazadorDisparo.value },
+              ]}
+            >
+              <Text
+                style={{
+                  color: "blue",
+                  fontSize: CONSTANTES.NUMERICAS.TAMANIO_ICONO_BOTON,
+                  textAlign: "center",
+                }}
+              >
+                HAS SIDO DISPARADO POR EL CAZADOR
+              </Text>
+            </Animated.View>
+          )}
+
+          {mostrarBrujaCura && (
+            <Animated.View
+              style={[
+                {
+                  position: "absolute",
+                  width: "80%",
+                  top: "20%",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  padding: 10,
+                },
+                { opacity: animacionesPantalla.animacionBrujaCura.value },
+              ]}
+            >
+              <Text
+                style={{
+                  color: "orange",
+                  fontSize: CONSTANTES.NUMERICAS.TAMANIO_ICONO_BOTON,
+                  textAlign: "center",
+                }}
+              >
+                HAS SIDO CURADO POR LA BRUJA
+              </Text>
+            </Animated.View>
+          )}
+
+          {mostrarBrujaVeneno && (
+            <Animated.View
+              style={[
+                {
+                  position: "absolute",
+                  width: "80%",
+                  top: "25%",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  padding: 10,
+                },
+                { opacity: animacionesPantalla.animacionBrujaVeneno.value },
+              ]}
+            >
+              <Text
+                style={{
+                  color: "orange",
+                  fontSize: CONSTANTES.NUMERICAS.TAMANIO_ICONO_BOTON,
+                  textAlign: "center",
+                }}
+              >
+                HAS SIDO ENVENENADO POR LA BRUJA
+              </Text>
+            </Animated.View>
+          )}
+
+          {mostrarDormir && (
+            <Animated.View
+              style={[
+                {
+                  position: "absolute",
+                  width: "80%",
+                  top: "30%",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  padding: 10,
+                },
+                { opacity: animacionesPantalla.animacionDormir.value },
+              ]}
+            >
+              <Text
+                style={{
+                  color: "white",
+                  fontSize: CONSTANTES.NUMERICAS.TAMANIO_ICONO_BOTON,
+                  textAlign: "center",
+                }}
+              >
+                ESTÁS DURMIENDO
+              </Text>
+            </Animated.View>
+          )}
+
+          {mostrarDevoraHombresLobo && (
+            <Animated.View
+              style={[
+                {
+                  position: "absolute",
+                  width: "80%",
+                  top: "35%",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  padding: 10,
+                },
+                {
+                  opacity: animacionesPantalla.animacionDevoraHombresLobo.value,
+                },
+              ]}
+            >
+              <Text
+                style={{
+                  color: "red",
+                  fontSize: CONSTANTES.NUMERICAS.TAMANIO_ICONO_BOTON,
+                  textAlign: "center",
+                }}
+              >
+                HAS SIDO EL DEVORADO POR LOS HOMBRES LOBO
+              </Text>
+            </Animated.View>
+          )}
+
+          {mostrarHombresLoboDormir && (
+            <Animated.View
+              style={[
+                {
+                  position: "absolute",
+                  width: "80%",
+                  top: "40%",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  padding: 10,
+                },
+                {
+                  opacity: animacionesPantalla.animacionHombresLoboDormir.value,
+                },
+              ]}
+            >
+              <Text
+                style={{
+                  color: "red",
+                  fontSize: CONSTANTES.NUMERICAS.TAMANIO_ICONO_BOTON,
+                  textAlign: "center",
+                }}
+              >
+                LOS HOMBRES LOBO SACIADOS VUELVEN A DORMIRSE Y SUEÑAN CON
+                PRÓXIMAS Y SABROSAS VÍCTIMAS
+              </Text>
+            </Animated.View>
+          )}
+
+          {mostrarBrujaDespierta && (
+            <Animated.View
+              style={[
+                {
+                  position: "absolute",
+                  width: "80%",
+                  top: "45%",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  padding: 10,
+                },
+                { opacity: animacionesPantalla.animacionBrujaDespierta.value },
+              ]}
+            >
+              <Text
+                style={{
+                  color: "orange",
+                  fontSize: CONSTANTES.NUMERICAS.TAMANIO_ICONO_BOTON,
+                  textAlign: "center",
+                }}
+              >
+                LA BRUJA SE DESPIERTA, OBSERVA LA NUEVA VÍCTIMA DE LOS HOMBRES
+                LOBO. USARÁ SU POCIÓN CURATIVA O SU POCIÓN VENENOSA
+              </Text>
+            </Animated.View>
+          )}
+
+          {mostrarBrujaDuerme && (
+            <Animated.View
+              style={[
+                {
+                  position: "absolute",
+                  width: "80%",
+                  top: "50%",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  padding: 10,
+                },
+                { opacity: animacionesPantalla.animacionBrujaDuerme.value },
+              ]}
+            >
+              <Text
+                style={{
+                  color: "orange",
+                  fontSize: CONSTANTES.NUMERICAS.TAMANIO_ICONO_BOTON,
+                  textAlign: "center",
+                }}
+              >
+                LA BRUJA SE VUELVE A DORMIR
+              </Text>
+            </Animated.View>
+          )}
+
+          {mostrarVidenteDuerme && (
+            <Animated.View
+              style={[
+                {
+                  position: "absolute",
+                  width: "80%",
+                  top: "55%",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  padding: 10,
+                },
+                { opacity: animacionesPantalla.animacionVidenteDuerme.value },
+              ]}
+            >
+              <Text
+                style={{
+                  color: "purple",
+                  fontSize: CONSTANTES.NUMERICAS.TAMANIO_ICONO_BOTON,
+                  textAlign: "center",
+                }}
+              >
+                LA VIDENTE SE VUELVE A DORMIR
+              </Text>
+            </Animated.View>
+          )}
+
+          {mostrarVidenteDespierta && (
+            <Animated.View
+              style={[
+                {
+                  position: "absolute",
+                  width: "80%",
+                  top: "60%",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  padding: 10,
+                },
+                {
+                  opacity: animacionesPantalla.animacionVidenteDespierta.value,
+                },
+              ]}
+            >
+              <Text
+                style={{
+                  color: "purple",
+                  fontSize: CONSTANTES.NUMERICAS.TAMANIO_ICONO_BOTON,
+                  textAlign: "center",
+                }}
+              >
+                LA VIDENTE SE DESPIERTA Y SEÑALA A UN JUGADOR DEL QUE QUIERE
+                CONOCER LA VERDADERA PERSONALIDAD
+              </Text>
+            </Animated.View>
+          )}
+
+          {mostrarNocheSupervivientes && (
+            <Animated.View
+              style={[
+                {
+                  position: "absolute",
+                  width: "80%",
+                  top: "65%",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  padding: 10,
+                },
+                {
+                  opacity:
+                    animacionesPantalla.animacionNocheSupervivientes.value,
+                },
+              ]}
+            >
+              <Text
+                style={{
+                  color: "white",
+                  fontSize: CONSTANTES.NUMERICAS.TAMANIO_ICONO_BOTON,
+                  textAlign: "center",
+                }}
+              >
+                SE HACE DE NOCHE; LOS SUPERVIVIENTES VUELVEN A DORMIR
+              </Text>
+            </Animated.View>
+          )}
+
+          {mostrarJugadorAlguacil && (
+            <Animated.View
+              style={[
+                {
+                  position: "absolute",
+                  width: "80%",
+                  top: "70%",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  padding: 10,
+                },
+                { opacity: animacionesPantalla.animacionJugadorAlguacil.value },
+              ]}
+            >
+              <Text
+                style={{
+                  color: "white",
+                  fontSize: CONSTANTES.NUMERICAS.TAMANIO_ICONO_BOTON,
+                  textAlign: "center",
+                }}
+              >
+                JUGADOR 4 ES EL AGUACIL
+              </Text>
+            </Animated.View>
+          )}
+
+          {mostrarVotacionesConcluidas && (
+            <Animated.View
+              style={[
+                {
+                  position: "absolute",
+                  width: "80%",
+                  top: "75%",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  padding: 10,
+                },
+                {
+                  opacity:
+                    animacionesPantalla.animacionVotacionesConcluidas.value,
+                },
+              ]}
+            >
+              <Text
+                style={{
+                  color: "white",
+                  fontSize: CONSTANTES.NUMERICAS.TAMANIO_ICONO_BOTON,
+                  textAlign: "center",
+                }}
+              >
+                LAS VOTACIONES HAN CONCLUIDO
+              </Text>
+            </Animated.View>
+          )}
+
+          {mostrarElegidoPueblo && (
+            <Animated.View
+              style={[
+                {
+                  position: "absolute",
+                  width: "80%",
+                  top: "80%",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  padding: 10,
+                },
+                { opacity: animacionesPantalla.animacionElegidoPueblo.value },
+              ]}
+            >
+              <Text
+                style={{
+                  color: "yellow",
+                  fontSize: CONSTANTES.NUMERICAS.TAMANIO_ICONO_BOTON,
+                  textAlign: "center",
+                }}
+              >
+                HAS SIDO EL ELEGIDO POR EL PUEBLO
               </Text>
             </Animated.View>
           )}
@@ -530,12 +921,18 @@ const PantallaJugando: React.FC = () => {
         />
         {/* Superposición animada para efectos visuales en el fondo */}
         <Animated.View
-          style={[estilos.superposicion, { opacity: animacionFondo.value }]}
+          style={[
+            estilos.superposicion,
+            { opacity: animacionesPantalla.animacionFondo.value },
+          ]}
         />
         {/* Texto inicial */}
         {mostrarTextoInicial && (
           <Animated.View
-            style={[estilos.contenedorTexto, { opacity: animacionTexto.value }]}
+            style={[
+              estilos.contenedorTexto,
+              { opacity: animacionesPantalla.animacionTexto.value },
+            ]}
           >
             <Text style={estilos.texto}>{CONSTANTES.TEXTOS.INICIAL}</Text>
           </Animated.View>
@@ -550,7 +947,10 @@ const PantallaJugando: React.FC = () => {
         {/* Información del rol del usuario */}
         {mostrarRol && (
           <Animated.View
-            style={[estilos.contenedorRol, { opacity: animacionRol.value }]}
+            style={[
+              estilos.contenedorRol,
+              { opacity: animacionesPantalla.animacionRol.value },
+            ]}
           >
             {/* Título "Tu rol es..." */}
             <View style={estilos.contenedorTextoRol}>
@@ -568,26 +968,7 @@ const PantallaJugando: React.FC = () => {
                 justifyContent: "center",
               }}
             >
-              {/* Capas del borde blanco en 4 direcciones usando transform
-              {[-1, 1].map((dx) =>
-                [-1, 1].map((dy) => (
-                  <Text
-                    key={`${dx}-${dy}`}
-                    style={[
-                      estilos.nombreRol,
-                      {
-                        color: "white",
-                        position: "absolute",
-                        transform: [{ translateX: dx }, { translateY: dy }],
-                        textAlign: "center",
-                      },
-                    ]}
-                  >
-                    {roleInfo.roleName}
-                  </Text>
-                ))
-              )} */}
-              {/* Texto principal */}
+              {/* Capas del borde blanco en 4 direcciones usando transform */}
               <Text
                 style={[
                   estilos.nombreRol,
@@ -608,7 +989,7 @@ const PantallaJugando: React.FC = () => {
           <Animated.View
             style={[
               estilos.contenedorTexto,
-              { opacity: animacionInicio.value },
+              { opacity: animacionesPantalla.animacionInicio.value },
             ]}
           >
             <Text style={estilos.textoInicio}>
@@ -663,6 +1044,7 @@ const PantallaJugando: React.FC = () => {
             onClose={handleCerrarHabilidad}
           />
         )}
+        {/* Botones de debug para animaciones */}
         {__DEV__ && (
           <View
             style={{
@@ -674,7 +1056,316 @@ const PantallaJugando: React.FC = () => {
             }}
           >
             <TouchableWithoutFeedback
-              onPress={ejecutaranimacionEmpiezanVotacionesAlguacil}
+              onPress={ejecutarCadenaAnimacionSospechososSerLobo}
+            >
+              <View
+                style={{
+                  padding: 10,
+                  backgroundColor: "rgba(0,0,0,0.5)",
+                  margin: 5,
+                }}
+              >
+                <Text style={{ color: "white" }}>
+                  Empiezan Votaciones Sospechosos Ser Lobo
+                </Text>
+              </View>
+            </TouchableWithoutFeedback>
+            <TouchableWithoutFeedback
+              onPress={() =>
+                animacionesPantalla.ejecutarAnimacionCazadorDisparo(
+                  setMostrarCazadorDisparo,
+                  animacionesPantalla.animacionFondo,
+                  setCurrentAnimacion,
+                  iniciarAnimacion,
+                  iniciarDelay,
+                  startFadeOutNowRef
+                )
+              }
+            >
+              <View
+                style={{
+                  padding: 10,
+                  backgroundColor: "rgba(0,0,0,0.5)",
+                  margin: 5,
+                }}
+              >
+                <Text style={{ color: "blue" }}>
+                  Has sido disparado por el cazador
+                </Text>
+              </View>
+            </TouchableWithoutFeedback>
+            <TouchableWithoutFeedback
+              onPress={() =>
+                animacionesPantalla.ejecutarAnimacionBrujaCura(
+                  setMostrarBrujaCura,
+                  animacionesPantalla.animacionFondo,
+                  setCurrentAnimacion,
+                  iniciarAnimacion,
+                  iniciarDelay,
+                  startFadeOutNowRef
+                )
+              }
+            >
+              <View
+                style={{
+                  padding: 10,
+                  backgroundColor: "rgba(0,0,0,0.5)",
+                  margin: 5,
+                }}
+              >
+                <Text style={{ color: "orange" }}>
+                  Has sido curado por la bruja
+                </Text>
+              </View>
+            </TouchableWithoutFeedback>
+            <TouchableWithoutFeedback
+              onPress={() =>
+                animacionesPantalla.ejecutarAnimacionBrujaVeneno(
+                  setMostrarBrujaVeneno,
+                  animacionesPantalla.animacionFondo,
+                  setCurrentAnimacion,
+                  iniciarAnimacion,
+                  iniciarDelay,
+                  startFadeOutNowRef
+                )
+              }
+            >
+              <View
+                style={{
+                  padding: 10,
+                  backgroundColor: "rgba(0,0,0,0.5)",
+                  margin: 5,
+                }}
+              >
+                <Text style={{ color: "orange" }}>
+                  Has sido envenenado por la bruja
+                </Text>
+              </View>
+            </TouchableWithoutFeedback>
+            <TouchableWithoutFeedback
+              onPress={() =>
+                animacionesPantalla.ejecutarAnimacionDormir(
+                  setMostrarDormir,
+                  animacionesPantalla.animacionFondo,
+                  setCurrentAnimacion,
+                  iniciarAnimacion,
+                  iniciarDelay,
+                  startFadeOutNowRef
+                )
+              }
+            >
+              <View
+                style={{
+                  padding: 10,
+                  backgroundColor: "rgba(0,0,0,0.5)",
+                  margin: 5,
+                }}
+              >
+                <Text style={{ color: "white" }}>Estás durmiendo</Text>
+              </View>
+            </TouchableWithoutFeedback>
+            <TouchableWithoutFeedback
+              onPress={() =>
+                animacionesPantalla.ejecutarAnimacionDevoraHombresLobo(
+                  setMostrarDevoraHombresLobo,
+                  animacionesPantalla.animacionFondo,
+                  setCurrentAnimacion,
+                  iniciarAnimacion,
+                  iniciarDelay,
+                  startFadeOutNowRef
+                )
+              }
+            >
+              <View
+                style={{
+                  padding: 10,
+                  backgroundColor: "rgba(0,0,0,0.5)",
+                  margin: 5,
+                }}
+              >
+                <Text style={{ color: "red" }}>
+                  Has sido el devorado por los hombres lobo
+                </Text>
+              </View>
+            </TouchableWithoutFeedback>
+            <TouchableWithoutFeedback
+              onPress={() =>
+                animacionesPantalla.ejecutarAnimacionHombresLoboDormir(
+                  setMostrarHombresLoboDormir,
+                  animacionesPantalla.animacionFondo,
+                  setCurrentAnimacion,
+                  iniciarAnimacion,
+                  iniciarDelay,
+                  startFadeOutNowRef
+                )
+              }
+            >
+              <View
+                style={{
+                  padding: 10,
+                  backgroundColor: "rgba(0,0,0,0.5)",
+                  margin: 5,
+                }}
+              >
+                <Text style={{ color: "red" }}>
+                  Hombres lobo vuelven a dormirse y sueñan con próximas víctimas
+                </Text>
+              </View>
+            </TouchableWithoutFeedback>
+            <TouchableWithoutFeedback
+              onPress={() =>
+                animacionesPantalla.ejecutarAnimacionBrujaDespierta(
+                  setMostrarBrujaDespierta,
+                  animacionesPantalla.animacionFondo,
+                  setCurrentAnimacion,
+                  iniciarAnimacion,
+                  iniciarDelay,
+                  startFadeOutNowRef
+                )
+              }
+            >
+              <View
+                style={{
+                  padding: 10,
+                  backgroundColor: "rgba(0,0,0,0.5)",
+                  margin: 5,
+                }}
+              >
+                <Text style={{ color: "orange" }}>
+                  La bruja se despierta (observa nueva víctima)
+                </Text>
+              </View>
+            </TouchableWithoutFeedback>
+            <TouchableWithoutFeedback
+              onPress={() =>
+                animacionesPantalla.ejecutarAnimacionBrujaDuerme(
+                  setMostrarBrujaDuerme,
+                  animacionesPantalla.animacionFondo,
+                  setCurrentAnimacion,
+                  iniciarAnimacion,
+                  iniciarDelay,
+                  startFadeOutNowRef
+                )
+              }
+            >
+              <View
+                style={{
+                  padding: 10,
+                  backgroundColor: "rgba(0,0,0,0.5)",
+                  margin: 5,
+                }}
+              >
+                <Text style={{ color: "orange" }}>
+                  La bruja se vuelve a dormir
+                </Text>
+              </View>
+            </TouchableWithoutFeedback>
+            <TouchableWithoutFeedback
+              onPress={() =>
+                animacionesPantalla.ejecutarAnimacionVidenteDuerme(
+                  setMostrarVidenteDuerme,
+                  animacionesPantalla.animacionFondo,
+                  setCurrentAnimacion,
+                  iniciarAnimacion,
+                  iniciarDelay,
+                  startFadeOutNowRef
+                )
+              }
+            >
+              <View
+                style={{
+                  padding: 10,
+                  backgroundColor: "rgba(0,0,0,0.5)",
+                  margin: 5,
+                }}
+              >
+                <Text style={{ color: "purple" }}>
+                  La vidente se vuelve a dormir
+                </Text>
+              </View>
+            </TouchableWithoutFeedback>
+            <TouchableWithoutFeedback
+              onPress={() =>
+                animacionesPantalla.ejecutarAnimacionVidenteDespierta(
+                  setMostrarVidenteDespierta,
+                  animacionesPantalla.animacionFondo,
+                  setCurrentAnimacion,
+                  iniciarAnimacion,
+                  iniciarDelay,
+                  startFadeOutNowRef
+                )
+              }
+            >
+              <View
+                style={{
+                  padding: 10,
+                  backgroundColor: "rgba(0,0,0,0.5)",
+                  margin: 5,
+                }}
+              >
+                <Text style={{ color: "purple" }}>
+                  La vidente se despierta y señala a un jugador
+                </Text>
+              </View>
+            </TouchableWithoutFeedback>
+            <TouchableWithoutFeedback
+              onPress={() =>
+                animacionesPantalla.ejecutarAnimacionNocheSupervivientes(
+                  setMostrarNocheSupervivientes,
+                  animacionesPantalla.animacionFondo,
+                  setCurrentAnimacion,
+                  iniciarAnimacion,
+                  iniciarDelay,
+                  startFadeOutNowRef
+                )
+              }
+            >
+              <View
+                style={{
+                  padding: 10,
+                  backgroundColor: "rgba(0,0,0,0.5)",
+                  margin: 5,
+                }}
+              >
+                <Text style={{ color: "white" }}>
+                  Se hace de noche; supervivientes duermen
+                </Text>
+              </View>
+            </TouchableWithoutFeedback>
+            <TouchableWithoutFeedback
+              onPress={() =>
+                animacionesPantalla.ejecutarAnimacionJugadorAlguacil(
+                  setMostrarJugadorAlguacil,
+                  animacionesPantalla.animacionFondo,
+                  setCurrentAnimacion,
+                  iniciarAnimacion,
+                  iniciarDelay,
+                  startFadeOutNowRef,
+                  4
+                )
+              }
+            >
+              <View
+                style={{
+                  padding: 10,
+                  backgroundColor: "rgba(0,0,0,0.5)",
+                  margin: 5,
+                }}
+              >
+                <Text style={{ color: "white" }}>Jugador 4 es el alguacil</Text>
+              </View>
+            </TouchableWithoutFeedback>
+            <TouchableWithoutFeedback
+              onPress={() =>
+                animacionesPantalla.ejecutarAnimacionEmpiezanVotacionesAlguacil(
+                  setMostrarAlguacil,
+                  animacionesPantalla.animacionFondo,
+                  setCurrentAnimacion,
+                  iniciarAnimacion,
+                  iniciarDelay,
+                  startFadeOutNowRef
+                )
+              }
             >
               <View
                 style={{
@@ -688,8 +1379,18 @@ const PantallaJugando: React.FC = () => {
                 </Text>
               </View>
             </TouchableWithoutFeedback>
+
             <TouchableWithoutFeedback
-              onPress={ejecutarCadenaAnimacionSospechososSerLobo}
+              onPress={() =>
+                animacionesPantalla.ejecutarAnimacionVotacionesConcluidas(
+                  setMostrarVotacionesConcluidas,
+                  animacionesPantalla.animacionFondo,
+                  setCurrentAnimacion,
+                  iniciarAnimacion,
+                  iniciarDelay,
+                  startFadeOutNowRef
+                )
+              }
             >
               <View
                 style={{
@@ -699,7 +1400,31 @@ const PantallaJugando: React.FC = () => {
                 }}
               >
                 <Text style={{ color: "white" }}>
-                  Empiezan Votaciones Sospechosos Ser Lobo
+                  Las votaciones han concluido
+                </Text>
+              </View>
+            </TouchableWithoutFeedback>
+            <TouchableWithoutFeedback
+              onPress={() =>
+                animacionesPantalla.ejecutarAnimacionElegidoPueblo(
+                  setMostrarElegidoPueblo,
+                  animacionesPantalla.animacionFondo,
+                  setCurrentAnimacion,
+                  iniciarAnimacion,
+                  iniciarDelay,
+                  startFadeOutNowRef
+                )
+              }
+            >
+              <View
+                style={{
+                  padding: 10,
+                  backgroundColor: "rgba(0,0,0,0.5)",
+                  margin: 5,
+                }}
+              >
+                <Text style={{ color: "yellow" }}>
+                  Has sido el elegido por el pueblo
                 </Text>
               </View>
             </TouchableWithoutFeedback>
