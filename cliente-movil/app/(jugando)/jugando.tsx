@@ -424,12 +424,21 @@ const PantallaJugando: React.FC = () => {
    * @returns {void}
    */
   const manejarPasarTurno = (): void => {
-    if (votoRealizado || pasoTurno) {
+    if (pasoTurno) {
       mostrarError("Has pasado turno");
       logCustom(
         jornadaActual,
         etapaActual,
         `Intento de pasar turno fallido: Turno ya pasado`
+      );
+      return;
+    }
+    if (votoRealizado) {
+      mostrarError("Has pasado turno");
+      logCustom(
+        jornadaActual,
+        etapaActual,
+        `Intento de pasar turno fallido: Turno pasado`
       );
       return;
     }
