@@ -31,6 +31,35 @@ interface AnimacionesProps {
   mostrarElegidoPueblo: boolean;
 }
 
+// Mapeo de palabras a colores
+const colorMapping: Record<string, string> = {
+  "HOMBRES LOBO": "red",
+  BRUJA: "orange",
+  CAZADOR: "blue",
+  VIDENTE: "purple",
+  PUEBLO: "yellow",
+  ALGUACIL: "yellow",
+};
+
+// Función que recibe un texto y retorna un arreglo de <Text> con las palabras coloreadas
+const renderColoredText = (text: string) => {
+  // Se crea una expresión regular con las palabras clave
+  const regex = new RegExp(`(${Object.keys(colorMapping).join("|")})`, "g");
+  // Se separa el texto en partes que sean o no palabras clave
+  const parts = text.split(regex);
+  return parts.map((part, index) => {
+    // Si la parte coincide con una palabra clave, se le aplica el color correspondiente
+    if (colorMapping[part]) {
+      return (
+        <Text key={index} style={{ color: colorMapping[part] }}>
+          {part}
+        </Text>
+      );
+    }
+    return <Text key={index}>{part}</Text>;
+  });
+};
+
 const Animaciones: React.FC<AnimacionesProps> = (props) => {
   const {
     handleSkipAnimaciones,
@@ -81,7 +110,7 @@ const Animaciones: React.FC<AnimacionesProps> = (props) => {
             ]}
           >
             <Text style={estilos.textoEmpiezanVotacionesAlguacil}>
-              {CONSTANTES.TEXTOS.ALGUACIL}
+              {renderColoredText(CONSTANTES.TEXTOS.ALGUACIL)}
             </Text>
           </Animated.View>
         )}
@@ -98,7 +127,7 @@ const Animaciones: React.FC<AnimacionesProps> = (props) => {
             ]}
           >
             <Text style={estilos.textoEmpiezanVotacionesSospechososSerLobo1}>
-              {CONSTANTES.TEXTOS.ELIMINAR_LOBO}
+              {renderColoredText(CONSTANTES.TEXTOS.ELIMINAR_LOBO)}
             </Text>
           </Animated.View>
         )}
@@ -115,383 +144,208 @@ const Animaciones: React.FC<AnimacionesProps> = (props) => {
             ]}
           >
             <Text style={estilos.textoEmpiezanVotacionesSospechososSerLobo2}>
-              {CONSTANTES.TEXTOS.VOTACIONES}
+              {renderColoredText(CONSTANTES.TEXTOS.VOTACIONES)}
             </Text>
           </Animated.View>
         )}
 
+        {/* DISPARO DEL CAZADOR */}
         {mostrarCazadorDisparo && (
           <Animated.View
             style={[
-              {
-                position: "absolute",
-                width: "80%",
-                top: "15%",
-                justifyContent: "center",
-                alignItems: "center",
-                padding: 10,
-              },
+              estilos.contenedorAnimacionCazador,
               { opacity: animacionesPantalla.animacionCazadorDisparo.value },
             ]}
           >
-            <Text
-              style={{
-                color: "blue",
-                fontSize: CONSTANTES.NUMERICAS.TAMANIO_ICONO_BOTON,
-                textAlign: "center",
-              }}
-            >
-              HAS SIDO DISPARADO POR EL CAZADOR
+            <Text style={estilos.textoAnimacionCazador}>
+              {renderColoredText(CONSTANTES.TEXTOS.DISPARO_CAZADOR)}
             </Text>
           </Animated.View>
         )}
 
+        {/* BRUJA CURA */}
         {mostrarBrujaCura && (
           <Animated.View
             style={[
-              {
-                position: "absolute",
-                width: "80%",
-                top: "20%",
-                justifyContent: "center",
-                alignItems: "center",
-                padding: 10,
-              },
+              estilos.contenedorAnimacionBrujaCura,
               { opacity: animacionesPantalla.animacionBrujaCura.value },
             ]}
           >
-            <Text
-              style={{
-                color: "orange",
-                fontSize: CONSTANTES.NUMERICAS.TAMANIO_ICONO_BOTON,
-                textAlign: "center",
-              }}
-            >
-              HAS SIDO CURADO POR LA BRUJA
+            <Text style={estilos.textoAnimacionBrujaCura}>
+              {renderColoredText(CONSTANTES.TEXTOS.BRUJA_CURA)}
             </Text>
           </Animated.View>
         )}
 
+        {/* BRUJA VENENO */}
         {mostrarBrujaVeneno && (
           <Animated.View
             style={[
-              {
-                position: "absolute",
-                width: "80%",
-                top: "25%",
-                justifyContent: "center",
-                alignItems: "center",
-                padding: 10,
-              },
+              estilos.contenedorAnimacionBrujaVeneno,
               { opacity: animacionesPantalla.animacionBrujaVeneno.value },
             ]}
           >
-            <Text
-              style={{
-                color: "orange",
-                fontSize: CONSTANTES.NUMERICAS.TAMANIO_ICONO_BOTON,
-                textAlign: "center",
-              }}
-            >
-              HAS SIDO ENVENENADO POR LA BRUJA
+            <Text style={estilos.textoAnimacionBrujaVeneno}>
+              {renderColoredText(CONSTANTES.TEXTOS.BRUJA_VENENO)}
             </Text>
           </Animated.View>
         )}
 
+        {/* DORMIR */}
         {mostrarDormir && (
           <Animated.View
             style={[
-              {
-                position: "absolute",
-                width: "80%",
-                top: "30%",
-                justifyContent: "center",
-                alignItems: "center",
-                padding: 10,
-              },
+              estilos.contenedorAnimacionDormir,
               { opacity: animacionesPantalla.animacionDormir.value },
             ]}
           >
-            <Text
-              style={{
-                color: "white",
-                fontSize: CONSTANTES.NUMERICAS.TAMANIO_ICONO_BOTON,
-                textAlign: "center",
-              }}
-            >
-              ESTÁS DURMIENDO
+            <Text style={estilos.textoAnimacionDormir}>
+              {renderColoredText(CONSTANTES.TEXTOS.DORMIR)}
             </Text>
           </Animated.View>
         )}
 
+        {/* DEVORA HOMBRES LOBO */}
         {mostrarDevoraHombresLobo && (
           <Animated.View
             style={[
-              {
-                position: "absolute",
-                width: "80%",
-                top: "35%",
-                justifyContent: "center",
-                alignItems: "center",
-                padding: 10,
-              },
-              {
-                opacity: animacionesPantalla.animacionDevoraHombresLobo.value,
-              },
+              estilos.contenedorAnimacionDevora,
+              { opacity: animacionesPantalla.animacionDevoraHombresLobo.value },
             ]}
           >
-            <Text
-              style={{
-                color: "red",
-                fontSize: CONSTANTES.NUMERICAS.TAMANIO_ICONO_BOTON,
-                textAlign: "center",
-              }}
-            >
-              HAS SIDO EL DEVORADO POR LOS HOMBRES LOBO
+            <Text style={estilos.textoAnimacionDevora}>
+              {renderColoredText(CONSTANTES.TEXTOS.DEVORA_LOBOS)}
             </Text>
           </Animated.View>
         )}
 
+        {/* HOMBRES LOBO DORMIR */}
         {mostrarHombresLoboDormir && (
           <Animated.View
             style={[
-              {
-                position: "absolute",
-                width: "80%",
-                top: "40%",
-                justifyContent: "center",
-                alignItems: "center",
-                padding: 10,
-              },
-              {
-                opacity: animacionesPantalla.animacionHombresLoboDormir.value,
-              },
+              estilos.contenedorAnimacionHombresLoboDormir,
+              { opacity: animacionesPantalla.animacionHombresLoboDormir.value },
             ]}
           >
-            <Text
-              style={{
-                color: "red",
-                fontSize: CONSTANTES.NUMERICAS.TAMANIO_ICONO_BOTON,
-                textAlign: "center",
-              }}
-            >
-              LOS HOMBRES LOBO SACIADOS VUELVEN A DORMIRSE Y SUEÑAN CON PRÓXIMAS
-              Y SABROSAS VÍCTIMAS
+            <Text style={estilos.textoAnimacionHombresLoboDormir}>
+              {renderColoredText(CONSTANTES.TEXTOS.LOBOS_DORMIR)}
             </Text>
           </Animated.View>
         )}
 
+        {/* BRUJA DESPIERTA */}
         {mostrarBrujaDespierta && (
           <Animated.View
             style={[
-              {
-                position: "absolute",
-                width: "80%",
-                top: "45%",
-                justifyContent: "center",
-                alignItems: "center",
-                padding: 10,
-              },
+              estilos.contenedorAnimacionBrujaDespierta,
               { opacity: animacionesPantalla.animacionBrujaDespierta.value },
             ]}
           >
-            <Text
-              style={{
-                color: "orange",
-                fontSize: CONSTANTES.NUMERICAS.TAMANIO_ICONO_BOTON,
-                textAlign: "center",
-              }}
-            >
-              LA BRUJA SE DESPIERTA, OBSERVA LA NUEVA VÍCTIMA DE LOS HOMBRES
-              LOBO. USARÁ SU POCIÓN CURATIVA O SU POCIÓN VENENOSA
+            <Text style={estilos.textoAnimacionBrujaDespierta}>
+              {renderColoredText(CONSTANTES.TEXTOS.BRUJA_DESPIERTA)}
             </Text>
           </Animated.View>
         )}
 
+        {/* BRUJA DUERME */}
         {mostrarBrujaDuerme && (
           <Animated.View
             style={[
-              {
-                position: "absolute",
-                width: "80%",
-                top: "50%",
-                justifyContent: "center",
-                alignItems: "center",
-                padding: 10,
-              },
+              estilos.contenedorAnimacionBrujaDuerme,
               { opacity: animacionesPantalla.animacionBrujaDuerme.value },
             ]}
           >
-            <Text
-              style={{
-                color: "orange",
-                fontSize: CONSTANTES.NUMERICAS.TAMANIO_ICONO_BOTON,
-                textAlign: "center",
-              }}
-            >
-              LA BRUJA SE VUELVE A DORMIR
+            <Text style={estilos.textoAnimacionBrujaDuerme}>
+              {renderColoredText(CONSTANTES.TEXTOS.BRUJA_DUERME)}
             </Text>
           </Animated.View>
         )}
 
+        {/* VIDENTE DUERME */}
         {mostrarVidenteDuerme && (
           <Animated.View
             style={[
-              {
-                position: "absolute",
-                width: "80%",
-                top: "55%",
-                justifyContent: "center",
-                alignItems: "center",
-                padding: 10,
-              },
+              estilos.contenedorAnimacionVidenteDuerme,
               { opacity: animacionesPantalla.animacionVidenteDuerme.value },
             ]}
           >
-            <Text
-              style={{
-                color: "purple",
-                fontSize: CONSTANTES.NUMERICAS.TAMANIO_ICONO_BOTON,
-                textAlign: "center",
-              }}
-            >
-              LA VIDENTE SE VUELVE A DORMIR
+            <Text style={estilos.textoAnimacionVidenteDuerme}>
+              {renderColoredText(CONSTANTES.TEXTOS.VIDENTE_DUERME)}
             </Text>
           </Animated.View>
         )}
 
+        {/* VIDENTE DESPIERTA */}
         {mostrarVidenteDespierta && (
           <Animated.View
             style={[
-              {
-                position: "absolute",
-                width: "80%",
-                top: "60%",
-                justifyContent: "center",
-                alignItems: "center",
-                padding: 10,
-              },
+              estilos.contenedorAnimacionVidenteDespierta,
               { opacity: animacionesPantalla.animacionVidenteDespierta.value },
             ]}
           >
-            <Text
-              style={{
-                color: "purple",
-                fontSize: CONSTANTES.NUMERICAS.TAMANIO_ICONO_BOTON,
-                textAlign: "center",
-              }}
-            >
-              LA VIDENTE SE DESPIERTA Y SEÑALA A UN JUGADOR DEL QUE QUIERE
-              CONOCER LA VERDADERA PERSONALIDAD
+            <Text style={estilos.textoAnimacionVidenteDespierta}>
+              {renderColoredText(CONSTANTES.TEXTOS.VIDENTE_DESPIERTA)}
             </Text>
           </Animated.View>
         )}
 
+        {/* NOCHE SUPERVIVIENTES */}
         {mostrarNocheSupervivientes && (
           <Animated.View
             style={[
-              {
-                position: "absolute",
-                width: "80%",
-                top: "65%",
-                justifyContent: "center",
-                alignItems: "center",
-                padding: 10,
-              },
+              estilos.contenedorAnimacionNocheSupervivientes,
               {
                 opacity: animacionesPantalla.animacionNocheSupervivientes.value,
               },
             ]}
           >
-            <Text
-              style={{
-                color: "white",
-                fontSize: CONSTANTES.NUMERICAS.TAMANIO_ICONO_BOTON,
-                textAlign: "center",
-              }}
-            >
-              SE HACE DE NOCHE; LOS SUPERVIVIENTES VUELVEN A DORMIR
+            <Text style={estilos.textoAnimacionNocheSupervivientes}>
+              {renderColoredText(CONSTANTES.TEXTOS.NOCHE_SUPERVIVIENTES)}
             </Text>
           </Animated.View>
         )}
 
+        {/* JUGADOR ALGUACIL */}
         {mostrarJugadorAlguacil && (
           <Animated.View
             style={[
-              {
-                position: "absolute",
-                width: "80%",
-                top: "70%",
-                justifyContent: "center",
-                alignItems: "center",
-                padding: 10,
-              },
+              estilos.contenedorAnimacionJugadorAlguacil,
               { opacity: animacionesPantalla.animacionJugadorAlguacil.value },
             ]}
           >
-            <Text
-              style={{
-                color: "white",
-                fontSize: CONSTANTES.NUMERICAS.TAMANIO_ICONO_BOTON,
-                textAlign: "center",
-              }}
-            >
-              JUGADOR 4 ES EL AGUACIL
+            <Text style={estilos.textoAnimacionJugadorAlguacil}>
+              {renderColoredText(CONSTANTES.TEXTOS.JUGADOR_ALGUACIL)}
             </Text>
           </Animated.View>
         )}
 
+        {/* VOTACIONES CONCLUIDAS */}
         {mostrarVotacionesConcluidas && (
           <Animated.View
             style={[
-              {
-                position: "absolute",
-                width: "80%",
-                top: "75%",
-                justifyContent: "center",
-                alignItems: "center",
-                padding: 10,
-              },
+              estilos.contenedorAnimacionVotacionesConcluidas,
               {
                 opacity:
                   animacionesPantalla.animacionVotacionesConcluidas.value,
               },
             ]}
           >
-            <Text
-              style={{
-                color: "white",
-                fontSize: CONSTANTES.NUMERICAS.TAMANIO_ICONO_BOTON,
-                textAlign: "center",
-              }}
-            >
-              LAS VOTACIONES HAN CONCLUIDO
+            <Text style={estilos.textoAnimacionVotacionesConcluidas}>
+              {renderColoredText(CONSTANTES.TEXTOS.VOTACIONES_CONCLUIDAS)}
             </Text>
           </Animated.View>
         )}
 
+        {/* ELEGIDO POR EL PUEBLO */}
         {mostrarElegidoPueblo && (
           <Animated.View
             style={[
-              {
-                position: "absolute",
-                width: "80%",
-                top: "80%",
-                justifyContent: "center",
-                alignItems: "center",
-                padding: 10,
-              },
+              estilos.contenedorAnimacionElegidoPueblo,
               { opacity: animacionesPantalla.animacionElegidoPueblo.value },
             ]}
           >
-            <Text
-              style={{
-                color: "yellow",
-                fontSize: CONSTANTES.NUMERICAS.TAMANIO_ICONO_BOTON,
-                textAlign: "center",
-              }}
-            >
-              HAS SIDO EL ELEGIDO POR EL PUEBLO
+            <Text style={estilos.textoAnimacionElegidoPueblo}>
+              {renderColoredText(CONSTANTES.TEXTOS.ELEGIDO_PUEBLO)}
             </Text>
           </Animated.View>
         )}
