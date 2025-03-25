@@ -40,6 +40,15 @@ export const administradorAnimaciones = () => {
     skipAnimaciones = skip;
   };
 
+  // Objeto dummy que implementa la interfaz CompositeAnimation
+  const dummyAnimation: Animated.CompositeAnimation = {
+    start: (callback?: (result: { finished: boolean }) => void) => {
+      if (callback) callback({ finished: true });
+    },
+    stop: () => {},
+    reset: () => {},
+  };
+
   const crearAnimacion = (initialValue = 0) => {
     const value = new Animated.Value(initialValue);
 
@@ -47,9 +56,7 @@ export const administradorAnimaciones = () => {
       if (skipAnimaciones) {
         skipAnimaciones = false;
         value.setValue(1);
-        return {
-          start: (callback?: () => void) => callback && callback(),
-        };
+        return dummyAnimation;
       }
       return Animated.timing(value, {
         toValue: 1,
@@ -62,9 +69,7 @@ export const administradorAnimaciones = () => {
       if (skipAnimaciones) {
         skipAnimaciones = false;
         value.setValue(0);
-        return {
-          start: (callback?: () => void) => callback && callback(),
-        };
+        return dummyAnimation;
       }
       return Animated.timing(value, {
         toValue: 0,
@@ -76,9 +81,7 @@ export const administradorAnimaciones = () => {
     const sequence = (animations: Animated.CompositeAnimation[]) => {
       if (skipAnimaciones) {
         skipAnimaciones = false;
-        return {
-          start: (callback?: () => void) => callback && callback(),
-        };
+        return dummyAnimation;
       }
       return Animated.sequence(animations);
     };
@@ -89,9 +92,7 @@ export const administradorAnimaciones = () => {
     ) => {
       if (skipAnimaciones) {
         skipAnimaciones = false;
-        return {
-          start: (callback?: () => void) => callback && callback(),
-        };
+        return dummyAnimation;
       }
       return Animated.stagger(delay, animations);
     };
