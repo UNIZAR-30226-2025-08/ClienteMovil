@@ -1,332 +1,339 @@
 /**
- * @file PantallaJugando - Componente principal de la pantalla de juego.
- * @description Maneja la lógica del juego, incluyendo estados, animaciones, temporizador,
- * votaciones, chat y habilidades.
+ * @file PantallaJugando.tsx
+ * @description Componente principal de la pantalla de juego.
+ * Maneja la lógica del juego, incluyendo estados, temporizador, votaciones, chat y habilidades, sin animaciones.
+ * @module PantallaJugando
  */
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   ImageBackground,
   Text,
-  Image,
-  Animated,
   TouchableWithoutFeedback,
+  Animated,
 } from "react-native";
 import { useFonts } from "expo-font";
-import { CONSTANTES, Rol } from "./constantes";
-import { estilos } from "./styles/jugando.styles";
 
-// Funciones auxiliares (puras)
-import { getInfoRol } from "./utilidades/rolesUtilidades";
+// Utils (funciones puras, estilos y constantes)
+import { getInfoRol } from "../../utils/jugando/rolesUtilidades";
+import { estilos } from "../../utils/jugando/jugando.styles";
+import { CONSTANTES, Rol } from "../../utils/jugando/constantes";
 
-// Módulos UI
+// Componentes (trozos de UI)
 import Chat from "./componentes/Chat";
 import HabilidadPopup from "./componentes/HabilidadPopup";
 import BarraSuperior from "./componentes/BarraSuperior";
 import CirculoVotar from "./componentes/CirculoVotar";
 import ControlesAccion from "./componentes/ControlesAccion";
 import MensajeError from "./componentes/MensajeError";
-import BotonesDebug from "./componentes/BotonesDebug";
-import Animaciones from "./componentes/Animaciones";
 
-// Hooks y administradores de estado
+// Hooks (administran estado)
 import useTemporizador from "./hooks/useTemporizador";
-import useModoDiaNoche from "./hooks/useModoDiaNoche";
 import useAnimacionChat from "./hooks/useAnimacionChat";
 import useAnimacionHabilidad from "./hooks/useAnimacionHabilidad";
 import useMensajeError from "./hooks/useMensajeError";
-import * as animacionesPantalla from "./hooks/useAnimacionesPantalla";
-import { administradorAnimaciones } from "./hooks/animaciones";
+import useDiaNoche from "./hooks/useDiaNoche";
 
 /**
- * @constant {boolean} MODO_NOCHE_GLOBAL - Indica si el juego está en modo noche. Si es falso, es de día.
+ * @constant {boolean} MODO_NOCHE_GLOBAL
+ * Indica si el juego se encuentra en modo noche. Si es false, se considera modo día.
  */
 export let MODO_NOCHE_GLOBAL = false;
 
 /**
- * @constant {boolean} TEXTO_YA_MOSTRADO - Bandera que indica si el texto de inicio ya se ha mostrado.
- * Si es verdadera, se omitirá la presentación inicial.
+ * Componente funcional que representa la pantalla principal de juego.
+ *
+ * @returns {JSX.Element | null} El componente renderizado o null si las fuentes no se han cargado.
  */
-export let TEXTO_YA_MOSTRADO = false;
-
 const PantallaJugando: React.FC = () => {
-  // Estados para controlar la visibilidad e interacciones de la UI:
-  const [mostrarRol, setMostrarRol] = useState(false);
-  const [mostrarInicio, setMostrarInicio] = useState(false);
-  const [mostrarBotones, setMostrarBotones] = useState(false);
-  const [mostrarChat, setMostrarChat] = useState(false);
-  const [mostrarTextoInicial, setMostrarTextoInicial] = useState(
-    !TEXTO_YA_MOSTRADO
+  // ---------------------------------------------------------------------------
+  // Estados del Juego
+  // ---------------------------------------------------------------------------
+  const [jornadaActual, setJornadaActual] = useState<number>(1);
+  const [etapaActual, setEtapaActual] = useState<"Día" | "Noche">(
+    MODO_NOCHE_GLOBAL ? "Noche" : "Día"
   );
+
+  // ---------------------------------------------------------------------------
+  // Estados de la Interfaz de Usuario (UI)
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Controla la visualización de los botones de acción pasar turno y votar.
+   * @type {boolean}
+   */
+  const [mostrarBotones, setMostrarBotones] = useState<boolean>(false);
+
+  /**
+   * Controla la visualización del chat.
+   * @type {boolean}
+   */
+  const [mostrarChat, setMostrarChat] = useState<boolean>(false);
+
+  /**
+   * Guarda el índice del jugador seleccionado para votar.
+   * @type {number | null}
+   */
   const [JugadorSeleccionado, setJugadorSeleccionado] = useState<number | null>(
     null
   );
-  const [votes, setVotos] = useState(
+
+  /**
+   * Registra los votos de cada jugador.
+   * @type {number[]}
+   */
+  const [votes, setVotos] = useState<number[]>(
     Array(CONSTANTES.NUMERICAS.CANTIDAD_IMAGENES).fill(0)
   );
-  const [mostrarHabilidad, setMostrarHabilidad] = useState(false);
-  const [imagenes] = useState(
+
+  /**
+   * Controla la visualización de la ventana de habilidad.
+   * @type {boolean}
+   */
+  const [mostrarHabilidad, setMostrarHabilidad] = useState<boolean>(false);
+
+  /**
+   * Lista de imágenes asociadas a cada jugador.
+   * @type {string[]}
+   */
+  const [imagenes] = useState<string[]>(
     new Array(CONSTANTES.NUMERICAS.CANTIDAD_IMAGENES).fill(
       CONSTANTES.IMAGENES.JUGADORES
     )
   );
-  const [indiceUsuario] = useState(0);
-  const [rolUsuario, setRolUsuario] = useState<Rol>("aldeano");
-  const [votoRealizado, setVotoRealizado] = useState(false);
-  const [pasoTurno, setPasoTurno] = useState(false);
-  const [currentAnimacion, setCurrentAnimacion] = useState("");
 
-  // Estados para las animaciones ya existentes
-  const [mostrarAlguacil, setMostrarAlguacil] = useState(false);
-  const [
-    mostrarEmpiezanVotacionesSospechososSerLobo1,
-    setMostrarEmpiezanVotacionesSospechososSerLobo1,
-  ] = useState(false);
-  const [mostrarVotaciones, setMostrarVotaciones] = useState(false);
+  /**
+   * Índice del usuario local.
+   * @type {number}
+   */
+  const [indiceUsuario] = useState<number>(0);
 
-  // NUEVOS ESTADOS para las animaciones agregadas
-  const [mostrarCazadorDisparo, setMostrarCazadorDisparo] = useState(false);
-  const [mostrarBrujaCura, setMostrarBrujaCura] = useState(false);
-  const [mostrarBrujaVeneno, setMostrarBrujaVeneno] = useState(false);
-  const [mostrarDormir, setMostrarDormir] = useState(false);
-  const [mostrarDevoraHombresLobo, setMostrarDevoraHombresLobo] =
-    useState(false);
-  const [mostrarHombresLoboDormir, setMostrarHombresLoboDormir] =
-    useState(false);
-  const [mostrarBrujaDespierta, setMostrarBrujaDespierta] = useState(false);
-  const [mostrarBrujaDuerme, setMostrarBrujaDuerme] = useState(false);
-  const [mostrarVidenteDuerme, setMostrarVidenteDuerme] = useState(false);
-  const [mostrarVidenteDespierta, setMostrarVidenteDespierta] = useState(false);
-  const [mostrarNocheSupervivientes, setMostrarNocheSupervivientes] =
-    useState(false);
-  const [mostrarJugadorAlguacil, setMostrarJugadorAlguacil] = useState(false);
-  const [mostrarVotacionesConcluidas, setMostrarVotacionesConcluidas] =
-    useState(false);
-  const [mostrarElegidoPueblo, setMostrarElegidoPueblo] = useState(false);
+  /**
+   * Rol del usuario local.
+   * @type {Rol}
+   */
+  const [rolUsuario, setRolUsuario] = useState<Rol>("aldeano"); // Por defecto villager
 
-  // Refs para callbacks y timeouts en animaciones
-  const startFadeOutNowRef = useRef<(() => void) | null>(null);
-  const currentTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  /**
+   * Indica si el usuario ya realizó su voto.
+   * @type {boolean}
+   */
+  const [votoRealizado, setVotoRealizado] = useState<boolean>(false);
 
-  // Información derivada del rol del jugador:
+  /**
+   * Indica si el usuario ha pasado su turno.
+   * @type {boolean}
+   */
+  const [pasoTurno, setPasoTurno] = useState<boolean>(false);
+
+  // ---------------------------------------------------------------------------
+  // Obtención de información adicional a partir del rol del jugador.
+  // ---------------------------------------------------------------------------
   const { habilidadInfo, roleInfo } = getInfoRol(rolUsuario);
 
-  // Administración de estados temporales y animaciones mediante hooks:
+  // ---------------------------------------------------------------------------
+  // Hook para la animación del modo día/noche
+  // ---------------------------------------------------------------------------
+  const { animacionFondo, setModoDiaNoche } = useDiaNoche(MODO_NOCHE_GLOBAL);
+
+  // ---------------------------------------------------------------------------
+  // Hooks para administrar el temporizador, el chat, la habilidad y errores.
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Hook que administra el temporizador del juego.
+   * @returns {tiempoRestante, reiniciarTemporizador, setTemporizadorActivo}
+   */
   const { tiempoRestante, reiniciarTemporizador, setTemporizadorActivo } =
     useTemporizador(CONSTANTES.NUMERICAS.TIEMPO_INICIAL, false);
-  const { esDeNoche, setModoDiaNoche } = useModoDiaNoche(
-    animacionesPantalla.animacionFondo
-  );
+
+  /**
+   * Hook que administra la animación del chat.
+   * @returns {posicionChat, abrirChat, cerrarChat}
+   */
   const { posicionChat, abrirChat, cerrarChat } = useAnimacionChat();
+
+  /**
+   * Hook que administra la animación de la ventana de habilidad.
+   * @returns {posicionHabilidad, abrirHabilidad, cerrarHabilidad}
+   */
   const { posicionHabilidad, abrirHabilidad, cerrarHabilidad } =
     useAnimacionHabilidad();
+
+  /**
+   * Hook que administra los mensajes de error en la interfaz.
+   * @returns {errorMessage, mostrarError, animacionError}
+   */
   const { errorMessage, mostrarError, animacionError } = useMensajeError();
 
-  // Se crea la instancia del hook unificado de animaciones.
-  const adminAnimaciones = administradorAnimaciones();
+  // ---------------------------------------------------------------------------
+  // Efectos de inicialización y actualización
+  // ---------------------------------------------------------------------------
 
   /**
-   * Función para iniciar una animación y almacenar su callback.
-   */
-  const iniciarAnimacion = (
-    nombreAnimacion: string,
-    animacion: Animated.CompositeAnimation,
-    animatedValue: Animated.Value,
-    valorFinal: number,
-    callback: () => void
-  ) => {
-    setCurrentAnimacion(nombreAnimacion);
-    animacion.start(() => {
-      callback();
-    });
-  };
-
-  /**
-   * Función para iniciar un delay (tiempo de espera) que se pueda saltar.
-   */
-  const iniciarDelay = (delay: number, callback: () => void) => {
-    setCurrentAnimacion("delay");
-    currentTimeoutRef.current = setTimeout(() => {
-      currentTimeoutRef.current = null;
-      callback();
-    }, delay);
-  };
-
-  /**
-   * Handler global para saltar la animación o delay actual.
-   */
-  const handleSkipAnimaciones = () => {
-    if (currentTimeoutRef.current) {
-      clearTimeout(currentTimeoutRef.current);
-      currentTimeoutRef.current = null;
-      if (startFadeOutNowRef.current) {
-        startFadeOutNowRef.current();
-        return;
-      }
-    }
-    if (startFadeOutNowRef.current) {
-      startFadeOutNowRef.current();
-      return;
-    }
-    if (currentAnimacion.includes("fadeOut")) {
-      if (currentAnimacion.includes("texto")) {
-        animacionesPantalla.animacionTexto.value.stopAnimation(() => {
-          animacionesPantalla.animacionTexto.value.setValue(0);
-        });
-      } else if (currentAnimacion.includes("rol")) {
-        animacionesPantalla.animacionRol.value.stopAnimation(() => {
-          animacionesPantalla.animacionRol.value.setValue(0);
-        });
-      } else if (currentAnimacion.includes("inicio")) {
-        animacionesPantalla.animacionInicio.value.stopAnimation(() => {
-          animacionesPantalla.animacionInicio.value.setValue(0);
-        });
-      } else if (currentAnimacion.includes("fondo")) {
-        animacionesPantalla.animacionFondo.value.stopAnimation(() => {
-          animacionesPantalla.animacionFondo.value.setValue(0);
-        });
-      }
-    }
-  };
-
-  /**
-   * Efecto: Cadena de animaciones iniciales (texto, rol, inicio).
+   * Efecto de inicialización:
+   * - Selecciona un rol aleatorio para el usuario.
+   * - Activa la visualización de los botones de acción.
    */
   useEffect(() => {
-    const roles: Rol[] = ["aldeano", "lobo", "bruja", "cazador"];
-    const indiceAleatorio = Math.floor(Math.random() * roles.length);
-    setRolUsuario(roles[indiceAleatorio]);
-
-    if (TEXTO_YA_MOSTRADO) {
-      setMostrarTextoInicial(false);
-      setMostrarRol(false);
-      setMostrarInicio(false);
-      setMostrarBotones(true);
-      return;
-    }
-
-    // Se invoca la cadena de animación a través de adminAnimaciones.
-    adminAnimaciones.ejecutarCadenaAnimacion(
-      "texto",
-      animacionesPantalla.animacionTexto,
-      adminAnimaciones.RETRASO_ANIMACION,
-      () => {
-        TEXTO_YA_MOSTRADO = true;
-        setMostrarTextoInicial(false);
-        setMostrarRol(true);
-        adminAnimaciones.ejecutarCadenaAnimacion(
-          "rol",
-          animacionesPantalla.animacionRol,
-          adminAnimaciones.RETRASO_ANIMACION,
-          () => {
-            setMostrarInicio(true);
-            adminAnimaciones.ejecutarCadenaAnimacion(
-              "inicio",
-              animacionesPantalla.animacionInicio,
-              adminAnimaciones.RETRASO_ANIMACION,
-              () => {
-                setCurrentAnimacion("fondo-fadeOut");
-                iniciarAnimacion(
-                  "fondo-fadeOut",
-                  animacionesPantalla.animacionFondo.fadeOut(),
-                  animacionesPantalla.animacionFondo.value,
-                  0,
-                  () => {
-                    setMostrarBotones(true);
-                    setCurrentAnimacion("");
-                  }
-                );
-              },
-              setCurrentAnimacion,
-              iniciarAnimacion,
-              iniciarDelay,
-              startFadeOutNowRef
-            );
-          },
-          setCurrentAnimacion,
-          iniciarAnimacion,
-          iniciarDelay,
-          startFadeOutNowRef
-        );
-      },
-      setCurrentAnimacion,
-      iniciarAnimacion,
-      iniciarDelay,
-      startFadeOutNowRef
+    const roles: Rol[] = ["aldeano", "lobo", "bruja", "cazador", "vidente"];
+    const indiceAleatorio: number = Math.floor(Math.random() * roles.length); // Para hacer pruebas, idea de Nico.
+    const rolAsignado = roles[indiceAleatorio];
+    setRolUsuario(rolAsignado);
+    setMostrarBotones(true);
+    console.log(
+      `[Jornada ${jornadaActual} - ${etapaActual}] Juego iniciado. Rol asignado: ${rolAsignado}`
     );
   }, []);
 
   /**
-   * Activa el temporizador cuando se muestran los botones.
-   */
-  useEffect(() => {
-    if (mostrarBotones) {
-      setTemporizadorActivo(true);
-    }
-  }, [mostrarBotones]);
-
-  /**
-   * Alterna el modo día/noche y reinicia estados al finalizar el temporizador.
+   * Efecto que se dispara cuando el temporizador llega a 0.
+   * Alterna el modo (día/noche), reinicia los estados de votación y resetea el temporizador.
    */
   useEffect(() => {
     if (tiempoRestante === 0) {
-      const nuevoModo = !esDeNoche;
+      const nuevoModo: boolean = !MODO_NOCHE_GLOBAL;
       MODO_NOCHE_GLOBAL = nuevoModo;
       setModoDiaNoche(nuevoModo);
+
+      const nuevaEtapa = nuevoModo ? "Noche" : "Día";
+      const esNuevoDia = nuevoModo === false;
+      const nuevaJornada = esNuevoDia ? jornadaActual + 1 : jornadaActual;
+
+      console.log(
+        `[Jornada ${nuevaJornada} - ${nuevaEtapa}] Comenzando nueva etapa`
+      );
+
+      setEtapaActual(nuevaEtapa);
+      if (esNuevoDia) {
+        setJornadaActual(nuevaJornada);
+      }
+
       setVotos(Array(CONSTANTES.NUMERICAS.CANTIDAD_IMAGENES).fill(0));
       setVotoRealizado(false);
       setPasoTurno(false);
       setJugadorSeleccionado(null);
       reiniciarTemporizador();
-    }
-  }, [tiempoRestante, esDeNoche, reiniciarTemporizador, setModoDiaNoche]);
 
-  // Manejo del chat y popup de habilidad
-  const handleAbrirChat = () => {
+      if (!votoRealizado) {
+        console.log(
+          `[Jornada ${jornadaActual} - ${nuevaEtapa}] El jugador no ha votado en esta etapa`
+        );
+      }
+    }
+  }, [tiempoRestante]);
+
+  /**
+   * Efecto que activa el temporizador al montar el componente.
+   */
+  useEffect(() => {
+    setTemporizadorActivo(true);
+  }, []);
+
+  // ---------------------------------------------------------------------------
+  // Funciones de manejo de eventos
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Abre el chat y activa la animación correspondiente.
+   *
+   * @returns {void}
+   */
+  const handleAbrirChat = (): void => {
+    console.log(`[Jornada ${jornadaActual} - ${etapaActual}] Chat abierto`);
     setMostrarChat(true);
     abrirChat();
   };
 
-  const handleCerrarChat = () => {
+  /**
+   * Cierra el chat y desactiva la animación correspondiente.
+   *
+   * @returns {void}
+   */
+  const handleCerrarChat = (): void => {
+    console.log(`[Jornada ${jornadaActual} - ${etapaActual}] Chat cerrado`);
     cerrarChat();
     setMostrarChat(false);
   };
 
-  const handleAbrirHabilidad = () => {
+  /**
+   * Abre la ventana de habilidad y activa la animación correspondiente.
+   *
+   * @returns {void}
+   */
+  const handleAbrirHabilidad = (): void => {
+    console.log(
+      `[Jornada ${jornadaActual} - ${etapaActual}] Ventana de habilidad abierta`
+    );
     setMostrarHabilidad(true);
     abrirHabilidad();
   };
 
-  const handleCerrarHabilidad = () => {
+  /**
+   * Cierra la ventana de habilidad y desactiva la animación correspondiente.
+   *
+   * @returns {void}
+   */
+  const handleCerrarHabilidad = (): void => {
+    console.log(
+      `[Jornada ${jornadaActual} - ${etapaActual}] Ventana de habilidad cerrada`
+    );
     cerrarHabilidad();
     setMostrarHabilidad(false);
   };
 
-  // Selección de jugador para votación
-  const administrarSeleccionJugadorVotacion = (index: number) => {
-    if (esDeNoche && rolUsuario !== "lobo") {
+  /**
+   * Administra la selección de un jugador para la votación.
+   *
+   * @param {number} index - Índice del jugador seleccionado.
+   * @returns {void}
+   */
+  const administrarSeleccionJugadorVotacion = (index: number): void => {
+    // Solo los lobos pueden seleccionar jugadores durante la noche
+    if (rolUsuario !== "lobo" && MODO_NOCHE_GLOBAL) {
+      console.log(
+        `[Jornada ${jornadaActual} - ${etapaActual}] Intento de selección de usuario fallido: Es de noche y no es lobo`
+      );
       mostrarError(
         "Solo los lobos pueden seleccionar jugadores durante la noche"
       );
       return;
     }
     if (pasoTurno) {
+      console.log(
+        `[Jornada ${jornadaActual} - ${etapaActual}] Intento de selección de usuario fallido: Turno ya pasado`
+      );
       mostrarError("Has pasado turno");
       return;
     }
     if (votoRealizado) {
+      console.log(
+        `[Jornada ${jornadaActual} - ${etapaActual}] Intento de selección de usuario fallido: Voto ya realizado`
+      );
       mostrarError("Solo puedes votar a un jugador por turno");
       return;
     }
     if (index === indiceUsuario) {
+      console.log(
+        `[Jornada ${jornadaActual} - ${etapaActual}] Intento de selección fallido: Voto propio`
+      );
       mostrarError("¡No puedes votarte a ti mismo!");
       return;
     }
+    console.log(
+      `[Jornada ${jornadaActual} - ${etapaActual}] Jugador ${
+        index + 1
+      } seleccionado para votación`
+    );
     setJugadorSeleccionado(index);
   };
 
-  // Votación de jugador
-  const votarAJugador = () => {
+  /**
+   * Ejecuta la acción de votar al jugador seleccionado.
+   *
+   * @returns {void}
+   */
+  const votarAJugador = (): void => {
     if (pasoTurno) {
       mostrarError("Has pasado turno");
       return;
@@ -336,208 +343,112 @@ const PantallaJugando: React.FC = () => {
       return;
     }
     if (JugadorSeleccionado === null) {
-      console.log("No se ha seleccionado ningún jugador para votar.");
+      console.log(
+        `[Jornada ${jornadaActual} - ${etapaActual}] Intento de voto fallido: Ningún jugador seleccionado`
+      );
       return;
     }
-    setVotos((votosAnteriores) => {
-      const nuevosVotos = [...votosAnteriores];
+    setVotos((votosAnteriores: number[]): number[] => {
+      const nuevosVotos: number[] = [...votosAnteriores];
       nuevosVotos[JugadorSeleccionado] += 1;
+      console.log(
+        `[Jornada ${jornadaActual} - ${etapaActual}] Voto registrado para el jugador ${
+          JugadorSeleccionado + 1
+        }`
+      );
       return nuevosVotos;
     });
-    console.log(`Votado al jugador ${JugadorSeleccionado + 1}`, votes);
-    setVotoRealizado(true);
-    setJugadorSeleccionado(null);
-  };
-
-  // Pasar turno
-  const manejarPasarTurno = () => {
-    if (votoRealizado || pasoTurno) {
-      mostrarError("Has pasado turno");
-      return;
-    }
-    setPasoTurno(true);
     setVotoRealizado(true);
     setJugadorSeleccionado(null);
   };
 
   /**
-   * Función que encadena las dos animaciones de "Sospechosos Ser Lobo" de forma secuencial.
+   * Maneja la acción de pasar turno, validando que no se haya votado previamente.
+   *
+   * @returns {void}
    */
-  const ejecutarCadenaAnimacionSospechososSerLobo = () => {
-    animacionesPantalla.animacionFondo.value.setValue(1);
-    setMostrarEmpiezanVotacionesSospechososSerLobo1(true);
-    adminAnimaciones.ejecutarCadenaAnimacion(
-      "EmpiezanVotacionesSospechososSerLobo1",
-      animacionesPantalla.animacionEmpiezanVotacionesSospechososSerLobo1,
-      adminAnimaciones.RETRASO_ANIMACION,
-      () => {
-        setMostrarEmpiezanVotacionesSospechososSerLobo1(false);
-        setMostrarVotaciones(true);
-        adminAnimaciones.ejecutarCadenaAnimacion(
-          "votaciones",
-          animacionesPantalla.animacionEmpiezanVotacionesSospechososSerLobo2,
-          adminAnimaciones.RETRASO_ANIMACION,
-          () => {
-            setCurrentAnimacion("fondo-fadeOut");
-            iniciarAnimacion(
-              "fondo-fadeOut",
-              animacionesPantalla.animacionFondo.fadeOut(),
-              animacionesPantalla.animacionFondo.value,
-              0,
-              () => {
-                setMostrarVotaciones(false);
-                setCurrentAnimacion("");
-              }
-            );
-          },
-          setCurrentAnimacion,
-          iniciarAnimacion,
-          iniciarDelay,
-          startFadeOutNowRef
-        );
-      },
-      setCurrentAnimacion,
-      iniciarAnimacion,
-      iniciarDelay,
-      startFadeOutNowRef
-    );
+  const manejarPasarTurno = (): void => {
+    if (votoRealizado || pasoTurno) {
+      mostrarError("Has pasado turno");
+      console.log(
+        `[Jornada ${jornadaActual} - ${etapaActual}] Intento de pasar turno fallido: Turno ya pasado`
+      );
+      return;
+    }
+    console.log(`[Jornada ${jornadaActual} - ${etapaActual}] Turno pasado`);
+    setPasoTurno(true);
+    setVotoRealizado(true);
+    setJugadorSeleccionado(null);
   };
 
-  // Carga de fuente personalizada
+  // ---------------------------------------------------------------------------
+  // Carga de fuentes personalizadas
+  // ---------------------------------------------------------------------------
   const [fuentesCargadas] = useFonts({
     Corben: require("@/assets/fonts/Corben-Regular.ttf"),
   });
   if (!fuentesCargadas) return null;
 
-  // Si hay algún overlay de animación activo, delegamos el renderizado al componente Animaciones.
-  const debugOverlayActive =
-    mostrarAlguacil ||
-    mostrarEmpiezanVotacionesSospechososSerLobo1 ||
-    mostrarVotaciones ||
-    mostrarCazadorDisparo ||
-    mostrarBrujaCura ||
-    mostrarBrujaVeneno ||
-    mostrarDormir ||
-    mostrarDevoraHombresLobo ||
-    mostrarHombresLoboDormir ||
-    mostrarBrujaDespierta ||
-    mostrarBrujaDuerme ||
-    mostrarVidenteDuerme ||
-    mostrarVidenteDespierta ||
-    mostrarNocheSupervivientes ||
-    mostrarJugadorAlguacil ||
-    mostrarVotacionesConcluidas ||
-    mostrarElegidoPueblo;
-
-  if (debugOverlayActive) {
-    return (
-      <Animaciones
-        handleSkipAnimaciones={handleSkipAnimaciones}
-        estilos={estilos}
-        animacionesPantalla={animacionesPantalla}
-        mostrarAlguacil={mostrarAlguacil}
-        mostrarEmpiezanVotacionesSospechososSerLobo1={
-          mostrarEmpiezanVotacionesSospechososSerLobo1
-        }
-        mostrarVotaciones={mostrarVotaciones}
-        mostrarCazadorDisparo={mostrarCazadorDisparo}
-        mostrarBrujaCura={mostrarBrujaCura}
-        mostrarBrujaVeneno={mostrarBrujaVeneno}
-        mostrarDormir={mostrarDormir}
-        mostrarDevoraHombresLobo={mostrarDevoraHombresLobo}
-        mostrarHombresLoboDormir={mostrarHombresLoboDormir}
-        mostrarBrujaDespierta={mostrarBrujaDespierta}
-        mostrarBrujaDuerme={mostrarBrujaDuerme}
-        mostrarVidenteDuerme={mostrarVidenteDuerme}
-        mostrarVidenteDespierta={mostrarVidenteDespierta}
-        mostrarNocheSupervivientes={mostrarNocheSupervivientes}
-        mostrarJugadorAlguacil={mostrarJugadorAlguacil}
-        mostrarVotacionesConcluidas={mostrarVotacionesConcluidas}
-        mostrarElegidoPueblo={mostrarElegidoPueblo}
-      />
-    );
-  }
-
-  // Renderizado normal de la UI cuando no hay overlay activo.
+  // ---------------------------------------------------------------------------
+  // Renderizado del componente
+  // ---------------------------------------------------------------------------
   return (
-    <TouchableWithoutFeedback onPress={handleSkipAnimaciones}>
+    // El componente TouchableWithoutFeedback se utiliza para capturar toques
+    // en cualquier parte de la pantalla sin mostrar retroalimentación visual.
+    <TouchableWithoutFeedback>
+      {/* Contenedor principal que engloba todo el contenido de la pantalla */}
       <View style={estilos.contenedor}>
+        {/* 
+          Imagen de fondo:
+          - Se utiliza el componente ImageBackground para colocar una imagen que cubra toda la pantalla.
+          - La imagen se obtiene de CONSTANTES.IMAGENES.FONDO.
+          - La propiedad resizeMode="cover" asegura que la imagen cubra el contenedor sin deformarse.
+        */}
         <ImageBackground
           source={CONSTANTES.IMAGENES.FONDO}
           style={estilos.fondo}
           resizeMode="cover"
         />
+
+        {/*
+          Overlay animado:
+          - Se emplea el componente Animated.View para mostrar una capa que oscurece la pantalla.
+          - La opacidad de esta capa se controla mediante el valor animado (animacionFondo)
+            proporcionado por el hook useDiaNoche.
+          - Cuando el modo es noche, la opacidad se establece en 0.95 para simular oscuridad.
+            En modo día, la opacidad es 0, haciendo la capa invisible.
+        */}
         <Animated.View
-          style={[
-            estilos.superposicion,
-            { opacity: animacionesPantalla.animacionFondo.value },
-          ]}
+          style={[estilos.superposicion, { opacity: animacionFondo }]}
         />
-        {mostrarTextoInicial && (
-          <Animated.View
-            style={[
-              estilos.contenedorTexto,
-              { opacity: animacionesPantalla.animacionTexto.value },
-            ]}
-          >
-            <Text style={estilos.texto}>{CONSTANTES.TEXTOS.INICIAL}</Text>
-          </Animated.View>
-        )}
+
+        {/*
+          Renderizado condicional del mensaje de error:
+          - Si errorMessage tiene contenido, se muestra el componente MensajeError.
+          - Este componente se encarga de mostrar el error y la animación correspondiente.
+        */}
         {errorMessage && (
           <MensajeError
             errorMessage={errorMessage}
             animacionError={animacionError}
           />
         )}
-        {mostrarRol && (
-          <Animated.View
-            style={[
-              estilos.contenedorRol,
-              { opacity: animacionesPantalla.animacionRol.value },
-            ]}
-          >
-            <View style={estilos.contenedorTextoRol}>
-              <Text style={estilos.textoRol}>
-                {CONSTANTES.TEXTOS.ROL_TITULO}
-              </Text>
-            </View>
-            <Image source={roleInfo.image} style={estilos.imagenRol} />
-            <View
-              style={{
-                position: "relative",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <Text
-                style={[
-                  estilos.nombreRol,
-                  {
-                    color: rolUsuario === "lobo" ? "red" : "rgb(0, 42, 252)",
-                    position: "absolute",
-                    textAlign: "center",
-                  },
-                ]}
-              >
-                {roleInfo.roleName}
-              </Text>
-            </View>
-          </Animated.View>
-        )}
-        {mostrarInicio && (
-          <Animated.View
-            style={[
-              estilos.contenedorTexto,
-              { opacity: animacionesPantalla.animacionInicio.value },
-            ]}
-          >
-            <Text style={estilos.textoInicio}>
-              {CONSTANTES.TEXTOS.INICIO_PARTIDA}
-            </Text>
-          </Animated.View>
-        )}
+
+        {/*
+          Renderizado condicional de los controles de acción y la votación:
+          - Se verifica el estado mostrarBotones para determinar si se deben renderizar
+            los botones de acción, la barra superior, el temporizador y la interfaz de votación.
+          - Estos elementos permiten al usuario interactuar con las funcionalidades del juego.
+        */}
         {mostrarBotones && (
           <>
+            {/*
+              Componente ControlesAccion:
+              - Muestra los botones para votar y pasar turno.
+              - Recibe información relevante (como habilidadInfo) y funciones de manejo de eventos.
+              - La función mostrarBotonesAccion determina la visibilidad según el modo de juego
+                o el rol del usuario (por ejemplo, permitiendo a los lobos interactuar durante la noche).
+            */}
             <ControlesAccion
               habilidadInfo={habilidadInfo}
               abrirHabilidad={handleAbrirHabilidad}
@@ -550,12 +461,30 @@ const PantallaJugando: React.FC = () => {
               votoRealizado={votoRealizado}
               turnoPasado={pasoTurno}
             />
+
+            {/* Componente BarraSuperior: 
+                Suele mostrar información relevante en la parte superior de la pantalla, 
+                como el estado del juego o la identificación del rol. */}
             <BarraSuperior />
+
+            {/*
+              Temporizador:
+              - Se renderiza un contenedor que muestra el tiempo restante de la ronda actual.
+              - El tiempo se muestra dentro de un círculo estilizado, haciendo uso de estilos predefinidos.
+            */}
             <View style={estilos.contenedorTemporizador}>
               <View style={estilos.circuloTemporizador}>
                 <Text style={estilos.textoTemporizador}>{tiempoRestante}</Text>
               </View>
             </View>
+
+            {/*
+              Componente CirculoVotar:
+              - Representa la interfaz de votación en la que se muestran las imágenes de los jugadores.
+              - Permite seleccionar un jugador para votar, mediante la función onSelectPlayer.
+              - Recibe la lista de imágenes, los votos acumulados, el jugador actualmente seleccionado,
+                y la función que maneja la selección de jugadores.
+            */}
             <CirculoVotar
               imagenes={imagenes}
               votes={votes}
@@ -564,6 +493,13 @@ const PantallaJugando: React.FC = () => {
             />
           </>
         )}
+
+        {/*
+          Renderizado condicional del Chat:
+          - Si mostrarChat es verdadero, se renderiza el componente Chat.
+          - Se pasan los mensajes iniciales, la posición actual del chat (para la animación),
+            y la función para cerrar el chat.
+        */}
         {mostrarChat && (
           <Chat
             mensajes={CONSTANTES.TEXTOS.CHAT.MENSAJES_INICIALES}
@@ -571,6 +507,14 @@ const PantallaJugando: React.FC = () => {
             onClose={handleCerrarChat}
           />
         )}
+
+        {/*
+          Renderizado condicional del HabilidadPopup:
+          - Si mostrarHabilidad es verdadero, se renderiza el componente HabilidadPopup.
+          - Este componente muestra información y opciones relacionadas con la habilidad del jugador.
+          - Se le suministran datos como habilidadInfo, la posición para la animación, y una función
+            para cerrar el popup.
+        */}
         {mostrarHabilidad && (
           <HabilidadPopup
             habilidadInfo={habilidadInfo}
@@ -578,33 +522,8 @@ const PantallaJugando: React.FC = () => {
             onClose={handleCerrarHabilidad}
           />
         )}
-        <BotonesDebug
-          ejecutarCadenaAnimacionSospechososSerLobo={
-            ejecutarCadenaAnimacionSospechososSerLobo
-          }
-          animacionesPantalla={animacionesPantalla}
-          setMostrarCazadorDisparo={setMostrarCazadorDisparo}
-          setMostrarBrujaCura={setMostrarBrujaCura}
-          setMostrarBrujaVeneno={setMostrarBrujaVeneno}
-          setMostrarDormir={setMostrarDormir}
-          setMostrarDevoraHombresLobo={setMostrarDevoraHombresLobo}
-          setMostrarHombresLoboDormir={setMostrarHombresLoboDormir}
-          setMostrarBrujaDespierta={setMostrarBrujaDespierta}
-          setMostrarBrujaDuerme={setMostrarBrujaDuerme}
-          setMostrarVidenteDuerme={setMostrarVidenteDuerme}
-          setMostrarVidenteDespierta={setMostrarVidenteDespierta}
-          setMostrarNocheSupervivientes={setMostrarNocheSupervivientes}
-          setMostrarJugadorAlguacil={setMostrarJugadorAlguacil}
-          setMostrarVotacionesConcluidas={setMostrarVotacionesConcluidas}
-          setMostrarElegidoPueblo={setMostrarElegidoPueblo}
-          setCurrentAnimacion={setCurrentAnimacion}
-          iniciarAnimacion={iniciarAnimacion}
-          iniciarDelay={iniciarDelay}
-          startFadeOutNowRef={startFadeOutNowRef}
-        />
       </View>
     </TouchableWithoutFeedback>
   );
 };
-
 export default PantallaJugando;

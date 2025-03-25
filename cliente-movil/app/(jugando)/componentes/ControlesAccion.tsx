@@ -1,7 +1,7 @@
 import React from "react";
 import { View, TouchableOpacity, Text, Image } from "react-native";
-import { CONSTANTES } from "../constantes";
-import { estilos } from "../styles/jugando.styles";
+import { CONSTANTES } from "../../../utils/jugando/constantes";
+import { estilos } from "../../../utils/jugando/jugando.styles";
 
 /**
  * @interface ControlesAccionProps

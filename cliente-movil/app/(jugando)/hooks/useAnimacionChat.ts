@@ -1,6 +1,6 @@
 import { useRef } from "react";
 import { Animated } from "react-native";
-import { ALTO } from "../constantes";
+import { ALTO } from "../../../utils/jugando/constantes";
 
 /**
  * @hook useAnimacionChat

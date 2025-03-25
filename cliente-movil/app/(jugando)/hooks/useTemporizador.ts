@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { CONSTANTES } from "../constantes";
+import { CONSTANTES } from "../../../utils/jugando/constantes";
 
 /**
  * @hook useTemporizador

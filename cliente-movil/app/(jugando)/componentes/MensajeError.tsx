@@ -1,6 +1,6 @@
 import React from "react";
 import { Animated, Text } from "react-native";
-import { estilos } from "../styles/jugando.styles";
+import { estilos } from "../../../utils/jugando/jugando.styles";
 
 interface MensajeErrorProps {
   errorMessage: string;

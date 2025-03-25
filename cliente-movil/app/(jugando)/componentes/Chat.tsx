@@ -17,8 +17,8 @@ import {
   View,
 } from "react-native";
 
-import { estilos } from "../styles/jugando.styles";
-import { CONSTANTES } from "../constantes";
+import { estilos } from "../../../utils/jugando/jugando.styles";
+import { CONSTANTES } from "../../../utils/jugando/constantes";
 const { TEXTOS, DIMENSIONES } = CONSTANTES;
 const { ALTO, ANCHO } = DIMENSIONES;
 
