@@ -27,6 +27,7 @@ import BarraSuperior from "./componentes/BarraSuperior";
 import CirculoVotar from "./componentes/CirculoVotar";
 import ControlesAccion from "./componentes/ControlesAccion";
 import MensajeError from "./componentes/MensajeError";
+import BotonesDebug from "./componentes/BotonesDebug";
 
 // Hooks y administradores de estado
 import useTemporizador from "./hooks/useTemporizador";
@@ -35,6 +36,7 @@ import useAnimacionChat from "./hooks/useAnimacionChat";
 import useAnimacionHabilidad from "./hooks/useAnimacionHabilidad";
 import useMensajeError from "./hooks/useMensajeError";
 import * as animacionesPantalla from "./hooks/useAnimacionesPantalla";
+
 import { administrador_animaciones } from "./hooks/useAnimacionesPantalla";
 
 /**
@@ -1044,392 +1046,31 @@ const PantallaJugando: React.FC = () => {
             onClose={handleCerrarHabilidad}
           />
         )}
-        {/* Botones de debug para animaciones */}
-        {__DEV__ && (
-          <View
-            style={{
-              position: "absolute",
-              bottom: 50,
-              left: 0,
-              right: 0,
-              alignItems: "center",
-            }}
-          >
-            <TouchableWithoutFeedback
-              onPress={ejecutarCadenaAnimacionSospechososSerLobo}
-            >
-              <View
-                style={{
-                  padding: 10,
-                  backgroundColor: "rgba(0,0,0,0.5)",
-                  margin: 5,
-                }}
-              >
-                <Text style={{ color: "white" }}>
-                  Empiezan Votaciones Sospechosos Ser Lobo
-                </Text>
-              </View>
-            </TouchableWithoutFeedback>
-            <TouchableWithoutFeedback
-              onPress={() =>
-                animacionesPantalla.ejecutarAnimacionCazadorDisparo(
-                  setMostrarCazadorDisparo,
-                  animacionesPantalla.animacionFondo,
-                  setCurrentAnimacion,
-                  iniciarAnimacion,
-                  iniciarDelay,
-                  startFadeOutNowRef
-                )
-              }
-            >
-              <View
-                style={{
-                  padding: 10,
-                  backgroundColor: "rgba(0,0,0,0.5)",
-                  margin: 5,
-                }}
-              >
-                <Text style={{ color: "blue" }}>
-                  Has sido disparado por el cazador
-                </Text>
-              </View>
-            </TouchableWithoutFeedback>
-            <TouchableWithoutFeedback
-              onPress={() =>
-                animacionesPantalla.ejecutarAnimacionBrujaCura(
-                  setMostrarBrujaCura,
-                  animacionesPantalla.animacionFondo,
-                  setCurrentAnimacion,
-                  iniciarAnimacion,
-                  iniciarDelay,
-                  startFadeOutNowRef
-                )
-              }
-            >
-              <View
-                style={{
-                  padding: 10,
-                  backgroundColor: "rgba(0,0,0,0.5)",
-                  margin: 5,
-                }}
-              >
-                <Text style={{ color: "orange" }}>
-                  Has sido curado por la bruja
-                </Text>
-              </View>
-            </TouchableWithoutFeedback>
-            <TouchableWithoutFeedback
-              onPress={() =>
-                animacionesPantalla.ejecutarAnimacionBrujaVeneno(
-                  setMostrarBrujaVeneno,
-                  animacionesPantalla.animacionFondo,
-                  setCurrentAnimacion,
-                  iniciarAnimacion,
-                  iniciarDelay,
-                  startFadeOutNowRef
-                )
-              }
-            >
-              <View
-                style={{
-                  padding: 10,
-                  backgroundColor: "rgba(0,0,0,0.5)",
-                  margin: 5,
-                }}
-              >
-                <Text style={{ color: "orange" }}>
-                  Has sido envenenado por la bruja
-                </Text>
-              </View>
-            </TouchableWithoutFeedback>
-            <TouchableWithoutFeedback
-              onPress={() =>
-                animacionesPantalla.ejecutarAnimacionDormir(
-                  setMostrarDormir,
-                  animacionesPantalla.animacionFondo,
-                  setCurrentAnimacion,
-                  iniciarAnimacion,
-                  iniciarDelay,
-                  startFadeOutNowRef
-                )
-              }
-            >
-              <View
-                style={{
-                  padding: 10,
-                  backgroundColor: "rgba(0,0,0,0.5)",
-                  margin: 5,
-                }}
-              >
-                <Text style={{ color: "white" }}>Estás durmiendo</Text>
-              </View>
-            </TouchableWithoutFeedback>
-            <TouchableWithoutFeedback
-              onPress={() =>
-                animacionesPantalla.ejecutarAnimacionDevoraHombresLobo(
-                  setMostrarDevoraHombresLobo,
-                  animacionesPantalla.animacionFondo,
-                  setCurrentAnimacion,
-                  iniciarAnimacion,
-                  iniciarDelay,
-                  startFadeOutNowRef
-                )
-              }
-            >
-              <View
-                style={{
-                  padding: 10,
-                  backgroundColor: "rgba(0,0,0,0.5)",
-                  margin: 5,
-                }}
-              >
-                <Text style={{ color: "red" }}>
-                  Has sido el devorado por los hombres lobo
-                </Text>
-              </View>
-            </TouchableWithoutFeedback>
-            <TouchableWithoutFeedback
-              onPress={() =>
-                animacionesPantalla.ejecutarAnimacionHombresLoboDormir(
-                  setMostrarHombresLoboDormir,
-                  animacionesPantalla.animacionFondo,
-                  setCurrentAnimacion,
-                  iniciarAnimacion,
-                  iniciarDelay,
-                  startFadeOutNowRef
-                )
-              }
-            >
-              <View
-                style={{
-                  padding: 10,
-                  backgroundColor: "rgba(0,0,0,0.5)",
-                  margin: 5,
-                }}
-              >
-                <Text style={{ color: "red" }}>
-                  Hombres lobo vuelven a dormirse y sueñan con próximas víctimas
-                </Text>
-              </View>
-            </TouchableWithoutFeedback>
-            <TouchableWithoutFeedback
-              onPress={() =>
-                animacionesPantalla.ejecutarAnimacionBrujaDespierta(
-                  setMostrarBrujaDespierta,
-                  animacionesPantalla.animacionFondo,
-                  setCurrentAnimacion,
-                  iniciarAnimacion,
-                  iniciarDelay,
-                  startFadeOutNowRef
-                )
-              }
-            >
-              <View
-                style={{
-                  padding: 10,
-                  backgroundColor: "rgba(0,0,0,0.5)",
-                  margin: 5,
-                }}
-              >
-                <Text style={{ color: "orange" }}>
-                  La bruja se despierta (observa nueva víctima)
-                </Text>
-              </View>
-            </TouchableWithoutFeedback>
-            <TouchableWithoutFeedback
-              onPress={() =>
-                animacionesPantalla.ejecutarAnimacionBrujaDuerme(
-                  setMostrarBrujaDuerme,
-                  animacionesPantalla.animacionFondo,
-                  setCurrentAnimacion,
-                  iniciarAnimacion,
-                  iniciarDelay,
-                  startFadeOutNowRef
-                )
-              }
-            >
-              <View
-                style={{
-                  padding: 10,
-                  backgroundColor: "rgba(0,0,0,0.5)",
-                  margin: 5,
-                }}
-              >
-                <Text style={{ color: "orange" }}>
-                  La bruja se vuelve a dormir
-                </Text>
-              </View>
-            </TouchableWithoutFeedback>
-            <TouchableWithoutFeedback
-              onPress={() =>
-                animacionesPantalla.ejecutarAnimacionVidenteDuerme(
-                  setMostrarVidenteDuerme,
-                  animacionesPantalla.animacionFondo,
-                  setCurrentAnimacion,
-                  iniciarAnimacion,
-                  iniciarDelay,
-                  startFadeOutNowRef
-                )
-              }
-            >
-              <View
-                style={{
-                  padding: 10,
-                  backgroundColor: "rgba(0,0,0,0.5)",
-                  margin: 5,
-                }}
-              >
-                <Text style={{ color: "purple" }}>
-                  La vidente se vuelve a dormir
-                </Text>
-              </View>
-            </TouchableWithoutFeedback>
-            <TouchableWithoutFeedback
-              onPress={() =>
-                animacionesPantalla.ejecutarAnimacionVidenteDespierta(
-                  setMostrarVidenteDespierta,
-                  animacionesPantalla.animacionFondo,
-                  setCurrentAnimacion,
-                  iniciarAnimacion,
-                  iniciarDelay,
-                  startFadeOutNowRef
-                )
-              }
-            >
-              <View
-                style={{
-                  padding: 10,
-                  backgroundColor: "rgba(0,0,0,0.5)",
-                  margin: 5,
-                }}
-              >
-                <Text style={{ color: "purple" }}>
-                  La vidente se despierta y señala a un jugador
-                </Text>
-              </View>
-            </TouchableWithoutFeedback>
-            <TouchableWithoutFeedback
-              onPress={() =>
-                animacionesPantalla.ejecutarAnimacionNocheSupervivientes(
-                  setMostrarNocheSupervivientes,
-                  animacionesPantalla.animacionFondo,
-                  setCurrentAnimacion,
-                  iniciarAnimacion,
-                  iniciarDelay,
-                  startFadeOutNowRef
-                )
-              }
-            >
-              <View
-                style={{
-                  padding: 10,
-                  backgroundColor: "rgba(0,0,0,0.5)",
-                  margin: 5,
-                }}
-              >
-                <Text style={{ color: "white" }}>
-                  Se hace de noche; supervivientes duermen
-                </Text>
-              </View>
-            </TouchableWithoutFeedback>
-            <TouchableWithoutFeedback
-              onPress={() =>
-                animacionesPantalla.ejecutarAnimacionJugadorAlguacil(
-                  setMostrarJugadorAlguacil,
-                  animacionesPantalla.animacionFondo,
-                  setCurrentAnimacion,
-                  iniciarAnimacion,
-                  iniciarDelay,
-                  startFadeOutNowRef,
-                  4
-                )
-              }
-            >
-              <View
-                style={{
-                  padding: 10,
-                  backgroundColor: "rgba(0,0,0,0.5)",
-                  margin: 5,
-                }}
-              >
-                <Text style={{ color: "white" }}>Jugador 4 es el alguacil</Text>
-              </View>
-            </TouchableWithoutFeedback>
-            <TouchableWithoutFeedback
-              onPress={() =>
-                animacionesPantalla.ejecutarAnimacionEmpiezanVotacionesAlguacil(
-                  setMostrarAlguacil,
-                  animacionesPantalla.animacionFondo,
-                  setCurrentAnimacion,
-                  iniciarAnimacion,
-                  iniciarDelay,
-                  startFadeOutNowRef
-                )
-              }
-            >
-              <View
-                style={{
-                  padding: 10,
-                  backgroundColor: "rgba(0,0,0,0.5)",
-                  margin: 5,
-                }}
-              >
-                <Text style={{ color: "white" }}>
-                  Empiezan Votaciones Alguacil
-                </Text>
-              </View>
-            </TouchableWithoutFeedback>
-
-            <TouchableWithoutFeedback
-              onPress={() =>
-                animacionesPantalla.ejecutarAnimacionVotacionesConcluidas(
-                  setMostrarVotacionesConcluidas,
-                  animacionesPantalla.animacionFondo,
-                  setCurrentAnimacion,
-                  iniciarAnimacion,
-                  iniciarDelay,
-                  startFadeOutNowRef
-                )
-              }
-            >
-              <View
-                style={{
-                  padding: 10,
-                  backgroundColor: "rgba(0,0,0,0.5)",
-                  margin: 5,
-                }}
-              >
-                <Text style={{ color: "white" }}>
-                  Las votaciones han concluido
-                </Text>
-              </View>
-            </TouchableWithoutFeedback>
-            <TouchableWithoutFeedback
-              onPress={() =>
-                animacionesPantalla.ejecutarAnimacionElegidoPueblo(
-                  setMostrarElegidoPueblo,
-                  animacionesPantalla.animacionFondo,
-                  setCurrentAnimacion,
-                  iniciarAnimacion,
-                  iniciarDelay,
-                  startFadeOutNowRef
-                )
-              }
-            >
-              <View
-                style={{
-                  padding: 10,
-                  backgroundColor: "rgba(0,0,0,0.5)",
-                  margin: 5,
-                }}
-              >
-                <Text style={{ color: "yellow" }}>
-                  Has sido el elegido por el pueblo
-                </Text>
-              </View>
-            </TouchableWithoutFeedback>
-          </View>
-        )}
+        {/* Botones de debug trasladados al componente BotonesDebug */}
+        <BotonesDebug
+          ejecutarCadenaAnimacionSospechososSerLobo={
+            ejecutarCadenaAnimacionSospechososSerLobo
+          }
+          animacionesPantalla={animacionesPantalla}
+          setMostrarCazadorDisparo={setMostrarCazadorDisparo}
+          setMostrarBrujaCura={setMostrarBrujaCura}
+          setMostrarBrujaVeneno={setMostrarBrujaVeneno}
+          setMostrarDormir={setMostrarDormir}
+          setMostrarDevoraHombresLobo={setMostrarDevoraHombresLobo}
+          setMostrarHombresLoboDormir={setMostrarHombresLoboDormir}
+          setMostrarBrujaDespierta={setMostrarBrujaDespierta}
+          setMostrarBrujaDuerme={setMostrarBrujaDuerme}
+          setMostrarVidenteDuerme={setMostrarVidenteDuerme}
+          setMostrarVidenteDespierta={setMostrarVidenteDespierta}
+          setMostrarNocheSupervivientes={setMostrarNocheSupervivientes}
+          setMostrarJugadorAlguacil={setMostrarJugadorAlguacil}
+          setMostrarVotacionesConcluidas={setMostrarVotacionesConcluidas}
+          setMostrarElegidoPueblo={setMostrarElegidoPueblo}
+          setCurrentAnimacion={setCurrentAnimacion}
+          iniciarAnimacion={iniciarAnimacion}
+          iniciarDelay={iniciarDelay}
+          startFadeOutNowRef={startFadeOutNowRef}
+        />
       </View>
     </TouchableWithoutFeedback>
   );
