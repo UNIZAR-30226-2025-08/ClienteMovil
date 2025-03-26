@@ -8,18 +8,19 @@ import React from "react";
 import { View, Text, Animated, Image } from "react-native";
 import animacionesEstilos from "../../../../utils/jugando/styles.animaciones";
 import { getInfoRol } from "../../../../utils/jugando/rolesUtilidades";
+import { Rol } from "../../../../utils/jugando/constantes";
 
 /**
  * @interface AnimacionInicioProps
  * @description Define las propiedades requeridas para el componente AnimacionInicio.
  * @property {Animated.Value} opacity - Controla la opacidad del componente (de 0 a 1).
  * @property {boolean} mostrarComponente - Determina si el componente debe renderizarse.
- * @property {string} rol - Rol del jugador que determinará la imagen y el nombre.
+ * @property {Rol} rol - Rol del jugador que determinará la imagen y el nombre.
  */
 interface AnimacionInicioProps {
   opacity: Animated.Value;
   mostrarComponente: boolean;
-  rol: string; // Rol del jugador
+  rol: Rol;
 }
 
 /**
@@ -46,6 +47,11 @@ const AnimacionInicio: React.FC<AnimacionInicioProps> = ({
 
   // Obtención de la información del rol
   const { roleInfo } = getInfoRol(rol);
+
+  // Si no hay información del rol, se retorna null para evitar renderizar sin datos.
+  if (!roleInfo) {
+    return null;
+  }
 
   // Función para determinar el color del texto según el rol
   const getColorTexto = () => {
