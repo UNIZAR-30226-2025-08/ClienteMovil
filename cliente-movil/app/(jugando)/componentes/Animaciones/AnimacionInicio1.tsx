@@ -7,7 +7,7 @@
 
 import React from "react";
 import { View, Text, Animated } from "react-native";
-import animacionesEstilos from "../../../utils/jugando/styles.animaciones";
+import animacionesEstilos from "../../../../utils/jugando/styles.animaciones";
 
 /**
  * @interface AnimacionInicioProps
@@ -23,9 +23,6 @@ interface AnimacionInicioProps {
 /**
  * @component AnimacionInicio
  * @description Componente que muestra una animación de texto de inicio con el mensaje de amanecer.
- * - Se muestra al comienzo de cada día en el juego
- * - Utiliza animación de opacidad para entrada/salida suave
- * - Texto perfectamente centrado y con la fuente personalizada Corben-Regular
  *
  * @param {AnimacionInicioProps} props - Propiedades del componente
  * @returns {JSX.Element | null} Retorna el componente animado o null si no debe mostrarse
@@ -47,35 +44,17 @@ const AnimacionInicio: React.FC<AnimacionInicioProps> = ({
   return (
     /**
      * Contenedor principal que cubre toda la pantalla.
-     * - Usa posición absoluta y dimensiones completas
-     * - Centrado vertical y horizontalmente
-     * - Estilo definido en animacionesEstilos.contenedorAnimacion
      */
     <View style={animacionesEstilos.contenedorAnimacion}>
-      {/**
-       * Vista animada que contiene el texto.
-       * - Controla la opacidad mediante la prop opacity
-       * - Ocupa el 100% del ancho disponible
-       * - Centra su contenido horizontalmente
-       */}
       <Animated.View
         style={[
-          { opacity }, // Opacidad animada proporcionada por el padre
+          { opacity },
           {
-            width: "100%", // Ocupa todo el ancho disponible
-            alignItems: "center", // Centra el contenido horizontalmente
+            width: "100%",
+            alignItems: "center",
           },
         ]}
       >
-        {/**
-         * Texto de amanecer con estilos personalizados.
-         * - Usa la fuente Corben-Regular cargada previamente
-         * - Tamaño de fuente 30
-         * - Color blanco para mejor contraste
-         * - Centrado vertical y horizontalmente
-         * - Padding horizontal para evitar cortes
-         * - Estilo definido en animacionesEstilos.textoAnimacion
-         */}
         <Text style={animacionesEstilos.textoAnimacion}>
           ¡AMANECE EN LA ALDEA, TODO EL MUNDO DESPIERTA Y ABRE LOS OJOS!
         </Text>

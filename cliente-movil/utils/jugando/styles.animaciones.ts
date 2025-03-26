@@ -1,11 +1,6 @@
-/**
- * @file styles.animaciones.ts
- * @description Estilos para las animaciones del juego, específicamente para la animación de inicio.
- * Define los estilos del contenedor y texto de la animación de bienvenida.
- * @module Utils/Estilos/Animaciones
- */
+import { StyleSheet, Dimensions } from "react-native";
 
-import { StyleSheet } from "react-native";
+const { width: ancho, height: alto } = Dimensions.get("window");
 
 /**
  * @const {object} animacionesEstilos
@@ -26,16 +21,38 @@ const animacionesEstilos = StyleSheet.create({
 
   /**
    * @style textoAnimacion
-   * @description Estilos para el texto de la animación:
+   * @description Estilos para el texto de las animaciones en general
    */
   textoAnimacion: {
-    fontSize: 30,
     color: "white",
     fontFamily: "Corben-Regular",
-    textAlign: "center", // Centrado horizontal
-    textAlignVertical: "center", // Centrado vertical
-    includeFontPadding: false, // Elimina padding innecesario
-    paddingHorizontal: 20, // Espaciado a los lados
+    textAlign: "center",
+    includeFontPadding: false,
+    paddingHorizontal: ancho * 0.05,
+    fontSize: ancho * 0.1,
+  },
+
+  /**
+   * @style textoRol
+   * @description Estilos para el texto del rol de la animación inicial 2 (aldeano, hombre lobo, ...)
+   */
+  textoRol: {
+    fontFamily: "Corben-Regular",
+    textAlign: "center",
+    includeFontPadding: false,
+    paddingHorizontal: ancho * 0.05,
+    fontSize: ancho * 0.12,
+  },
+
+  /**
+   * @style imagenRol
+   * @description Estilos para la imagen del rol de la animación inicial 2
+   */
+  imagenRol: {
+    width: ancho * 0.3,
+    height: ancho * 0.3,
+    marginVertical: alto * 0.02,
+    resizeMode: "contain", // Para que la imagen no se corte
   },
 });
 

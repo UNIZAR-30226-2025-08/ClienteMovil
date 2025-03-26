@@ -27,7 +27,9 @@ import BarraSuperior from "./componentes/BarraSuperior";
 import CirculoVotar from "./componentes/CirculoVotar";
 import ControlesAccion from "./componentes/ControlesAccion";
 import MensajeError from "./componentes/MensajeError";
-import AnimacionInicio from "./componentes/AnimacionInicio";
+import AnimacionInicio1 from "./componentes/Animaciones/AnimacionInicio1";
+import AnimacionInicio2 from "./componentes/Animaciones/AnimacionInicio2";
+import AnimacionInicio3 from "./componentes/Animaciones/AnimacionInicio3";
 
 // Hooks (administran estado)
 import useTemporizador from "./hooks/useTemporizador";
@@ -145,10 +147,14 @@ const PantallaJugando: React.FC = () => {
   const { habilidadInfo, roleInfo } = getInfoRol(rolUsuario);
 
   // ---------------------------------------------------------------------------
-  // Hook para la animación de inicio
+  // Hooks para la animación de inicio
   // ---------------------------------------------------------------------------
-  const [mostrarAnimacionInicio, setMostrarAnimacionInicio] =
+  const [mostrarAnimacionInicio1, setMostrarAnimacionInicio1] =
     useState<boolean>(true);
+  const [mostrarAnimacionInicio2, setMostrarAnimacionInicio2] =
+    useState<boolean>(false);
+  const [mostrarAnimacionInicio3, setMostrarAnimacionInicio3] =
+    useState<boolean>(false);
 
   // ---------------------------------------------------------------------------
   // Hook para la animación del modo día/noche
@@ -188,14 +194,15 @@ const PantallaJugando: React.FC = () => {
   const duracionFadeIn = 1000; // 1 segundo
   const duracionEspera = 2000; // 2 segundos
   const duracionFadeOut = 1000; // 1 segundo
-  const { opacity, mostrarComponente } = useGestorAnimaciones({
+  const { opacities, mostrarComponentes } = useGestorAnimaciones({
     duracionFadeIn,
     duracionEspera,
     duracionFadeOut,
+    numAnimaciones: 3, // 3 animaciones iniciales concatenadas :)
   });
 
   // ---------------------------------------------------------------------------
-  // Lista de colores para cada jornada
+  // Logs custom
   // ---------------------------------------------------------------------------
 
   const coloresConsola = [
@@ -239,10 +246,18 @@ const PantallaJugando: React.FC = () => {
     console.log(`Juego iniciado. Rol asignado: ${rolAsignado}`);
 
     setTimeout(() => {
-      setMostrarBotones(true);
-      MODO_NOCHE_GLOBAL = false;
-      setModoDiaNoche(MODO_NOCHE_GLOBAL);
-      setMostrarAnimacionInicio(false);
+      setMostrarAnimacionInicio1(false);
+      setMostrarAnimacionInicio2(true);
+      setTimeout(() => {
+        setMostrarAnimacionInicio2(false);
+        setMostrarAnimacionInicio3(true);
+        setTimeout(() => {
+          setMostrarAnimacionInicio3(false);
+          setMostrarBotones(true);
+          MODO_NOCHE_GLOBAL = false;
+          setModoDiaNoche(MODO_NOCHE_GLOBAL);
+        }, 4000);
+      }, 4000);
     }, 4000);
   }, []);
 
@@ -481,6 +496,9 @@ const PantallaJugando: React.FC = () => {
     setJugadorSeleccionado(null);
   };
 
+  /**
+   * Hasta que no se cargue la fuente de puñeta no continuar
+   */
   if (!fuentesCargadas) {
     return <ActivityIndicator size="large" style={estilos.cargando} />;
   }
@@ -518,11 +536,31 @@ const PantallaJugando: React.FC = () => {
           style={[estilos.superposicion, { opacity: animacionFondo }]}
         />
 
-        {/* Mostrar la animación de inicio solo al principio */}
-        {mostrarComponente && (
-          <AnimacionInicio
-            opacity={opacity}
-            mostrarComponente={mostrarComponente}
+        {/*
+        Mostrar la animación de iniciado:
+        - mostrarAnimacionInicio1: ¡AMANECE EN LA ALDEA, TODO EL MUNDO DESPIERTA Y ABRE LOS OJOS!
+        - mostrarAnimacionInicio2: TU ROL ES <IMAGEN ROL> <ROL LOCAL>
+        - mostrarAnimacionInicio3: ¡LA PARTIDA COMIENZA, LOS JUGADORES PUEDEN INTERACTUAR AHORA!
+        */}
+        {mostrarAnimacionInicio1 && (
+          <AnimacionInicio1
+            opacity={opacities[0]}
+            mostrarComponente={mostrarComponentes[0]}
+          />
+        )}
+
+        {mostrarAnimacionInicio2 && (
+          <AnimacionInicio2
+            opacity={opacities[1]}
+            mostrarComponente={mostrarComponentes[1]}
+            rol={rolUsuario}
+          />
+        )}
+
+        {mostrarAnimacionInicio3 && (
+          <AnimacionInicio3
+            opacity={opacities[2]}
+            mostrarComponente={mostrarComponentes[2]}
           />
         )}
 
