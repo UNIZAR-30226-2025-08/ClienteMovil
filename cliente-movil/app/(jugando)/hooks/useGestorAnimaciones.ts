@@ -1,54 +1,32 @@
 import { useState, useEffect } from "react";
 import { Animated } from "react-native";
 
+// Definir el tipo para los parámetros de la función
+interface GestorAnimacionesParams {
+  duracionFadeIn: number;
+  duracionEspera: number;
+  duracionFadeOut: number;
+  numAnimaciones?: number; // Puede ser opcional, con valor por defecto 1
+}
+
 /**
  * Hook que gestiona las animaciones de opacidad para varios componentes.
  * Permite controlar animaciones de entrada (fade-in) y salida (fade-out) para varios elementos.
  *
- * @param {Object} params Parámetros para configurar el comportamiento de las animaciones.
- * @param {number} params.duracionFadeIn Duración de la animación de fade-in (entrada) en milisegundos.
- * @param {number} params.duracionEspera Duración de la espera entre fade-in y fade-out en milisegundos.
- * @param {number} params.duracionFadeOut Duración de la animación de fade-out (salida) en milisegundos.
- * @param {number} [params.numAnimaciones=1] Número de animaciones a gestionar. Por defecto es 1.
- *
+ * @param {GestorAnimacionesParams} params Parámetros para configurar el comportamiento de las animaciones.
  * @returns {Object} Retorna un objeto con dos propiedades:
  *   - `opacities`: Un array de valores `Animated.Value` que representan la opacidad de cada animación.
  *   - `mostrarComponentes`: Un array de valores booleanos que indican si cada componente debe ser mostrado o no.
- *
- * @example
- *
- * Para controlar varias animaciones, este hook devuelve un array de opacidades y otro de visibilidad.
- * Puedes usarlo de la siguiente manera:
- *
- * 1. **Animaciones secuenciales**: Si deseas que las animaciones se reproduzcan una tras otra, puedes configurar `numAnimaciones` para que sea mayor que 1 y gestionar el estado de cada componente en secuencia.
- *
- * 2. **Animaciones esporádicas**: Si necesitas que las animaciones se reproduzcan de manera independiente, puedes manipular `mostrarComponentes` para que se muestren de manera intermitente.
- *
- * ```ts
- * const { opacities, mostrarComponentes } = useGestorAnimaciones({
- *   duracionFadeIn: 1000,
- *   duracionEspera: 2000,
- *   duracionFadeOut: 1000,
- *   numAnimaciones: 3, // Controla 3 animaciones
- * });
- *
- * // Asumiendo 3 componentes:
- * <Animacion1 opacity={opacities[0]} mostrarComponente={mostrarComponentes[0]} />
- * <Animacion2 opacity={opacities[1]} mostrarComponente={mostrarComponentes[1]} />
- * <Animacion3 opacity={opacities[2]} mostrarComponente={mostrarComponentes[2]} />
- * ```
  */
 const useGestorAnimaciones = ({
   duracionFadeIn,
   duracionEspera,
   duracionFadeOut,
-  numAnimaciones = 1, // Número de animaciones a controlar
-}) => {
+  numAnimaciones = 1,
+}: GestorAnimacionesParams) => {
   // Crear un array de objetos Animated.Value para cada animación
   const [opacities] = useState(
-    Array(numAnimaciones)
-      .fill()
-      .map(() => new Animated.Value(0)) // Inicializamos cada opacidad a 0
+    Array(numAnimaciones).fill(new Animated.Value(0))
   );
 
   // Crear un array para gestionar la visibilidad de los componentes
