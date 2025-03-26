@@ -531,4 +531,10 @@ export const estilos = StyleSheet.create({
     includeFontPadding: false,
     textAlignVertical: "center",
   },
+  cargando: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#000",
+  },
 });

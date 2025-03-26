@@ -19,7 +19,7 @@ const useDiaNoche = (modoInicialNoche: boolean) => {
   const setModoDiaNoche = (modoNoche: boolean) => {
     Animated.timing(animationValue, {
       toValue: modoNoche ? 0.95 : 0,
-      duration: 500,
+      duration: 1000,
       useNativeDriver: true,
     }).start();
   };

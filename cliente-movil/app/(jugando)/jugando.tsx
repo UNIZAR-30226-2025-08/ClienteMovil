@@ -11,6 +11,7 @@ import {
   Text,
   TouchableWithoutFeedback,
   Animated,
+  ActivityIndicator,
 } from "react-native";
 import { useFonts } from "expo-font";
 
@@ -26,6 +27,7 @@ import BarraSuperior from "./componentes/BarraSuperior";
 import CirculoVotar from "./componentes/CirculoVotar";
 import ControlesAccion from "./componentes/ControlesAccion";
 import MensajeError from "./componentes/MensajeError";
+import AnimacionInicio from "./componentes/AnimacionInicio";
 
 // Hooks (administran estado)
 import useTemporizador from "./hooks/useTemporizador";
@@ -33,12 +35,13 @@ import useAnimacionChat from "./hooks/useAnimacionChat";
 import useAnimacionHabilidad from "./hooks/useAnimacionHabilidad";
 import useMensajeError from "./hooks/useMensajeError";
 import useDiaNoche from "./hooks/useDiaNoche";
+import useGestorAnimaciones from "./hooks/useGestorAnimaciones";
 
 /**
  * @constant {boolean} MODO_NOCHE_GLOBAL
  * Indica si el juego se encuentra en modo noche. Si es false, se considera modo día.
  */
-export let MODO_NOCHE_GLOBAL = false;
+export let MODO_NOCHE_GLOBAL = true;
 
 /**
  * Componente funcional que representa la pantalla principal de juego.
@@ -46,6 +49,13 @@ export let MODO_NOCHE_GLOBAL = false;
  * @returns {JSX.Element | null} El componente renderizado o null si las fuentes no se han cargado.
  */
 const PantallaJugando: React.FC = () => {
+  // ---------------------------------------------------------------------------
+  // Carga de fuentes
+  // ---------------------------------------------------------------------------
+  const [fuentesCargadas] = useFonts({
+    Corben: require("@/assets/fonts/corben-regular.ttf"),
+  });
+
   // ---------------------------------------------------------------------------
   // Estados del Juego
   // ---------------------------------------------------------------------------
@@ -135,6 +145,12 @@ const PantallaJugando: React.FC = () => {
   const { habilidadInfo, roleInfo } = getInfoRol(rolUsuario);
 
   // ---------------------------------------------------------------------------
+  // Hook para la animación de inicio
+  // ---------------------------------------------------------------------------
+  const [mostrarAnimacionInicio, setMostrarAnimacionInicio] =
+    useState<boolean>(true);
+
+  // ---------------------------------------------------------------------------
   // Hook para la animación del modo día/noche
   // ---------------------------------------------------------------------------
   const { animacionFondo, setModoDiaNoche } = useDiaNoche(MODO_NOCHE_GLOBAL);
@@ -169,6 +185,15 @@ const PantallaJugando: React.FC = () => {
    */
   const { errorMessage, mostrarError, animacionError } = useMensajeError();
 
+  const duracionFadeIn = 1000; // 1 segundo
+  const duracionEspera = 2000; // 2 segundos
+  const duracionFadeOut = 1000; // 1 segundo
+  const { opacity, mostrarComponente } = useGestorAnimaciones({
+    duracionFadeIn,
+    duracionEspera,
+    duracionFadeOut,
+  });
+
   // ---------------------------------------------------------------------------
   // Lista de colores para cada jornada
   // ---------------------------------------------------------------------------
@@ -178,7 +203,7 @@ const PantallaJugando: React.FC = () => {
     "\x1b[32m", // Verde (Jornada 2)
     "\x1b[33m", // Amarillo (Jornada 3)
     "\x1b[34m", // Azul (Jornada 4)
-    "\x1b[35m", // Magenta (Jornada 5)
+    "\x1b[35m", // Magenta (Jornada 5r)
     "\x1b[36m", // Cian (Jornada 6)
     "\x1b[37m", // Blanco (Jornada 7)
   ];
@@ -206,11 +231,19 @@ const PantallaJugando: React.FC = () => {
    */
   useEffect(() => {
     const roles: Rol[] = ["aldeano", "lobo", "bruja", "cazador", "vidente"];
-    const indiceAleatorio: number = Math.floor(Math.random() * roles.length); // Para hacer pruebas, idea de Nico.
+
+    const indiceAleatorio: number = Math.floor(Math.random() * roles.length);
     const rolAsignado = roles[indiceAleatorio];
+
     setRolUsuario(rolAsignado);
-    setMostrarBotones(true);
     console.log(`Juego iniciado. Rol asignado: ${rolAsignado}`);
+
+    setTimeout(() => {
+      setMostrarBotones(true);
+      MODO_NOCHE_GLOBAL = false;
+      setModoDiaNoche(MODO_NOCHE_GLOBAL);
+      setMostrarAnimacionInicio(false);
+    }, 4000);
   }, []);
 
   /**
@@ -448,13 +481,9 @@ const PantallaJugando: React.FC = () => {
     setJugadorSeleccionado(null);
   };
 
-  // ---------------------------------------------------------------------------
-  // Carga de fuentes personalizadas
-  // ---------------------------------------------------------------------------
-  const [fuentesCargadas] = useFonts({
-    Corben: require("@/assets/fonts/Corben-Regular.ttf"),
-  });
-  if (!fuentesCargadas) return null;
+  if (!fuentesCargadas) {
+    return <ActivityIndicator size="large" style={estilos.cargando} />;
+  }
 
   // ---------------------------------------------------------------------------
   // Renderizado del componente
@@ -488,6 +517,14 @@ const PantallaJugando: React.FC = () => {
         <Animated.View
           style={[estilos.superposicion, { opacity: animacionFondo }]}
         />
+
+        {/* Mostrar la animación de inicio solo al principio */}
+        {mostrarComponente && (
+          <AnimacionInicio
+            opacity={opacity}
+            mostrarComponente={mostrarComponente}
+          />
+        )}
 
         {/*
           Renderizado condicional del mensaje de error:
