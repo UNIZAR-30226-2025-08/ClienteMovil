@@ -117,7 +117,7 @@ export default function AmigosScreen(): JSX.Element {
           const response = await axios.get(
             `${BACKEND_URL}/api/amistad/listar/${usuario.idUsuario}`
           );
-          console.log("Datos recibidos del backend:", response.data); // 👀 Verifica los datos
+          console.log("Datos recibidos del backend:", response.data);
           setAmigos(response.data.amigos);
           console.log("Lista de amigos (IDs):", response.data.amigos); // Verifica los IDs
           cargarDetallesAmigos(response.data.amigos); // Llamar a la función para cargar los detalles de los amigos
@@ -183,6 +183,19 @@ export default function AmigosScreen(): JSX.Element {
     }
   };
 
+  const handlePress = async (idUsuario: number) => {
+    try {
+      console.log("Presionando perfil del amigo con ID:", idUsuario);
+      await AsyncStorage.setItem("amigoId", idUsuario.toString());
+      router.push({
+        pathname: "/perfilAmigo",
+        params: { amigoId: idUsuario.toString() },
+      });
+    } catch (error) {
+      console.error("Error al guardar el ID del amigo en AsyncStorage", error);
+    }
+  };
+
   /**
    * Función para eliminar un amigo de la lista.
    */
@@ -194,7 +207,7 @@ export default function AmigosScreen(): JSX.Element {
       return;
     }
 
-    console.log("📤 Enviando datos:", {
+    console.log("Enviando datos:", {
       idUsuario1: usuario.idUsuario,
       idUsuario2: idAmigo,
     });
@@ -262,24 +275,30 @@ export default function AmigosScreen(): JSX.Element {
           showsVerticalScrollIndicator={false}
         >
           {amigosDetalles.map((amigo) => (
-            <View key={amigo.idUsuario} style={styles.amigoContainer}>
-              <View style={styles.cardHeader}>
-                {/* Mostrar avatar de cada uno de los usuarios del ranking */}
-                <Image
-                  source={
-                    avatarMap[amigo.avatar || "avatar1"] || imagenPerfilDefecto
-                  }
-                  style={styles.imagenPerfil}
-                />
-                <Text style={styles.nombre}>{amigo.nombre}</Text>
-                <TouchableOpacity
-                  style={styles.botonEliminar}
-                  onPress={() => eliminarAmigo(amigo.idUsuario)}
-                >
-                  <Text style={styles.botonAnadirTexto}>ELIMINAR</Text>
-                </TouchableOpacity>
+            <TouchableOpacity
+              key={amigo.idUsuario}
+              onPress={() => handlePress(amigo.idUsuario)}
+              activeOpacity={0.7} // Da un efecto visual al presionar
+            >
+              <View style={styles.amigoContainer}>
+                <View style={styles.cardHeader}>
+                  <Image
+                    source={
+                      avatarMap[amigo.avatar || "avatar1"] ||
+                      imagenPerfilDefecto
+                    }
+                    style={styles.imagenPerfil}
+                  />
+                  <Text style={styles.nombre}>{amigo.nombre}</Text>
+                  <TouchableOpacity
+                    style={styles.botonEliminar}
+                    onPress={() => eliminarAmigo(amigo.idUsuario)}
+                  >
+                    <Text style={styles.botonAnadirTexto}>ELIMINAR</Text>
+                  </TouchableOpacity>
+                </View>
               </View>
-            </View>
+            </TouchableOpacity>
           ))}
         </ScrollView>
 
