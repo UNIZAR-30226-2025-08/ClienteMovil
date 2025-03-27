@@ -452,8 +452,16 @@ const PantallaJugando: React.FC = () => {
       );
       return;
     }
+    /**
+     * TODO_API
+     * Probablemente habrá que adaptar la lógica de contar los votos para simplemente leerlos del backend.
+     */
     setVotos((votosAnteriores: number[]): number[] => {
       const nuevosVotos: number[] = [...votosAnteriores];
+      /**
+       * TODO_API
+       * backend.vota(indiceUsuario.toString(), JugadorSeleccionado.toString())
+       */
       nuevosVotos[JugadorSeleccionado] += 1;
       logCustom(
         jornadaActual,
