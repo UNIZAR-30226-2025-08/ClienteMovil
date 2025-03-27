@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import socket from "@/app/(sala)/socket"; // Módulo de conexión
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 /**
  * Tipo de datos para representar un jugador dentro de la sala.
@@ -19,6 +20,12 @@ type Player = {
   level: number;
   isReady: boolean;
   isOwner?: boolean; // Indica si es el dueño de la sala
+};
+
+// Define el tipo para el estado del usuario
+type UsuarioData = {
+  id: string;
+  nombre: string;
 };
 
 /**
@@ -38,16 +45,7 @@ export default function SalaPreviaScreen(): JSX.Element {
   }>();
   const [players, setPlayers] = useState<Player[]>([]);
   const salaInfo = salaData ? JSON.parse(salaData) : null;
-
-  /**
-   * Estado con la información de los jugadores en la sala.
-   */
-  /*const [players, setPlayers] = useState<Player[]>([
-    { id: "1", name: "Jugador1", level: 106, isReady: true, isOwner: true },
-    { id: "2", name: "Jugador2", level: 106, isReady: true },
-    { id: "3", name: "Jugador3", level: 106, isReady: false },
-    // Puedes añadir más o dejar placeholders
-  ]);*/
+  const [usuarioData, setUsuarioData] = useState<UsuarioData | null>(null);
 
   useEffect(() => {
     if (salaData) {
@@ -80,19 +78,35 @@ export default function SalaPreviaScreen(): JSX.Element {
     };
   }, []);
 
+  // Efecto para recuperar el usuario desde AsyncStorage
+  useEffect(() => {
+    const obtenerDatosUsuario = async () => {
+      const nombreUsuario = await AsyncStorage.getItem("nombreUsuario");
+      const idUsuario = await AsyncStorage.getItem("idUsuario");
+      if (nombreUsuario && idUsuario) {
+        setUsuarioData({ id: idUsuario, nombre: nombreUsuario });
+      }
+    };
+    obtenerDatosUsuario();
+  }, []);
+
   /**
    * Alterna el estado de "Listo" de un jugador.
    *
-   * @param playerId ID del jugador a modificar.
+   * @param playerName Nombre del jugador a modificar.
    */
-  // Función para marcar el estado listo (emite evento al servidor)
-  const toggleReady = (playerId: string) => {
-    // Aquí enviarías el nuevo estado al servidor para actualizarlo
-    const jugador = players.find((p) => p.id === playerId);
+  const toggleReady = (playerName: string) => {
+    // Compara por nombre en lugar de comparar por ID
+    if (!usuarioData || playerName !== usuarioData.nombre) {
+      Alert.alert("No autorizado", "Solo puedes cambiar tu propio estado.");
+      return;
+    }
+
+    const jugador = players.find((p) => p.name === playerName);
     if (jugador) {
       socket.emit("marcarEstado", {
         idSala,
-        idUsuario: playerId,
+        idUsuario: jugador.id, // el ID real del socket
         estado: !jugador.isReady,
       });
     }
@@ -148,7 +162,7 @@ export default function SalaPreviaScreen(): JSX.Element {
             styles.readyButton,
             item.isReady ? styles.ready : styles.notReady,
           ]}
-          onPress={() => toggleReady(item.id)}
+          onPress={() => toggleReady(item.name)}
         >
           <Text style={styles.readyButtonText}>
             {item.isReady ? "¡Listo!" : "No Listo"}
