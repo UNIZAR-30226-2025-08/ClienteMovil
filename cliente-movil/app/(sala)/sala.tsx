@@ -23,19 +23,21 @@ type Player = {
 
 /**
  * Pantalla de sala previa a la partida.
- * 
+ *
  * Permite a los jugadores unirse, marcarse como listos y al anfitrión iniciar la partida.
- * 
+ *
  * @returns {JSX.Element} Pantalla de la sala previa al juego.
  */
 export default function SalaPreviaScreen(): JSX.Element {
   const router = useRouter(); // Usamos useRouter para manejar la navegación
 
   // Obtén el idSala pasado como parámetro al navegar
-  const { idSala, salaData } = useLocalSearchParams<{ idSala: string; salaData: string }>();
+  const { idSala, salaData } = useLocalSearchParams<{
+    idSala: string;
+    salaData: string;
+  }>();
   const [players, setPlayers] = useState<Player[]>([]);
   const salaInfo = salaData ? JSON.parse(salaData) : null;
-  
 
   /**
    * Estado con la información de los jugadores en la sala.
@@ -50,25 +52,29 @@ export default function SalaPreviaScreen(): JSX.Element {
   useEffect(() => {
     if (salaData) {
       const sala = JSON.parse(salaData);
-      setPlayers(sala.jugadores.map((j: any) => ({
-        id: j.id,
-        name: j.nombre || j.id,
-        level: 106,
-        isReady: j.listo || false,
-        isOwner: sala.lider === j.id,
-      })));
+      setPlayers(
+        sala.jugadores.map((j: any) => ({
+          id: j.id,
+          name: j.nombre || j.id,
+          level: 106,
+          isReady: j.listo || false,
+          isOwner: sala.lider === j.id,
+        }))
+      );
     }
     // Suscribirte a "actualizarSala" para cambios futuros...
     socket.on("actualizarSala", (sala) => {
-      setPlayers(sala.jugadores.map((j: any) => ({
-        id: j.id,
-        name: j.nombre || j.id,
-        level: 106,
-        isReady: j.listo || false,
-        isOwner: sala.lider === j.id,
-      })));
+      setPlayers(
+        sala.jugadores.map((j: any) => ({
+          id: j.id,
+          name: j.nombre || j.id,
+          level: 106,
+          isReady: j.listo || false,
+          isOwner: sala.lider === j.id,
+        }))
+      );
     });
-  
+
     return () => {
       socket.off("actualizarSala");
     };
@@ -76,7 +82,7 @@ export default function SalaPreviaScreen(): JSX.Element {
 
   /**
    * Alterna el estado de "Listo" de un jugador.
-   * 
+   *
    * @param playerId ID del jugador a modificar.
    */
   // Función para marcar el estado listo (emite evento al servidor)
@@ -84,7 +90,11 @@ export default function SalaPreviaScreen(): JSX.Element {
     // Aquí enviarías el nuevo estado al servidor para actualizarlo
     const jugador = players.find((p) => p.id === playerId);
     if (jugador) {
-      socket.emit("marcarEstado", { idSala, idUsuario: playerId, estado: !jugador.isReady });
+      socket.emit("marcarEstado", {
+        idSala,
+        idUsuario: playerId,
+        estado: !jugador.isReady,
+      });
     }
   };
 
@@ -171,15 +181,15 @@ export default function SalaPreviaScreen(): JSX.Element {
 
       {/* Info de la cuenta */}
       <View style={styles.accountInfo}>
-      <Text style={styles.accountName}>
-        {salaInfo && salaInfo.jugadores 
-          ? salaInfo.jugadores.find((jug: any) => jug.id === salaInfo.lider)?.nombre 
-          : "Noom"}
-      </Text>
+        <Text style={styles.accountName}>
+          {salaInfo && salaInfo.jugadores
+            ? salaInfo.jugadores.find((jug: any) => jug.id === salaInfo.lider)
+                ?.nombre
+            : "Noom"}
+        </Text>
         <Text style={styles.accountName}>Nivel 10</Text>
         <Text style={styles.accountName}>2000S</Text>
       </View>
-
 
       {/* Lista de jugadores + slots vacíos */}
       <View style={styles.playersContainer}>
@@ -347,7 +357,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 4,
   },
-  
+
   startText: {
     color: "#fff",
     fontWeight: "bold",
