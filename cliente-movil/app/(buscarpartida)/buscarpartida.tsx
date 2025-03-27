@@ -9,10 +9,11 @@ import {
   Alert,
   TextInput,
   Modal,
-  ScrollView, 
+  ScrollView,
 } from "react-native";
 import { useRouter } from "expo-router";
 import socket from "@/app/(sala)/socket"; // Módulo de conexión
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 /**
  * Imágenes utilizadas en la pantalla de búsqueda de salas.
@@ -20,21 +21,6 @@ import socket from "@/app/(sala)/socket"; // Módulo de conexión
 const imagenFondo = require("@/assets/images/fondo-roles.jpg");
 const imagenAtras = require("@/assets/images/botonAtras.png");
 const iconoCandado = require("@/assets/images/candado.png");
-
-/**
- * Lista de salas disponibles para unirse.
- * Las salas pueden ser públicas o privadas.
- */
-/*const salas = [
-  { estado: "Sala", tipo: "Privada", nombre: "SADADDSADADSSAS", privada: true },
-  {
-    estado: "En Partida",
-    tipo: "Pública",
-    nombre: "SADADDSADADSSAS",
-    privada: false,
-  },
-  { estado: "Empezando", tipo: "Privada", nombre: "Empezando", privada: true },
-];*/
 
 /**
  * Pantalla para buscar y unirse a salas.
@@ -60,12 +46,6 @@ export default function BuscarSalasScreen(): JSX.Element {
   /**
    * Estado para almacenar la sala seleccionada cuando es privada.
    */
-  /*const [salaSeleccionada, setSalaSeleccionada] = useState<{
-    estado: string;
-    tipo: string;
-    nombre: string;
-    privada: boolean;
-  } | null>(null);*/
   const [salaSeleccionada, setSalaSeleccionada] = useState<any>(null);
 
   // Al montar la pantalla, solicita la lista de salas activas
@@ -84,27 +64,37 @@ export default function BuscarSalasScreen(): JSX.Element {
     };
   }, []);
 
-  /**
-   * Maneja la selección de una sala.
-   * Si la sala es privada, solicita una contraseña.
-   * Si es pública, redirige directamente.
-   *
-   * @param sala Sala seleccionada.
-   */
-  /*const handleSalaPress = (sala: {
-    estado: string;
-    tipo: string;
-    nombre: string;
-    privada: boolean;
-  }) => {
-    if (sala.privada) {
-      setSalaSeleccionada(sala);
-      setMostrarModal(true);
-    } else {
-      router.push("/(sala)/sala");
-    }
-  };*/
+  useEffect(() => {
+    /**
+     * Recupera de forma asíncrona los datos del usuario (nombre de usuario e ID de usuario) desde AsyncStorage
+     * y actualiza el estado con los valores recuperados.
+     */
+    const obtenerDatosUsuario = async () => {
+      const nombreUsuario = await AsyncStorage.getItem("nombreUsuario");
+      const idUsuario = await AsyncStorage.getItem("idUsuario");
+      if (nombreUsuario && idUsuario) {
+        setUsuarioData({ id: idUsuario, nombre: nombreUsuario });
+      }
+    };
 
+    obtenerDatosUsuario();
+  }, []);
+
+  /**
+   * Estado que almacena los datos del usuario.
+   *
+   * @type {Object | null} - Puede ser un objeto con las propiedades `id` y `nombre`
+   * o `null` si no hay datos del usuario disponibles.
+   *
+   * @property {string} id - Identificador único del usuario.
+   * @property {string} nombre - Nombre del usuario.
+   *
+   * Se utiliza para gestionar y acceder a la información del usuario en el componente.
+   */
+  const [usuarioData, setUsuarioData] = useState<{
+    id: string;
+    nombre: string;
+  } | null>(null);
   /**
    * Al presionar una sala:
    * - Si es privada, se muestra el modal para ingresar la contraseña.
@@ -114,45 +104,37 @@ export default function BuscarSalasScreen(): JSX.Element {
     if (sala.tipo.toLowerCase() === "privada") {
       setSalaSeleccionada(sala);
       setMostrarModal(true);
-    } else {
-      // Simula los datos de otro usuario, por ejemplo "user2"
-      const usuarioData = { id: "user2", nombre: "OtroUsuario" };
+    } else if (usuarioData) {
       socket.emit("unirseSala", { idSala: sala.id, usuario: usuarioData });
       router.push({ pathname: "/(sala)/sala", params: { idSala: sala.id } });
+    } else {
+      Alert.alert("Usuario no disponible", "No hay datos de usuario.");
     }
   };
 
   /**
-   * Maneja la validación de la contraseña de una sala privada.
+   * Al confirmar la contraseña en una sala privada, se emite el evento de unión.
    */
-  /*const handleConfirmarPassword = () => {
-    // Aquí puedes agregar la lógica para verificar la contraseña
-    if (password === "1234") {
-      // Ejemplo de contraseña
+  const handleConfirmarPassword = () => {
+    if (!usuarioData) {
+      Alert.alert("Error", "No hay datos de usuario.");
+      return;
+    }
+    if (password === salaSeleccionada.contrasena) {
+      socket.emit("unirseSala", {
+        idSala: salaSeleccionada.id,
+        usuario: usuarioData,
+        contrasena: password,
+      });
       setMostrarModal(false);
-      router.push("/(sala)/sala");
+      router.push({
+        pathname: "/(sala)/sala",
+        params: { idSala: salaSeleccionada.id },
+      });
     } else {
       Alert.alert("Contraseña incorrecta", "Por favor, intenta de nuevo.");
     }
-  };*/
-    /**
-   * Al confirmar la contraseña en una sala privada, se emite el evento de unión.
-   */
-    const handleConfirmarPassword = () => {
-      // Aquí puedes hacer la validación real; en este ejemplo se compara con la contraseña de la sala
-      if (password === salaSeleccionada.contrasena) {
-        const usuarioData = { id: "user2", nombre: "OtroUsuario" };
-        socket.emit("unirseSala", {
-          idSala: salaSeleccionada.id,
-          usuario: usuarioData,
-          contrasena: password,
-        });
-        setMostrarModal(false);
-        router.push({ pathname: "/(sala)/sala", params: { idSala: salaSeleccionada.id } });
-      } else {
-        Alert.alert("Contraseña incorrecta", "Por favor, intenta de nuevo.");
-      }
-    };
+  };
 
   return (
     <View style={styles.container}>
@@ -342,7 +324,7 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 5,
   },
-  
+
   textoBotonCancelar: {
     color: "white",
     fontWeight: "bold",
@@ -351,6 +333,6 @@ const styles = StyleSheet.create({
   scrollContenido: {
     paddingBottom: 20,
     alignItems: "center",
-    width: "80%"
+    width: "80%",
   },
 });

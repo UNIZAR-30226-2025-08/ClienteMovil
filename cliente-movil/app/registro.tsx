@@ -137,7 +137,7 @@ export default function RegistroScreen() {
         // Guardamos los datos del usuario en AsyncStorage para su uso posterior
         await AsyncStorage.setItem('idUsuario', data.usuario.idUsuario.toString());
         await AsyncStorage.setItem('nombreUsuario', data.usuario.nombre);
-        await AsyncStorage.setItem('avatarUsuario', data.usuario.avatar);
+        await AsyncStorage.setItem('avatarUsuario', 'avatar5'); //avatar por defecto
         await AsyncStorage.setItem('correoUsuario', data.usuario.correo);
         await AsyncStorage.setItem("fechaCreacion", data.usuario.fechaCreacion);
         await AsyncStorage.setItem("rolFavorito", data.usuario.rolFavorito);
