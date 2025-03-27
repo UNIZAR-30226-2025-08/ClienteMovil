@@ -106,7 +106,8 @@ export default function App(): JSX.Element | null {
 
       if (response.status === 200) {
         const data = response.data;
-
+        console.log("ID del usuario:", data.usuario.idUsuario); // Depuración en consola
+        await AsyncStorage.setItem('idUsuario', data.usuario.idUsuario.toString());
         // Guardamos el correo en AsyncStorage para su uso posterior
         await AsyncStorage.setItem('nombreUsuario', data.usuario.nombre);
         if (data.usuario.avatar) {
@@ -121,6 +122,7 @@ export default function App(): JSX.Element | null {
 
         await AsyncStorage.setItem("rolFavorito", data.usuario.rolFavorito || "aldeano");
         await AsyncStorage.setItem("fechaCreacion", data.usuario.fechaCreacion || "Fecha desconocida");
+
 
 
         Alert.alert('Inicio de sesión exitoso', `Bienvenido, ${data.usuario.nombre}`);

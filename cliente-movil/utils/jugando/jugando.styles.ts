@@ -24,6 +24,14 @@ const TAMANIO_ICONO_BOTON = ancho * 0.1;
 const TAMANIO_TEMPORIZADOR = ancho * 0.15;
 
 /**
+ * @constant textoBlancoCorben - Estilo base para textos blancos con fuente "Corben".
+ */
+const textoBlancoCorben = {
+  color: "white",
+  fontFamily: "Corben",
+};
+
+/**
  * @constant estilos - Contiene los estilos de la pantalla de juego.
  */
 export const estilos = StyleSheet.create({
@@ -40,7 +48,7 @@ export const estilos = StyleSheet.create({
   },
 
   superposicion: {
-    backgroundColor: "rgba(38, 37, 34, 0.7)",
+    backgroundColor: "rgba(38, 37, 34, 0.95)",
     position: "absolute",
     top: 0,
     left: 0,
@@ -51,15 +59,14 @@ export const estilos = StyleSheet.create({
   contenedorTexto: {
     position: "absolute",
     width: "80%",
-    top: "21%",
+    top: "25%",
     justifyContent: "center",
     alignItems: "center",
   },
 
   texto: {
-    color: "white",
+    ...textoBlancoCorben,
     fontSize: ancho * 0.09,
-    fontFamily: "Corben",
     textAlign: "center",
     paddingHorizontal: ancho * 0.05,
   },
@@ -82,9 +89,8 @@ export const estilos = StyleSheet.create({
   },
 
   textoRol: {
+    ...textoBlancoCorben,
     fontSize: ancho * 0.1,
-    color: "white",
-    fontFamily: "Corben",
     textAlign: "center",
     lineHeight: ancho * 0.12,
     paddingVertical: alto * 0.005,
@@ -105,11 +111,10 @@ export const estilos = StyleSheet.create({
   },
 
   textoInicio: {
-    color: "white",
+    ...textoBlancoCorben,
     fontSize: ancho * 0.1,
-    fontFamily: "Corben",
     textAlign: "center",
-    top: "127%",
+    top: "115%",
     paddingHorizontal: ancho * 0.05,
   },
 
@@ -159,6 +164,7 @@ export const estilos = StyleSheet.create({
     fontWeight: "bold",
     textAlign: "center",
   },
+
   contenedorBarraSuperior: {
     position: "absolute",
     top: alto * 0.06,
@@ -170,37 +176,45 @@ export const estilos = StyleSheet.create({
     paddingVertical: alto * 0.03,
     paddingHorizontal: ancho * 0.04,
   },
+
   seccionBarraSuperiorIzquierda: {
     flex: 1,
     alignItems: "flex-start",
   },
+
   seccionBarraSuperiorCentro: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
   },
+
   seccionBarraSuperiorDerecha: {
     flex: 1,
     alignItems: "flex-end",
   },
+
   contenedorBarraSuperiorItem: {
     flexDirection: "row",
     alignItems: "center",
     gap: ancho * 0.02,
   },
+
   iconoBarraSuperior: {
     width: ancho * 0.1,
     height: ancho * 0.1,
     borderRadius: ancho * 0.02,
   },
+
   textoBarraSuperiorContainer: {
     flexDirection: "column",
   },
+
   textoBarraSuperiorTitulo: {
     color: "white",
     fontSize: ancho * 0.04,
     fontWeight: "bold",
   },
+
   textoBarraSuperiorSub: {
     color: "white",
     fontSize: ancho * 0.03,
@@ -266,7 +280,7 @@ export const estilos = StyleSheet.create({
   },
 
   textoTemporizador: {
-    color: "white",
+    ...textoBlancoCorben,
     fontSize: ancho * 0.05,
     fontWeight: "bold",
   },
@@ -298,7 +312,7 @@ export const estilos = StyleSheet.create({
     left: ancho * 0.05,
     right: ancho * 0.05,
     bottom: 0,
-    height: alto * 0.85,
+    height: alto * 0.87,
     backgroundColor: "#262522",
     borderTopLeftRadius: ancho * 0.05,
     borderTopRightRadius: ancho * 0.05,
@@ -326,22 +340,20 @@ export const estilos = StyleSheet.create({
   },
 
   textoCerrarChat: {
-    color: "white",
+    ...textoBlancoCorben,
     fontSize: ancho * 0.07,
     fontWeight: "bold",
-    fontFamily: "Corben",
     includeFontPadding: true,
     textAlignVertical: "center",
     marginBottom: -alto * 0.005,
   },
 
   tituloChat: {
-    color: "white",
+    ...textoBlancoCorben,
     fontSize: ancho * 0.07,
     fontWeight: "bold",
     textAlign: "center",
     marginTop: alto * 0.02,
-    fontFamily: "Corben",
   },
 
   separadorChat: {
@@ -357,10 +369,9 @@ export const estilos = StyleSheet.create({
   },
 
   mensajeChat: {
-    color: "white",
+    ...textoBlancoCorben,
     fontSize: ancho * 0.04,
     marginBottom: alto * 0.015,
-    fontFamily: "Corben",
     lineHeight: ancho * 0.05,
     includeFontPadding: true,
   },
@@ -372,6 +383,7 @@ export const estilos = StyleSheet.create({
   },
 
   entradaChat: {
+    ...textoBlancoCorben,
     flex: 1,
     height: alto * 0.07,
     borderWidth: ancho * 0.002,
@@ -379,9 +391,7 @@ export const estilos = StyleSheet.create({
     backgroundColor: "#262522",
     borderRadius: ancho * 0.02,
     paddingHorizontal: ancho * 0.03,
-    color: "white",
     fontSize: ancho * 0.04,
-    fontFamily: "Corben",
   },
 
   botonEnviarChat: {
@@ -395,10 +405,9 @@ export const estilos = StyleSheet.create({
   },
 
   textoBotonEnviarChat: {
-    color: "white",
+    ...textoBlancoCorben,
     fontWeight: "bold",
     fontSize: ancho * 0.04,
-    fontFamily: "Corben",
   },
 
   contenedorHabilidad: {
@@ -435,10 +444,9 @@ export const estilos = StyleSheet.create({
   },
 
   textoCerrarHabilidad: {
-    color: "white",
+    ...textoBlancoCorben,
     fontSize: ancho * 0.07,
     fontWeight: "bold",
-    fontFamily: "Corben",
     includeFontPadding: true,
     textAlignVertical: "center",
     marginBottom: -alto * 0.005,
@@ -458,11 +466,10 @@ export const estilos = StyleSheet.create({
   },
 
   tituloHabilidad: {
-    color: "white",
+    ...textoBlancoCorben,
     fontSize: ancho * 0.07,
     fontWeight: "bold",
     textAlign: "center",
-    fontFamily: "Corben",
   },
 
   separadorHabilidad: {
@@ -478,19 +485,17 @@ export const estilos = StyleSheet.create({
   },
 
   textoHabilidad: {
-    color: "white",
+    ...textoBlancoCorben,
     fontSize: ancho * 0.05,
     marginBottom: alto * 0.015,
-    fontFamily: "Corben",
     lineHeight: ancho * 0.06,
     includeFontPadding: true,
   },
 
   textoRecuerda: {
-    color: "white",
+    ...textoBlancoCorben,
     fontSize: ancho * 0.045,
     marginTop: alto * 0.02,
-    fontFamily: "Corben",
     lineHeight: ancho * 0.055,
     includeFontPadding: true,
   },
@@ -510,7 +515,6 @@ export const estilos = StyleSheet.create({
       width: ancho * 0.005,
       height: alto * 0.005,
     },
-
     shadowOpacity: 0.25,
     shadowRadius: alto * 0.005,
     maxWidth: ancho * 0.9,
@@ -520,12 +524,17 @@ export const estilos = StyleSheet.create({
   },
 
   textoError: {
-    color: "white",
-    fontFamily: "Corben",
-    fontSize: alto * 0.022,
+    ...textoBlancoCorben,
+    fontSize: alto * 0.02,
     textAlign: "center",
     lineHeight: alto * 0.03,
     includeFontPadding: false,
     textAlignVertical: "center",
+  },
+  cargando: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#000",
   },
 });

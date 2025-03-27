@@ -10,8 +10,8 @@
  */
 import React from "react";
 import { View, Image, Text } from "react-native";
-import { estilos } from "../jugando.styles";
-import { CONSTANTES } from "../constantes";
+import { estilos } from "../../../utils/jugando/jugando.styles";
+import { CONSTANTES } from "../../../utils/jugando/constantes";
 const { TEXTOS, IMAGENES } = CONSTANTES;
 
 const BarraSuperior: React.FC = () => (

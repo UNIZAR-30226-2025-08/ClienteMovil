@@ -10,7 +10,7 @@ import { Dimensions } from "react-native";
  * @constant {number} ANCHO - Ancho de la pantalla en píxeles.
  * @constant {number} ALTO - Alto de la pantalla en píxeles.
  */
-const { width: ANCHO, height: ALTO } = Dimensions.get("window");
+export const { width: ANCHO, height: ALTO } = Dimensions.get("window");
 
 /**
  * @constant CONSTANTES - Contiene todos los valores globales utilizados en la partida.
@@ -44,6 +44,43 @@ export const CONSTANTES = {
         { id: 2, texto: "Jugador 5: Otro mensaje" }, // TODO
       ],
     },
+
+    /**
+     * @constant ALGUACIL - TODO COMENTAR.
+     */
+    ALGUACIL:
+      "LOS JUGADORES DEBEN ELEGIR DE MANERA CONSENSUADA QUIEN EJERCERÁ DE ALGUACIL",
+
+    /**
+     * @constant ELIMINAR_LOBO - TODO COMENTAR.
+     */
+    ELIMINAR_LOBO:
+      "LOS JUGADORES DEBEN ELIMINAR DE MANERA CONSENSUADA A UN SOSPECHOSO DE SER HOMBRE LOBO",
+
+    /**
+     * @constant VOTACIONES - TODO COMENTAR.
+     */
+    VOTACIONES: "COMIENZAN LAS VOTACIONES",
+
+    // Textos para las animaciones
+    DISPARO_CAZADOR: "HAS SIDO DISPARADO POR EL CAZADOR",
+    BRUJA_CURA: "HAS SIDO CURADO POR LA BRUJA",
+    BRUJA_VENENO: "HAS SIDO ENVENENADO POR LA BRUJA",
+    DORMIR: "ESTÁS DURMIENDO",
+    DEVORA_LOBOS: "HAS SIDO EL DEVORADO POR LOS HOMBRES LOBO",
+    LOBOS_DORMIR:
+      "LOS HOMBRES LOBO SACIADOS VUELVEN A DORMIRSE Y SUEÑAN CON PRÓXIMAS Y SABROSAS VÍCTIMAS",
+    BRUJA_DESPIERTA:
+      "LA BRUJA SE DESPIERTA, OBSERVA LA NUEVA VÍCTIMA DE LOS HOMBRES LOBO. USARÁ SU POCIÓN CURATIVA O SU POCIÓN VENENOSA",
+    BRUJA_DUERME: "LA BRUJA SE VUELVE A DORMIR",
+    VIDENTE_DUERME: "LA VIDENTE SE VUELVE A DORMIR",
+    VIDENTE_DESPIERTA:
+      "LA VIDENTE SE DESPIERTA Y SEÑALA A UN JUGADOR DEL QUE QUIERE CONOCER LA VERDADERA PERSONALIDAD",
+    NOCHE_SUPERVIVIENTES:
+      "SE HACE DE NOCHE; LOS SUPERVIVIENTES VUELVEN A DORMIR",
+    JUGADOR_ALGUACIL: "JUGADOR 4 ES EL AGUACIL",
+    VOTACIONES_CONCLUIDAS: "LAS VOTACIONES HAN CONCLUIDO",
+    ELEGIDO_PUEBLO: "HAS SIDO EL ELEGIDO POR EL PUEBLO",
   },
 
   /**
@@ -99,7 +136,7 @@ export const CONSTANTES = {
 };
 
 /**
- * @typedef {"aldeano" | "lobo" | "bruja" | "cazador"} Rol
+ * @typedef {"aldeano" | "lobo" | "bruja" | "cazador" | vidente} Rol
  * @description Define los posibles roles en la partida.
  */
-export type Rol = "aldeano" | "lobo" | "bruja" | "cazador";
+export type Rol = "aldeano" | "lobo" | "bruja" | "cazador" | "vidente";

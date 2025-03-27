@@ -30,7 +30,6 @@ const avatarMap: Record<string, any> = {
   avatar8: require("@/assets/images/imagenPerfil8.webp"),
 };
 
-
 /**
  * Imágenes utilizadas en la pantalla.
  */
@@ -109,8 +108,7 @@ export default function ElegirPartidaScreen(): JSX.Element | null {
 
   return (
     <View style={styles.container}>
-
-      {/* Fondo de pantalla */}     
+      {/* Fondo de pantalla */}
       <ImageBackground
         source={imagenPortada}
         resizeMode="cover"
@@ -118,21 +116,19 @@ export default function ElegirPartidaScreen(): JSX.Element | null {
       >
         <View style={styles.overlay} />
 
-          {/* Contenedor del perfil del usuario */}
-          <TouchableOpacity
-              onPress={() => router.push("/perfil")}
-              style={styles.contenedorPerfil}
-            >
-              <Image
-                source={usuario?.avatar ? usuario.avatar : imagenPorDefecto}
-                style={styles.profileImage}
-              />
-            </TouchableOpacity>
+        {/* Contenedor del perfil del usuario */}
+        <TouchableOpacity
+          onPress={() => router.push("/perfil")}
+          style={styles.contenedorPerfil}
+        >
+          <Image
+            source={usuario?.avatar ? usuario.avatar : imagenPorDefecto}
+            style={styles.profileImage}
+          />
+        </TouchableOpacity>
 
-            {/* Nombre del jugador */}
-            <Text style={styles.nombrePlayer}>
-              {usuario?.nombre || "Usuario"}
-            </Text>
+        {/* Nombre del jugador */}
+        <Text style={styles.nombrePlayer}>{usuario?.nombre || "Usuario"}</Text>
 
         {/* Botón de Partida Rápida */}
         <Link href={"/jugando"} style={styles.textoPartida}>
@@ -194,8 +190,8 @@ const styles = StyleSheet.create({
   },
 
   overlay: {
-    ...StyleSheet.absoluteFillObject, 
-    backgroundColor: "rgba(0, 0, 0, 0.4)", 
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0, 0, 0, 0.4)",
   },
 
   profileImage: {
@@ -206,26 +202,26 @@ const styles = StyleSheet.create({
 
   nombrePlayer: {
     position: "absolute",
-    top: 205, 
-    alignSelf: "center", 
+    top: 205,
+    alignSelf: "center",
     color: "white",
     fontSize: 20,
     fontWeight: "bold",
     textAlign: "center",
-    width: "100%", 
+    width: "100%",
   },
 
   textoPartida: {
     fontSize: 20,
     fontWeight: "bold",
     color: "white",
-    textShadowColor: "rgba(0, 0, 0, 0.75)", 
+    textShadowColor: "rgba(0, 0, 0, 0.75)",
     textShadowOffset: { width: 2, height: 2 },
     textShadowRadius: 10,
     textAlign: "center",
     backgroundColor: "rgba(255, 255, 255, 0.6)",
-    position: "absolute", 
-    top: 250, 
+    position: "absolute",
+    top: 250,
     width: "100%",
     paddingVertical: 10,
     borderRadius: 20,
@@ -235,13 +231,13 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "bold",
     color: "white",
-    textShadowColor: "rgba(0, 0, 0, 0.75)", 
+    textShadowColor: "rgba(0, 0, 0, 0.75)",
     textShadowOffset: { width: 2, height: 2 },
     textShadowRadius: 10,
     textAlign: "center",
     backgroundColor: "rgba(255, 255, 255, 0.6)",
-    position: "absolute", 
-    top: 325, 
+    position: "absolute",
+    top: 325,
     width: "100%",
     paddingVertical: 10,
     borderRadius: 20,
@@ -251,13 +247,13 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "bold",
     color: "white",
-    textShadowColor: "rgba(0, 0, 0, 0.75)", 
+    textShadowColor: "rgba(0, 0, 0, 0.75)",
     textShadowOffset: { width: 2, height: 2 },
     textShadowRadius: 10,
     textAlign: "center",
     backgroundColor: "rgba(255, 255, 255, 0.6)",
-    position: "absolute", 
-    top: 400, 
+    position: "absolute",
+    top: 400,
     width: "100%",
     paddingVertical: 10,
     borderRadius: 20,
@@ -271,13 +267,13 @@ const styles = StyleSheet.create({
   },
 
   iconoNotificacionesContainer: {
-    backgroundColor: "rgba(0, 0, 0, 0.6)", 
+    backgroundColor: "rgba(0, 0, 0, 0.6)",
     borderRadius: 10,
     padding: 5,
   },
 
   iconoNotificaciones: {
-    width: 40, 
-    height: 40, 
+    width: 40,
+    height: 40,
   },
 });
