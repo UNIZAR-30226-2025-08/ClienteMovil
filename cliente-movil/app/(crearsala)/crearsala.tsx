@@ -21,7 +21,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 const rolesData = [
   {
     id: 1,
-    nombre: "Hombre Lobo",
+    nombre: "Hombre lobo",
     imagen: require("@/assets/images/hombre-lobo-icon.jpeg"),
     cantidad: 1,
   },
@@ -126,10 +126,10 @@ const CrearSala = (): JSX.Element => {
   const ajustarRoles = () => {
     let jugadores = numJugadores;
     let newRoles = [...rolesCantidad];
-    // Ajuste del número de "Hombre Lobo"
+    // Ajuste del número de "Hombre lobo"
     let lobos = jugadores >= 12 ? 3 : jugadores >= 8 ? 2 : 1;
     newRoles = newRoles.map((r) =>
-      r.nombre === "Hombre Lobo" ? { ...r, cantidad: lobos } : r
+      r.nombre === "Hombre lobo" ? { ...r, cantidad: lobos } : r
     );
 
     if (privacidad === "publica") {
@@ -222,7 +222,7 @@ const CrearSala = (): JSX.Element => {
 
   /**
    * Incrementa la cantidad de un rol específico en partidas privadas.
-   * Se evitan incrementos para salas públicas, para "Hombre Lobo" o si se alcanzó el máximo.
+   * Se evitan incrementos para salas públicas, para "Hombre lobo" o si se alcanzó el máximo.
    */
   const incrementarRol = (rol: {
     id: number;
@@ -232,7 +232,7 @@ const CrearSala = (): JSX.Element => {
   }) => {
     if (
       privacidad === "publica" ||
-      rol.nombre === "Hombre Lobo" ||
+      rol.nombre === "Hombre lobo" ||
       numJugadores >= 18
     )
       return;
@@ -260,7 +260,7 @@ const CrearSala = (): JSX.Element => {
   }) => {
     if (
       privacidad === "publica" ||
-      rol.nombre === "Hombre Lobo" ||
+      rol.nombre === "Hombre lobo" ||
       rol.cantidad <= 0
     )
       return;
@@ -279,6 +279,16 @@ const CrearSala = (): JSX.Element => {
       .filter((rol) => rol.nombre !== "Aldeano")
       .reduce((sum, rol) => sum + rol.cantidad, 0);
 
+    // 1. Construir un objeto con las cantidades de cada rol
+    const rolesObject: Record<string, number> = rolesCantidad.reduce(
+      (acc, rol) => {
+        acc[rol.nombre] = rol.cantidad;
+        return acc;
+      },
+      {} as Record<string, number>
+    );
+
+    // 2. Incluir este objeto en el payload que envías al servidor
     const datosSala = {
       nombreSala: nombreServidor,
       tipo: privacidad.toLowerCase(),
@@ -286,9 +296,9 @@ const CrearSala = (): JSX.Element => {
       maxJugadores: numJugadores,
       maxRolesEspeciales,
       usuario: usuario,
+      maxRoles: rolesObject,
     };
 
-    console.log("Enviando datos de sala:", datosSala);
     socket.emit("crearSala", datosSala);
   };
 
@@ -399,7 +409,7 @@ const CrearSala = (): JSX.Element => {
             <View style={styles.botonContainer}>
               {rol.cantidad > 0 &&
                 privacidad !== "publica" &&
-                rol.nombre !== "Hombre Lobo" && (
+                rol.nombre !== "Hombre lobo" && (
                   <Button title="-" onPress={() => decrementarRol(rol)} />
                 )}
               <Button title="+" onPress={() => incrementarRol(rol)} />

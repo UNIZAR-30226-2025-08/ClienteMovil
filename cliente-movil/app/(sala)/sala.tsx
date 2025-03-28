@@ -43,8 +43,16 @@ export default function SalaPreviaScreen(): JSX.Element {
     idSala: string;
     salaData: string;
   }>();
-  const [players, setPlayers] = useState<Player[]>([]);
   const salaInfo = salaData ? JSON.parse(salaData) : null;
+
+  const [players, setPlayers] = useState<Player[]>([]);
+  // Nuevo estado para el nombre de la sala
+  const [roomName, setRoomName] = useState(
+    salaInfo && salaInfo.nombre && salaInfo.nombre.trim() !== ""
+      ? salaInfo.nombre
+      : "Sala sin nombre"
+  );
+
   const [usuarioData, setUsuarioData] = useState<UsuarioData | null>(null);
 
   useEffect(() => {
@@ -62,6 +70,7 @@ export default function SalaPreviaScreen(): JSX.Element {
     }
     // Suscribirte a "actualizarSala" para cambios futuros...
     socket.on("actualizarSala", (sala) => {
+      console.log("Evento actualizarSala recibido:", sala);
       setPlayers(
         sala.jugadores.map((j: any) => ({
           id: j.id,
@@ -70,6 +79,12 @@ export default function SalaPreviaScreen(): JSX.Element {
           isReady: j.listo || false,
           isOwner: sala.lider === j.id,
         }))
+      );
+      // Actualiza dinámicamente el nombre de la sala
+      setRoomName(
+        sala.nombre && sala.nombre.trim() !== ""
+          ? sala.nombre
+          : "Sala sin nombre"
       );
     });
 
@@ -89,6 +104,73 @@ export default function SalaPreviaScreen(): JSX.Element {
     };
     obtenerDatosUsuario();
   }, []);
+
+  useEffect(() => {
+    // Cuando un jugador se une a la sala
+    socket.on("jugadorUnido", (data) => {
+      console.log("Jugador unido:", data);
+      setPlayers((prevPlayers) => [
+        ...prevPlayers,
+        {
+          id: data.id,
+          name: data.nombre || data.id,
+          level: 106, // Ajusta el nivel si corresponde
+          isReady: false,
+          isOwner: false,
+        },
+      ]);
+    });
+
+    // Cuando un jugador sale de la sala
+    socket.on("jugadorSalido", (data) => {
+      console.log("Jugador salió:", data);
+      setPlayers((prevPlayers) =>
+        prevPlayers.filter((player) => player.id !== data.id)
+      );
+    });
+
+    // Cuando se cambia el estado (listo / no listo) de un jugador
+    socket.on("estadoCambiado", ({ idUsuario, estado }) => {
+      console.log("Estado cambiado:", idUsuario, estado);
+      setPlayers((prevPlayers) =>
+        prevPlayers.map((player) =>
+          player.id === idUsuario ? { ...player, isReady: estado } : player
+        )
+      );
+    });
+
+    // Cuando se expulsa a un jugador de la sala
+    socket.on("expulsadoDeSala", ({ idExpulsado }) => {
+      console.log("Expulsado de la sala:", idExpulsado);
+      if (usuarioData && usuarioData.id === idExpulsado) {
+        Alert.alert("Expulsado", "Has sido expulsado de la sala.");
+        router.back();
+      } else {
+        setPlayers((prevPlayers) =>
+          prevPlayers.filter((player) => player.id !== idExpulsado)
+        );
+      }
+    });
+
+    // Cuando la partida se inicia
+    socket.on("enPartida", (data) => {
+      console.log("Partida iniciada:", data);
+      Alert.alert(
+        "Inicio de Partida",
+        data.mensaje || "La partida ha iniciado."
+      );
+      router.push("/(jugando)/jugando");
+    });
+
+    // Limpieza: removemos los listeners al desmontar el componente
+    return () => {
+      socket.off("jugadorUnido");
+      socket.off("jugadorSalido");
+      socket.off("estadoCambiado");
+      socket.off("expulsadoDeSala");
+      socket.off("enPartida");
+    };
+  }, [usuarioData]);
 
   /**
    * Alterna el estado de "Listo" de un jugador.
@@ -188,9 +270,7 @@ export default function SalaPreviaScreen(): JSX.Element {
     <View style={styles.container}>
       {/* Encabezado (Nombre De La Sala) */}
       <View style={styles.headerContainer}>
-        <Text style={styles.roomName}>
-          {salaData ? JSON.parse(salaData).nombre : "Sala sin nombre"}
-        </Text>
+        <Text style={styles.roomName}>{roomName}</Text>
       </View>
 
       {/* Info de la cuenta */}
@@ -232,7 +312,7 @@ export default function SalaPreviaScreen(): JSX.Element {
         <TouchableOpacity
           style={[
             styles.buttonStart,
-            { backgroundColor: allReady ? "#008000" : "#555" }, // Se colorea verde si todos están listos
+            { backgroundColor: allReady ? "#008000" : "#555" },
           ]}
           onPress={handleIniciarPartida}
           disabled={!allReady}
