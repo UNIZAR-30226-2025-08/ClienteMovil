@@ -12,6 +12,7 @@ import {
 import axios from "axios";
 import Constants from "expo-constants";
 import { useRouter } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 /**
  * Mapa de avatares que relaciona claves con sus respectivas imágenes.
@@ -25,15 +26,15 @@ import { useRouter } from "expo-router";
  * ```
  */
 const avatarMap: Record<string, any> = {
-    avatar1: require("@/assets/images/imagenPerfil.webp"),
-    avatar2: require("@/assets/images/imagenPerfil2.webp"),
-    avatar3: require("@/assets/images/imagenPerfil3.webp"),
-    avatar4: require("@/assets/images/imagenPerfil4.webp"),
-    avatar5: require("@/assets/images/imagenPerfil5.webp"),
-    avatar6: require("@/assets/images/imagenPerfil6.webp"),
-    avatar7: require("@/assets/images/imagenPerfil7.webp"),
-    avatar8: require("@/assets/images/imagenPerfil8.webp"),
-  };
+  avatar1: require("@/assets/images/imagenPerfil.webp"),
+  avatar2: require("@/assets/images/imagenPerfil2.webp"),
+  avatar3: require("@/assets/images/imagenPerfil3.webp"),
+  avatar4: require("@/assets/images/imagenPerfil4.webp"),
+  avatar5: require("@/assets/images/imagenPerfil5.webp"),
+  avatar6: require("@/assets/images/imagenPerfil6.webp"),
+  avatar7: require("@/assets/images/imagenPerfil7.webp"),
+  avatar8: require("@/assets/images/imagenPerfil8.webp"),
+};
 
 /**
  * Tipo que representa a un jugador en el ranking.
@@ -86,6 +87,22 @@ export default function RankingScreen(): JSX.Element {
     fetchRanking();
   }, []);
 
+  const handlePress = async (idUsuario: number) => {
+    try {
+      console.log("Presionando jugador del ranking con ID:", idUsuario);
+      await AsyncStorage.setItem("amigoId", idUsuario.toString());
+      router.push({
+        pathname: "/(perfil)/perfilAmigo",
+        params: { amigoId: idUsuario.toString() },
+      });
+    } catch (error) {
+      console.error(
+        "Error al guardar el ID del jugador en AsyncStorage",
+        error
+      );
+    }
+  };
+
   return (
     <View style={styles.container}>
       <ImageBackground
@@ -105,26 +122,31 @@ export default function RankingScreen(): JSX.Element {
             showsVerticalScrollIndicator={false}
           >
             {ranking.map((jugador, index) => (
-              <View key={jugador.idUsuario} style={styles.cardContainer}>
-                <View style={styles.cardHeader}>
-                  {/* Mostrar avatar de cada uno de los usuarios del ranking */}
-                  <Image
-                    source={
+              <TouchableOpacity
+                key={jugador.idUsuario}
+                onPress={() => handlePress(jugador.idUsuario)}
+                activeOpacity={0.7}
+              >
+                <View key={jugador.idUsuario} style={styles.cardContainer}>
+                  <View style={styles.cardHeader}>
+                    {/* Mostrar avatar de cada uno de los usuarios del ranking */}
+                    <Image
+                      source={
                         jugador.avatar && avatarMap[jugador.avatar]
-                        ? avatarMap[jugador.avatar]
-                        : require("@/assets/images/imagenPerfil.webp")
-                    }
-                    style={styles.avatar}
+                          ? avatarMap[jugador.avatar]
+                          : require("@/assets/images/imagenPerfil.webp")
+                      }
+                      style={styles.avatar}
                     />
 
-
-                  <Text style={styles.rank}>{index + 1}.</Text>
-                  <Text style={styles.nombre}>{jugador.nombre}</Text>
+                    <Text style={styles.rank}>{index + 1}.</Text>
+                    <Text style={styles.nombre}>{jugador.nombre}</Text>
+                  </View>
+                  <Text style={styles.victorias}>
+                    {jugador.victorias} victorias
+                  </Text>
                 </View>
-                <Text style={styles.victorias}>
-                  {jugador.victorias} victorias
-                </Text>
-              </View>
+              </TouchableOpacity>
             ))}
           </ScrollView>
         )}
@@ -220,7 +242,7 @@ const styles = StyleSheet.create({
     bottom: 20,
     left: "46%",
   },
-  
+
   imageAtras: {
     width: 40,
     height: 40,
