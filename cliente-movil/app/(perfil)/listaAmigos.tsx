@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   ImageBackground,
   TextInput,
+  Alert,
 } from "react-native";
 import { useRouter } from "expo-router";
 import Constants from "expo-constants";
@@ -151,35 +152,50 @@ export default function AmigosScreen(): JSX.Element {
     }
   };
 
-  /**
-   * Función para agregar un nuevo amigo a la lista.
-   */
-  const anadirAmigo = async () => {
+  // Nueva función para enviar solicitud de amistad:
+  const enviarSolicitud = async () => {
     if (!nuevoAmigo.trim() || !usuario) return;
 
     try {
-      const response = await axios.post(`${BACKEND_URL}/api/amistad/agregar`, {
-        idUsuario1: usuario.idUsuario,
-        idUsuario2: nuevoAmigo.trim(), // Este ID debe ser de otro usuario, aquí lo asumo como nombre temporal
-      });
+      // Buscar el usuario por nombre
+      const responseUsuario = await axios.post(
+        `${BACKEND_URL}/api/usuario/obtener_por_nombre`,
+        { nombre: nuevoAmigo.trim() }
+      );
+      if (!responseUsuario.data.usuario) {
+        //Alert.alert("Depuración", "Usuario no encontrado");
+        setMensaje("Usuario no encontrado");
+        return;
+      }
 
-      if (response.data.amistad) {
-        // Agregar el nuevo amigo a la lista de amigos localmente
-        setAmigos([...amigos, response.data.amistad]);
-        setNuevoAmigo(""); // Limpiar el campo de entrada
-        const nuevoAmigoId = response.data.amistad.idUsuario2;
+      // Muestra la información del usuario en un Alert
+      /*Alert.alert(
+        "Depuración",
+        `Usuario encontrado:\n${JSON.stringify(responseUsuario.data.usuario)}`
+      );*/
 
-        // Cargar los detalles del nuevo amigo
-        cargarDetallesAmigos([...amigos, nuevoAmigoId]); // Llamamos a cargarDetallesAmigos con la lista actualizada
+      const idReceptor = responseUsuario.data.usuario.idUsuario;
+      //Alert.alert("Depuración", `Usuario encontrado: ID ${idReceptor}`);
 
-        // Mostrar el mensaje de éxito
-        setMensaje("¡Amigo agregado con éxito!");
-
-        // Ocultar el mensaje después de 3 segundos
-        setTimeout(() => setMensaje(null), 1500);
+      // Enviar la solicitud de amistad
+      const responseSolicitud = await axios.post(
+        `${BACKEND_URL}/api/solicitud/enviar`,
+        {
+          idEmisor: usuario.idUsuario,
+          idReceptor: idReceptor,
+        }
+      );
+      if (responseSolicitud.data.solicitud) {
+        //Alert.alert("Depuración", "Solicitud enviada con éxito");
+        setMensaje("¡Solicitud enviada con éxito!");
       }
     } catch (error) {
-      console.error("Error al agregar amigo:", error);
+      console.error("Error al enviar solicitud:", error);
+      //Alert.alert("Depuración", "Error al enviar solicitud");
+      setMensaje("Error al enviar solicitud");
+    } finally {
+      setNuevoAmigo("");
+      setTimeout(() => setMensaje(null), 1500);
     }
   };
 
@@ -248,24 +264,27 @@ export default function AmigosScreen(): JSX.Element {
         {/* Título */}
         <Text style={styles.titulo}>Lista de Amigos</Text>
 
-        {/* Mostrar mensaje de éxito */}
+        {/* Mostrar mensaje de éxito o error */}
         {mensaje && (
           <View style={styles.mensajeExitoContainer}>
             <Text style={styles.mensajeExito}>{mensaje}</Text>
           </View>
         )}
 
-        {/* Contenedor para añadir nuevo amigo */}
+        {/* Contenedor para añadir nuevo amigo (ahora envío de solicitud) */}
         <View style={styles.addFriendContainer}>
           <TextInput
             style={styles.input}
-            placeholder="Nombre del nuevo amigo"
+            placeholder="Nombre del usuario" // Se actualiza el placeholder
             placeholderTextColor="#666"
             value={nuevoAmigo}
             onChangeText={setNuevoAmigo}
           />
-          <TouchableOpacity style={styles.botonAnadir} onPress={anadirAmigo}>
-            <Text style={styles.botonAnadirTexto}>AÑADIR</Text>
+          <TouchableOpacity
+            style={styles.botonAnadir}
+            onPress={enviarSolicitud}
+          >
+            <Text style={styles.botonAnadirTexto}>ENVIAR SOLICITUD</Text>
           </TouchableOpacity>
         </View>
 
