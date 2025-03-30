@@ -1,25 +1,25 @@
-import React from "react"; // Importar useState desde React
-import {
-  ImageBackground,
-  StyleSheet,
-  Text,
-  View,
-  Image,
-  TouchableOpacity,
-} from "react-native";
-import { Link, useRouter } from "expo-router";
-import { useFonts } from "expo-font";
+import React from 'react';  // Importar useState desde React
+import { 
+  ImageBackground, 
+  StyleSheet, 
+  Text, 
+  View, 
+  Image, 
+  TouchableOpacity
+} from 'react-native';
+import { Link, useRouter } from 'expo-router';
+import { useFonts } from 'expo-font';
 
 /**
  * Importación de imágenes utilizadas en la pantalla "¿Cómo Jugar?".
  */
-const imagenFondoRoles = require("@/assets/images/fondo-roles.jpg");
-const imageLobo = require("@/assets/images/lobo.png");
-const imagenPapiro = require("@/assets/images/papiro.png");
-const imageFondoTurnos = require("@/assets/images/fondo-turnos-explicacion.jpg");
-const imagenAtras = require("@/assets/images/botonAtras.png");
-const imagenLuna = require("@/assets/images/imagen-luna.png");
-const imagenSol = require("@/assets/images/imagen-sol.jpg");
+const imagenFondoRoles = require('@/assets/images/fondo-roles.jpg');
+const imageLobo = require('@/assets/images/lobo.png');
+const imagenPapiro = require('@/assets/images/papiro.png')
+const imageFondoTurnos = require('@/assets/images/fondo-turnos-explicacion.jpg');
+const imagenAtras = require('@/assets/images/botonAtras.png');
+const imagenLuna = require('@/assets/images/imagen-luna.png');
+const imagenSol = require('@/assets/images/imagen-sol.jpg');
 
 /**
  * Pantalla "¿Cómo Jugar?".
@@ -28,11 +28,12 @@ const imagenSol = require("@/assets/images/imagen-sol.jpg");
  * @returns {JSX.Element} Pantalla de explicación de juego.
  */
 export default function ComoJugarScreen(): JSX.Element | null {
-  const router = useRouter(); // Usamos useRouter para manejar la navegación
+
+  const router = useRouter();  // Usamos useRouter para manejar la navegación
 
   // Cargar la fuente GhostShadow
   const [loaded] = useFonts({
-    GhostShadow: require("@/assets/fonts/ghost-shadow.ttf"),
+    GhostShadow: require('@/assets/fonts/ghost-shadow.ttf'),
   });
 
   if (!loaded) {
@@ -43,41 +44,37 @@ export default function ComoJugarScreen(): JSX.Element | null {
    * Función para regresar a la pantalla anterior.
    */
   const irAtras = () => {
-    router.back(); // Regresa a la pantalla anterior
+    router.back();  // Regresa a la pantalla anterior
   };
 
   return (
     <View style={styles.container}>
       <ImageBackground
         source={imagenFondoRoles}
-        resizeMode="cover"
+        resizeMode='cover'
         style={styles.image}
       >
+
         <View style={styles.overlay} />
         <Text style={styles.tituloComoJugar}>¿CÓMO JUGAR?</Text>
         <Image source={imageLobo} style={styles.imageLobo}></Image>
         <Image source={imagenPapiro} style={styles.imagePapiro}></Image>
         <Text style={styles.textoComoJugar}>
-          Se reparten los roles a los jugadores. Cada jugador mira su carta para
-          saber cuál es su personaje, información que mantendrá en secreto a
-          menos que sea eliminado. El Narrador decide si los aldeanos votarán
-          ahora un Alguacil (función adicional, independiente del personaje) por
-          mayoría simple, o si el Alguacil será elegido más tarde en el
-          transcurso de la partida. El voto del Alguacil cuenta como dos votos.
-          El juego comienza en la noche.
+        Se reparten los roles a los jugadores. Cada jugador mira su carta para 
+        saber cuál es su personaje, información que mantendrá en secreto a 
+        menos que sea eliminado. El Narrador decide si los aldeanos votarán 
+        ahora un Alguacil (función adicional, independiente del personaje) 
+        por mayoría simple, o si el Alguacil será elegido más tarde en el 
+        transcurso de la partida. El voto del Alguacil cuenta como dos votos. 
+        El juego comienza en la noche.
         </Text>
 
         {/* Botón para ir a la fase de Noche */}
         <TouchableOpacity style={styles.containerTurnoNoche}>
           <View style={styles.turnoContainer}>
-            <Link href="/(comoJugar)/(turnos)/turnoNoche">
-              {" "}
-              {/* Ruta a la que quieres redirigir */}
+            <Link href="/(comoJugar)/(turnos)/turnoNoche"> {/* Ruta a la que quieres redirigir */}
               <View style={styles.imageContainer}>
-                <Image
-                  source={imageFondoTurnos}
-                  style={styles.imageFondoTurnos}
-                />
+                <Image source={imageFondoTurnos} style={styles.imageFondoTurnos} />
                 <View style={styles.overlayTurno} />
               </View>
             </Link>
@@ -91,14 +88,9 @@ export default function ComoJugarScreen(): JSX.Element | null {
         {/* Botón para ir a la fase de Día */}
         <TouchableOpacity style={styles.containerTurnoDia}>
           <View style={styles.turnoContainer}>
-            <Link href="/(comoJugar)/(turnos)/turnoDia">
-              {" "}
-              {/* Ruta a la que quieres redirigir */}
+            <Link href="/(comoJugar)/(turnos)/turnoDia"> {/* Ruta a la que quieres redirigir */}
               <View style={styles.imageContainer}>
-                <Image
-                  source={imageFondoTurnos}
-                  style={styles.imageFondoTurnos}
-                />
+                <Image source={imageFondoTurnos} style={styles.imageFondoTurnos} />
                 <View style={styles.overlayTurno} />
               </View>
             </Link>
@@ -111,7 +103,7 @@ export default function ComoJugarScreen(): JSX.Element | null {
 
         {/* Botón de regreso */}
         <TouchableOpacity style={styles.containerAtras} onPress={irAtras}>
-          <Image source={imagenAtras} style={styles.imageAtras} />
+              <Image source={imagenAtras} style={styles.imageAtras} />
         </TouchableOpacity>
       </ImageBackground>
     </View>
@@ -124,50 +116,51 @@ export default function ComoJugarScreen(): JSX.Element | null {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    flexDirection: "column",
+    flexDirection: 'column',
   },
 
   turnoContainer: {
-    position: "absolute",
+    position: 'absolute', 
     width: 220,
     height: 40,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 
   imageContainer: {
-    position: "relative",
-    width: 220,
-    height: 40,
+    position: 'relative', 
+    width: 220,  
+    height: 40, 
   },
 
   overlayTurno: {
-    position: "absolute",
+    position: 'absolute',  
     top: 0,
     left: 0,
-    width: "100%",
-    height: "100%",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    width: '100%',
+    height: '100%',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)', 
   },
 
   containerAtras: {
-    position: "absolute",
-    bottom: 20,
-    left: "46%",
+    position: 'absolute',
+    bottom: 20,  
+    left: '46%', 
+
   },
 
   containerTurnoNoche: {
-    position: "absolute",
-    top: 570,
-    left: "35%",
-    marginLeft: -50,
+    position: 'absolute', 
+    top: 570,  
+    left: '35%',
+    marginLeft: -50,  
   },
 
   containerTurnoDia: {
-    position: "absolute",
-    top: 630,
-    left: "35%",
-    marginLeft: -50,
+    position: 'absolute', 
+    top: 630,  
+    left: '35%',
+    marginLeft: -50,  
   },
 
   imageAtras: {
@@ -176,74 +169,74 @@ const styles = StyleSheet.create({
   },
 
   image: {
-    width: "100%",
-    height: "100%",
+    width: '100%',
+    height: '100%',
     flex: 1,
-    resizeMode: "cover",
-    justifyContent: "center",
+    resizeMode: 'cover',
+    justifyContent: 'center',
   },
 
   imageFondoTurnos: {
-    width: 220,
-    height: 40,
+    width: 220,  
+    height: 40, 
   },
 
   imagePapiro: {
     height: 400,
     width: 300,
-    position: "absolute",
+    position: 'absolute',
     bottom: "10%",
     left: "13%",
   },
 
   overlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0, 0, 0, 0.4)",
+    ...StyleSheet.absoluteFillObject,  
+    backgroundColor: 'rgba(0, 0, 0, 0.4)', 
   },
 
   imageLobo: {
-    width: 170,
-    height: 170,
+    width: 170,  
+    height: 170, 
     left: "29%",
     top: "15%",
-    position: "absolute",
+    position: 'absolute'
   },
 
   tituloComoJugar: {
-    position: "absolute",
-    top: "5%",
-    left: "25%",
-    marginTop: 20,
-    marginLeft: -60,
-    color: "white",
-    fontSize: 45,
-    fontWeight: "bold",
-    textAlign: "center",
+    position: 'absolute', 
+    top: '5%',  
+    left: '25%',  
+    marginTop: 20,  
+    marginLeft: -60,  
+    color: 'white',  
+    fontSize: 45,  
+    fontWeight: 'bold',  
+    textAlign: 'center',  
   },
 
   textoComoJugar: {
     fontSize: 13,
-    fontWeight: "bold",
-    position: "absolute",
+    fontWeight: 'bold',
+    position: 'absolute',
     width: 230,
     left: "25%",
     top: "45%",
   },
 
   textoNoche: {
-    position: "absolute",
+    position: 'absolute',
     fontSize: 20,
-    fontWeight: "bold",
-    color: "white",
+    fontWeight: 'bold',
+    color: 'white',
     left: "43%",
     bottom: "25%",
   },
 
   textoDia: {
-    position: "absolute",
+    position: 'absolute',
     fontSize: 20,
-    fontWeight: "bold",
-    color: "white",
+    fontWeight: 'bold',
+    color: 'white',
     left: "47%",
     bottom: "17.5%",
   },
@@ -251,7 +244,7 @@ const styles = StyleSheet.create({
   imagenTurnoNoche1: {
     width: 35,
     height: 35,
-    position: "absolute",
+    position: 'absolute',
     bottom: "24.3%",
     left: "28%",
     borderRadius: 100,
@@ -260,7 +253,7 @@ const styles = StyleSheet.create({
   imagenTurnoNoche2: {
     width: 35,
     height: 35,
-    position: "absolute",
+    position: 'absolute',
     bottom: "24.3%",
     left: "66%",
     borderRadius: 100,
@@ -269,7 +262,7 @@ const styles = StyleSheet.create({
   imagenTurnoDia1: {
     width: 35,
     height: 35,
-    position: "absolute",
+    position: 'absolute',
     bottom: "16.8%",
     left: "28%",
     borderRadius: 100,
@@ -278,7 +271,7 @@ const styles = StyleSheet.create({
   imagenTurnoDia2: {
     width: 35,
     height: 35,
-    position: "absolute",
+    position: 'absolute',
     bottom: "16.8%",
     left: "66%",
     borderRadius: 100,

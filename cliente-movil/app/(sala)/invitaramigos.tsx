@@ -76,7 +76,7 @@ const amigos = [
 /**
  * Pantalla que muestra la lista de amigos del usuario.
  * Permite invitar amigos a una partida o interactuar con ellos.
- *
+ * 
  * @returns {JSX.Element} Pantalla de lista de amigos.
  */
 export default function AmigosScreen(): JSX.Element {
@@ -84,7 +84,7 @@ export default function AmigosScreen(): JSX.Element {
 
   /**
    * Muestra un mensaje de confirmación cuando un amigo es invitado.
-   *
+   * 
    * @param amigoNombre Nombre del amigo al que se ha invitado.
    */
   const handleInvite = (amigoNombre: string) => {

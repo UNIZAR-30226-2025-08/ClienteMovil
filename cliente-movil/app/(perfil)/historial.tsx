@@ -19,7 +19,7 @@ const imagenAtras = require("@/assets/images/botonAtras.png");
 /**
  * Pantalla que muestra el historial de partidas del usuario.
  * Permite visualizar las partidas jugadas con sus resultados.
- *
+ * 
  * @returns {JSX.Element} Pantalla de historial de partidas.
  */
 export default function HistorialPartidasScreen(): JSX.Element {
@@ -45,6 +45,7 @@ export default function HistorialPartidasScreen(): JSX.Element {
 
   return (
     <View style={styles.container}>
+
       {/* Fondo con imagen de roles */}
       <ImageBackground
         source={imagenFondoRoles}
@@ -149,7 +150,7 @@ const styles = StyleSheet.create({
     bottom: 20,
     left: "46%",
   },
-
+  
   imageAtras: {
     width: 40,
     height: 40,
