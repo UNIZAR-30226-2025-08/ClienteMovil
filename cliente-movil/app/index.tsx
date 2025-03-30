@@ -173,7 +173,7 @@ export default function App(): JSX.Element | null {
                   placeholder="Tu contraseña"
                   placeholderTextColor="#444"
                   value={contrasena}
-                  onChangeText={setContrasena} // Actualiza el estado y por tanto el valor de la variable con el texto ingresado
+                  onChangeText={setContrasena} // Actualiza el estado y por tanto el valor de la variable con el texto ingresado  router.push('/entrar')
                   secureTextEntry={secureText}
                 />
                 <TouchableOpacity onPress={() => setSecureText(!secureText)}>
@@ -194,8 +194,8 @@ export default function App(): JSX.Element | null {
                   <Text style={styles.textoEntrar}>ENTRAR</Text>
               </TouchableOpacity>
 
-              <TouchableOpacity style={styles.botonEntrar} onPress={() => router.push('/entrar')}>
-                <Text style={styles.textoEntrar}>ATAJO</Text>
+              <TouchableOpacity style={styles.botonEntrar} onPress={() => router.push('/admin')}> 
+                <Text style={styles.textoEntrar}>ATAJO ADMIN</Text>
               </TouchableOpacity>
             </View>
           </ImageBackground>
