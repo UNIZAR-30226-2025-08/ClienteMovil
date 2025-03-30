@@ -40,6 +40,13 @@ import useDiaNoche from "./hooks/useDiaNoche";
 import useGestorAnimaciones from "./hooks/useGestorAnimaciones";
 
 /**
+ * Desconozco donde va esto !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ */
+interface Props {
+  rol: string;
+}
+
+/**
  * @constant {boolean} MODO_NOCHE_GLOBAL
  * Indica si el juego se encuentra en modo noche. Si es false, se considera modo día.
  */
@@ -50,7 +57,7 @@ export let MODO_NOCHE_GLOBAL = true;
  *
  * @returns {JSX.Element | null} El componente renderizado o null si las fuentes no se han cargado.
  */
-const PantallaJugando: React.FC = () => {
+const PantallaJugando: React.FC<Props> = ({ rol }) => {
   // ---------------------------------------------------------------------------
   // Carga de fuentes
   // ---------------------------------------------------------------------------
@@ -237,13 +244,23 @@ const PantallaJugando: React.FC = () => {
    * - Activa la visualización de los botones de acción.
    */
   useEffect(() => {
-    const roles: Rol[] = ["aldeano", "lobo", "bruja", "cazador", "vidente"];
+    const roles: Rol[] = [
+      "Aldeano",
+      "Hombre Lobo",
+      "Bruja",
+      "Cazador",
+      "Vidente",
+    ];
 
-    const indiceAleatorio: number = Math.floor(Math.random() * roles.length);
-    const rolAsignado = roles[indiceAleatorio];
+    //const indiceAleatorio: number = Math.floor(Math.random() * roles.length);
+    //const rolAsignado = roles[indiceAleatorio];
 
-    setRolUsuario(rolAsignado);
-    console.log(`Juego iniciado. Rol asignado: ${rolAsignado}`);
+    if (roles.includes(rol as Rol)) {
+      setRolUsuario(rol as Rol);
+      console.log(`Juego iniciado. Rol asignado: ${rol}`);
+    } else {
+      console.error(`Rol inválido recibido: ${rol}`);
+    }
 
     setTimeout(() => {
       setMostrarAnimacionInicio1(false);

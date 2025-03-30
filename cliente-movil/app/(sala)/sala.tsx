@@ -10,6 +10,7 @@ import {
 import { useRouter, useLocalSearchParams } from "expo-router";
 import socket from "@/app/(sala)/socket"; // Módulo de conexión
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import PantallaJugando from "../(jugando)/jugando"; // Permite acceso al paso de rol
 
 /**
  * Tipo de datos para representar un jugador dentro de la sala.
@@ -38,6 +39,8 @@ type UsuarioData = {
 export default function SalaPreviaScreen(): JSX.Element {
   const router = useRouter(); // Usamos useRouter para manejar la navegación
 
+  const [rolUsuario, setRolUsuario] = useState<string | null>(null);
+
   // Obtén el idSala pasado como parámetro al navegar
   const { idSala, salaData } = useLocalSearchParams<{
     idSala: string;
@@ -58,6 +61,10 @@ export default function SalaPreviaScreen(): JSX.Element {
   useEffect(() => {
     if (salaData) {
       const sala = JSON.parse(salaData);
+      /*console.log(
+        "📋 Datos de la sala recibidos:",
+        JSON.stringify(sala, null, 2)
+      );*/
       setPlayers(
         sala.jugadores.map((j: any) => ({
           id: j.id,
@@ -77,7 +84,7 @@ export default function SalaPreviaScreen(): JSX.Element {
           name: j.nombre || j.id,
           level: 106,
           isReady: j.listo || false,
-          isOwner: sala.lider === j.id,
+          isOwner: String(j.id) === String(sala.lider), // Asegura comparación correcta
         }))
       );
       // Actualiza dinámicamente el nombre de la sala
@@ -152,6 +159,11 @@ export default function SalaPreviaScreen(): JSX.Element {
       }
     });
 
+    socket.on("rolAsignado", (rol: string) => {
+      console.log("Rol recibido:", rol);
+      setRolUsuario(rol);
+    });
+
     // Cuando la partida se inicia
     socket.on("enPartida", (data) => {
       console.log("Partida iniciada:", data);
@@ -162,12 +174,24 @@ export default function SalaPreviaScreen(): JSX.Element {
       router.push("/(jugando)/jugando");
     });
 
+    // Cuando se produce un error
+    socket.on("error", (data) => {
+      console.log("Error recibido del servidor:", data);
+
+      Alert.alert(
+        "Error",
+        data.mensaje ||
+          "Ha ocurrido un error en el servidor. Inténtalo de nuevo más tarde."
+      );
+    });
+
     // Limpieza: removemos los listeners al desmontar el componente
     return () => {
       socket.off("jugadorUnido");
       socket.off("jugadorSalido");
       socket.off("estadoCambiado");
       socket.off("expulsadoDeSala");
+      socket.off("rolAsignado");
       socket.off("enPartida");
     };
   }, [usuarioData]);
@@ -199,11 +223,7 @@ export default function SalaPreviaScreen(): JSX.Element {
    */
   const allReady = players.every((player) => player.isReady);
 
-  /**
-   * Maneja el botón "Iniciar Partida".
-   * Solo permite avanzar si todos los jugadores están listos.
-   */
-  const handleIniciarPartida = () => {
+  /*const handleIniciarPartida = () => {
     if (allReady) {
       router.push("/(jugando)/jugando"); // Cambia a la pantalla de juego
     } else {
@@ -212,6 +232,65 @@ export default function SalaPreviaScreen(): JSX.Element {
         "No puedes iniciar la partida hasta que todos estén listos."
       );
     }
+  };*/
+
+  /**
+   * Maneja el botón "Iniciar Partida".
+   * Solo permite avanzar si todos los jugadores están listos.
+   */
+  const handleIniciarPartida = () => {
+    if (!usuarioData) {
+      Alert.alert("Error", "No se pudo obtener la información del usuario.");
+      return;
+    }
+
+    /*const esLider = players.some(
+      (player) => player.id === usuarioData.id && player.isOwner
+    );*/
+
+    const usuarioId = usuarioData.id.trim(); // Asegurar que no haya espacios
+    const liderId = players.find((p) => p.isOwner)?.id?.trim();
+
+    console.log(
+      "Usuario ID:",
+      usuarioData?.id,
+      "Tipo:",
+      typeof usuarioData?.id
+    );
+
+    /* No se pasa correctamente player.id de la pantalla anterior a esta
+    
+    const esLider = players.some(
+      (player) => player.id === usuarioData.id && player.isOwner
+    );
+
+    console.log("Lista de jugadores:", JSON.stringify(players, null, 2));
+    console.log("Usuario ID:", usuarioId);
+    console.log("Líder ID:", liderId);
+    console.log("Es líder:", esLider);*/
+
+    /*if (!esLider) {
+      Alert.alert(
+        "No eres el líder",
+        "Solo el líder puede iniciar la partida."
+      );
+      return;
+    }*/
+
+    if (!allReady) {
+      Alert.alert(
+        "Faltan jugadores por estar listos",
+        "No puedes iniciar la partida hasta que todos estén listos."
+      );
+      return;
+    }
+
+    console.log("test");
+    // Emitir evento de inicio de partida al servidor
+    socket.emit("iniciarPartida", {
+      idSala,
+      idLider: usuarioData.id,
+    });
   };
 
   /**
