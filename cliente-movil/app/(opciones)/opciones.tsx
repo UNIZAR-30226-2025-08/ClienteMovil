@@ -47,10 +47,8 @@ export default function OpcionesScreen(): JSX.Element {
 
   return (
     <View style={styles.container}>
-
       {/* Imagen de fondo */}
       <ImageBackground source={imagenFondo} style={styles.image}>
-
         {/* Título principal */}
         <Text style={styles.titulo}>OPCIONES</Text>
 
@@ -167,7 +165,7 @@ const styles = StyleSheet.create({
   botonAtras: {
     marginTop: 20,
   },
-  
+
   imagenAtras: {
     width: 50,
     height: 50,
