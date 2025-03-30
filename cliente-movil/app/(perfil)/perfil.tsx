@@ -39,7 +39,7 @@ const imagenListaAmigos = require("@/assets/images/imagen-lista-amigos.png");
  * Pantalla de perfil del usuario.
  *
  * Permite la edición del nombre, la selección de un rol favorito
- * y la visualización del avatar. También se pueden acceder a la 
+ * y la visualización del avatar. También se pueden acceder a la
  * lista de amigos y al historial de partidas.
  *
  * @returns {JSX.Element} Pantalla de perfil del usuario.
@@ -68,7 +68,7 @@ export default function PerfilScreen(): JSX.Element | null {
   /**
    * Estado que almacena la imagen del avatar del usuario.
    */
-  const [avatar, setAvatar] = useState<any>(null); 
+  const [avatar, setAvatar] = useState<any>(null);
 
   /**
    * Estado de carga de la pantalla.
@@ -82,7 +82,7 @@ export default function PerfilScreen(): JSX.Element | null {
 
   /**
    * Carga los datos del usuario desde el backend y los almacena en el estado.
-   * 
+   *
    * Obtiene el correo del usuario almacenado en AsyncStorage, realiza una
    * petición a la API para obtener los datos del usuario y los asigna a los
    * estados correspondientes.
@@ -93,9 +93,12 @@ export default function PerfilScreen(): JSX.Element | null {
         const correo = await AsyncStorage.getItem("correoUsuario");
 
         if (!correo) return;
-  
-        const response = await axios.post(`${BACKEND_URL}/api/usuario/obtener`, { correo });
-  
+
+        const response = await axios.post(
+          `${BACKEND_URL}/api/usuario/obtener`,
+          { correo }
+        );
+
         if (response.status === 200) {
           const data = response.data.usuario;
           setNombre(data.nombre);
@@ -122,13 +125,13 @@ export default function PerfilScreen(): JSX.Element | null {
         setLoading(false);
       }
     };
-  
+
     cargarDatosUsuario();
   }, []);
-  
+
   /**
    * Guarda los datos del usuario actualizados en el backend.
-   * 
+   *
    * Realiza una petición `PUT` a la API para actualizar los datos del usuario.
    * Antes de enviar la solicitud, valida que el usuario tenga un ID y un rol favorito seleccionado.
    * Si la actualización es exitosa, se almacenan los datos localmente.
@@ -147,12 +150,15 @@ export default function PerfilScreen(): JSX.Element | null {
         Alert.alert("Error", "Selecciona un rol favorito antes de guardar.");
         return;
       }
-      
-      const response = await axios.put(`${BACKEND_URL}/api/usuario/actualizar`, {
-        idUsuario: parseInt(idUsuario),
-        nombre: nombre,
-        rolFavorito: rolFavorito, 
-      });
+
+      const response = await axios.put(
+        `${BACKEND_URL}/api/usuario/actualizar`,
+        {
+          idUsuario: parseInt(idUsuario),
+          nombre: nombre,
+          rolFavorito: rolFavorito,
+        }
+      );
 
       if (response.status === 200) {
         await AsyncStorage.setItem("nombreUsuario", nombre);
@@ -166,7 +172,7 @@ export default function PerfilScreen(): JSX.Element | null {
       Alert.alert("Error", "No se pudieron actualizar los datos.");
     }
   };
-  
+
   /**
    * Carga la fuente personalizada de la aplicación.
    */
@@ -182,7 +188,7 @@ export default function PerfilScreen(): JSX.Element | null {
    * Redirige a la pantalla principal de opciones.
    */
   const irAtras = () => {
-    router.push('/elegirOpciones');
+    router.push("/elegirOpciones");
   };
 
   return (
@@ -215,7 +221,9 @@ export default function PerfilScreen(): JSX.Element | null {
           />
 
           <Text style={styles.fechaCreacion}>
-            {fechaCreacion ? new Date(fechaCreacion).toLocaleDateString("es-ES") : "Cargando..."}
+            {fechaCreacion
+              ? new Date(fechaCreacion).toLocaleDateString("es-ES")
+              : "Cargando..."}
           </Text>
 
           <Text style={styles.textoRol}>Rol favorito</Text>
@@ -226,11 +234,10 @@ export default function PerfilScreen(): JSX.Element | null {
               style={styles.picker}
             >
               <Picker.Item label="Aldeano" value="aldeano" />
-              <Picker.Item label="Lobo" value="lobo" />
+              <Picker.Item label="Hombre lobo" value="lobo" />
               <Picker.Item label="Vidente" value="vidente" />
               <Picker.Item label="Bruja" value="bruja" />
               <Picker.Item label="Cazador" value="cazador" />
-              <Picker.Item label="Alguacil" value="alguacil" />
             </Picker>
           </View>
 
@@ -253,16 +260,15 @@ export default function PerfilScreen(): JSX.Element | null {
           </TouchableOpacity>
         </View>
 
-          {/* Reutilizando el mismo botón "GUARDAR" */}
-          <TouchableOpacity 
-            style={styles.botonGuardar} 
-            onPress={guardarDatosUsuario}>
-            <Text style={styles.textoGuardar}>GUARDAR</Text>
-          </TouchableOpacity>
+        {/* Reutilizando el mismo botón "GUARDAR" */}
+        <TouchableOpacity
+          style={styles.botonGuardar}
+          onPress={guardarDatosUsuario}
+        >
+          <Text style={styles.textoGuardar}>GUARDAR</Text>
+        </TouchableOpacity>
 
-        <TouchableOpacity 
-          style={styles.containerAtras} 
-          onPress={irAtras}>
+        <TouchableOpacity style={styles.containerAtras} onPress={irAtras}>
           <Image source={imagenAtras} style={styles.imageAtras} />
         </TouchableOpacity>
       </ImageBackground>

@@ -134,7 +134,7 @@ const PantallaJugando: React.FC<Props> = ({ rol }) => {
    * Rol del usuario local.
    * @type {Rol}
    */
-  const [rolUsuario, setRolUsuario] = useState<Rol>("aldeano"); // Por defecto villager
+  const [rolUsuario, setRolUsuario] = useState<Rol>("Aldeano"); // Por defecto villager
 
   /**
    * Indica si el usuario ya realizó su voto.
@@ -246,7 +246,7 @@ const PantallaJugando: React.FC<Props> = ({ rol }) => {
   useEffect(() => {
     const roles: Rol[] = [
       "Aldeano",
-      "Hombre Lobo",
+      "Hombre lobo",
       "Bruja",
       "Cazador",
       "Vidente",
@@ -390,7 +390,7 @@ const PantallaJugando: React.FC<Props> = ({ rol }) => {
    */
   const administrarSeleccionJugadorVotacion = (index: number): void => {
     // Solo los lobos pueden seleccionar jugadores durante la noche
-    if (rolUsuario !== "lobo" && MODO_NOCHE_GLOBAL) {
+    if (rolUsuario !== "Hombre lobo" && MODO_NOCHE_GLOBAL) {
       logCustom(
         jornadaActual,
         etapaActual,
@@ -615,7 +615,7 @@ const PantallaJugando: React.FC<Props> = ({ rol }) => {
               votarAJugador={votarAJugador}
               manejarPasarTurno={manejarPasarTurno}
               mostrarBotonesAccion={() =>
-                !MODO_NOCHE_GLOBAL || rolUsuario === "lobo"
+                !MODO_NOCHE_GLOBAL || rolUsuario === "Hombre lobo"
               }
               votoRealizado={votoRealizado}
               turnoPasado={pasoTurno}

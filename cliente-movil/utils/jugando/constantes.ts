@@ -136,7 +136,7 @@ export const CONSTANTES = {
 };
 
 /**
- * @typedef {"aldeano" | "lobo" | "bruja" | "cazador" | vidente} Rol
+ * @typedef {"Aldeano" | "Hombre lobo" | "Bruja" | "Cazador" | "Vidente"} Rol
  * @description Define los posibles roles en la partida.
  */
-export type Rol = "aldeano" | "lobo" | "bruja" | "cazador" | "vidente";
+export type Rol = "Aldeano" | "Hombre lobo" | "Bruja" | "Cazador" | "Vidente";
