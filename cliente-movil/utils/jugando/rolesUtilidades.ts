@@ -17,7 +17,7 @@ const { TEXTOS, IMAGENES } = CONSTANTES;
  *   - roleInfo: { roleName, image }
  *
  * @example
- * const info = getInfoRol("bruja");
+ * const info = getInfoRol("Bruja");
  * console.log(info.habilidadInfo.descripcion); // "Como bruja, tienes dos pociones: una para salvar a un jugador y otra para envenenar..."
  * console.log(info.roleInfo.roleName); // "BRUJA"
  */
@@ -25,7 +25,7 @@ export const getInfoRol = (rol: Rol) => {
   let habilidadInfo;
   let roleInfo;
   switch (rol) {
-    case "aldeano":
+    case "Aldeano":
       habilidadInfo = {
         descripcion:
           "Como aldeano, no posees una habilidad especial, pero tu voto es crucial para la aldea.",
@@ -34,7 +34,7 @@ export const getInfoRol = (rol: Rol) => {
       };
       roleInfo = { roleName: "ALDEANO", image: IMAGENES.ALDEANO };
       break;
-    case "lobo":
+    case "Hombre lobo":
       habilidadInfo = {
         descripcion:
           "Eres El Lobo. Tienes el poder de matar a un jugador durante la noche, pero ten cuidado de no ser descubierto.",
@@ -44,7 +44,7 @@ export const getInfoRol = (rol: Rol) => {
       };
       roleInfo = { roleName: "HOMBRE LOBO", image: IMAGENES.LOBO_ROL };
       break;
-    case "bruja":
+    case "Bruja":
       habilidadInfo = {
         descripcion:
           "Como bruja, tienes dos pociones: una para salvar a un jugador y otra para envenenar. Úsalas con sabiduría.",
@@ -53,7 +53,7 @@ export const getInfoRol = (rol: Rol) => {
       };
       roleInfo = { roleName: "BRUJA", image: IMAGENES.BRUJA };
       break;
-    case "cazador":
+    case "Cazador":
       habilidadInfo = {
         descripcion:
           "Si mueres, puedes disparar a otro jugador en venganza. Usa tu habilidad para proteger a la aldea.",

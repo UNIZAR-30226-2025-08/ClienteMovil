@@ -244,23 +244,18 @@ const PantallaJugando: React.FC<Props> = ({ rol }) => {
    * - Activa la visualización de los botones de acción.
    */
   useEffect(() => {
-    const roles: Rol[] = [
+    /*const roles: Rol[] = [
       "Aldeano",
       "Hombre lobo",
       "Bruja",
       "Cazador",
       "Vidente",
-    ];
+    ];*/
 
     //const indiceAleatorio: number = Math.floor(Math.random() * roles.length);
     //const rolAsignado = roles[indiceAleatorio];
 
-    if (roles.includes(rol as Rol)) {
-      setRolUsuario(rol as Rol);
-      console.log(`Juego iniciado. Rol asignado: ${rol}`);
-    } else {
-      console.error(`Rol inválido recibido: ${rol}`);
-    }
+    setRolUsuario(rol as Rol);
 
     setTimeout(() => {
       setMostrarAnimacionInicio1(false);

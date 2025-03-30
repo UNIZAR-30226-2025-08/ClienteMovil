@@ -56,13 +56,13 @@ const AnimacionInicio: React.FC<AnimacionInicioProps> = ({
   // Función para determinar el color del texto según el rol
   const getColorTexto = () => {
     switch (rol) {
-      case "lobo":
+      case "Hombre lobo":
         return "red";
-      case "cazador":
+      case "Cazador":
         return "blue";
-      case "vidente":
+      case "Vidente":
         return "purple";
-      case "bruja":
+      case "Bruja":
         return "orange";
       default:
         return "white";
