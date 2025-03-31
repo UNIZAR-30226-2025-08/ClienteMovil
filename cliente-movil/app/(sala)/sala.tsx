@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   Alert,
   FlatList,
+  BackHandler,
 } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import socket from "@/app/(sala)/socket"; // Módulo de conexión
@@ -58,6 +59,41 @@ export default function SalaPreviaScreen(): JSX.Element {
 
   const [usuarioData, setUsuarioData] = useState<UsuarioData | null>(null);
   const [partidaPendiente, setPartidaPendiente] = useState<any>(null);
+
+  useEffect(() => {
+    const handleBackPress = () => {
+      if (!usuarioData) {
+        Alert.alert(
+          "Error",
+          "Se ha producido un error al acceder a tu usuario."
+        );
+        return true; // Bloquea la acción de retroceso
+      }
+
+      Alert.alert("Salir de la sala", "¿Estás seguro de que quieres salir?", [
+        { text: "Cancelar", style: "cancel" },
+        {
+          text: "Salir",
+          onPress: () => {
+            socket.emit("salirSala", {
+              idSala,
+              idUsuario: usuarioData.id, // El ID real del usuario
+            });
+
+            router.back(); // Regresa a la pantalla anterior
+          },
+        },
+      ]);
+
+      return true; // Bloquea la acción por defecto (para que espere la confirmación)
+    };
+
+    BackHandler.addEventListener("hardwareBackPress", handleBackPress);
+
+    return () => {
+      BackHandler.removeEventListener("hardwareBackPress", handleBackPress);
+    };
+  }, [usuarioData, idSala, socket]);
 
   useEffect(() => {
     if (salaData) {
@@ -168,7 +204,7 @@ export default function SalaPreviaScreen(): JSX.Element {
 
     // Escuchar evento de inicio de partida
     socket.on("enPartida", (data) => {
-      console.log("🟢 Partida iniciada:", data);
+      console.log("Partida iniciada:", data);
       Alert.alert(
         "Inicio de Partida",
         data.mensaje || "La partida ha iniciado."
@@ -201,8 +237,21 @@ export default function SalaPreviaScreen(): JSX.Element {
   // Cuando `rolUsuario` cambia, verificamos si hay una partida pendiente
   useEffect(() => {
     if (rolUsuario && partidaPendiente) {
-      console.log("✅ Rol confirmado:", rolUsuario);
-      console.log("🏠 Partida en curso:", partidaPendiente);
+      console.log("Rol confirmado:", rolUsuario);
+      console.log("Partida en curso:", partidaPendiente);
+
+      if (!usuarioData) {
+        Alert.alert(
+          "Error",
+          "Se ha producido un error al acceder a tu usuario."
+        );
+        return;
+      }
+
+      socket.emit("salirSala", {
+        idSala,
+        idUsuario: usuarioData.id, // el ID real del socket
+      });
 
       router.push({
         pathname: "/(jugando)/jugando",
@@ -284,7 +333,6 @@ export default function SalaPreviaScreen(): JSX.Element {
       return;
     }
 
-    console.log("test");
     // Emitir evento de inicio de partida al servidor
     socket.emit("iniciarPartida", {
       idSala,
@@ -296,6 +344,14 @@ export default function SalaPreviaScreen(): JSX.Element {
    * Función para manejar el botón "Volver" y regresar a la pantalla anterior.
    */
   const handleVolver = () => {
+    if (!usuarioData) {
+      Alert.alert("Error", "No se pudo obtener la información del usuario.");
+      return;
+    }
+    socket.emit("salirSala", {
+      idSala,
+      idUsuario: usuarioData.id, // el ID real del socket
+    });
     router.back(); // Regresa a la pantalla anterior
   };
 
