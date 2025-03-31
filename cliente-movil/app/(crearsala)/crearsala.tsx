@@ -314,7 +314,7 @@ const CrearSala = (): JSX.Element => {
           maxJugadores: numJugadores,
           maxRolesEspeciales,
           usuario: {
-            id: idUsuario, // Se añade el ID al usuario
+            id: String(idUsuario), // Se añade el ID al usuario
             nombre: usuario.nombre,
           },
           maxRoles: rolesObject,
