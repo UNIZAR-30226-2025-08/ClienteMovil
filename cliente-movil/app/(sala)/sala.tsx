@@ -253,11 +253,15 @@ export default function SalaPreviaScreen(): JSX.Element {
         idUsuario: usuarioData.id, // el ID real del socket
       });
 
+      console.log("Futura partida:", partidaPendiente.partidaID);
+
       router.push({
         pathname: "/(jugando)/jugando",
         params: {
+          idSala: partidaPendiente.partidaID,
           salaData: JSON.stringify(partidaPendiente.sala),
           rol: rolUsuario,
+          usuarioID: usuarioData.id,
         },
       });
 
