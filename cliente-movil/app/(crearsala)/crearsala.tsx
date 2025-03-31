@@ -11,6 +11,8 @@ import {
   Alert,
   Modal,
 } from "react-native";
+import axios from "axios";
+import Constants from "expo-constants";
 import { useRouter } from "expo-router";
 import socket from "@/app/(sala)/socket"; // Módulo de conexión con socket.io
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -59,6 +61,8 @@ const rolesData = [
  */
 const CrearSala = (): JSX.Element => {
   const router = useRouter();
+
+  const BACKEND_URL = Constants.expoConfig?.extra?.backendUrl;
 
   // Estados para usuario y nombre del servidor
   const [usuario, setUsuario] = useState<{ nombre: string } | null>(null);
@@ -274,7 +278,7 @@ const CrearSala = (): JSX.Element => {
   /**
    * Función para crear la sala utilizando websockets.
    */
-  const crearSala = () => {
+  const crearSala = async () => {
     const maxRolesEspeciales = rolesCantidad
       .filter((rol) => rol.nombre !== "Aldeano")
       .reduce((sum, rol) => sum + rol.cantidad, 0);
@@ -288,18 +292,40 @@ const CrearSala = (): JSX.Element => {
       {} as Record<string, number>
     );
 
-    // 2. Incluir este objeto en el payload que envías al servidor
-    const datosSala = {
-      nombreSala: nombreServidor,
-      tipo: privacidad.toLowerCase(),
-      contrasena: privacidad === "Privada" ? password : null,
-      maxJugadores: numJugadores,
-      maxRolesEspeciales,
-      usuario: usuario,
-      maxRoles: rolesObject,
-    };
+    //2. Obtener id del usuario
 
-    socket.emit("crearSala", datosSala);
+    try {
+      if (usuario) {
+        // Buscar el usuario por nombre
+        const responseUsuario = await axios.post(
+          `${BACKEND_URL}/api/usuario/obtener_por_nombre`,
+          { nombre: usuario.nombre.trim() }
+        );
+        if (!responseUsuario.data.usuario) {
+          Alert.alert("Usuario no encontrado");
+          return;
+        }
+        const idUsuario = responseUsuario.data.usuario.idUsuario;
+        // 3. Incluir este objeto en el payload que envías al servidor
+        const datosSala = {
+          nombreSala: nombreServidor,
+          tipo: privacidad.toLowerCase(),
+          contrasena: privacidad === "Privada" ? password : null,
+          maxJugadores: numJugadores,
+          maxRolesEspeciales,
+          usuario: {
+            id: idUsuario, // Se añade el ID al usuario
+            nombre: usuario.nombre,
+          },
+          maxRoles: rolesObject,
+        };
+
+        socket.emit("crearSala", datosSala);
+      }
+    } catch (error) {
+      console.error("Error al crear sala:", error);
+      //Alert.alert("Depuración", "Error al enviar solicitud");
+    }
   };
 
   // Escuchar respuesta del servidor sobre la creación de la sala
