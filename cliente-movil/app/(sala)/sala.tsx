@@ -218,7 +218,7 @@ export default function SalaPreviaScreen(): JSX.Element {
 
       Alert.alert(
         "Error",
-        data.mensaje ||
+        data ||
           "Ha ocurrido un error en el servidor. Inténtalo de nuevo más tarde."
       );
     });
