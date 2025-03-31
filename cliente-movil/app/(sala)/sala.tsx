@@ -57,6 +57,7 @@ export default function SalaPreviaScreen(): JSX.Element {
   );
 
   const [usuarioData, setUsuarioData] = useState<UsuarioData | null>(null);
+  const [partidaPendiente, setPartidaPendiente] = useState<any>(null);
 
   useEffect(() => {
     if (salaData) {
@@ -159,19 +160,20 @@ export default function SalaPreviaScreen(): JSX.Element {
       }
     });
 
-    socket.on("rolAsignado", (rol: string) => {
-      console.log("Rol recibido:", rol);
-      setRolUsuario(rol);
+    // Escuchar evento de asignación de rol
+    socket.on("rolAsignado", (data) => {
+      console.log("📥 Rol recibido:", data.rol);
+      setRolUsuario(data.rol);
     });
 
-    // Cuando la partida se inicia
+    // Escuchar evento de inicio de partida
     socket.on("enPartida", (data) => {
-      console.log("Partida iniciada:", data);
+      console.log("🟢 Partida iniciada:", data);
       Alert.alert(
         "Inicio de Partida",
         data.mensaje || "La partida ha iniciado."
       );
-      router.push("/(jugando)/jugando");
+      setPartidaPendiente(data); // Guarda los datos de la partida hasta que el rol esté disponible
     });
 
     // Cuando se produce un error
@@ -195,6 +197,24 @@ export default function SalaPreviaScreen(): JSX.Element {
       socket.off("enPartida");
     };
   }, [usuarioData]);
+
+  // Cuando `rolUsuario` cambia, verificamos si hay una partida pendiente
+  useEffect(() => {
+    if (rolUsuario && partidaPendiente) {
+      console.log("✅ Rol confirmado:", rolUsuario);
+      console.log("🏠 Partida en curso:", partidaPendiente);
+
+      router.push({
+        pathname: "/(jugando)/jugando",
+        params: {
+          salaData: JSON.stringify(partidaPendiente.sala),
+          rol: rolUsuario,
+        },
+      });
+
+      setPartidaPendiente(null); // Limpia la partida pendiente
+    }
+  }, [rolUsuario, partidaPendiente]);
 
   /**
    * Alterna el estado de "Listo" de un jugador.
@@ -244,38 +264,17 @@ export default function SalaPreviaScreen(): JSX.Element {
       return;
     }
 
-    /*const esLider = players.some(
-      (player) => player.id === usuarioData.id && player.isOwner
-    );*/
+    const esLider = players.some((player) => player.isOwner);
 
-    const usuarioId = usuarioData.id.trim(); // Asegurar que no haya espacios
-    const liderId = players.find((p) => p.isOwner)?.id?.trim();
-
-    console.log(
-      "Usuario ID:",
-      usuarioData?.id,
-      "Tipo:",
-      typeof usuarioData?.id
-    );
-
-    /* No se pasa correctamente player.id de la pantalla anterior a esta
-    
-    const esLider = players.some(
-      (player) => player.id === usuarioData.id && player.isOwner
-    );
-
-    console.log("Lista de jugadores:", JSON.stringify(players, null, 2));
-    console.log("Usuario ID:", usuarioId);
-    console.log("Líder ID:", liderId);
-    console.log("Es líder:", esLider);*/
-
-    /*if (!esLider) {
+    if (!esLider) {
       Alert.alert(
         "No eres el líder",
         "Solo el líder puede iniciar la partida."
       );
       return;
-    }*/
+    }
+
+    // Comprobar número cuando esté testeado partida
 
     if (!allReady) {
       Alert.alert(

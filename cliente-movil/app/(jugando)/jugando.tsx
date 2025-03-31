@@ -14,6 +14,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { useFonts } from "expo-font";
+import { useRouter, useLocalSearchParams } from "expo-router";
 
 // Utils (funciones puras, estilos y constantes)
 import { getInfoRol } from "../../utils/jugando/rolesUtilidades";
@@ -40,13 +41,6 @@ import useDiaNoche from "./hooks/useDiaNoche";
 import useGestorAnimaciones from "./hooks/useGestorAnimaciones";
 
 /**
- * Desconozco donde va esto !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
- */
-interface Props {
-  rol: string;
-}
-
-/**
  * @constant {boolean} MODO_NOCHE_GLOBAL
  * Indica si el juego se encuentra en modo noche. Si es false, se considera modo día.
  */
@@ -57,13 +51,19 @@ export let MODO_NOCHE_GLOBAL = true;
  *
  * @returns {JSX.Element | null} El componente renderizado o null si las fuentes no se han cargado.
  */
-const PantallaJugando: React.FC<Props> = ({ rol }) => {
+const PantallaJugando: React.FC = () => {
   // ---------------------------------------------------------------------------
   // Carga de fuentes
   // ---------------------------------------------------------------------------
   const [fuentesCargadas] = useFonts({
     Corben: require("@/assets/fonts/corben-regular.ttf"),
   });
+
+  const { salaData, rol } = useLocalSearchParams<{
+    salaData: string;
+    rol: string;
+  }>();
+  const sala = JSON.parse(salaData);
 
   // ---------------------------------------------------------------------------
   // Estados del Juego
@@ -255,7 +255,11 @@ const PantallaJugando: React.FC<Props> = ({ rol }) => {
     //const indiceAleatorio: number = Math.floor(Math.random() * roles.length);
     //const rolAsignado = roles[indiceAleatorio];
 
+    console.log("🎭 Valor de rol:", rol);
+
     setRolUsuario(rol as Rol);
+
+    console.log("🏠 Sala en juego:", sala);
 
     setTimeout(() => {
       setMostrarAnimacionInicio1(false);
