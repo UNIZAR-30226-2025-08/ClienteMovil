@@ -39,14 +39,13 @@ const imagenNotificaciones = require("@/assets/images/noti_icon.png");
 
 /**
  * Pantalla de opciones principales del juego.
- * 
+ *
  * Permite acceder a diferentes secciones como jugar, ver roles, opciones,
  * contacto y cerrar sesión.
- * 
+ *
  * @returns {JSX.Element | null} Pantalla de opciones del juego.
  */
 export default function OpcionesScreen(): JSX.Element | null {
-
   /**
    * Recupera la URL del backend desde las configuraciones de la aplicación.
    */
@@ -61,7 +60,7 @@ export default function OpcionesScreen(): JSX.Element | null {
     avatar?: string;
   } | null>(null);
 
-    /**
+  /**
    * Estado de carga para mostrar un indicador mientras se recuperan los datos.
    */
   const [loading, setLoading] = useState(true);
@@ -136,7 +135,6 @@ export default function OpcionesScreen(): JSX.Element | null {
           <ActivityIndicator size="large" color="#fff" style={styles.loader} />
         ) : (
           <>
-
             {/* Contenedor del perfil del usuario */}
             <TouchableOpacity
               onPress={() => router.push("/perfil")}
@@ -216,8 +214,8 @@ export default function OpcionesScreen(): JSX.Element | null {
           </View>
         </TouchableOpacity>
 
-          {/* Nuevo Botón de Ranking */}
-                <TouchableOpacity
+        {/* Nuevo Botón de Ranking */}
+        <TouchableOpacity
           style={styles.botonRanking}
           onPress={() => router.push("/ranking")}
         >
@@ -229,7 +227,6 @@ export default function OpcionesScreen(): JSX.Element | null {
     </View>
   );
 }
-
 
 // Estilos de la pantalla
 const styles = StyleSheet.create({

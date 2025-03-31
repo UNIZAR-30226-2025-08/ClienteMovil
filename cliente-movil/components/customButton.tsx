@@ -10,19 +10,28 @@ interface CustomButtonProps {
   fontFamily?: string;
 }
 
-const CustomButton: React.FC<CustomButtonProps> = ({ 
-  title, 
-  bgColor = "#007bff", 
-  textColor = "#fff", 
-  width, 
+const CustomButton: React.FC<CustomButtonProps> = ({
+  title,
+  bgColor = "#007bff",
+  textColor = "#fff",
+  width,
   height,
-  fontFamily
+  fontFamily,
 }) => {
   return (
-    <TouchableOpacity 
-      style={[styles.button, { backgroundColor: bgColor, width: width ?? '80%', height: height ?? 50 }]}
+    <TouchableOpacity
+      style={[
+        styles.button,
+        {
+          backgroundColor: bgColor,
+          width: width ?? "80%",
+          height: height ?? 50,
+        },
+      ]}
     >
-      <Text style={[styles.text, { color: textColor, fontFamily }]}>{title}</Text>
+      <Text style={[styles.text, { color: textColor, fontFamily }]}>
+        {title}
+      </Text>
     </TouchableOpacity>
   );
 };
