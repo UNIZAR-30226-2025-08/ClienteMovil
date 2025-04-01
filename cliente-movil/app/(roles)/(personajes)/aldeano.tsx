@@ -63,7 +63,10 @@ export default function AldeanoScreen(): JSX.Element | null {
         <Image source={imagenPapiro} style={styles.imagePapiro}></Image>
 
         {/* Descripción del rol */}
-        <Text style={styles.textoAldeano}>DESCRIPCIÓN DEL ALDEANO</Text>
+        <Text style={styles.textoAldeano}>
+          LOS ALDEANOS NO POSEEN NINGUNA HABILIDAD ESPECIAL, PERO SU VOTO ES
+          CRUCIAL PARA SALVAR LA ALDEA.
+        </Text>
 
         {/* Botón para regresar a la pantalla anterior */}
         <TouchableOpacity style={styles.containerAtras} onPress={irAtras}>

@@ -63,7 +63,10 @@ export default function CazadorScreen(): JSX.Element | null {
         <Image source={imagenPapiro} style={styles.imagePapiro}></Image>
 
         {/* Descripción del rol */}
-        <Text style={styles.textoCazador}>DESCRIPCIÓN DEL CAZADOR</Text>
+        <Text style={styles.textoCazador}>
+          AL MORIR, DISPARA A OTRO JUGADOR EN VENGANZA. SU HABILIDAD AYUDARÁ A
+          PROTEGER LA ALDEA.
+        </Text>
 
         {/* Botón para regresar a la pantalla anterior */}
         <TouchableOpacity style={styles.containerAtras} onPress={irAtras}>

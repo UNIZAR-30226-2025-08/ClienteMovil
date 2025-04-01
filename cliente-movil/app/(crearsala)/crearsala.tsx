@@ -60,7 +60,7 @@ const rolesData = [
 const CrearSala = (): JSX.Element => {
   const router = useRouter();
 
-  // Estados para usuario y nombre del servidor
+  // Ajustar el tipo de usuario para incluir 'id'
   const [usuario, setUsuario] = useState<{
     nombre: string;
     id?: string;
@@ -92,6 +92,7 @@ const CrearSala = (): JSX.Element => {
         const nombreGuardado = await AsyncStorage.getItem("nombreUsuario");
         const idGuardado = await AsyncStorage.getItem("idUsuario");
         if (nombreGuardado && idGuardado) {
+          // Ahora se guarda también el 'id'
           const usuarioObj = { nombre: nombreGuardado, id: idGuardado };
           setUsuario(usuarioObj);
           setNombreServidor(`Servidor de "${usuarioObj.nombre}"`);

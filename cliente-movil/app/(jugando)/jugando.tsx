@@ -14,6 +14,8 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { useFonts } from "expo-font";
+import { useRouter, useLocalSearchParams } from "expo-router";
+import socket from "@/app/(sala)/socket"; // Módulo de conexión
 
 // Utils (funciones puras, estilos y constantes)
 import { getInfoRol } from "../../utils/jugando/rolesUtilidades";
@@ -40,30 +42,38 @@ import useDiaNoche from "./hooks/useDiaNoche";
 import useGestorAnimaciones from "./hooks/useGestorAnimaciones";
 
 /**
- * Desconozco donde va esto !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
- */
-interface Props {
-  rol: string;
-}
-
-/**
  * @constant {boolean} MODO_NOCHE_GLOBAL
  * Indica si el juego se encuentra en modo noche. Si es false, se considera modo día.
  */
 export let MODO_NOCHE_GLOBAL = true;
+
+// !! ESTO NO SÉ SI VA AQUÍ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+// Definir el tipo correcto para los mensajes
+interface MensajeChat {
+  id: number;
+  texto: string;
+}
 
 /**
  * Componente funcional que representa la pantalla principal de juego.
  *
  * @returns {JSX.Element | null} El componente renderizado o null si las fuentes no se han cargado.
  */
-const PantallaJugando: React.FC<Props> = ({ rol }) => {
+const PantallaJugando: React.FC = () => {
   // ---------------------------------------------------------------------------
   // Carga de fuentes
   // ---------------------------------------------------------------------------
   const [fuentesCargadas] = useFonts({
     Corben: require("@/assets/fonts/corben-regular.ttf"),
   });
+
+  const { idSala, salaData, rol, usuarioID } = useLocalSearchParams<{
+    idSala: string;
+    salaData: string;
+    rol: string;
+    usuarioID: string;
+  }>();
+  const sala = JSON.parse(salaData);
 
   // ---------------------------------------------------------------------------
   // Estados del Juego
@@ -75,6 +85,8 @@ const PantallaJugando: React.FC<Props> = ({ rol }) => {
   const [jugadoresVivos, setJugadoresVivos] = useState<boolean[]>(
     Array(CONSTANTES.NUMERICAS.CANTIDAD_IMAGENES).fill(true)
   );
+  // Estado para almacenar los mensajes
+  const [mensajes, setMensajes] = useState<MensajeChat[]>([]);
 
   // ---------------------------------------------------------------------------
   // Estados de la Interfaz de Usuario (UI)
@@ -255,7 +267,11 @@ const PantallaJugando: React.FC<Props> = ({ rol }) => {
     //const indiceAleatorio: number = Math.floor(Math.random() * roles.length);
     //const rolAsignado = roles[indiceAleatorio];
 
+    //console.log("🎭 Valor de rol:", rol);
+
     setRolUsuario(rol as Rol);
+
+    //console.log("🏠 Sala en juego:", sala);
 
     setTimeout(() => {
       setMostrarAnimacionInicio1(false);
@@ -328,6 +344,27 @@ const PantallaJugando: React.FC<Props> = ({ rol }) => {
   useEffect(() => {
     setTemporizadorActivo(true);
   }, []);
+
+  // ---------------------------------------------------------------------------
+  // Efectos del backend
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Texto
+   *
+   */
+  socket.on("mensajeChat", (data) => {
+    console.log("LLega el mensaje a Frontend", data);
+
+    // Crear un nuevo objeto mensaje asegurando que tenga la estructura correcta
+    const nuevoMensaje: MensajeChat = {
+      id: mensajes.length + 1, // Asignar un ID incremental
+      texto: data.chat,
+    };
+
+    // Agregar el nuevo mensaje a la lista
+    setMensajes((prevMensajes) => [...prevMensajes, nuevoMensaje]);
+  });
 
   // ---------------------------------------------------------------------------
   // Funciones de manejo de eventos
@@ -656,9 +693,13 @@ const PantallaJugando: React.FC<Props> = ({ rol }) => {
         */}
         {mostrarChat && (
           <Chat
-            mensajes={CONSTANTES.TEXTOS.CHAT.MENSAJES_INICIALES}
+            //mensajes={CONSTANTES.TEXTOS.CHAT.MENSAJES_INICIALES}mensajes
+            mensajes={mensajes}
             posicionChat={posicionChat}
             onClose={handleCerrarChat}
+            socket={socket} // Aquí pasas el socket
+            idSala={idSala} // Aquí pasas el idSala
+            usuarioID={usuarioID} // Aquí pasas el usuarioData
           />
         )}
 

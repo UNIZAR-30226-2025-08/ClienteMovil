@@ -63,7 +63,11 @@ export default function AlguacilScreen(): JSX.Element | null {
         <Image source={imagenPapiro} style={styles.imagePapiro}></Image>
 
         {/* Descripción del rol */}
-        <Text style={styles.textoAlguacil}>DESCRIPCIÓN DEL ALGUACIL</Text>
+        <Text style={styles.textoAlguacil}>
+          ESTE NO ES UN ROL NORMAL, SE OBTIENE POR MMAYORÍA EN UNA VOTACIÓN DEL
+          PUEBLO. EL VOTO DEL ALGUACIL VALE EL DOBLE EN LAS VOTACIONES DE LA
+          ALDEA
+        </Text>
 
         {/* Botón para regresar a la pantalla anterior */}
         <TouchableOpacity style={styles.containerAtras} onPress={irAtras}>
