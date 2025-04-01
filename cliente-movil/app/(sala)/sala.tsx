@@ -221,18 +221,7 @@ export default function SalaPreviaScreen(): JSX.Element {
   /**
    * Verifica si todos los jugadores en la sala están listos.
    */
-  const allReady = players.every((player) => player.isReady);
-
-  /*const handleIniciarPartida = () => {
-    if (allReady) {
-      router.push("/(jugando)/jugando"); // Cambia a la pantalla de juego
-    } else {
-      Alert.alert(
-        "Faltan jugadores por estar listos",
-        "No puedes iniciar la partida hasta que todos estén listos."
-      );
-    }
-  };*/
+  const allReady = true; // players.every((player) => player.isReady);
 
   /**
    * Maneja el botón "Iniciar Partida".
@@ -244,9 +233,11 @@ export default function SalaPreviaScreen(): JSX.Element {
       return;
     }
 
-    /*const esLider = players.some(
-      (player) => player.id === usuarioData.id && player.isOwner
-    );*/
+    const getLiderId = (): string | null => {
+      const lider = players.find((player) => player.isOwner);
+      return lider ? lider.id : null;
+    };
+    const esLider = usuarioData ? usuarioData.id === getLiderId() : false;
 
     const usuarioId = usuarioData.id.trim(); // Asegurar que no haya espacios
     const liderId = players.find((p) => p.isOwner)?.id?.trim();
@@ -258,24 +249,13 @@ export default function SalaPreviaScreen(): JSX.Element {
       typeof usuarioData?.id
     );
 
-    /* No se pasa correctamente player.id de la pantalla anterior a esta
-    
-    const esLider = players.some(
-      (player) => player.id === usuarioData.id && player.isOwner
-    );
-
-    console.log("Lista de jugadores:", JSON.stringify(players, null, 2));
-    console.log("Usuario ID:", usuarioId);
-    console.log("Líder ID:", liderId);
-    console.log("Es líder:", esLider);*/
-
-    /*if (!esLider) {
+    if (!esLider) {
       Alert.alert(
         "No eres el líder",
         "Solo el líder puede iniciar la partida."
       );
       return;
-    }*/
+    }
 
     if (!allReady) {
       Alert.alert(
@@ -350,18 +330,6 @@ export default function SalaPreviaScreen(): JSX.Element {
       {/* Encabezado (Nombre De La Sala) */}
       <View style={styles.headerContainer}>
         <Text style={styles.roomName}>{roomName}</Text>
-      </View>
-
-      {/* Info de la cuenta */}
-      <View style={styles.accountInfo}>
-        <Text style={styles.accountName}>
-          {salaInfo && salaInfo.jugadores
-            ? salaInfo.jugadores.find((jug: any) => jug.id === salaInfo.lider)
-                ?.nombre
-            : "Noom"}
-        </Text>
-        <Text style={styles.accountName}>Nivel 10</Text>
-        <Text style={styles.accountName}>2000S</Text>
       </View>
 
       {/* Lista de jugadores + slots vacíos */}

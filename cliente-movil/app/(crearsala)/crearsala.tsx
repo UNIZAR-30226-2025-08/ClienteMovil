@@ -61,7 +61,10 @@ const CrearSala = (): JSX.Element => {
   const router = useRouter();
 
   // Estados para usuario y nombre del servidor
-  const [usuario, setUsuario] = useState<{ nombre: string } | null>(null);
+  const [usuario, setUsuario] = useState<{
+    nombre: string;
+    id?: string;
+  } | null>(null);
   const [nombreServidor, setNombreServidor] = useState("");
 
   // Estado para la privacidad ("publica" o "Privada")
@@ -86,10 +89,10 @@ const CrearSala = (): JSX.Element => {
   useEffect(() => {
     const fetchUsuario = async () => {
       try {
-        //comentar para evitar iniciar sesion para pruebas
-        const usuarioGuardado = await AsyncStorage.getItem("nombreUsuario");
-        if (usuarioGuardado) {
-          const usuarioObj = { nombre: usuarioGuardado }; // Ajusta según cómo se almacena
+        const nombreGuardado = await AsyncStorage.getItem("nombreUsuario");
+        const idGuardado = await AsyncStorage.getItem("idUsuario");
+        if (nombreGuardado && idGuardado) {
+          const usuarioObj = { nombre: nombreGuardado, id: idGuardado };
           setUsuario(usuarioObj);
           setNombreServidor(`Servidor de "${usuarioObj.nombre}"`);
         } else {
@@ -298,6 +301,8 @@ const CrearSala = (): JSX.Element => {
       usuario: usuario,
       maxRoles: rolesObject,
     };
+
+    //console.log("Datos de la sala a enviar:", datosSala);
 
     socket.emit("crearSala", datosSala);
   };

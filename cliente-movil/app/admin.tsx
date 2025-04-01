@@ -16,22 +16,34 @@ import { useFocusEffect } from "@react-navigation/native";
 
 const BACKEND_URL = Constants.expoConfig?.extra?.backendUrl;
 
+// Ejemplo de función para obtener usuario por ID
+async function fetchUserData(userId: number) {
+  const response = await axios.post(
+    `${BACKEND_URL}/api/usuario/obtener_por_id`,
+    { idUsuario: userId }
+  );
+ // Alert.alert("Usuario Obtenido", JSON.stringify(response.data.usuario)); // Muestra lo recibido en un alert
+  return response.data.usuario; // Ajusta según la estructura que devuelva el backend
+}
+
 // Pantalla de administración de sugerencias
 export default function AdminSuggestionsScreen() {
   // Estado para almacenar las sugerencias obtenidas
   interface Suggestion {
     idSugerencia: number;
     name?: string;
-    email?: string;
+    correo?: string;
     contenido: string;
     respuesta?: string;
     revisada?: boolean;
   }
-  
+
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   // Estado para la respuesta en curso y sugerencia activa (para mostrar TextInput)
   const [selectedReply, setSelectedReply] = useState("");
-  const [activeSuggestionId, setActiveSuggestionId] = useState<number | null>(null);
+  const [activeSuggestionId, setActiveSuggestionId] = useState<number | null>(
+    null
+  );
   // Estado de carga (opcional)
   const [loading, setLoading] = useState(true);
 
@@ -40,7 +52,18 @@ export default function AdminSuggestionsScreen() {
     try {
       const response = await axios.get(`${BACKEND_URL}/api/sugerencias/todas`);
       // Se espera que el backend devuelva { mensaje, sugerencias }
-      setSuggestions(response.data.sugerencias);
+      const enrichedSuggestions = await Promise.all(
+        response.data.sugerencias.map(async (sug: { idUsuario: number }) => {
+          const usuario = await fetchUserData(sug.idUsuario);
+          // Ajustamos el campo a "correo" en lugar de "email"
+          return {
+            ...sug,
+            name: usuario.nombre,
+            correo: usuario.correo,
+          };
+        })
+      );
+      setSuggestions(enrichedSuggestions);
     } catch (error) {
       Alert.alert(
         "Error",
@@ -127,7 +150,9 @@ export default function AdminSuggestionsScreen() {
       <Text style={styles.userInfo}>
         Nombre: {item.name ? item.name : "N/D"}
       </Text>
-  <Text style={styles.userInfo}>Correo: {item.email ? item.email : "N/D"}</Text>
+      <Text style={styles.userInfo}>
+        Correo: {item.correo ? item.correo : "N/D"}
+      </Text>
       <Text style={styles.description}>Sugerencia: {item.contenido}</Text>
       {item.respuesta ? (
         <Text style={styles.reply}>Respuesta: {item.respuesta}</Text>
