@@ -14,7 +14,12 @@ import { estilos } from "../../../utils/jugando/jugando.styles";
 import { CONSTANTES } from "../../../utils/jugando/constantes";
 const { TEXTOS, IMAGENES } = CONSTANTES;
 
-const BarraSuperior: React.FC = () => (
+interface PropsBarraSuperior {
+  vivos: number;
+  lobos: number;
+}
+
+const BarraSuperior: React.FC<PropsBarraSuperior> = ({ vivos, lobos }) => (
   // Contenedor principal de la barra superior
   <View style={estilos.contenedorBarraSuperior}>
     {/* Sección izquierda: Información del pueblo */}
@@ -23,9 +28,7 @@ const BarraSuperior: React.FC = () => (
         <Image source={IMAGENES.PUEBLO} style={estilos.iconoBarraSuperior} />
         <View style={estilos.textoBarraSuperiorContainer}>
           <Text style={estilos.textoBarraSuperiorTitulo}>{TEXTOS.PUEBLO}</Text>
-          <Text style={estilos.textoBarraSuperiorSub}>
-            {TEXTOS.ESTADO_PUEBLO}
-          </Text>
+          <Text style={estilos.textoBarraSuperiorSub}>🧍‍♂️ Vivos: {vivos}</Text>
         </View>
       </View>
     </View>
@@ -41,9 +44,7 @@ const BarraSuperior: React.FC = () => (
       <View style={estilos.contenedorBarraSuperiorItem}>
         <View style={estilos.textoBarraSuperiorContainer}>
           <Text style={estilos.textoBarraSuperiorTitulo}>{TEXTOS.LOBOS}</Text>
-          <Text style={estilos.textoBarraSuperiorSub}>
-            {TEXTOS.ESTADO_LOBOS}
-          </Text>
+          <Text style={estilos.textoBarraSuperiorSub}>🐺 Lobos: {lobos}</Text>
         </View>
         <Image source={IMAGENES.LOBOS} style={estilos.iconoBarraSuperior} />
       </View>

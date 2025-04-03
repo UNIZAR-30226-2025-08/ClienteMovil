@@ -16,6 +16,7 @@ import {
 import { useFonts } from "expo-font";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import socket from "@/app/(sala)/socket"; // Módulo de conexión
+import { useMemo } from "react";
 
 // Utils (funciones puras, estilos y constantes)
 import { getInfoRol } from "../../utils/jugando/rolesUtilidades";
@@ -60,6 +61,35 @@ interface MensajeChat {
  * @returns {JSX.Element | null} El componente renderizado o null si las fuentes no se han cargado.
  */
 const PantallaJugando: React.FC = () => {
+
+  useEffect(() => {
+    // ✔️ Log para ver si el componente se monta
+    console.log("[PantallaJugando] Componente montado. Registrando listeners...");
+
+    // Registramos el listener de 'enPartida'
+    console.log("[PantallaJugando] Registrando socket.on('enPartida')");
+    socket.on("enPartida", (data) => {
+      console.log("[PantallaJugando] ► Llega enPartida con data:", data);
+      console.log("Jugadores enPartida (stringify):", JSON.stringify(data.sala.jugadores, null, 2));
+      setJugadoresEstado(data.sala.jugadores);
+    });
+
+    // Registramos el listener de 'actualizarSala'
+    console.log("[PantallaJugando] Registrando socket.on('actualizarSala')");
+    socket.on("actualizarSala", (data) => {
+      console.log("[PantallaJugando] ► Llega actualizarSala con data:", data);
+      // lógica de ignorar si data.enPartida && ...
+      // setJugadoresEstado si procede
+    });
+
+    // Limpiamos los listeners al desmontar
+    return () => {
+      console.log("[PantallaJugando] Desmontando, removiendo listeners...");
+      socket.off("enPartida");
+      socket.off("actualizarSala");
+    };
+  }, []); // <-- efecto que corre una sola vez al montar
+
   // ---------------------------------------------------------------------------
   // Carga de fuentes
   // ---------------------------------------------------------------------------
@@ -345,6 +375,64 @@ const PantallaJugando: React.FC = () => {
     setTemporizadorActivo(true);
   }, []);
 
+  useEffect(() => {
+    if (!idSala) return;
+
+    // Emitir evento para pedir estado (asegúrate de que tu backend tenga socket.on("obtenerEstadoPartida", ...))
+    socket.emit("obtenerEstadoPartida", { idPartida: idSala });
+    console.log("[PantallaJugando] → Emitiendo obtenerEstadoPartida", idSala);
+
+    // Al llegar la respuesta, actualizamos jugadoresEstado
+    socket.on("estadoPartida", (data) => {
+      console.log("→ Respuesta estadoPartida:", data);
+      if (data.error) {
+        console.log("Error al obtener estado de la partida:", data.error);
+        return;
+      }
+      setJugadoresEstado(data.jugadores);
+    });
+
+    return () => {
+      // Quitar el listener cuando se desmonte
+      socket.off("estadoPartida");
+    };
+  }, [idSala]);
+
+  useEffect(() => {
+    socket.on("enPartida", (data) => {
+      console.log("Evento enPartida recibido");
+      console.log("Jugadores recibidos enPartida (raw):", data.sala.jugadores);
+    
+      // 👇 Conviértelo a JSON legible
+      console.log("Jugadores enPartida (stringify):",
+        JSON.stringify(data.sala.jugadores, null, 2)
+      );
+    
+      setJugadoresEstado(data.sala.jugadores);
+    });
+    
+  
+    socket.on("actualizarSala", (data) => {
+      console.log("Evento actualizarSala recibido:", data);
+    
+      // Si ya estamos en partida, no toques nada, pero agrega una excepción:
+      if (data.enPartida && (!Array.isArray(data.jugadores) || data.jugadores.length === 0)) {
+        console.log("Ignorando actualizarSala (jugadores vacíos o ya en partida):", data.jugadores);
+        return;
+      }
+    
+      console.log("Actualizando jugadoresEstado con:", data.jugadores);
+      setJugadoresEstado(data.jugadores);
+    });
+    
+  
+    return () => {
+      socket.off("enPartida");
+      socket.off("actualizarSala");
+    };
+  }, []);
+  
+  
   // ---------------------------------------------------------------------------
   // Efectos del backend
   // ---------------------------------------------------------------------------
@@ -545,6 +633,37 @@ const PantallaJugando: React.FC = () => {
     setJugadorSeleccionado(null);
   };
 
+  const [jugadoresEstado, setJugadoresEstado] = useState<
+  {
+    id: string;
+    nombre: string;
+    listo: boolean;
+    rol: string
+    estaVivo: boolean;
+    esAlguacil: boolean;
+    haVisto: boolean;
+    pocionCuraUsada: boolean;
+    pocionMatarUsada: boolean;
+  }[]
+>([]);
+
+useEffect(() => {
+  console.log("[Effect] jugadoresEstado actualizado (stringify):", 
+    JSON.stringify(jugadoresEstado, null, 2)
+  );
+}, [jugadoresEstado]);
+
+console.log("[Render] Estado de jugadoresEstado antes de renderizar:", jugadoresEstado);
+
+
+const vivos = useMemo(() => {
+  return jugadoresEstado.filter(j => j.estaVivo).length;
+}, [jugadoresEstado]);
+
+const lobosVivos = useMemo(() => {
+  return jugadoresEstado.filter(j => j.estaVivo && j.rol === "Hombre lobo").length;
+}, [jugadoresEstado]);
+
   /**
    * Hasta que no se cargue la fuente de puñeta no continuar
    */
@@ -656,7 +775,7 @@ const PantallaJugando: React.FC = () => {
             {/* Componente BarraSuperior: 
                 Suele mostrar información relevante en la parte superior de la pantalla, 
                 como el estado del juego o la identificación del rol. */}
-            <BarraSuperior />
+            <BarraSuperior vivos={vivos} lobos={lobosVivos}/>
 
             {/*
               Temporizador:
