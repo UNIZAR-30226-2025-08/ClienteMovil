@@ -796,7 +796,7 @@ const lobosVivos = useMemo(() => {
                 y la función que maneja la selección de jugadores.
             */}
             <CirculoVotar
-              imagenes={imagenes}
+              jugadores={jugadoresEstado}
               votes={votes}
               JugadorSeleccionado={JugadorSeleccionado}
               onSelectPlayer={administrarSeleccionJugadorVotacion}

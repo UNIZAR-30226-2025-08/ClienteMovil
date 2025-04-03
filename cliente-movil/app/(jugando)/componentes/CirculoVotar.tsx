@@ -20,18 +20,31 @@ const { NUMERICAS, DIMENSIONES, COLORES } = CONSTANTES;
 const { ANCHO, ALTO } = DIMENSIONES;
 
 interface CirculoVotarProps {
-  imagenes: any[];
+  jugadores: {
+    id: string;
+    nombre: string;
+    listo: boolean;
+    rol: string;
+    estaVivo: boolean;
+    esAlguacil: boolean;
+    haVisto: boolean;
+    pocionCuraUsada: boolean;
+    pocionMatarUsada: boolean;
+  }[];
   votes: number[];
   JugadorSeleccionado: number | null;
   onSelectPlayer: (index: number) => void;
 }
 
 const CirculoVotar: React.FC<CirculoVotarProps> = ({
-  imagenes,
+  jugadores,
   votes,
   JugadorSeleccionado,
   onSelectPlayer,
 }) => {
+
+  const cantidadJugadores = jugadores.length;
+
   // Calcula el radio máximo del círculo basado en las dimensiones mínimas de la pantalla y un multiplicador.
   const radioMaximoCalculado =
     Math.min(ANCHO, ALTO) * NUMERICAS.MULTIPLICADOR_RADIO;
@@ -54,9 +67,9 @@ const CirculoVotar: React.FC<CirculoVotarProps> = ({
         },
       ]}
     >
-      {imagenes.slice(0, NUMERICAS.CANTIDAD_IMAGENES).map((img, indice) => {
+      {jugadores.map((jugador, indice) => {
         // Calcula el ángulo para posicionar la imagen de cada jugador uniformemente en el círculo.
-        const angulo = (indice * 2 * Math.PI) / NUMERICAS.CANTIDAD_IMAGENES;
+        const angulo = (indice * 2 * Math.PI) / cantidadJugadores;
         // Calcula la posición X e Y basadas en el ángulo y el radio máximo.
         const x = radioMaximo * Math.cos(angulo);
         const y =
@@ -68,7 +81,7 @@ const CirculoVotar: React.FC<CirculoVotarProps> = ({
         return (
           // Botón que representa cada jugador; al pulsar se ejecuta onSelectPlayer.
           <TouchableOpacity
-            key={indice}
+            key={jugador.id}
             onPress={() => onSelectPlayer(indice)}
             style={[
               estilos.contenedorJugador,
@@ -88,7 +101,7 @@ const CirculoVotar: React.FC<CirculoVotarProps> = ({
                 },
               ]}
             >
-              <Image source={img} style={estilos.imagenCirculo} />
+              <Image source={CONSTANTES.IMAGENES.JUGADORES} style={estilos.imagenCirculo} />
             </View>
             {/* Contenedor que muestra barras de votos: una barra por cada voto recibido */}
             <View style={estilos.contenedorVotos}>
