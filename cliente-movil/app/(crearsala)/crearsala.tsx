@@ -64,6 +64,7 @@ const CrearSala = (): JSX.Element => {
   const [usuario, setUsuario] = useState<{
     nombre: string;
     id?: string;
+    avatar: string | null;
   } | null>(null);
   const [nombreServidor, setNombreServidor] = useState("");
 
@@ -91,9 +92,14 @@ const CrearSala = (): JSX.Element => {
       try {
         const nombreGuardado = await AsyncStorage.getItem("nombreUsuario");
         const idGuardado = await AsyncStorage.getItem("idUsuario");
+        const avatarUsuario = await AsyncStorage.getItem("avatarUsuario");
         if (nombreGuardado && idGuardado) {
           // Ahora se guarda también el 'id'
-          const usuarioObj = { nombre: nombreGuardado, id: idGuardado };
+          const usuarioObj = { 
+            nombre: nombreGuardado, 
+            id: idGuardado,
+            avatar: avatarUsuario ?? "avatar1",
+          };
           setUsuario(usuarioObj);
           setNombreServidor(`Servidor de "${usuarioObj.nombre}"`);
         } else {
@@ -299,7 +305,11 @@ const CrearSala = (): JSX.Element => {
       contrasena: privacidad === "Privada" ? password : null,
       maxJugadores: numJugadores,
       maxRolesEspeciales,
-      usuario: usuario,
+      usuario: {
+        id: usuario?.id,
+        nombre: usuario?.nombre,
+        avatar: usuario?.avatar, // Asegúrate de incluirlo
+      },
       maxRoles: rolesObject,
     };
 

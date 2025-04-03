@@ -13,16 +13,29 @@
  */
 
 import React from "react";
-import { View, Image, TouchableOpacity } from "react-native";
+import { View, Image, TouchableOpacity, Text } from "react-native";
 import { estilos } from "../../../utils/jugando/jugando.styles";
 import { CONSTANTES } from "../../../utils/jugando/constantes";
 const { NUMERICAS, DIMENSIONES, COLORES } = CONSTANTES;
 const { ANCHO, ALTO } = DIMENSIONES;
 
+// Mapa de avatares
+const avatarMap: Record<string, any> = {
+  avatar1: require("@/assets/images/imagenPerfil.webp"),
+  avatar2: require("@/assets/images/imagenPerfil2.webp"),
+  avatar3: require("@/assets/images/imagenPerfil3.webp"),
+  avatar4: require("@/assets/images/imagenPerfil4.webp"),
+  avatar5: require("@/assets/images/imagenPerfil5.webp"),
+  avatar6: require("@/assets/images/imagenPerfil6.webp"),
+  avatar7: require("@/assets/images/imagenPerfil7.webp"),
+  avatar8: require("@/assets/images/imagenPerfil8.webp"),
+};
+
 interface CirculoVotarProps {
   jugadores: {
     id: string;
     nombre: string;
+    avatar?: string;
     listo: boolean;
     rol: string;
     estaVivo: boolean;
@@ -78,6 +91,17 @@ const CirculoVotar: React.FC<CirculoVotarProps> = ({
           (1 - NUMERICAS.FACTOR_ENCOGIMIENTO_VERTICAL);
         // Determina si el jugador actual está seleccionado para resaltar su imagen.
         const isSelected = JugadorSeleccionado === indice;
+
+        console.log(`Jugador: ${jugador.nombre}, avatar: ${jugador.avatar}`);
+
+        // Normalizamos la clave del avatar (por si viene con mayúsculas)
+        const avatarKey = jugador.avatar?.toLowerCase() ?? "avatar1";
+        const avatarFuente = avatarMap[avatarKey] ?? avatarMap.avatar1;
+
+        if (!avatarMap[avatarKey]) {
+          console.warn(`⚠️ Avatar no encontrado para key: ${avatarKey}`);
+        }
+
         return (
           // Botón que representa cada jugador; al pulsar se ejecuta onSelectPlayer.
           <TouchableOpacity
@@ -101,8 +125,14 @@ const CirculoVotar: React.FC<CirculoVotarProps> = ({
                 },
               ]}
             >
-              <Image source={CONSTANTES.IMAGENES.JUGADORES} style={estilos.imagenCirculo} />
+              <Image source={avatarFuente} style={estilos.imagenCirculo} />
             </View>
+
+            {/* Nombre del jugador */}
+            <Text style={estilos.nombreJugadorPartida}>
+              {jugador.nombre}
+            </Text>
+
             {/* Contenedor que muestra barras de votos: una barra por cada voto recibido */}
             <View style={estilos.contenedorVotos}>
               {Array.from({ length: votes[indice] }).map((_, index) => (

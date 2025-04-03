@@ -152,6 +152,12 @@ export const estilos = StyleSheet.create({
     marginLeft: ancho * 0.02,
   },
 
+  nombreJugadorPartida: {
+    marginTop: 4, 
+    color: "black", 
+    fontWeight: "bold"
+  },
+
   iconoBoton: {
     width: TAMANIO_ICONO_BOTON,
     height: TAMANIO_ICONO_BOTON,

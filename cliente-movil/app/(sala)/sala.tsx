@@ -19,6 +19,7 @@ import PantallaJugando from "../(jugando)/jugando"; // Permite acceso al paso de
 type Player = {
   id: string;
   name: string;
+  avatar: string;
   level: number;
   isReady: boolean;
   isOwner?: boolean; // Indica si es el dueño de la sala
@@ -28,6 +29,7 @@ type Player = {
 type UsuarioData = {
   id: string;
   nombre: string;
+  avatar?: string;
 };
 
 /**
@@ -106,6 +108,7 @@ export default function SalaPreviaScreen(): JSX.Element {
         sala.jugadores.map((j: any) => ({
           id: j.id,
           name: j.nombre || j.id,
+          avatar: j.avatar,
           level: 106,
           isReady: j.listo || false,
           isOwner: sala.lider === j.id,
@@ -119,6 +122,7 @@ export default function SalaPreviaScreen(): JSX.Element {
         sala.jugadores.map((j: any) => ({
           id: j.id,
           name: j.nombre || j.id,
+          avatar: j.avatar,
           level: 106,
           isReady: j.listo || false,
           isOwner: String(j.id) === String(sala.lider), // Asegura comparación correcta
@@ -142,8 +146,10 @@ export default function SalaPreviaScreen(): JSX.Element {
     const obtenerDatosUsuario = async () => {
       const nombreUsuario = await AsyncStorage.getItem("nombreUsuario");
       const idUsuario = await AsyncStorage.getItem("idUsuario");
+      const avatarUsuario = await AsyncStorage.getItem("avatarUsuario");
+      console.log("Valor real en AsyncStorage: ", avatarUsuario);
       if (nombreUsuario && idUsuario) {
-        setUsuarioData({ id: idUsuario, nombre: nombreUsuario });
+        setUsuarioData({ id: idUsuario, nombre: nombreUsuario, avatar: avatarUsuario ?? "avatar1"});
       }
     };
     obtenerDatosUsuario();
@@ -158,6 +164,7 @@ export default function SalaPreviaScreen(): JSX.Element {
         {
           id: data.id,
           name: data.nombre || data.id,
+          avatar: data.avatar,
           level: 106, // Ajusta el nivel si corresponde
           isReady: false,
           isOwner: false,
@@ -401,6 +408,7 @@ export default function SalaPreviaScreen(): JSX.Element {
   const emptySlots = Array.from({ length: emptySlotsCount }, (_, i) => ({
     id: `empty-${i}`,
     name: "Vacío",
+    avatar: "avatar1",
     level: 0,
     isReady: false,
   }));
