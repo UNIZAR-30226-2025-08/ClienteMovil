@@ -2,7 +2,7 @@
 import io from "socket.io-client";
 
 // PONER LA URL DEL SERVIDOR
-const socket = io("http://192.168.114.205:5000");
+const socket = io("http://192.168.0.18:5000");
 
 // Ejemplo de manejo de conexión y reconexión
 socket.on("connect", () => {

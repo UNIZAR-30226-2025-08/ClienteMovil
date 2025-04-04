@@ -22,10 +22,12 @@ export default function NotificacionesScreen(): JSX.Element {
   const router = useRouter();
   const BACKEND_URL = Constants.expoConfig?.extra?.backendUrl;
 
-  // Estado para almacenar las notificaciones (solicitudes de amistad)
+  // Estado para almacenar las notificaciones
   const [notificaciones, setNotificaciones] = useState([]);
   // Estado para almacenar el id del usuario actual
   const [usuarioId, setUsuarioId] = useState<number | null>(null);
+  // Estado para el tipo de notificación: "solicitudes", "invitaciones" o "sugerencias"
+  const [tipoNotificacion, setTipoNotificacion] = useState("solicitudes");
 
   // Al cargar la pantalla, obtenemos el usuario actual
   useEffect(() => {
@@ -33,7 +35,9 @@ export default function NotificacionesScreen(): JSX.Element {
       try {
         const idUsuario = await AsyncStorage.getItem("idUsuario");
         if (idUsuario) {
-          setUsuarioId(parseInt(idUsuario));
+          const parsedId = parseInt(idUsuario);
+          setUsuarioId(parsedId);
+          //console.log("Usuario ID cargado:", parsedId);
         }
       } catch (error) {
         console.error("Error al cargar usuario:", error);
@@ -42,31 +46,53 @@ export default function NotificacionesScreen(): JSX.Element {
     cargarUsuario();
   }, []);
 
-  // Obtener las notificaciones cuando se tiene el usuario
+  // Obtener las notificaciones cuando se tiene el usuario o se cambia el tipo
   useEffect(() => {
     if (usuarioId) {
       fetchNotificaciones();
     }
-  }, [usuarioId]);
+  }, [usuarioId, tipoNotificacion]);
 
   const fetchNotificaciones = async () => {
-    try {
+    if (!usuarioId) return;
+    if (tipoNotificacion === "solicitudes") {
       const response = await axios.get(
         `${BACKEND_URL}/api/solicitud/listar/${usuarioId}`
       );
-      //console.log("Notificaciones recibidas:", response.data);
-      // Se espera que response.data tenga { solicitudes: [...] }
       setNotificaciones(response.data.solicitudes);
-    } catch (error) {
-      console.error("Error al cargar notificaciones:", error);
-      Alert.alert("Error", "No se pudieron cargar las notificaciones");
+    } else if (tipoNotificacion === "invitaciones") {
+      const response = await axios.get(
+        `${BACKEND_URL}/api/invitacion/listar/${usuarioId}`
+      );
+      setNotificaciones(response.data.invitaciones);
+    } else if (tipoNotificacion === "sugerencias") {
+      // En vez de armar el endpoint, invoca directamente la función
+      await handleVerSugerencia(String(usuarioId));
     }
   };
 
-  /**
-   * Maneja la aceptación de una solicitud.
-   * Se llama al endpoint para aceptar y, de ser exitoso, se elimina la notificación de la lista.
-   */
+  // Ejemplo de función para cargar sugerencias
+  const handleVerSugerencia = async (usuarioId: string) => {
+    if (!usuarioId) {
+      Alert.alert("Error", "No se pudo obtener el ID del usuario.");
+      return;
+    }
+    try {
+      const { data } = await axios.post(
+        `${BACKEND_URL}/api/sugerencias/usuario`,
+        {
+          idUsuario: usuarioId,
+        }
+      );
+      setNotificaciones(data.sugerencias);
+    } catch (err: any) {
+      Alert.alert(
+        "Error",
+        err.response?.data?.error || "Error al obtener tus sugerencias."
+      );
+    }
+  };
+
   const handleAceptar = async (notif: any) => {
     try {
       const response = await axios.post(
@@ -86,22 +112,18 @@ export default function NotificacionesScreen(): JSX.Element {
     }
   };
 
-  /**
-   * Maneja la denegación de una solicitud.
-   * Se llama al endpoint para denegar y, de ser exitoso, se elimina la notificación de la lista.
-   */
-  const handleDenegar = async (solicitudId: number) => {
+  const handleDenegar = async (emisorId: number) => {
     try {
       const response = await axios.post(
         `${BACKEND_URL}/api/solicitud/denegar`,
         {
-          solicitudId,
+          solicitudId: emisorId,
         }
       );
       if (response.data.exito) {
         Alert.alert("Éxito", "Solicitud denegada");
         setNotificaciones((prev) =>
-          prev.filter((notif: any) => notif.id !== solicitudId)
+          prev.filter((notif: any) => notif.id !== emisorId)
         );
       } else {
         Alert.alert("Error", "No se pudo denegar la solicitud");
@@ -110,6 +132,15 @@ export default function NotificacionesScreen(): JSX.Element {
       console.error("Error al denegar solicitud:", error);
       Alert.alert("Error", "Error al denegar la solicitud");
     }
+  };
+
+  // Funciones de ejemplo para invitaciones a partidas
+  const handleUnirse = (notif: any) => {
+    Alert.alert("Función no implementada", "Unirse a la partida");
+  };
+
+  const handleRechazar = (emisorId: number) => {
+    Alert.alert("Función no implementada", "Rechazar la invitación");
   };
 
   const irAtras = () => {
@@ -125,40 +156,120 @@ export default function NotificacionesScreen(): JSX.Element {
       >
         <View style={styles.overlay} />
         <Text style={styles.titulo}>Notificaciones</Text>
+
+        {/* Botones para filtrar el tipo de notificaciones */}
+        <View style={styles.botonesTipoContainer}>
+          <TouchableOpacity
+            style={[
+              styles.botonTipo,
+              tipoNotificacion === "solicitudes" && styles.botonTipoActivo,
+            ]}
+            onPress={() => setTipoNotificacion("solicitudes")}
+          >
+            <Text style={styles.botonTipoTexto}>Solicitudes</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              styles.botonTipo,
+              tipoNotificacion === "invitaciones" && styles.botonTipoActivo,
+            ]}
+            onPress={() => setTipoNotificacion("invitaciones")}
+          >
+            <Text style={styles.botonTipoTexto}>Invitaciones</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              styles.botonTipo,
+              tipoNotificacion === "sugerencias" && styles.botonTipoActivo,
+            ]}
+            onPress={() => setTipoNotificacion("sugerencias")}
+          >
+            <Text style={styles.botonTipoTexto}>Sugerencias</Text>
+          </TouchableOpacity>
+        </View>
+
         <ScrollView
           contentContainerStyle={styles.scrollContainer}
           showsVerticalScrollIndicator={false}
         >
-          {notificaciones.map((notif: any, index: number) => (
-            <View
-              key={`${notif.idUsuarioEmisor}-${index}`}
-              style={styles.notificacionContainer}
-            >
-              <Text style={styles.textoNotificacion}>
-                <Text style={styles.autor}>{notif.nombreEmisor}</Text> te ha
-                enviado una solicitud de amistad.
-              </Text>
-              <Text style={styles.fechaNotificacion}>
-                {new Date(notif.fechaSolicitud).toLocaleString()}
-              </Text>
-              <View style={styles.botonesContainer}>
-                <TouchableOpacity
-                  style={styles.boton}
-                  onPress={() => handleAceptar(notif)}
-                >
-                  <Text style={styles.botonTexto}>Aceptar</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[styles.boton, styles.botonDenegar]}
-                  onPress={() => handleDenegar(notif.idUsuarioEmisor)}
-                >
-                  <Text style={styles.botonTexto}>Denegar</Text>
-                </TouchableOpacity>
+          {notificaciones && notificaciones.length > 0 ? (
+            notificaciones.map((notif: any, index: number) => (
+              <View
+                key={`${notif.idUsuarioEmisor || notif.id}-${index}`}
+                style={styles.notificacionContainer}
+              >
+                {tipoNotificacion === "solicitudes" && (
+                  <>
+                    <Text style={styles.textoNotificacion}>
+                      <Text style={styles.autor}>{notif.nombreEmisor}</Text> te
+                      ha enviado una solicitud de amistad.
+                    </Text>
+                    <Text style={styles.fechaNotificacion}>
+                      {new Date(notif.fechaSolicitud).toLocaleString()}
+                    </Text>
+                    <View style={styles.botonesContainer}>
+                      <TouchableOpacity
+                        style={styles.boton}
+                        onPress={() => handleAceptar(notif)}
+                      >
+                        <Text style={styles.botonTexto}>Aceptar</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={[styles.boton, styles.botonDenegar]}
+                        onPress={() => handleDenegar(notif.idUsuarioEmisor)}
+                      >
+                        <Text style={styles.botonTexto}>Denegar</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </>
+                )}
+                {tipoNotificacion === "invitaciones" && (
+                  <>
+                    <Text style={styles.textoNotificacion}>
+                      <Text style={styles.autor}>{notif.nombreEmisor}</Text> te
+                      ha invitado a una partida.
+                    </Text>
+                    <Text style={styles.fechaNotificacion}>
+                      {new Date(notif.fechaInvitacion).toLocaleString()}
+                    </Text>
+                    <View style={styles.botonesContainer}>
+                      <TouchableOpacity
+                        style={styles.boton}
+                        onPress={() => handleUnirse(notif)}
+                      >
+                        <Text style={styles.botonTexto}>Unirse</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={[styles.boton, styles.botonDenegar]}
+                        onPress={() => handleRechazar(notif.idUsuarioEmisor)}
+                      >
+                        <Text style={styles.botonTexto}>Rechazar</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </>
+                )}
+                {tipoNotificacion === "sugerencias" && (
+                  <>
+                    <Text style={styles.textoNotificacion}>
+                      Sugerencia enviada:
+                    </Text>
+                    <Text style={styles.textoNotificacion}>
+                      {notif.contenido || "Sin contenido"}
+                    </Text>
+                    <Text style={styles.fechaNotificacion}>
+                      {new Date(notif.fechaSugerencia).toLocaleString()}
+                    </Text>
+                    <Text style={styles.textoNotificacion}>
+                      Respuesta: {notif.respuesta ?? "Aún no hay respuesta"}
+                    </Text>
+                    <Text style={styles.textoNotificacion}>
+                      Estado: {notif.completada ? "Completada" : "Pendiente"}
+                    </Text>
+                  </>
+                )}
               </View>
-            </View>
-          ))}
-
-          {notificaciones.length === 0 && (
+            ))
+          ) : (
             <Text style={styles.sinNotificaciones}>
               No tienes notificaciones pendientes
             </Text>
@@ -179,17 +290,36 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     backgroundColor: "rgba(0, 0, 0, 0.4)",
   },
-  scrollContainer: {
-    paddingHorizontal: 20,
-    paddingBottom: 60,
-    marginTop: 20,
-  },
   titulo: {
     fontSize: 28,
     fontWeight: "bold",
     color: "#fff",
     textAlign: "center",
     marginTop: 60,
+  },
+  botonesTipoContainer: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    marginHorizontal: 20,
+    marginTop: 20,
+  },
+  botonTipo: {
+    backgroundColor: "#008f39",
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 10,
+  },
+  botonTipoActivo: {
+    backgroundColor: "#005f20",
+  },
+  botonTipoTexto: {
+    color: "#fff",
+    fontWeight: "bold",
+  },
+  scrollContainer: {
+    paddingHorizontal: 20,
+    paddingBottom: 60,
+    marginTop: 20,
   },
   notificacionContainer: {
     backgroundColor: "rgba(255, 255, 255, 0.8)",
