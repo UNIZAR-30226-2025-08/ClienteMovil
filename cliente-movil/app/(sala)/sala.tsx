@@ -294,7 +294,7 @@ export default function SalaPreviaScreen(): JSX.Element {
   /**
    * Verifica si todos los jugadores en la sala están listos.
    */
-  const allReady = true; // players.every((player) => player.isReady);
+  const allReady = players.every((player) => player.isReady);
 
   /**
    * Maneja el botón "Iniciar Partida".
