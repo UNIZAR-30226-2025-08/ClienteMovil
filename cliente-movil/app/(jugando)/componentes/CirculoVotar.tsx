@@ -13,25 +13,51 @@
  */
 
 import React from "react";
-import { View, Image, TouchableOpacity } from "react-native";
+import { View, Image, TouchableOpacity, Text } from "react-native";
 import { estilos } from "../../../utils/jugando/jugando.styles";
 import { CONSTANTES } from "../../../utils/jugando/constantes";
 const { NUMERICAS, DIMENSIONES, COLORES } = CONSTANTES;
 const { ANCHO, ALTO } = DIMENSIONES;
 
+// Mapa de avatares
+const avatarMap: Record<string, any> = {
+  avatar1: require("@/assets/images/imagenPerfil.webp"),
+  avatar2: require("@/assets/images/imagenPerfil2.webp"),
+  avatar3: require("@/assets/images/imagenPerfil3.webp"),
+  avatar4: require("@/assets/images/imagenPerfil4.webp"),
+  avatar5: require("@/assets/images/imagenPerfil5.webp"),
+  avatar6: require("@/assets/images/imagenPerfil6.webp"),
+  avatar7: require("@/assets/images/imagenPerfil7.webp"),
+  avatar8: require("@/assets/images/imagenPerfil8.webp"),
+};
+
 interface CirculoVotarProps {
-  imagenes: any[];
+  jugadores: {
+    id: string;
+    nombre: string;
+    avatar?: string;
+    listo: boolean;
+    rol: string;
+    estaVivo: boolean;
+    esAlguacil: boolean;
+    haVisto: boolean;
+    pocionCuraUsada: boolean;
+    pocionMatarUsada: boolean;
+  }[];
   votes: number[];
   JugadorSeleccionado: number | null;
   onSelectPlayer: (index: number) => void;
 }
 
 const CirculoVotar: React.FC<CirculoVotarProps> = ({
-  imagenes,
+  jugadores,
   votes,
   JugadorSeleccionado,
   onSelectPlayer,
 }) => {
+
+  const cantidadJugadores = jugadores.length;
+
   // Calcula el radio máximo del círculo basado en las dimensiones mínimas de la pantalla y un multiplicador.
   const radioMaximoCalculado =
     Math.min(ANCHO, ALTO) * NUMERICAS.MULTIPLICADOR_RADIO;
@@ -54,9 +80,9 @@ const CirculoVotar: React.FC<CirculoVotarProps> = ({
         },
       ]}
     >
-      {imagenes.slice(0, NUMERICAS.CANTIDAD_IMAGENES).map((img, indice) => {
+      {jugadores.map((jugador, indice) => {
         // Calcula el ángulo para posicionar la imagen de cada jugador uniformemente en el círculo.
-        const angulo = (indice * 2 * Math.PI) / NUMERICAS.CANTIDAD_IMAGENES;
+        const angulo = (indice * 2 * Math.PI) / cantidadJugadores;
         // Calcula la posición X e Y basadas en el ángulo y el radio máximo.
         const x = radioMaximo * Math.cos(angulo);
         const y =
@@ -65,10 +91,21 @@ const CirculoVotar: React.FC<CirculoVotarProps> = ({
           (1 - NUMERICAS.FACTOR_ENCOGIMIENTO_VERTICAL);
         // Determina si el jugador actual está seleccionado para resaltar su imagen.
         const isSelected = JugadorSeleccionado === indice;
+
+        console.log(`Jugador: ${jugador.nombre}, avatar: ${jugador.avatar}`);
+
+        // Normalizamos la clave del avatar (por si viene con mayúsculas)
+        const avatarKey = jugador.avatar?.toLowerCase() ?? "avatar1";
+        const avatarFuente = avatarMap[avatarKey] ?? avatarMap.avatar1;
+
+        if (!avatarMap[avatarKey]) {
+          console.warn(`⚠️ Avatar no encontrado para key: ${avatarKey}`);
+        }
+
         return (
           // Botón que representa cada jugador; al pulsar se ejecuta onSelectPlayer.
           <TouchableOpacity
-            key={indice}
+            key={jugador.id}
             onPress={() => onSelectPlayer(indice)}
             style={[
               estilos.contenedorJugador,
@@ -88,8 +125,14 @@ const CirculoVotar: React.FC<CirculoVotarProps> = ({
                 },
               ]}
             >
-              <Image source={img} style={estilos.imagenCirculo} />
+              <Image source={avatarFuente} style={estilos.imagenCirculo} />
             </View>
+
+            {/* Nombre del jugador */}
+            <Text style={estilos.nombreJugadorPartida}>
+              {jugador.nombre}
+            </Text>
+
             {/* Contenedor que muestra barras de votos: una barra por cada voto recibido */}
             <View style={estilos.contenedorVotos}>
               {Array.from({ length: votes[indice] }).map((_, index) => (

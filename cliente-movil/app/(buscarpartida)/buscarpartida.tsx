@@ -64,22 +64,6 @@ export default function BuscarSalasScreen(): JSX.Element {
     };
   }, []);
 
-  useEffect(() => {
-    /**
-     * Recupera de forma asíncrona los datos del usuario (nombre de usuario e ID de usuario) desde AsyncStorage
-     * y actualiza el estado con los valores recuperados.
-     */
-    const obtenerDatosUsuario = async () => {
-      const nombreUsuario = await AsyncStorage.getItem("nombreUsuario");
-      const idUsuario = await AsyncStorage.getItem("idUsuario");
-      if (nombreUsuario && idUsuario) {
-        setUsuarioData({ id: idUsuario, nombre: nombreUsuario });
-      }
-    };
-
-    obtenerDatosUsuario();
-  }, []);
-
   /**
    * Estado que almacena los datos del usuario.
    *
@@ -94,7 +78,25 @@ export default function BuscarSalasScreen(): JSX.Element {
   const [usuarioData, setUsuarioData] = useState<{
     id: string;
     nombre: string;
+    avatar: string;
   } | null>(null);
+
+  useEffect(() => {
+    /**
+     * Recupera de forma asíncrona los datos del usuario (nombre de usuario e ID de usuario) desde AsyncStorage
+     * y actualiza el estado con los valores recuperados.
+     */
+    const obtenerDatosUsuario = async () => {
+      const nombreUsuario = await AsyncStorage.getItem("nombreUsuario");
+      const idUsuario = await AsyncStorage.getItem("idUsuario");
+      const avatarUsuario = await AsyncStorage.getItem("avatarUsuario");
+      if (nombreUsuario && idUsuario) {
+        setUsuarioData({ id: idUsuario, nombre: nombreUsuario, avatar: avatarUsuario ?? "avatar1"});
+      }
+    };
+
+    obtenerDatosUsuario();
+  }, []);
   /**
    * Al presionar una sala:
    * - Si es privada, se muestra el modal para ingresar la contraseña.
@@ -105,7 +107,14 @@ export default function BuscarSalasScreen(): JSX.Element {
       setSalaSeleccionada(sala);
       setMostrarModal(true);
     } else if (usuarioData) {
-      socket.emit("unirseSala", { idSala: sala.id, usuario: usuarioData });
+      socket.emit("unirseSala", { 
+        idSala: sala.id, 
+        usuario: {
+          id: usuarioData.id,
+          nombre: usuarioData.nombre,
+          avatar: usuarioData.avatar,
+        },
+      });
       router.push({ pathname: "/(sala)/sala", params: { idSala: sala.id } });
     } else {
       Alert.alert("Usuario no disponible", "No hay datos de usuario.");
@@ -123,7 +132,11 @@ export default function BuscarSalasScreen(): JSX.Element {
     if (password === salaSeleccionada.contrasena) {
       socket.emit("unirseSala", {
         idSala: salaSeleccionada.id,
-        usuario: usuarioData,
+        usuario: {
+          id: usuarioData.id,
+          nombre: usuarioData.nombre,
+          avatar: usuarioData.avatar,
+        },
         contrasena: password,
       });
       setMostrarModal(false);
