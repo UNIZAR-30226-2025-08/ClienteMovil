@@ -657,7 +657,7 @@ console.log("[Render] Estado de jugadoresEstado antes de renderizar:", jugadores
 
 
 const vivos = useMemo(() => {
-  return jugadoresEstado.filter(j => j.estaVivo).length;
+  return jugadoresEstado.filter(j => j.estaVivo && j.rol !== "Hombre lobo").length;
 }, [jugadoresEstado]);
 
 const lobosVivos = useMemo(() => {
