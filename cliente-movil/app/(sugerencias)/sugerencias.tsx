@@ -22,15 +22,15 @@ const imagenContacto = require("@/assets/images/logo-soporte-tecnico.png");
 const imagenAtras = require("@/assets/images/botonAtras.png");
 
 /**
- * Componente que representa la pantalla de contacto.
+ * Componente que representa la pantalla de sugerencias.
  *
- * Este componente permite a los usuarios enviar una sugerencia de contacto,
+ * Este componente permite a los usuarios enviar una sugerencia,
  * ingresando su nombre, correo y asunto. La sugerencia se envía a un backend
  * para ser almacenada en la base de datos.
  *
- * @returns {JSX.Element | null} Retorna el componente de contacto o null si no se ha cargado la fuente.
+ * @returns {JSX.Element | null} Retorna el componente de sugerencias o null si no se ha cargado la fuente.
  */
-export default function ContactoScreen(): JSX.Element | null {
+export default function SugerenciasScreen(): JSX.Element | null {
   /**
    * URL del backend obtenida de las constantes de Expo.
    *
@@ -145,7 +145,7 @@ export default function ContactoScreen(): JSX.Element | null {
         style={styles.image}
       >
         <View style={styles.overlay} />
-        <Text style={styles.tituloContacto}>CONTACTO</Text>
+        <Text style={styles.tituloContacto}>SUGERENCIAS</Text>
         <Image source={imagenContacto} style={styles.imageContacto}></Image>
 
         {/* Campo de entrada para el nombre */}
@@ -237,7 +237,7 @@ const styles = StyleSheet.create({
   tituloContacto: {
     position: "absolute",
     top: "5%",
-    left: "36%",
+    left: "28%",
     marginTop: 20,
     marginLeft: -60,
     color: "white",

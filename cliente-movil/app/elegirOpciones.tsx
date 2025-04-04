@@ -186,9 +186,9 @@ export default function OpcionesScreen(): JSX.Element | null {
             {/* Botón para ver la sección de contacto */}
             <TouchableOpacity
               style={styles.boton}
-              onPress={() => router.push("/(contacto)/contacto")}
+              onPress={() => router.push("/(sugerencias)/sugerencias")}
             >
-              <Text style={styles.textoBoton}>CONTACTO</Text>
+              <Text style={styles.textoBoton}>SUGERENCIAS</Text>
             </TouchableOpacity>
 
             {/* Botón para cerrar sesión */}
