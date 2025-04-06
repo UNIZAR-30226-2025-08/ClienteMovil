@@ -33,6 +33,7 @@ import MensajeError from "./componentes/MensajeError";
 import AnimacionInicio1 from "./componentes/Animaciones/AnimacionInicio1";
 import AnimacionInicio2 from "./componentes/Animaciones/AnimacionInicio2";
 import AnimacionInicio3 from "./componentes/Animaciones/AnimacionInicio3";
+import AnimacionGenerica from "./componentes/Animaciones/AnimacionGenerica";
 
 // Hooks (administran estado)
 import useTemporizador from "./hooks/useTemporizador";
@@ -61,23 +62,28 @@ interface MensajeChat {
  * @returns {JSX.Element | null} El componente renderizado o null si las fuentes no se han cargado.
  */
 const PantallaJugando: React.FC = () => {
-
+  // TODO organziar este código
   useEffect(() => {
     // ✔️ Log para ver si el componente se monta
-    console.log("[PantallaJugando] Componente montado. Registrando listeners...");
+    /*console.log(
+      "[PantallaJugando] Componente montado. Registrando listeners..."
+    );*/
 
     // Registramos el listener de 'enPartida'
-    console.log("[PantallaJugando] Registrando socket.on('enPartida')");
+    //console.log("[PantallaJugando] Registrando socket.on('enPartida')");
     socket.on("enPartida", (data) => {
-      console.log("[PantallaJugando] ► Llega enPartida con data:", data);
-      console.log("Jugadores enPartida (stringify):", JSON.stringify(data.sala.jugadores, null, 2));
+      /*console.log("[PantallaJugando] ► Llega enPartida con data:", data);
+      console.log(
+        "Jugadores enPartida (stringify):",
+        JSON.stringify(data.sala.jugadores, null, 2)
+      );*/
       setJugadoresEstado(data.sala.jugadores);
     });
 
     // Registramos el listener de 'actualizarSala'
-    console.log("[PantallaJugando] Registrando socket.on('actualizarSala')");
+    //console.log("[PantallaJugando] Registrando socket.on('actualizarSala')");
     socket.on("actualizarSala", (data) => {
-      console.log("[PantallaJugando] ► Llega actualizarSala con data:", data);
+      /*console.log("[PantallaJugando] ► Llega actualizarSala con data:", data);*/
       // lógica de ignorar si data.enPartida && ...
       // setJugadoresEstado si procede
     });
@@ -108,7 +114,7 @@ const PantallaJugando: React.FC = () => {
   // ---------------------------------------------------------------------------
   // Estados del Juego
   // ---------------------------------------------------------------------------
-  const [jornadaActual, setJornadaActual] = useState<number>(1);
+  const [jornadaActual, setJornadaActual] = useState<number>(0);
   const [etapaActual, setEtapaActual] = useState<"Día" | "Noche">(
     MODO_NOCHE_GLOBAL ? "Noche" : "Día"
   );
@@ -205,6 +211,38 @@ const PantallaJugando: React.FC = () => {
   const [mostrarAnimacionInicio3, setMostrarAnimacionInicio3] =
     useState<boolean>(false);
 
+  const duracionFadeIn = 1000; // 1 segundo
+  const duracionEspera = 2000; // 2 segundos
+  const duracionFadeOut = 1000; // 1 segundo
+  const {
+    opacities: opacitiesInicio,
+    mostrarComponentes: mostrarComponentesInicio,
+  } = useGestorAnimaciones({
+    duracionFadeIn,
+    duracionEspera,
+    duracionFadeOut,
+    numAnimaciones: 3,
+    start: true,
+  });
+
+  // ---------------------------------------------------------------------------
+  // Hook para la votación de alguacil
+  // ---------------------------------------------------------------------------
+  const [
+    mostrarAnimacionVotacionAlguacil,
+    setMostrarAnimacionVotacionAlguacil,
+  ] = useState(false);
+
+  const {
+    opacities: opacitiesVotacionAlguacil,
+    mostrarComponentes: mostrarComponentesVotacionAlguacil,
+  } = useGestorAnimaciones({
+    duracionFadeIn,
+    duracionEspera,
+    duracionFadeOut,
+    numAnimaciones: 1,
+    start: mostrarAnimacionVotacionAlguacil,
+  });
   // ---------------------------------------------------------------------------
   // Hook para la animación del modo día/noche
   // ---------------------------------------------------------------------------
@@ -219,7 +257,7 @@ const PantallaJugando: React.FC = () => {
    * @returns {tiempoRestante, reiniciarTemporizador, setTemporizadorActivo}
    */
   const { tiempoRestante, reiniciarTemporizador, setTemporizadorActivo } =
-    useTemporizador(CONSTANTES.NUMERICAS.TIEMPO_INICIAL, false);
+    useTemporizador(30, false); // Tiempo para el tiempo tranquilo antes de la votación del alguacil
 
   /**
    * Hook que administra la animación del chat.
@@ -239,16 +277,6 @@ const PantallaJugando: React.FC = () => {
    * @returns {errorMessage, mostrarError, animacionError}
    */
   const { errorMessage, mostrarError, animacionError } = useMensajeError();
-
-  const duracionFadeIn = 1000; // 1 segundo
-  const duracionEspera = 2000; // 2 segundos
-  const duracionFadeOut = 1000; // 1 segundo
-  const { opacities, mostrarComponentes } = useGestorAnimaciones({
-    duracionFadeIn,
-    duracionEspera,
-    duracionFadeOut,
-    numAnimaciones: 3, // 3 animaciones iniciales concatenadas :)
-  });
 
   // ---------------------------------------------------------------------------
   // Logs custom
@@ -323,47 +351,80 @@ const PantallaJugando: React.FC = () => {
    * Efecto que se dispara cuando el temporizador llega a 0.
    * Alterna el modo (día/noche), reinicia los estados de votación y resetea el temporizador.
    */
+  /**
+   * Efecto que se dispara cuando el temporizador llega a 0.
+   * Alterna el modo (día/noche), reinicia los estados de votación y resetea el temporizador.
+   */
   useEffect(() => {
     if (tiempoRestante === 0) {
-      const nuevoModo: boolean = !MODO_NOCHE_GLOBAL;
-      MODO_NOCHE_GLOBAL = nuevoModo;
-      setModoDiaNoche(nuevoModo);
-
-      const nuevaEtapa = nuevoModo ? "Noche" : "Día";
-      const esNuevoDia = nuevoModo === false;
-      const nuevaJornada = esNuevoDia ? jornadaActual + 1 : jornadaActual;
-
-      if (!votoRealizado) {
+      if (jornadaActual === 0) {
         logCustom(
           jornadaActual,
           etapaActual,
-          `El jugador no ha votado en esta etapa`
+          "Iniciando votación de alguacil en la primera jornada"
         );
-      }
 
-      logCustom(nuevaJornada, nuevaEtapa, `Comenzando nueva etapa`);
+        MODO_NOCHE_GLOBAL = true;
+        setModoDiaNoche(MODO_NOCHE_GLOBAL);
+        setMostrarBotones(false);
+        setMostrarAnimacionVotacionAlguacil(true);
+        setTimeout(() => {
+          setMostrarAnimacionVotacionAlguacil(false);
+          setMostrarBotones(true);
+          MODO_NOCHE_GLOBAL = false;
+          setModoDiaNoche(MODO_NOCHE_GLOBAL);
+          setJornadaActual(1);
+          setVotos(Array(CONSTANTES.NUMERICAS.CANTIDAD_IMAGENES).fill(0));
+          setVotoRealizado(false);
+          setPasoTurno(false);
+          setJugadorSeleccionado(null);
+          reiniciarTemporizador();
+        }, 4000);
+      } else {
+        const nuevoModo: boolean = !MODO_NOCHE_GLOBAL;
+        MODO_NOCHE_GLOBAL = nuevoModo;
+        setModoDiaNoche(nuevoModo);
 
-      if (!MODO_NOCHE_GLOBAL) {
-        logCustom(nuevaJornada, nuevaEtapa, `Estado de vida de los jugadores:`);
-        jugadoresVivos.forEach((estado, index) => {
+        const nuevaEtapa = nuevoModo ? "Noche" : "Día";
+        const esNuevoDia = nuevoModo === false;
+        const nuevaJornada = esNuevoDia ? jornadaActual + 1 : jornadaActual;
+
+        if (!votoRealizado) {
+          logCustom(
+            jornadaActual,
+            etapaActual,
+            "El jugador no ha votado en esta etapa"
+          );
+        }
+
+        logCustom(nuevaJornada, nuevaEtapa, "Comenzando nueva etapa");
+
+        if (!MODO_NOCHE_GLOBAL) {
           logCustom(
             nuevaJornada,
             nuevaEtapa,
-            `- Jugador ${index + 1}: ${estado ? "Vivo" : "Muerto"}`
+            "Estado de vida de los jugadores:"
           );
-        });
-      }
+          jugadoresVivos.forEach((estado, index) => {
+            logCustom(
+              nuevaJornada,
+              nuevaEtapa,
+              `- Jugador ${index + 1}: ${estado ? "Vivo" : "Muerto"}`
+            );
+          });
+        }
 
-      setEtapaActual(nuevaEtapa);
-      if (esNuevoDia) {
-        setJornadaActual(nuevaJornada);
-      }
+        setEtapaActual(nuevaEtapa);
+        if (esNuevoDia) {
+          setJornadaActual(nuevaJornada);
+        }
 
-      setVotos(Array(CONSTANTES.NUMERICAS.CANTIDAD_IMAGENES).fill(0));
-      setVotoRealizado(false);
-      setPasoTurno(false);
-      setJugadorSeleccionado(null);
-      reiniciarTemporizador();
+        setVotos(Array(CONSTANTES.NUMERICAS.CANTIDAD_IMAGENES).fill(0));
+        setVotoRealizado(false);
+        setPasoTurno(false);
+        setJugadorSeleccionado(null);
+        reiniciarTemporizador();
+      }
     }
   }, [tiempoRestante]);
 
@@ -398,41 +459,46 @@ const PantallaJugando: React.FC = () => {
     };
   }, [idSala]);
 
+  // TODO organziar este código
   useEffect(() => {
     socket.on("enPartida", (data) => {
-      console.log("Evento enPartida recibido");
-      console.log("Jugadores recibidos enPartida (raw):", data.sala.jugadores);
-    
+      //console.log("Evento enPartida recibido");
+      //console.log("Jugadores recibidos enPartida (raw):", data.sala.jugadores);
+
       // 👇 Conviértelo a JSON legible
-      console.log("Jugadores enPartida (stringify):",
+      /*console.log(
+        "Jugadores enPartida (stringify):",
         JSON.stringify(data.sala.jugadores, null, 2)
-      );
-    
+      );*/
+
       setJugadoresEstado(data.sala.jugadores);
     });
-    
-  
+
     socket.on("actualizarSala", (data) => {
-      console.log("Evento actualizarSala recibido:", data);
-    
+      //console.log("Evento actualizarSala recibido:", data);
+
       // Si ya estamos en partida, no toques nada, pero agrega una excepción:
-      if (data.enPartida && (!Array.isArray(data.jugadores) || data.jugadores.length === 0)) {
-        console.log("Ignorando actualizarSala (jugadores vacíos o ya en partida):", data.jugadores);
+      if (
+        data.enPartida &&
+        (!Array.isArray(data.jugadores) || data.jugadores.length === 0)
+      ) {
+        /*console.log(
+          "Ignorando actualizarSala (jugadores vacíos o ya en partida):",
+          data.jugadores
+        );*/
         return;
       }
-    
-      console.log("Actualizando jugadoresEstado con:", data.jugadores);
+
+      //console.log("Actualizando jugadoresEstado con:", data.jugadores);
       setJugadoresEstado(data.jugadores);
     });
-    
-  
+
     return () => {
       socket.off("enPartida");
       socket.off("actualizarSala");
     };
   }, []);
-  
-  
+
   // ---------------------------------------------------------------------------
   // Efectos del backend
   // ---------------------------------------------------------------------------
@@ -634,35 +700,41 @@ const PantallaJugando: React.FC = () => {
   };
 
   const [jugadoresEstado, setJugadoresEstado] = useState<
-  {
-    id: string;
-    nombre: string;
-    listo: boolean;
-    rol: string
-    estaVivo: boolean;
-    esAlguacil: boolean;
-    haVisto: boolean;
-    pocionCuraUsada: boolean;
-    pocionMatarUsada: boolean;
-  }[]
->([]);
+    {
+      id: string;
+      nombre: string;
+      listo: boolean;
+      rol: string;
+      estaVivo: boolean;
+      esAlguacil: boolean;
+      haVisto: boolean;
+      pocionCuraUsada: boolean;
+      pocionMatarUsada: boolean;
+    }[]
+  >([]);
 
-useEffect(() => {
-  console.log("[Effect] jugadoresEstado actualizado (stringify):", 
-    JSON.stringify(jugadoresEstado, null, 2)
-  );
-}, [jugadoresEstado]);
+  // TODO organziar este código
+  useEffect(() => {
+    /*console.log(
+      "[Effect] jugadoresEstado actualizado (stringify):",
+      JSON.stringify(jugadoresEstado, null, 2)
+    );*/
+  }, [jugadoresEstado]);
 
-console.log("[Render] Estado de jugadoresEstado antes de renderizar:", jugadoresEstado);
+  /*console.log(
+    "[Render] Estado de jugadoresEstado antes de renderizar:",
+    jugadoresEstado
+  );*/
 
+  const vivos = useMemo(() => {
+    return jugadoresEstado.filter((j) => j.estaVivo && j.rol !== "Hombre lobo")
+      .length;
+  }, [jugadoresEstado]);
 
-const vivos = useMemo(() => {
-  return jugadoresEstado.filter(j => j.estaVivo && j.rol !== "Hombre lobo").length;
-}, [jugadoresEstado]);
-
-const lobosVivos = useMemo(() => {
-  return jugadoresEstado.filter(j => j.estaVivo && j.rol === "Hombre lobo").length;
-}, [jugadoresEstado]);
+  const lobosVivos = useMemo(() => {
+    return jugadoresEstado.filter((j) => j.estaVivo && j.rol === "Hombre lobo")
+      .length;
+  }, [jugadoresEstado]);
 
   /**
    * Hasta que no se cargue la fuente de puñeta no continuar
@@ -712,26 +784,36 @@ const lobosVivos = useMemo(() => {
         */}
         {mostrarAnimacionInicio1 && (
           <AnimacionInicio1
-            opacity={opacities[0]}
-            mostrarComponente={mostrarComponentes[0]}
+            opacity={opacitiesInicio[0]}
+            mostrarComponente={mostrarComponentesInicio[0]}
           />
         )}
 
         {mostrarAnimacionInicio2 && (
           <AnimacionInicio2
-            opacity={opacities[1]}
-            mostrarComponente={mostrarComponentes[1]}
+            opacity={opacitiesInicio[1]}
+            mostrarComponente={mostrarComponentesInicio[1]}
             rol={rolUsuario}
           />
         )}
 
         {mostrarAnimacionInicio3 && (
           <AnimacionInicio3
-            opacity={opacities[2]}
-            mostrarComponente={mostrarComponentes[2]}
+            opacity={opacitiesInicio[2]}
+            mostrarComponente={mostrarComponentesInicio[2]}
           />
         )}
 
+        {/*
+          Animación especial para iniciar las votaciones de alguacil (única para la primera jornada)
+        */}
+        {mostrarAnimacionVotacionAlguacil && (
+          <AnimacionGenerica
+            opacity={new Animated.Value(1)}
+            mostrarComponente={true}
+            texto="EMPIEZAN LAS VOTACIONES DE ALGUACIL"
+          />
+        )}
         {/*
           Renderizado condicional del mensaje de error:
           - Si errorMessage tiene contenido, se muestra el componente MensajeError.
@@ -775,7 +857,7 @@ const lobosVivos = useMemo(() => {
             {/* Componente BarraSuperior: 
                 Suele mostrar información relevante en la parte superior de la pantalla, 
                 como el estado del juego o la identificación del rol. */}
-            <BarraSuperior vivos={vivos} lobos={lobosVivos}/>
+            <BarraSuperior vivos={vivos} lobos={lobosVivos} />
 
             {/*
               Temporizador:

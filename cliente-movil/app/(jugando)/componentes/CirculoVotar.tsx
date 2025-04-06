@@ -55,7 +55,6 @@ const CirculoVotar: React.FC<CirculoVotarProps> = ({
   JugadorSeleccionado,
   onSelectPlayer,
 }) => {
-
   const cantidadJugadores = jugadores.length;
 
   // Calcula el radio máximo del círculo basado en las dimensiones mínimas de la pantalla y un multiplicador.
@@ -92,7 +91,7 @@ const CirculoVotar: React.FC<CirculoVotarProps> = ({
         // Determina si el jugador actual está seleccionado para resaltar su imagen.
         const isSelected = JugadorSeleccionado === indice;
 
-        console.log(`Jugador: ${jugador.nombre}, avatar: ${jugador.avatar}`);
+        //console.log(`Jugador: ${jugador.nombre}, avatar: ${jugador.avatar}`);
 
         // Normalizamos la clave del avatar (por si viene con mayúsculas)
         const avatarKey = jugador.avatar?.toLowerCase() ?? "avatar1";
@@ -129,9 +128,7 @@ const CirculoVotar: React.FC<CirculoVotarProps> = ({
             </View>
 
             {/* Nombre del jugador */}
-            <Text style={estilos.nombreJugadorPartida}>
-              {jugador.nombre}
-            </Text>
+            <Text style={estilos.nombreJugadorPartida}>{jugador.nombre}</Text>
 
             {/* Contenedor que muestra barras de votos: una barra por cada voto recibido */}
             <View style={estilos.contenedorVotos}>
