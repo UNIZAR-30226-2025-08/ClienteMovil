@@ -85,7 +85,7 @@ export default function SugerenciasScreen(): JSX.Element | null {
    */
   const enviarSugerencia = async (): Promise<void> => {
     // Validar que se hayan ingresado los campos requeridos
-    if (!nombre || !correo || !asunto) {
+    if (!asunto) {
       Alert.alert("Por favor, completa todos los campos.");
       return;
     }
@@ -147,26 +147,6 @@ export default function SugerenciasScreen(): JSX.Element | null {
         <View style={styles.overlay} />
         <Text style={styles.tituloContacto}>SUGERENCIAS</Text>
         <Image source={imagenContacto} style={styles.imageContacto}></Image>
-
-        {/* Campo de entrada para el nombre */}
-        <Text style={styles.textoNombre}>Nombre</Text>
-        <TextInput
-          style={styles.smallInput}
-          placeholder="Tu nombre"
-          placeholderTextColor="#444"
-          value={nombre}
-          onChangeText={setNombre}
-        />
-
-        {/* Campo de entrada para el correo electrónico */}
-        <Text style={styles.textoCorreo}>Correo electrónico</Text>
-        <TextInput
-          style={styles.smallInput}
-          placeholder="Tu correo"
-          placeholderTextColor="#444"
-          value={correo}
-          onChangeText={setCorreo}
-        />
 
         {/* Campo de entrada para el asunto */}
         <Text style={styles.textoAsunto}>Asunto</Text>
@@ -246,25 +226,11 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
 
-  textoNombre: {
-    fontSize: 18,
-    color: "white",
-    marginLeft: "20%",
-    marginTop: 190,
-  },
-
-  textoCorreo: {
-    fontSize: 18,
-    color: "white",
-    marginLeft: "20%",
-    marginTop: 20,
-  },
-
   textoAsunto: {
     fontSize: 18,
     color: "white",
     marginLeft: "20%",
-    marginTop: 20,
+    marginTop: 150,
   },
 
   smallInput: {
@@ -274,10 +240,12 @@ const styles = StyleSheet.create({
   },
 
   bigInput: {
+    marginTop: 10,
+    marginBottom: 10,
     marginLeft: "20%",
     backgroundColor: "rgba(255, 255, 255, 0.8)",
     width: "60%",
-    height: "20%",
+    height: "35%",
     textAlignVertical: "top",
   },
 
