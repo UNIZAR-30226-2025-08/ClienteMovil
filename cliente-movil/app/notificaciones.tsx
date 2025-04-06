@@ -250,20 +250,45 @@ export default function NotificacionesScreen(): JSX.Element {
                 )}
                 {tipoNotificacion === "sugerencias" && (
                   <>
-                    <Text style={styles.textoNotificacion}>
+                    {/* Indicador de sugerencia */}
+                    <Text
+                      style={[
+                        styles.textoNotificacion,
+                        { fontStyle: "italic" },
+                      ]}
+                    >
                       Sugerencia enviada:
                     </Text>
-                    <Text style={styles.textoNotificacion}>
+
+                    {/* Luego se muestra el contenido y la respuesta */}
+                    <Text
+                      style={[styles.textoNotificacion, { fontWeight: "bold" }]}
+                    >
                       {notif.contenido || "Sin contenido"}
                     </Text>
+                    <Text style={[styles.textoNotificacion]}>
+                      Respuesta:{" "}
+                      <Text style={{ fontWeight: "bold" }}>
+                        {notif.respuesta ?? "Aún no hay respuesta"}
+                      </Text>
+                    </Text>
+
+                    {/* Finalmente se muestra la fecha y el estado */}
                     <Text style={styles.fechaNotificacion}>
                       {new Date(notif.fechaSugerencia).toLocaleString()}
                     </Text>
+
+                    {/* Si la sugerencia está cerrada, muestra un check verde al lado */}
                     <Text style={styles.textoNotificacion}>
-                      Respuesta: {notif.respuesta ?? "Aún no hay respuesta"}
-                    </Text>
-                    <Text style={styles.textoNotificacion}>
-                      Estado: {notif.completada ? "Cerrada" : "Abierta"}
+                      Estado:
+                      {notif.revisada ? (
+                        <Text style={{ color: "green", fontWeight: "bold" }}>
+                          {" "}
+                          Cerrada ✔
+                        </Text>
+                      ) : (
+                        <Text style={{ fontWeight: "bold" }}> Abierta</Text>
+                      )}
                     </Text>
                   </>
                 )}

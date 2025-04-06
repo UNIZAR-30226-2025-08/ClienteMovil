@@ -121,6 +121,7 @@ export default function AdminSuggestionsScreen() {
     try {
       await axios.put(`${BACKEND_URL}/api/sugerencias/marcarRevisada`, {
         idSugerencia,
+        revisada: true,
       });
       Alert.alert(
         "Sugerencia completada",

@@ -146,7 +146,11 @@ export default function SalaPreviaScreen(): JSX.Element {
       const avatarUsuario = await AsyncStorage.getItem("avatarUsuario");
       console.log("Valor real en AsyncStorage: ", avatarUsuario);
       if (nombreUsuario && idUsuario) {
-        setUsuarioData({ id: idUsuario, nombre: nombreUsuario, avatar: avatarUsuario ?? "avatar1"});
+        setUsuarioData({
+          id: idUsuario,
+          nombre: nombreUsuario,
+          avatar: avatarUsuario ?? "avatar1",
+        });
       }
     };
     obtenerDatosUsuario();
@@ -300,8 +304,13 @@ export default function SalaPreviaScreen(): JSX.Element {
   const allReady = players.every((player) => player.isReady);
 
   /**
+   * Verifica si la cantidad de jugadores es igual al número máximo de jugadores.
+   */
+  const playersComplete = players.length === salaInfo?.maxJugadores;
+
+  /**
    * Maneja el botón "Iniciar Partida".
-   * Solo permite avanzar si todos los jugadores están listos.
+   * Solo permite avanzar si todos los jugadores están listos y la sala está completa.
    */
   const handleIniciarPartida = () => {
     if (!usuarioData) {
@@ -322,13 +331,31 @@ export default function SalaPreviaScreen(): JSX.Element {
       "Usuario ID:",
       usuarioData?.id,
       "Tipo:",
-      typeof usuarioData?.id
+      typeof usuarioData?.id,
+      "Lider ID:",
+      liderId
     );
 
     if (!esLider) {
       Alert.alert(
         "No eres el líder",
         "Solo el líder puede iniciar la partida."
+      );
+      return;
+    }
+
+    // Verificar que la cantidad de jugadores sea la correcta y que todos estén listos
+    console.log(
+      "Estado de los jugadores:",
+      players.map((player) => `${player.name}: ${player.isReady}`)
+    );
+    console.log("¿Todos listos?", allReady);
+    console.log("¿Sala completa?", playersComplete);
+
+    if (!playersComplete) {
+      Alert.alert(
+        "Esperando jugadores",
+        "No puedes iniciar la partida hasta que se hayan unido todos los jugadores."
       );
       return;
     }
@@ -374,7 +401,6 @@ export default function SalaPreviaScreen(): JSX.Element {
    * Renderiza cada tarjeta de jugador.
    */
   const renderPlayerItem = ({ item }: { item: Player }) => {
-
     const esLider = usuarioData?.id === players.find((p) => p.isOwner)?.id;
     const soyYo = item.id === usuarioData?.id;
 
@@ -472,13 +498,16 @@ export default function SalaPreviaScreen(): JSX.Element {
           <Text style={styles.inviteText}>INVITAR AMIGOS</Text>
         </TouchableOpacity>
 
+        {/* Deshabilita el botón si no están todos listos o no está completa la sala */}
         <TouchableOpacity
           style={[
             styles.buttonStart,
-            { backgroundColor: allReady ? "#008000" : "#555" },
+            {
+              backgroundColor: allReady && playersComplete ? "#008000" : "#555",
+            },
           ]}
           onPress={handleIniciarPartida}
-          disabled={!allReady}
+          disabled={!allReady || !playersComplete}
         >
           <Text style={styles.startText}>INICIAR PARTIDA</Text>
         </TouchableOpacity>
@@ -627,11 +656,10 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     borderRadius: 4,
   },
-  
+
   textoBotonExpulsar: {
     color: "#fff",
     fontSize: 12,
     fontWeight: "bold",
   },
-  
 });
