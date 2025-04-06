@@ -11,8 +11,14 @@ const useTemporizador = (
   tiempoInicial = CONSTANTES.NUMERICAS.TIEMPO_INICIAL,
   activar = false
 ) => {
+  // Inicializamos el tiempo restante con el valor actual de tiempoInicial.
   const [tiempoRestante, setTiempoRestante] = useState(tiempoInicial);
   const [temporizadorActivo, setTemporizadorActivo] = useState(activar);
+
+  // Si el valor de tiempoInicial cambia, actualizamos el estado para reflejar el nuevo valor.
+  useEffect(() => {
+    setTiempoRestante(tiempoInicial);
+  }, [tiempoInicial]);
 
   useEffect(() => {
     let intervalo: NodeJS.Timeout;
@@ -21,13 +27,13 @@ const useTemporizador = (
         setTiempoRestante((prev) => prev - 1);
       }, 1000);
     }
-    // Nota: Cuando tiempoRestante llega a 0, la acción de cambio de modo noche se gestionará en el componente principal.
+    // Se limpia el intervalo en cada render o cuando el componente se desmonte.
     return () => clearInterval(intervalo);
   }, [temporizadorActivo, tiempoRestante]);
 
   /**
    * @function reiniciarTemporizador
-   * @description Reinicia el temporizador al valor inicial y lo activa.
+   * @description Reinicia el temporizador al valor actual de tiempoInicial y lo activa.
    */
   const reiniciarTemporizador = () => {
     setTiempoRestante(tiempoInicial);
