@@ -263,7 +263,7 @@ export default function NotificacionesScreen(): JSX.Element {
                       Respuesta: {notif.respuesta ?? "Aún no hay respuesta"}
                     </Text>
                     <Text style={styles.textoNotificacion}>
-                      Estado: {notif.completada ? "Completada" : "Pendiente"}
+                      Estado: {notif.completada ? "Cerrada" : "Abierta"}
                     </Text>
                   </>
                 )}
