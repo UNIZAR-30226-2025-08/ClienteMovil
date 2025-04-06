@@ -56,6 +56,7 @@ const ControlesAccion: React.FC<ControlesAccionProps> = ({
           {/*
             Si turnoPasado es true, se aplica un borde rojo al botón de pasar turno.
           */}
+          {/*
           <TouchableOpacity
             style={[
               estilos.botonAccion,
@@ -67,6 +68,7 @@ const ControlesAccion: React.FC<ControlesAccionProps> = ({
               {CONSTANTES.TEXTOS.BOTON_PASAR_TURNO}
             </Text>
           </TouchableOpacity>
+          */}
 
           {/*
             Si votoRealizado es true, se aplica un borde rojo al botón de votar.
