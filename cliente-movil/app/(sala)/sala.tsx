@@ -20,7 +20,6 @@ type Player = {
   id: string;
   name: string;
   avatar: string;
-  level: number;
   isReady: boolean;
   isOwner?: boolean; // Indica si es el dueño de la sala
 };
@@ -109,7 +108,6 @@ export default function SalaPreviaScreen(): JSX.Element {
           id: j.id,
           name: j.nombre || j.id,
           avatar: j.avatar,
-          level: 106,
           isReady: j.listo || false,
           isOwner: sala.lider === j.id,
         }))
@@ -123,7 +121,6 @@ export default function SalaPreviaScreen(): JSX.Element {
           id: j.id,
           name: j.nombre || j.id,
           avatar: j.avatar,
-          level: 106,
           isReady: j.listo || false,
           isOwner: String(j.id) === String(sala.lider), // Asegura comparación correcta
         }))
@@ -165,7 +162,6 @@ export default function SalaPreviaScreen(): JSX.Element {
           id: data.id,
           name: data.nombre || data.id,
           avatar: data.avatar,
-          level: 106, // Ajusta el nivel si corresponde
           isReady: false,
           isOwner: false,
         },
@@ -382,7 +378,6 @@ export default function SalaPreviaScreen(): JSX.Element {
       <View style={styles.playerCard}>
         {item.isOwner && <Text style={styles.ownerCrown}>👑</Text>}
         <Text style={styles.playerName}>{item.name}</Text>
-        <Text style={styles.playerLevel}>Level {item.level}</Text>
 
         {/* Estado Listo / No Listo */}
         <TouchableOpacity
