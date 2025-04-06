@@ -374,6 +374,10 @@ export default function SalaPreviaScreen(): JSX.Element {
    * Renderiza cada tarjeta de jugador.
    */
   const renderPlayerItem = ({ item }: { item: Player }) => {
+
+    const esLider = usuarioData?.id === players.find((p) => p.isOwner)?.id;
+    const soyYo = item.id === usuarioData?.id;
+
     return (
       <View style={styles.playerCard}>
         {item.isOwner && <Text style={styles.ownerCrown}>👑</Text>}
@@ -391,6 +395,35 @@ export default function SalaPreviaScreen(): JSX.Element {
             {item.isReady ? "¡Listo!" : "No Listo"}
           </Text>
         </TouchableOpacity>
+
+        {/* Botón de expulsar visible solo para el líder y no para sí mismo */}
+        {esLider && !soyYo && (
+          <TouchableOpacity
+            style={styles.botonExpulsar}
+            onPress={() => {
+              Alert.alert(
+                "¿Expulsar jugador?",
+                `¿Estás seguro de que quieres expulsar a ${item.name}?`,
+                [
+                  { text: "Cancelar", style: "cancel" },
+                  {
+                    text: "Expulsar",
+                    onPress: () => {
+                      socket.emit("expulsarJugador", {
+                        idSala,
+                        idLider: usuarioData?.id,
+                        idExpulsado: item.id,
+                      });
+                    },
+                    style: "destructive",
+                  },
+                ]
+              );
+            }}
+          >
+            <Text style={styles.textoBotonExpulsar}>Expulsar</Text>
+          </TouchableOpacity>
+        )}
       </View>
     );
   };
@@ -586,4 +619,19 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "bold",
   },
+
+  botonExpulsar: {
+    marginTop: 6,
+    backgroundColor: "#800000",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 4,
+  },
+  
+  textoBotonExpulsar: {
+    color: "#fff",
+    fontSize: 12,
+    fontWeight: "bold",
+  },
+  
 });
