@@ -62,40 +62,6 @@ interface MensajeChat {
  * @returns {JSX.Element | null} El componente renderizado o null si las fuentes no se han cargado.
  */
 const PantallaJugando: React.FC = () => {
-  // TODO organziar este código
-  useEffect(() => {
-    // ✔️ Log para ver si el componente se monta
-    /*console.log(
-      "[PantallaJugando] Componente montado. Registrando listeners..."
-    );*/
-
-    // Registramos el listener de 'enPartida'
-    //console.log("[PantallaJugando] Registrando socket.on('enPartida')");
-    socket.on("enPartida", (data) => {
-      /*console.log("[PantallaJugando] ► Llega enPartida con data:", data);
-      console.log(
-        "Jugadores enPartida (stringify):",
-        JSON.stringify(data.sala.jugadores, null, 2)
-      );*/
-      setJugadoresEstado(data.sala.jugadores);
-    });
-
-    // Registramos el listener de 'actualizarSala'
-    //console.log("[PantallaJugando] Registrando socket.on('actualizarSala')");
-    socket.on("actualizarSala", (data) => {
-      /*console.log("[PantallaJugando] ► Llega actualizarSala con data:", data);*/
-      // lógica de ignorar si data.enPartida && ...
-      // setJugadoresEstado si procede
-    });
-
-    // Limpiamos los listeners al desmontar
-    return () => {
-      console.log("[PantallaJugando] Desmontando, removiendo listeners...");
-      socket.off("enPartida");
-      socket.off("actualizarSala");
-    };
-  }, []); // <-- efecto que corre una sola vez al montar
-
   // ---------------------------------------------------------------------------
   // Carga de fuentes
   // ---------------------------------------------------------------------------
@@ -121,8 +87,24 @@ const PantallaJugando: React.FC = () => {
   const [jugadoresVivos, setJugadoresVivos] = useState<boolean[]>(
     Array(CONSTANTES.NUMERICAS.CANTIDAD_IMAGENES).fill(true)
   );
+
   // Estado para almacenar los mensajes
   const [mensajes, setMensajes] = useState<MensajeChat[]>([]);
+
+  // Estado del backend
+  const [jugadoresEstado, setJugadoresEstado] = useState<
+    {
+      id: string;
+      nombre: string;
+      listo: boolean;
+      rol: string;
+      estaVivo: boolean;
+      esAlguacil: boolean;
+      haVisto: boolean;
+      pocionCuraUsada: boolean;
+      pocionMatarUsada: boolean;
+    }[]
+  >([]);
 
   // ---------------------------------------------------------------------------
   // Estados de la Interfaz de Usuario (UI)
@@ -309,6 +291,71 @@ const PantallaJugando: React.FC = () => {
   // ---------------------------------------------------------------------------
 
   /**
+   * Conecta la partida a los sockets
+   * Logs comentados porque este useEffect se ejecuta constantemente y petaría los logs
+   */
+  useEffect(() => {
+    socket.on("enPartida", (data) => {
+      // console.log("Evento enPartida recibido");
+      // console.log("Jugadores recibidos enPartida (raw):", data.sala.jugadores);
+
+      // 👇 Conviértelo a JSON legible
+      /*
+      console.log(
+        "Jugadores enPartida (stringify):",
+        JSON.stringify(data.sala.jugadores, null, 2)
+      );
+      */
+
+      setJugadoresEstado(data.sala.jugadores);
+    });
+
+    socket.on("actualizarSala", (data) => {
+      // console.log("Evento actualizarSala recibido:", data);
+
+      // Si ya estamos en partida, no toques nada, pero agrega una excepción:
+      if (
+        data.enPartida &&
+        (!Array.isArray(data.jugadores) || data.jugadores.length === 0)
+      ) {
+        /*
+        console.log(
+          "Ignorando actualizarSala (jugadores vacíos o ya en partida):",
+          data.jugadores
+        );
+        */
+        return;
+      }
+
+      // console.log("Actualizando jugadoresEstado con:", data.jugadores);
+      setJugadoresEstado(data.jugadores);
+    });
+
+    return () => {
+      socket.off("enPartida");
+      socket.off("actualizarSala");
+    };
+  }, []);
+
+  /**
+   * Avisa si se actualiza el estado de cualquier jugador
+   * Logs comentados porque este useEffect se ejecuta constantemente y petaría los logs
+   */
+  useEffect(() => {
+    /*console.log(
+          "[Effect] jugadoresEstado actualizado (stringify):",
+          JSON.stringify(jugadoresEstado, null, 2)
+        );*/
+  }, [jugadoresEstado]);
+
+  /*
+  console.log(
+        "[Render] Estado de jugadoresEstado antes de renderizar:",
+        jugadoresEstado
+      );
+  */
+
+  /**
    * Efecto de inicialización:
    * - Selecciona un rol aleatorio para el usuario.
    * - Activa la visualización de los botones de acción.
@@ -459,46 +506,6 @@ const PantallaJugando: React.FC = () => {
     };
   }, [idSala]);
 
-  // TODO organziar este código
-  useEffect(() => {
-    socket.on("enPartida", (data) => {
-      //console.log("Evento enPartida recibido");
-      //console.log("Jugadores recibidos enPartida (raw):", data.sala.jugadores);
-
-      // 👇 Conviértelo a JSON legible
-      /*console.log(
-        "Jugadores enPartida (stringify):",
-        JSON.stringify(data.sala.jugadores, null, 2)
-      );*/
-
-      setJugadoresEstado(data.sala.jugadores);
-    });
-
-    socket.on("actualizarSala", (data) => {
-      //console.log("Evento actualizarSala recibido:", data);
-
-      // Si ya estamos en partida, no toques nada, pero agrega una excepción:
-      if (
-        data.enPartida &&
-        (!Array.isArray(data.jugadores) || data.jugadores.length === 0)
-      ) {
-        /*console.log(
-          "Ignorando actualizarSala (jugadores vacíos o ya en partida):",
-          data.jugadores
-        );*/
-        return;
-      }
-
-      //console.log("Actualizando jugadoresEstado con:", data.jugadores);
-      setJugadoresEstado(data.jugadores);
-    });
-
-    return () => {
-      socket.off("enPartida");
-      socket.off("actualizarSala");
-    };
-  }, []);
-
   // ---------------------------------------------------------------------------
   // Efectos del backend
   // ---------------------------------------------------------------------------
@@ -523,6 +530,28 @@ const PantallaJugando: React.FC = () => {
   // ---------------------------------------------------------------------------
   // Funciones de manejo de eventos
   // ---------------------------------------------------------------------------
+
+  /**
+   * Calcula y devuelve la cantidad de jugadores vivos que no son "Hombre lobo".
+   * Se recalcula automáticamente cuando cambia el estado de los jugadores.
+   *
+   * @returns {number} La cantidad de jugadores vivos no pertenecientes al rol "Hombre lobo".
+   */
+  const vivos = useMemo(() => {
+    return jugadoresEstado.filter((j) => j.estaVivo && j.rol !== "Hombre lobo")
+      .length;
+  }, [jugadoresEstado]);
+
+  /**
+   * Calcula y devuelve la cantidad de jugadores vivos que tienen el rol "Hombre lobo".
+   * Se recalcula automáticamente cuando cambia el estado de los jugadores.
+   *
+   * @returns {number} La cantidad de jugadores vivos que son "Hombre lobo".
+   */
+  const lobosVivos = useMemo(() => {
+    return jugadoresEstado.filter((j) => j.estaVivo && j.rol === "Hombre lobo")
+      .length;
+  }, [jugadoresEstado]);
 
   /**
    * Abre el chat y activa la animación correspondiente.
@@ -698,43 +727,6 @@ const PantallaJugando: React.FC = () => {
     setVotoRealizado(true);
     setJugadorSeleccionado(null);
   };
-
-  const [jugadoresEstado, setJugadoresEstado] = useState<
-    {
-      id: string;
-      nombre: string;
-      listo: boolean;
-      rol: string;
-      estaVivo: boolean;
-      esAlguacil: boolean;
-      haVisto: boolean;
-      pocionCuraUsada: boolean;
-      pocionMatarUsada: boolean;
-    }[]
-  >([]);
-
-  // TODO organziar este código
-  useEffect(() => {
-    /*console.log(
-      "[Effect] jugadoresEstado actualizado (stringify):",
-      JSON.stringify(jugadoresEstado, null, 2)
-    );*/
-  }, [jugadoresEstado]);
-
-  /*console.log(
-    "[Render] Estado de jugadoresEstado antes de renderizar:",
-    jugadoresEstado
-  );*/
-
-  const vivos = useMemo(() => {
-    return jugadoresEstado.filter((j) => j.estaVivo && j.rol !== "Hombre lobo")
-      .length;
-  }, [jugadoresEstado]);
-
-  const lobosVivos = useMemo(() => {
-    return jugadoresEstado.filter((j) => j.estaVivo && j.rol === "Hombre lobo")
-      .length;
-  }, [jugadoresEstado]);
 
   /**
    * Hasta que no se cargue la fuente de puñeta no continuar
