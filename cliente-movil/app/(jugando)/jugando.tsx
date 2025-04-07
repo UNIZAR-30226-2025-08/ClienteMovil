@@ -192,6 +192,12 @@ const PantallaJugando: React.FC = () => {
   const { habilidadInfo, roleInfo } = getInfoRol(rolUsuario);
 
   // ---------------------------------------------------------------------------
+  // Para controlar el timer según mande el backend
+  // ---------------------------------------------------------------------------
+  const [deberiaResetearElTimer, setDeberiaResetearElTimer] = useState(false);
+  const [timerTerminado, setTimerTerminado] = useState(false);
+
+  // ---------------------------------------------------------------------------
   // Hooks para la animación de inicio
   // ---------------------------------------------------------------------------
   const [mostrarAnimacionInicio1, setMostrarAnimacionInicio1] =
@@ -397,6 +403,7 @@ const PantallaJugando: React.FC = () => {
           setMostrarBotones(true);
           MODO_NOCHE_GLOBAL = false;
           setModoDiaNoche(MODO_NOCHE_GLOBAL);
+          reiniciarTemporizador();
         }, 4000);
       }, 4000);
     }, 4000);
@@ -408,6 +415,8 @@ const PantallaJugando: React.FC = () => {
    */
   useEffect(() => {
     if (tiempoRestante === 0) {
+      setTimerTerminado(true);
+      logCustom(jornadaActual, etapaActual, "El timer ha llegado a 0");
       if (jornadaActual === 0) {
         logCustom(
           jornadaActual,
@@ -430,7 +439,7 @@ const PantallaJugando: React.FC = () => {
           setVotoRealizado(false);
           setPasoTurno(false);
           setJugadorSeleccionado(null);
-          reiniciarTemporizador();
+          // reiniciarTemporizador();
         }, 4000);
       } else {
         const nuevoModo: boolean = !MODO_NOCHE_GLOBAL;
@@ -475,7 +484,7 @@ const PantallaJugando: React.FC = () => {
         setVotoRealizado(false);
         setPasoTurno(false);
         setJugadorSeleccionado(null);
-        reiniciarTemporizador();
+        // reiniciarTemporizador(); Para que el backend controle cuando se reinicia el temporizador
       }
     }
   }, [tiempoRestante]);
@@ -511,6 +520,17 @@ const PantallaJugando: React.FC = () => {
     };
   }, [idSala]);
 
+  /**
+   * Efecto que reinicia el temporizador cuando deba hacerlo según indique el backend
+   */
+  useEffect(() => {
+    if (deberiaResetearElTimer) {
+      reiniciarTemporizador();
+      setDeberiaResetearElTimer(false);
+      setTimerTerminado(false);
+    }
+  }, [deberiaResetearElTimer, reiniciarTemporizador]);
+
   // ---------------------------------------------------------------------------
   // Efectos del backend
   // ---------------------------------------------------------------------------
@@ -531,6 +551,39 @@ const PantallaJugando: React.FC = () => {
     // Agregar el nuevo mensaje a la lista
     setMensajes((prevMensajes) => [...prevMensajes, nuevoMensaje]);
   });
+
+  /**
+   * Reinicia el timer cuando lo indica el backend
+   * NO FUNCIONAL DE MOMENTO PORQUE EL BACKEND IMPLOSIONA (O LO IMPLOSIONA EL FRONTEND :V) !!!!!
+   */
+  useEffect(() => {
+    const transitionEvents = [
+      "esperaInicial",
+      "iniciarVotacionAlguacil",
+      "nocheComienza",
+      "habilidadVidente",
+      "turnoHombresLobos",
+      "habilidadBruja",
+      "diaComienza",
+    ];
+
+    transitionEvents.forEach((eventName) => {
+      socket.on(eventName, (data) => {
+        logCustom(
+          jornadaActual,
+          etapaActual,
+          `Evento recibido: ${eventName} - ${JSON.stringify(data)}`
+        );
+        setDeberiaResetearElTimer(true);
+      });
+    });
+
+    return () => {
+      transitionEvents.forEach((eventName) => {
+        socket.off(eventName);
+      });
+    };
+  }, []);
 
   // ---------------------------------------------------------------------------
   // Funciones de manejo de eventos
