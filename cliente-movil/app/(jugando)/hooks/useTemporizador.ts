@@ -7,10 +7,7 @@ import { CONSTANTES } from "../../../utils/jugando/constantes";
  * @param {number} tiempoInicial - Valor inicial del temporizador.
  * @param {boolean} activar - Bandera para activar el temporizador.
  */
-const useTemporizador = (
-  tiempoInicial = CONSTANTES.NUMERICAS.TIEMPO_INICIAL,
-  activar = false
-) => {
+const useTemporizador = (tiempoInicial = 30, activar = false) => {
   // Inicializamos el tiempo restante con el valor actual de tiempoInicial.
   const [tiempoRestante, setTiempoRestante] = useState(tiempoInicial);
   const [temporizadorActivo, setTemporizadorActivo] = useState(activar);

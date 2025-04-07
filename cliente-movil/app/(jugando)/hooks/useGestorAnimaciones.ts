@@ -23,10 +23,11 @@ const useGestorAnimaciones = ({
   duracionEspera,
   duracionFadeOut,
   numAnimaciones = 1,
-}: GestorAnimacionesParams) => {
+  start = false, // Para que no se haga trigger de la lógica de la animación hasta que se quiera
+}: GestorAnimacionesParams & { start?: boolean }) => {
   // Crear un array de objetos Animated.Value para cada animación
-  const [opacities] = useState(
-    Array(numAnimaciones).fill(new Animated.Value(0))
+  const [opacities] = useState(() =>
+    Array.from({ length: numAnimaciones }, () => new Animated.Value(0))
   );
 
   // Crear un array para gestionar la visibilidad de los componentes
@@ -35,6 +36,8 @@ const useGestorAnimaciones = ({
   );
 
   useEffect(() => {
+    if (!start) return; // Solo inicia la animación si 'start' es true
+
     // Función que maneja las animaciones en secuencia
     const animate = async () => {
       for (let i = 0; i < numAnimaciones; i++) {
@@ -65,6 +68,7 @@ const useGestorAnimaciones = ({
 
     animate();
   }, [
+    start, // Se añade 'start' como dependencia para controlar el trigger
     duracionFadeIn,
     duracionEspera,
     duracionFadeOut,

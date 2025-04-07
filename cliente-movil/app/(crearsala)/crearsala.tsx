@@ -95,8 +95,8 @@ const CrearSala = (): JSX.Element => {
         const avatarUsuario = await AsyncStorage.getItem("avatarUsuario");
         if (nombreGuardado && idGuardado) {
           // Ahora se guarda también el 'id'
-          const usuarioObj = { 
-            nombre: nombreGuardado, 
+          const usuarioObj = {
+            nombre: nombreGuardado,
             id: idGuardado,
             avatar: avatarUsuario ?? "avatar1",
           };

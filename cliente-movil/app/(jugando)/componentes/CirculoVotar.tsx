@@ -55,7 +55,6 @@ const CirculoVotar: React.FC<CirculoVotarProps> = ({
   JugadorSeleccionado,
   onSelectPlayer,
 }) => {
-
   const cantidadJugadores = jugadores.length;
 
   // Calcula el radio máximo del círculo basado en las dimensiones mínimas de la pantalla y un multiplicador.
@@ -92,7 +91,7 @@ const CirculoVotar: React.FC<CirculoVotarProps> = ({
         // Determina si el jugador actual está seleccionado para resaltar su imagen.
         const isSelected = JugadorSeleccionado === indice;
 
-        console.log(`Jugador: ${jugador.nombre}, avatar: ${jugador.avatar}`);
+        //console.log(`Jugador: ${jugador.nombre}, avatar: ${jugador.avatar}`);
 
         // Normalizamos la clave del avatar (por si viene con mayúsculas)
         const avatarKey = jugador.avatar?.toLowerCase() ?? "avatar1";
@@ -129,9 +128,63 @@ const CirculoVotar: React.FC<CirculoVotarProps> = ({
             </View>
 
             {/* Nombre del jugador */}
-            <Text style={estilos.nombreJugadorPartida}>
-              {jugador.nombre}
-            </Text>
+            <View style={{ position: "relative" }}>
+              {/* Copias en blanco para que el texto tenga un borde */}
+              <Text
+                style={[
+                  estilos.nombreJugadorPartida,
+                  {
+                    position: "absolute",
+                    top: 1,
+                    left: 1,
+                    color: "white",
+                  },
+                ]}
+              >
+                {jugador.nombre}
+              </Text>
+              <Text
+                style={[
+                  estilos.nombreJugadorPartida,
+                  {
+                    position: "absolute",
+                    top: 1,
+                    left: -1,
+                    color: "white",
+                  },
+                ]}
+              >
+                {jugador.nombre}
+              </Text>
+              <Text
+                style={[
+                  estilos.nombreJugadorPartida,
+                  {
+                    position: "absolute",
+                    top: -1,
+                    left: 1,
+                    color: "white",
+                  },
+                ]}
+              >
+                {jugador.nombre}
+              </Text>
+              <Text
+                style={[
+                  estilos.nombreJugadorPartida,
+                  {
+                    position: "absolute",
+                    top: -1,
+                    left: -1,
+                    color: "white",
+                  },
+                ]}
+              >
+                {jugador.nombre}
+              </Text>
+              {/* Texto principal */}
+              <Text style={estilos.nombreJugadorPartida}>{jugador.nombre}</Text>
+            </View>
 
             {/* Contenedor que muestra barras de votos: una barra por cada voto recibido */}
             <View style={estilos.contenedorVotos}>

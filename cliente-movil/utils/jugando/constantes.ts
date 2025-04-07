@@ -112,6 +112,8 @@ export const CONSTANTES = {
     ALDEANO: require("@/assets/images/aldeano-icon.jpeg"),
     BRUJA: require("@/assets/images/bruja-icon.jpeg"),
     CAZADOR: require("@/assets/images/cazador-icon.jpeg"),
+    VIDENTE: require("@/assets/images/vidente-icon.jpeg"),
+    IMAGEN_MISSING: require("@/assets/images/icon.png"),
   },
 
   /**
