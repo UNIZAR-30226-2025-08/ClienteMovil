@@ -278,25 +278,65 @@ const PantallaJugando: React.FC = () => {
   // Logs custom
   // ---------------------------------------------------------------------------
 
-  const coloresConsola = [
-    "\x1b[31m", // Rojo (Jornada 1)
-    "\x1b[32m", // Verde (Jornada 2)
-    "\x1b[33m", // Amarillo (Jornada 3)
-    "\x1b[34m", // Azul (Jornada 4)
-    "\x1b[35m", // Magenta (Jornada 5r)
-    "\x1b[36m", // Cian (Jornada 6)
-    "\x1b[37m", // Blanco (Jornada 7)
+  const coloresDisponibles = [
+    "\x1b[31m", // Rojo
+    "\x1b[32m", // Verde
+    "\x1b[33m", // Amarillo
+    "\x1b[34m", // Azul
+    "\x1b[35m", // Magenta
+    "\x1b[36m", // Cyan
   ];
 
+  const colorJugadorDesconocido = "\x1b[37m"; // Blanco para desconocidos
+
+  /**
+   * Genera un hash numérico determinista basado en un string (generalmente el ID del jugador).
+   * Esto permite asignar colores consistentes y únicos a cada jugador.
+   *
+   * @param {string} str - Cadena que será transformada en un número hash.
+   * @returns {number} Número hash generado a partir de la cadena.
+   */
+  function hashStringToInt(str: string): number {
+    let hash = 5381;
+    for (let i = 0; i < str.length; i++) {
+      hash = (hash * 33) ^ str.charCodeAt(i);
+    }
+    return Math.abs(hash);
+  }
+
+  /**
+   * Imprime logs personalizados en consola, con colores únicos por jugador y formato claro.
+   * Asigna el color de cada jugador en base a un hash generado a partir de su ID, garantizando
+   * consistencia durante la partida.
+   *
+   * @param {number} jornadaActual - Número actual de la jornada del juego.
+   * @param {"Día" | "Noche"} etapaActual - Indica si es día o noche en el juego.
+   * @param {string} message - Mensaje específico a mostrar en el log.
+   * @param {object} [jugador] - Información del jugador (ID y nombre).
+   * @param {string} jugador.id - Identificador único del jugador.
+   * @param {string} jugador.nombre - Nombre del jugador.
+   */
   function logCustom(
     jornadaActual: number,
     etapaActual: "Día" | "Noche",
-    message: string
+    message: string,
+    jugador?: { id: string; nombre: string }
   ) {
+    const obtenerColorJugador = (id: string | undefined): string => {
+      if (!id) return colorJugadorDesconocido;
+      const colorIndex = hashStringToInt(id) % coloresDisponibles.length;
+      return coloresDisponibles[colorIndex];
+    };
+
+    const color = obtenerColorJugador(jugador?.id);
+    const infoJugador = jugador
+      ? `Jugador: ${jugador.nombre} (ID: ${jugador.id})`
+      : "->";
+
+    const etapaParaMostrar = jornadaActual === 0 ? "Día" : etapaActual;
+
     console.log(
-      `${
-        coloresConsola[jornadaActual % coloresConsola.length]
-      }[Jornada ${jornadaActual} - ${etapaActual}] ${message}\x1b[0m`
+      `${color}[Jornada ${jornadaActual} - ${etapaParaMostrar}] ${infoJugador} - ${message}\x1b[0m`
     );
   }
 
@@ -416,12 +456,18 @@ const PantallaJugando: React.FC = () => {
   useEffect(() => {
     if (tiempoRestante === 0) {
       setTimerTerminado(true);
-      logCustom(jornadaActual, etapaActual, "El timer ha llegado a 0");
+      logCustom(
+        jornadaActual,
+        etapaActual,
+        "El timer ha llegado a 0",
+        jugadoresEstado[indiceUsuario]
+      );
       if (jornadaActual === 0) {
         logCustom(
           jornadaActual,
           etapaActual,
-          "Iniciando votación de alguacil en la primera jornada"
+          "Iniciando votación de alguacil en la primera jornada",
+          jugadoresEstado[indiceUsuario]
         );
 
         MODO_NOCHE_GLOBAL = true;
@@ -454,7 +500,8 @@ const PantallaJugando: React.FC = () => {
           logCustom(
             jornadaActual,
             etapaActual,
-            "El jugador no ha votado en esta etapa"
+            "El jugador no ha votado en esta etapa",
+            jugadoresEstado[indiceUsuario]
           );
         }
 
@@ -464,13 +511,15 @@ const PantallaJugando: React.FC = () => {
           logCustom(
             nuevaJornada,
             nuevaEtapa,
-            "Estado de vida de los jugadores:"
+            "Estado de vida de los jugadores:",
+            jugadoresEstado[indiceUsuario]
           );
           jugadoresVivos.forEach((estado, index) => {
             logCustom(
               nuevaJornada,
               nuevaEtapa,
-              `- Jugador ${index + 1}: ${estado ? "Vivo" : "Muerto"}`
+              `- Jugador ${index + 1}: ${estado ? "Vivo" : "Muerto"}`,
+              jugadoresEstado[indiceUsuario]
             );
           });
         }
@@ -617,7 +666,12 @@ const PantallaJugando: React.FC = () => {
    * @returns {void}
    */
   const handleAbrirChat = (): void => {
-    logCustom(jornadaActual, etapaActual, `Chat abierto`);
+    logCustom(
+      jornadaActual,
+      etapaActual,
+      `Chat abierto`,
+      jugadoresEstado[indiceUsuario]
+    );
     setMostrarChat(true);
     abrirChat();
   };
@@ -628,7 +682,12 @@ const PantallaJugando: React.FC = () => {
    * @returns {void}
    */
   const handleCerrarChat = (): void => {
-    logCustom(jornadaActual, etapaActual, `Chat cerrado`);
+    logCustom(
+      jornadaActual,
+      etapaActual,
+      `Chat cerrado`,
+      jugadoresEstado[indiceUsuario]
+    );
     cerrarChat();
     setMostrarChat(false);
   };
@@ -639,7 +698,12 @@ const PantallaJugando: React.FC = () => {
    * @returns {void}
    */
   const handleAbrirHabilidad = (): void => {
-    logCustom(jornadaActual, etapaActual, `Ventana de habilidad abierta`);
+    logCustom(
+      jornadaActual,
+      etapaActual,
+      `Ventana de habilidad abierta`,
+      jugadoresEstado[indiceUsuario]
+    );
     setMostrarHabilidad(true);
     abrirHabilidad();
   };
@@ -650,7 +714,12 @@ const PantallaJugando: React.FC = () => {
    * @returns {void}
    */
   const handleCerrarHabilidad = (): void => {
-    logCustom(jornadaActual, etapaActual, `Ventana de habilidad cerrada`);
+    logCustom(
+      jornadaActual,
+      etapaActual,
+      `Ventana de habilidad cerrada`,
+      jugadoresEstado[indiceUsuario]
+    );
     cerrarHabilidad();
     setMostrarHabilidad(false);
   };
@@ -667,7 +736,8 @@ const PantallaJugando: React.FC = () => {
       logCustom(
         jornadaActual,
         etapaActual,
-        `Intento de selección de usuario fallido: No hay nada que votar`
+        `Intento de selección de usuario fallido: No hay nada que votar`,
+        jugadoresEstado[indiceUsuario]
       );
       mostrarError("No hay nada que votar aún :)");
       return;
@@ -676,7 +746,8 @@ const PantallaJugando: React.FC = () => {
       logCustom(
         jornadaActual,
         etapaActual,
-        `Intento de selección de usuario fallido: Es de noche y no es lobo`
+        `Intento de selección de usuario fallido: Es de noche y no es lobo`,
+        jugadoresEstado[indiceUsuario]
       );
       mostrarError(
         "Solo los lobos pueden seleccionar jugadores durante la noche"
@@ -687,7 +758,8 @@ const PantallaJugando: React.FC = () => {
       logCustom(
         jornadaActual,
         etapaActual,
-        `Intento de selección de usuario fallido: Turno ya pasado`
+        `Intento de selección de usuario fallido: Turno ya pasado`,
+        jugadoresEstado[indiceUsuario]
       );
       mostrarError("Has pasado turno");
       return;
@@ -696,7 +768,8 @@ const PantallaJugando: React.FC = () => {
       logCustom(
         jornadaActual,
         etapaActual,
-        `Intento de selección de usuario fallido: Voto ya realizado`
+        `Intento de selección de usuario fallido: Voto ya realizado`,
+        jugadoresEstado[indiceUsuario]
       );
       mostrarError("Solo puedes votar a un jugador por turno");
       return;
@@ -705,7 +778,8 @@ const PantallaJugando: React.FC = () => {
       logCustom(
         jornadaActual,
         etapaActual,
-        `Intento de selección fallido: Voto propio`
+        `Intento de selección fallido: Voto propio`,
+        jugadoresEstado[indiceUsuario]
       );
       mostrarError("¡No puedes votarte a ti mismo!");
       return;
@@ -713,7 +787,8 @@ const PantallaJugando: React.FC = () => {
     logCustom(
       jornadaActual,
       etapaActual,
-      `Jugador ${index + 1} seleccionado para votación`
+      `Jugador ${index + 1} seleccionado para votación`,
+      jugadoresEstado[indiceUsuario]
     );
     setJugadorSeleccionado(index);
   };
@@ -729,7 +804,8 @@ const PantallaJugando: React.FC = () => {
       logCustom(
         jornadaActual,
         etapaActual,
-        `Intento de voto fallido: Turno pasado`
+        `Intento de voto fallido: Turno pasado`,
+        jugadoresEstado[indiceUsuario]
       );
       return;
     }
@@ -738,7 +814,8 @@ const PantallaJugando: React.FC = () => {
       logCustom(
         jornadaActual,
         etapaActual,
-        `Intento de voto fallido: Voto ya realizado`
+        `Intento de voto fallido: Voto ya realizado`,
+        jugadoresEstado[indiceUsuario]
       );
       return;
     }
@@ -747,7 +824,8 @@ const PantallaJugando: React.FC = () => {
       logCustom(
         jornadaActual,
         etapaActual,
-        `Intento de voto fallido: Ningún jugador seleccionado`
+        `Intento de voto fallido: Ningún jugador seleccionado`,
+        jugadoresEstado[indiceUsuario]
       );
       return;
     }
@@ -761,7 +839,8 @@ const PantallaJugando: React.FC = () => {
       logCustom(
         jornadaActual,
         etapaActual,
-        `Voto ALGUACIL registrado para el jugador ${JugadorSeleccionado + 1}`
+        `Voto ALGUACIL registrado para el jugador ${JugadorSeleccionado + 1}`,
+        jugadoresEstado[indiceUsuario]
       );
     } else {
       // Votación diurna o nocturna
@@ -791,7 +870,8 @@ const PantallaJugando: React.FC = () => {
       logCustom(
         jornadaActual,
         etapaActual,
-        `Intento de pasar turno fallido: Turno ya pasado`
+        `Intento de pasar turno fallido: Turno ya pasado`,
+        jugadoresEstado[indiceUsuario]
       );
       return;
     }
@@ -800,11 +880,17 @@ const PantallaJugando: React.FC = () => {
       logCustom(
         jornadaActual,
         etapaActual,
-        `Intento de pasar turno fallido: Turno pasado`
+        `Intento de pasar turno fallido: Turno pasado`,
+        jugadoresEstado[indiceUsuario]
       );
       return;
     }
-    logCustom(jornadaActual, etapaActual, `Turno pasado`);
+    logCustom(
+      jornadaActual,
+      etapaActual,
+      `Turno pasado`,
+      jugadoresEstado[indiceUsuario]
+    );
     setPasoTurno(true);
     setVotoRealizado(true);
     setJugadorSeleccionado(null);
