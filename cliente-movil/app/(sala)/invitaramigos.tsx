@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -9,123 +9,166 @@ import {
   ImageBackground,
   Alert,
 } from "react-native";
-import { useRouter } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
+import Constants from "expo-constants";
+import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useFocusEffect } from "@react-navigation/native";
+import io from "socket.io-client";
 
 /**
- * Imagen de fondo de la pantalla.
+ * Mapa de avatares que relaciona claves con sus respectivas imágenes.
  */
+const avatarMap: Record<string, any> = {
+  avatar1: require("@/assets/images/imagenPerfil.webp"),
+  avatar2: require("@/assets/images/imagenPerfil2.webp"),
+  avatar3: require("@/assets/images/imagenPerfil3.webp"),
+  avatar4: require("@/assets/images/imagenPerfil4.webp"),
+  avatar5: require("@/assets/images/imagenPerfil5.webp"),
+  avatar6: require("@/assets/images/imagenPerfil6.webp"),
+  avatar7: require("@/assets/images/imagenPerfil7.webp"),
+  avatar8: require("@/assets/images/imagenPerfil8.webp"),
+};
+
+/**
+ * Tipo que representa a un jugador.
+ */
+type Jugador = {
+  idUsuario: number;
+  nombre: string;
+  avatar?: string;
+};
+
 const imagenFondoRoles = require("@/assets/images/fondo-roles.jpg");
-
-/**
- * Imagen del botón para volver atrás.
- */
 const imagenAtras = require("@/assets/images/botonAtras.png");
+const imagenPerfilDefecto = require("@/assets/images/imagenPerfil.webp");
 
-/**
- * Lista de amigos simulada.
- * En una aplicación real, estos datos deberían ser obtenidos desde un backend.
- */
-const amigos = [
-  {
-    id: 1,
-    nombre: "Adrián Artigas",
-    imagen: require("@/assets/images/imagenPerfil.webp"),
-  },
-  {
-    id: 2,
-    nombre: "Adrián Becerril",
-    imagen: require("@/assets/images/imagenPerfil4.webp"),
-  },
-  {
-    id: 3,
-    nombre: "Nico Fabra",
-    imagen: require("@/assets/images/imagenPerfil.webp"),
-  },
-  {
-    id: 4,
-    nombre: "Alberto Solaz",
-    imagen: require("@/assets/images/imagenPerfil5.webp"),
-  },
-  {
-    id: 5,
-    nombre: "Enrique Baldovín",
-    imagen: require("@/assets/images/imagenPerfil3.webp"),
-  },
-  {
-    id: 6,
-    nombre: "Marcos Ibáñez",
-    imagen: require("@/assets/images/imagenPerfil8.webp"),
-  },
-  {
-    id: 7,
-    nombre: "Óscar Gil",
-    imagen: require("@/assets/images/imagenPerfil2.webp"),
-  },
-  {
-    id: 8,
-    nombre: "Juan González",
-    imagen: require("@/assets/images/imagenPerfil7.webp"),
-  },
-  {
-    id: 9,
-    nombre: "Blanca Gayarre",
-    imagen: require("@/assets/images/imagenPerfil6.webp"),
-  },
-];
-
-/**
- * Pantalla que muestra la lista de amigos del usuario.
- * Permite invitar amigos a una partida o interactuar con ellos.
- *
- * @returns {JSX.Element} Pantalla de lista de amigos.
- */
 export default function AmigosScreen(): JSX.Element {
   const router = useRouter();
+  // Ahora solo recibimos el idSala
+  const { idSala } = useLocalSearchParams<{ idSala: string }>();
+  console.log("idSala recibido:", idSala);
 
-  /**
-   * Muestra un mensaje de confirmación cuando un amigo es invitado.
-   *
-   * @param amigoNombre Nombre del amigo al que se ha invitado.
-   */
-  const handleInvite = (amigoNombre: string) => {
-    Alert.alert("Invitación", `Has invitado a ${amigoNombre}`);
+  const [loading, setLoading] = useState(true);
+  const BACKEND_URL = Constants.expoConfig?.extra?.backendUrl;
+
+  // Conexión al backend vía Socket.IO
+  const socket = io(BACKEND_URL);
+
+  // Estado para almacenar la lista de IDs de amigos y sus detalles
+  const [amigos, setAmigos] = useState<number[]>([]);
+  const [amigosDetalles, setAmigosDetalles] = useState<Jugador[]>([]);
+  // Datos del usuario logueado
+  const [usuario, setUsuario] = useState<{
+    idUsuario: number;
+    nombre: string;
+  } | null>(null);
+
+  // Cargar datos del usuario al ganar foco la pantalla
+  useFocusEffect(
+    useCallback(() => {
+      const cargarUsuario = async () => {
+        try {
+          const idUsuario = await AsyncStorage.getItem("idUsuario");
+          const nombre = await AsyncStorage.getItem("nombreUsuario");
+          setUsuario({
+            idUsuario: idUsuario ? parseInt(idUsuario) : 0,
+            nombre: nombre ?? "Usuario",
+          });
+        } catch (error) {
+          console.error("Error al cargar usuario:", error);
+        } finally {
+          setLoading(false);
+        }
+      };
+      cargarUsuario();
+    }, [])
+  );
+
+  // Obtener la lista de amigos desde el backend
+  useEffect(() => {
+    if (usuario && usuario.idUsuario) {
+      const fetchListadoAmigos = async () => {
+        try {
+          const response = await axios.get(
+            `${BACKEND_URL}/api/amistad/listar/${usuario.idUsuario}`
+          );
+          setAmigos(response.data.amigos);
+          cargarDetallesAmigos(response.data.amigos);
+        } catch (error) {
+          console.error("Error al obtener los amigos:", error);
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchListadoAmigos();
+    }
+  }, [usuario]);
+
+  // Función para obtener detalles de cada amigo usando sus IDs
+  const cargarDetallesAmigos = async (idsAmigos: number[]) => {
+    try {
+      const detalles = await Promise.all(
+        idsAmigos.map(async (idAmigo) => {
+          const response = await axios.post(
+            `${BACKEND_URL}/api/usuario/obtener_por_id`,
+            { idUsuario: idAmigo }
+          );
+          return response.data.usuario;
+        })
+      );
+      setAmigosDetalles(detalles);
+    } catch (error) {
+      console.error("Error al obtener los detalles de los amigos:", error);
+    }
+  };
+
+  // Función para manejar la acción de invitar a un amigo usando socket.emit
+  const handleInvite = (amigoNombre: string, idAmigo: number) => {
+    if (!usuario) return;
+    if (!idSala) {
+      Alert.alert("Error", "No se recibió un id de sala válido.");
+      return;
+    }
+    socket.emit("invitarASala", {
+      idAmigo,
+      idSala,
+      idInvitador: usuario.idUsuario,
+    });
+    Alert.alert("Invitación", `Invitación enviada a ${amigoNombre}`);
   };
 
   return (
     <View style={styles.container}>
-      {/* Fondo con overlay */}
       <ImageBackground
         source={imagenFondoRoles}
         resizeMode="cover"
         style={styles.image}
       >
         <View style={styles.overlay} />
-
-        {/* Título */}
         <Text style={styles.titulo}>Lista de Amigos</Text>
-
-        {/* Lista de amigos desplazable */}
         <ScrollView
           contentContainerStyle={styles.scrollContainer}
           showsVerticalScrollIndicator={false}
         >
-          {amigos.map((amigo) => (
-            <View key={amigo.id} style={styles.amigoContainer}>
-              <Image source={amigo.imagen} style={styles.imagenPerfil} />
+          {amigosDetalles.map((amigo) => (
+            <View key={amigo.idUsuario} style={styles.amigoContainer}>
+              <Image
+                source={
+                  avatarMap[amigo.avatar || "avatar1"] || imagenPerfilDefecto
+                }
+                style={styles.imagenPerfil}
+              />
               <Text style={styles.nombre}>{amigo.nombre}</Text>
-
-              {/* Botón "Invitar" */}
               <TouchableOpacity
                 style={styles.inviteButton}
-                onPress={() => handleInvite(amigo.nombre)}
+                onPress={() => handleInvite(amigo.nombre, amigo.idUsuario)}
               >
                 <Text style={styles.inviteButtonText}>Invitar</Text>
               </TouchableOpacity>
             </View>
           ))}
         </ScrollView>
-
-        {/* Botón para volver atrás */}
         <TouchableOpacity
           style={styles.containerAtras}
           onPress={() => router.back()}
@@ -137,12 +180,8 @@ export default function AmigosScreen(): JSX.Element {
   );
 }
 
-/**
- * Estilos de la pantalla.
- */
 const styles = StyleSheet.create({
   container: { flex: 1 },
-
   image: {
     width: "100%",
     height: "100%",
@@ -150,12 +189,10 @@ const styles = StyleSheet.create({
     resizeMode: "cover",
     justifyContent: "center",
   },
-
   overlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0, 0, 0, 0.4)", // Fondo oscuro semitransparente
+    backgroundColor: "rgba(0, 0, 0, 0.4)",
   },
-
   titulo: {
     fontSize: 28,
     fontWeight: "bold",
@@ -163,36 +200,30 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginTop: 60,
   },
-
   scrollContainer: {
     marginTop: 20,
     paddingHorizontal: 20,
-    paddingBottom: 80, // Espacio para evitar que el último elemento quede oculto
+    paddingBottom: 80,
   },
-
   amigoContainer: {
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "rgba(255, 255, 255, 0.8)",
     padding: 15,
     borderRadius: 15,
-    marginBottom: 15, // Espacio entre amigos
+    marginBottom: 15,
   },
-
   imagenPerfil: {
     width: 50,
     height: 50,
     borderRadius: 25,
-    marginRight: 15,
+    marginRight: 10,
   },
-
   nombre: {
     fontSize: 18,
     fontWeight: "bold",
     color: "black",
   },
-
-  // Botón de "Invitar" (se sitúa a la derecha automáticamente con marginLeft: 'auto')
   inviteButton: {
     marginLeft: "auto",
     backgroundColor: "#007BFF",
@@ -200,19 +231,16 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderRadius: 6,
   },
-
   inviteButtonText: {
     color: "#fff",
     fontWeight: "bold",
     fontSize: 14,
   },
-
   containerAtras: {
     position: "absolute",
     bottom: 20,
     left: "46%",
   },
-
   imageAtras: {
     height: 40,
     width: 40,

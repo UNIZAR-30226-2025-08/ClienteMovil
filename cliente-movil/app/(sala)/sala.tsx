@@ -50,6 +50,8 @@ export default function SalaPreviaScreen(): JSX.Element {
   }>();
   const salaInfo = salaData ? JSON.parse(salaData) : null;
 
+  console.log("Información de la sala:", salaInfo);
+
   const [players, setPlayers] = useState<Player[]>([]);
   // Nuevo estado para el nombre de la sala
   const [roomName, setRoomName] = useState(
@@ -394,7 +396,16 @@ export default function SalaPreviaScreen(): JSX.Element {
    * Función para manejar la invitación de amigos a la sala.
    */
   const handleInvitarAmigos = () => {
-    router.push("/(sala)/invitaramigos");
+    if (!salaInfo?.codigoInvitacion) {
+      Alert.alert("Error", "No se pudo obtener el código de invitación.");
+      return;
+    }
+    router.push({
+      pathname: "/(sala)/invitaramigos",
+      params: {
+        idSala: idSala, 
+      },
+    });
   };
 
   /**
