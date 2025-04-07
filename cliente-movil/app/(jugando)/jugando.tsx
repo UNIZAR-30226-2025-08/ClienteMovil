@@ -164,7 +164,9 @@ const PantallaJugando: React.FC = () => {
    * Índice del usuario local.
    * @type {number}
    */
-  const [indiceUsuario] = useState<number>(0);
+  const indiceUsuario = jugadoresEstado.findIndex(
+    (jugador) => jugador.id === usuarioID
+  );
 
   /**
    * Rol del usuario local.
@@ -608,6 +610,15 @@ const PantallaJugando: React.FC = () => {
    */
   const administrarSeleccionJugadorVotacion = (index: number): void => {
     // Solo los lobos pueden seleccionar jugadores durante la noche
+    if (!mostrarBotonVotar) {
+      logCustom(
+        jornadaActual,
+        etapaActual,
+        `Intento de selección de usuario fallido: No hay nada que votar`
+      );
+      mostrarError("No hay nada que votar aún :)");
+      return;
+    }
     if (rolUsuario !== "Hombre lobo" && MODO_NOCHE_GLOBAL) {
       logCustom(
         jornadaActual,
@@ -692,7 +703,7 @@ const PantallaJugando: React.FC = () => {
       socket.emit("votarAlguacil", {
         idPartida: idSala,
         idJugador: usuarioID,
-        JugadorSeleccionado,
+        idObjetivo: JugadorSeleccionado,
       });
       logCustom(
         jornadaActual,
@@ -851,21 +862,19 @@ const PantallaJugando: React.FC = () => {
               - La función mostrarBotonesAccion determina la visibilidad según el modo de juego
                 o el rol del usuario (por ejemplo, permitiendo a los lobos interactuar durante la noche).
             */}
-            {mostrarBotonVotar && (
-              <ControlesAccion
-                habilidadInfo={habilidadInfo}
-                abrirHabilidad={handleAbrirHabilidad}
-                abrirChat={handleAbrirChat}
-                votarAJugador={votarAJugador}
-                manejarPasarTurno={manejarPasarTurno}
-                mostrarBotonesAccion={() =>
-                  !MODO_NOCHE_GLOBAL || rolUsuario === "Hombre lobo"
-                }
-                votoRealizado={votoRealizado}
-                turnoPasado={pasoTurno}
-              />
-            )}
-
+            <ControlesAccion
+              habilidadInfo={habilidadInfo}
+              abrirHabilidad={handleAbrirHabilidad}
+              abrirChat={handleAbrirChat}
+              votarAJugador={votarAJugador}
+              manejarPasarTurno={manejarPasarTurno}
+              mostrarBotonesAccion={() =>
+                !MODO_NOCHE_GLOBAL || rolUsuario === "Hombre lobo"
+              }
+              votoRealizado={votoRealizado}
+              turnoPasado={pasoTurno}
+              mostrarVotacion={mostrarBotonVotar}
+            />
             {/* Componente BarraSuperior: 
                 Suele mostrar información relevante en la parte superior de la pantalla, 
                 como el estado del juego o la identificación del rol. */}

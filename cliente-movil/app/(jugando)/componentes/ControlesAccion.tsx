@@ -16,6 +16,7 @@ interface ControlesAccionProps {
   votoRealizado: boolean;
   manejarPasarTurno: () => void; // Para manejar la acción de pasar turno
   turnoPasado: boolean; // Para indicar si el turno se ha pasado
+  mostrarVotacion: boolean; // Nuevo prop para controlar la visibilidad de los botones de votar y pasar turno
 }
 
 /**
@@ -31,6 +32,7 @@ const ControlesAccion: React.FC<ControlesAccionProps> = ({
   votoRealizado,
   manejarPasarTurno,
   turnoPasado,
+  mostrarVotacion,
 }) => {
   return (
     <>
@@ -50,8 +52,8 @@ const ControlesAccion: React.FC<ControlesAccionProps> = ({
         </TouchableOpacity>
       </View>
 
-      {/* Botones adicionales (Pasar turno y Votar) que sólo se muestran si mostrarBotonesAccion() es true */}
-      {mostrarBotonesAccion() && (
+      {/* Botones adicionales (Pasar turno y Votar) que sólo se muestran si mostrarBotonesAccion() es true y mostrarVotacion es true */}
+      {mostrarBotonesAccion() && mostrarVotacion && (
         <View style={estilos.contenedorBotonesDerecha}>
           {/*
             Si turnoPasado es true, se aplica un borde rojo al botón de pasar turno.
