@@ -106,6 +106,11 @@ const PantallaJugando: React.FC = () => {
     }[]
   >([]);
 
+  const [mensajeAlguacil, setMensajeAlguacil] = useState<string>("");
+
+  // Fase en la que está el backend
+  const [backendState, setBackendState] = useState<string>("esperaInicial");
+
   // ---------------------------------------------------------------------------
   // Estados de la Interfaz de Usuario (UI)
   // ---------------------------------------------------------------------------
@@ -464,30 +469,6 @@ const PantallaJugando: React.FC = () => {
         jugadoresEstado[indiceUsuario]
       );
       if (jornadaActual === 0) {
-        logCustom(
-          jornadaActual,
-          etapaActual,
-          "Iniciando votación de alguacil en la primera jornada",
-          jugadoresEstado[indiceUsuario]
-        );
-
-        MODO_NOCHE_GLOBAL = true;
-        setModoDiaNoche(MODO_NOCHE_GLOBAL);
-        setMostrarBotones(false);
-        setMostrarAnimacionVotacionAlguacil(true);
-        setTimeout(() => {
-          setMostrarAnimacionVotacionAlguacil(false);
-          setMostrarBotonVotar(true);
-          setMostrarBotones(true);
-          MODO_NOCHE_GLOBAL = false;
-          setModoDiaNoche(MODO_NOCHE_GLOBAL);
-          setJornadaActual(1);
-          setVotos(Array(CONSTANTES.NUMERICAS.CANTIDAD_IMAGENES).fill(0));
-          setVotoRealizado(false);
-          setPasoTurno(false);
-          setJugadorSeleccionado(null);
-          // reiniciarTemporizador();
-        }, 4000);
       } else {
         const nuevoModo: boolean = !MODO_NOCHE_GLOBAL;
         MODO_NOCHE_GLOBAL = nuevoModo;
@@ -628,13 +609,14 @@ const PantallaJugando: React.FC = () => {
         setMostrarBotones(true);
         MODO_NOCHE_GLOBAL = false;
         setModoDiaNoche(MODO_NOCHE_GLOBAL);
+        setDeberiaResetearElTimer(true);
         setJornadaActual(1);
         setVotos(Array(CONSTANTES.NUMERICAS.CANTIDAD_IMAGENES).fill(0));
         setVotoRealizado(false);
         setPasoTurno(false);
         setJugadorSeleccionado(null);
-        reiniciarTemporizador();
       }, 4000);
+      setBackendState("iniciarVotacionAlguacil");
     };
 
     /**
@@ -647,6 +629,7 @@ const PantallaJugando: React.FC = () => {
         `Evento recibido: esperaInicial - ${JSON.stringify(datos)}`,
         jugadoresEstado[indiceUsuario]
       );
+      setBackendState("diaComienza");
       // Código pendiente para espera inicial
     };
 
@@ -660,6 +643,7 @@ const PantallaJugando: React.FC = () => {
         `Evento recibido: nocheComienza - ${JSON.stringify(datos)}`,
         jugadoresEstado[indiceUsuario]
       );
+      setBackendState("nocheComienza");
       // Código pendiente para cuando comienza la noche
     };
 
@@ -673,6 +657,7 @@ const PantallaJugando: React.FC = () => {
         `Evento recibido: habilidadVidente - ${JSON.stringify(datos)}`,
         jugadoresEstado[indiceUsuario]
       );
+      setBackendState("habilidadVidente");
       // Código pendiente para la habilidad del vidente
     };
 
@@ -686,6 +671,7 @@ const PantallaJugando: React.FC = () => {
         `Evento recibido: turnoHombresLobos - ${JSON.stringify(datos)}`,
         jugadoresEstado[indiceUsuario]
       );
+      setBackendState("turnoHombresLobos");
       // Código pendiente para el turno de los lobos
     };
 
@@ -699,6 +685,7 @@ const PantallaJugando: React.FC = () => {
         `Evento recibido: habilidadBruja - ${JSON.stringify(datos)}`,
         jugadoresEstado[indiceUsuario]
       );
+      setBackendState("habilidadBruja");
       // Código pendiente para la habilidad de la bruja
     };
 
@@ -712,6 +699,7 @@ const PantallaJugando: React.FC = () => {
         `Evento recibido: diaComienza - ${JSON.stringify(datos)}`,
         jugadoresEstado[indiceUsuario]
       );
+      setBackendState("diaComienza");
       // Código pendiente para cuando comienza el día
     };
 
@@ -749,6 +737,66 @@ const PantallaJugando: React.FC = () => {
     setPasoTurno,
     setJugadorSeleccionado,
   ]);
+
+  useEffect(() => {
+    // Evento: Se registra el voto de alguacil exitosamente
+    socket.on("votoAlguacilRegistrado", (data) => {
+      logCustom(
+        jornadaActual,
+        etapaActual,
+        `Evento votoAlguacilRegistrado recibido: ${JSON.stringify(data)}`
+      );
+      if (data.estado && data.estado.jugadores) {
+        setJugadoresEstado(data.estado.jugadores);
+      }
+    });
+
+    // Evento: Primer empate en la votación del alguacil
+    socket.on("empateVotacionAlguacil", (data) => {
+      logCustom(
+        jornadaActual,
+        etapaActual,
+        `Evento empateVotacionAlguacil recibido: ${JSON.stringify(data)}`
+      );
+      setMensajeAlguacil(data.mensaje);
+    });
+
+    // Evento: Segundo empate, no se elige alguacil
+    socket.on("segundoEmpateVotacionAlguacil", (data) => {
+      logCustom(
+        jornadaActual,
+        etapaActual,
+        `Evento segundoEmpateVotacionAlguacil recibido: ${JSON.stringify(data)}`
+      );
+      setMensajeAlguacil(data.mensaje);
+    });
+
+    // Evento: Se elige al alguacil
+    socket.on("alguacilElegido", (data) => {
+      logCustom(
+        jornadaActual,
+        etapaActual,
+        `Evento alguacilElegido recibido: ${JSON.stringify(data)}`
+      );
+      setMensajeAlguacil(data.mensaje);
+      if (data.alguacil) {
+        setJugadoresEstado((prevJugadores) =>
+          prevJugadores.map((jugador) =>
+            jugador.id === data.alguacil
+              ? { ...jugador, esAlguacil: true }
+              : jugador
+          )
+        );
+      }
+    });
+
+    return () => {
+      socket.off("votoAlguacilRegistrado");
+      socket.off("empateVotacionAlguacil");
+      socket.off("segundoEmpateVotacionAlguacil");
+      socket.off("alguacilElegido");
+    };
+  }, [jugadoresEstado, indiceUsuario, jornadaActual, etapaActual]);
 
   // ---------------------------------------------------------------------------
   // Funciones de manejo de eventos
@@ -945,28 +993,34 @@ const PantallaJugando: React.FC = () => {
       );
       return;
     }
-    if (jornadaActual === 0) {
-      // Votación del alguacil
+    if (backendState === "iniciarVotacionAlguacil") {
+      const jugadorObjetivo = jugadoresEstado[JugadorSeleccionado!];
+      if (!jugadorObjetivo) {
+        mostrarError("El jugador seleccionado no existe");
+        return;
+      }
+
       socket.emit("votarAlguacil", {
         idPartida: idSala,
         idJugador: usuarioID,
-        idObjetivo: JugadorSeleccionado,
+        idObjetivo: jugadorObjetivo.id,
       });
       logCustom(
         jornadaActual,
         etapaActual,
-        `Voto ALGUACIL registrado para el jugador ${JugadorSeleccionado + 1}`,
+        `Voto ALGUACIL enviado para el jugador ${jugadorObjetivo.id}`,
         jugadoresEstado[indiceUsuario]
       );
     } else {
-      // Votación diurna o nocturna
+      // (Other vote types would go here)
       setVotos((votosAnteriores: number[]): number[] => {
         const nuevosVotos: number[] = [...votosAnteriores];
         nuevosVotos[JugadorSeleccionado] += 1;
         logCustom(
           jornadaActual,
           etapaActual,
-          `Voto DIURNO registrado para el jugador ${JugadorSeleccionado + 1}`
+          `Voto DIURNO registrado para el jugador ${JugadorSeleccionado + 1}`,
+          jugadoresEstado[indiceUsuario]
         );
         return nuevosVotos;
       });
