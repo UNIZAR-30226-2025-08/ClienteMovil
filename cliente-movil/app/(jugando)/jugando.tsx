@@ -253,7 +253,7 @@ const PantallaJugando: React.FC = () => {
    * @returns {tiempoRestante, reiniciarTemporizador, setTemporizadorActivo}
    */
   const { tiempoRestante, reiniciarTemporizador, setTemporizadorActivo } =
-    useTemporizador(30, false); // Tiempo para el tiempo tranquilo antes de la votación del alguacil
+    useTemporizador(15, false); // Tiempo para el tiempo tranquilo antes de la votación del alguacil
 
   /**
    * Hook que administra la animación del chat.
@@ -290,7 +290,8 @@ const PantallaJugando: React.FC = () => {
   const colorJugadorDesconocido = "\x1b[37m"; // Blanco para desconocidos
 
   /**
-   * Genera un hash numérico determinista basado en un string (generalmente el ID del jugador).
+   * Genera un hash numérico determinista basado en un string
+   * (hecho a medida para que el string sea el ID del jugador).
    * Esto permite asignar colores consistentes y únicos a cada jugador.
    *
    * @param {string} str - Cadena que será transformada en un número hash.
@@ -602,37 +603,152 @@ const PantallaJugando: React.FC = () => {
   });
 
   /**
-   * Reinicia el timer cuando lo indica el backend
-   * NO FUNCIONAL DE MOMENTO PORQUE EL BACKEND IMPLOSIONA (O LO IMPLOSIONA EL FRONTEND :V) !!!!!
+   * Administra las fases de la partida según dicta el backend
    */
   useEffect(() => {
-    const transitionEvents = [
-      "esperaInicial",
-      "iniciarVotacionAlguacil",
-      "nocheComienza",
-      "habilidadVidente",
-      "turnoHombresLobos",
-      "habilidadBruja",
-      "diaComienza",
-    ];
+    /**
+     * Evento que inicia la votación del alguacil en la primera jornada.
+     */
+    const manejarIniciarVotacionAlguacil = (datos: any) => {
+      logCustom(
+        jornadaActual,
+        etapaActual,
+        `Evento recibido: iniciarVotacionAlguacil - ${JSON.stringify(datos)}`,
+        jugadoresEstado[indiceUsuario]
+      );
 
-    transitionEvents.forEach((eventName) => {
-      socket.on(eventName, (data) => {
-        logCustom(
-          jornadaActual,
-          etapaActual,
-          `Evento recibido: ${eventName} - ${JSON.stringify(data)}`
-        );
-        setDeberiaResetearElTimer(true);
-      });
-    });
+      MODO_NOCHE_GLOBAL = true;
+      setModoDiaNoche(MODO_NOCHE_GLOBAL);
+      setMostrarBotones(false);
+      setMostrarAnimacionVotacionAlguacil(true);
 
-    return () => {
-      transitionEvents.forEach((eventName) => {
-        socket.off(eventName);
-      });
+      setTimeout(() => {
+        setMostrarAnimacionVotacionAlguacil(false);
+        setMostrarBotonVotar(true);
+        setMostrarBotones(true);
+        MODO_NOCHE_GLOBAL = false;
+        setModoDiaNoche(MODO_NOCHE_GLOBAL);
+        setJornadaActual(1);
+        setVotos(Array(CONSTANTES.NUMERICAS.CANTIDAD_IMAGENES).fill(0));
+        setVotoRealizado(false);
+        setPasoTurno(false);
+        setJugadorSeleccionado(null);
+        reiniciarTemporizador();
+      }, 4000);
     };
-  }, []);
+
+    /**
+     * Evento que maneja la espera inicial antes del comienzo del juego.
+     */
+    const manejarEsperaInicial = (datos: any) => {
+      logCustom(
+        jornadaActual,
+        etapaActual,
+        `Evento recibido: esperaInicial - ${JSON.stringify(datos)}`,
+        jugadoresEstado[indiceUsuario]
+      );
+      // Código pendiente para espera inicial
+    };
+
+    /**
+     * Evento que maneja el comienzo de la noche.
+     */
+    const manejarNocheComienza = (datos: any) => {
+      logCustom(
+        jornadaActual,
+        etapaActual,
+        `Evento recibido: nocheComienza - ${JSON.stringify(datos)}`,
+        jugadoresEstado[indiceUsuario]
+      );
+      // Código pendiente para cuando comienza la noche
+    };
+
+    /**
+     * Evento que activa la habilidad del vidente.
+     */
+    const manejarHabilidadVidente = (datos: any) => {
+      logCustom(
+        jornadaActual,
+        etapaActual,
+        `Evento recibido: habilidadVidente - ${JSON.stringify(datos)}`,
+        jugadoresEstado[indiceUsuario]
+      );
+      // Código pendiente para la habilidad del vidente
+    };
+
+    /**
+     * Evento que indica el turno de los hombres lobo.
+     */
+    const manejarTurnoHombresLobos = (datos: any) => {
+      logCustom(
+        jornadaActual,
+        etapaActual,
+        `Evento recibido: turnoHombresLobos - ${JSON.stringify(datos)}`,
+        jugadoresEstado[indiceUsuario]
+      );
+      // Código pendiente para el turno de los lobos
+    };
+
+    /**
+     * Evento que activa la habilidad de la bruja.
+     */
+    const manejarHabilidadBruja = (datos: any) => {
+      logCustom(
+        jornadaActual,
+        etapaActual,
+        `Evento recibido: habilidadBruja - ${JSON.stringify(datos)}`,
+        jugadoresEstado[indiceUsuario]
+      );
+      // Código pendiente para la habilidad de la bruja
+    };
+
+    /**
+     * Evento que maneja el comienzo del día.
+     */
+    const manejarDiaComienza = (datos: any) => {
+      logCustom(
+        jornadaActual,
+        etapaActual,
+        `Evento recibido: diaComienza - ${JSON.stringify(datos)}`,
+        jugadoresEstado[indiceUsuario]
+      );
+      // Código pendiente para cuando comienza el día
+    };
+
+    // Registro de eventos con sus manejadores específicos
+    socket.on("iniciarVotacionAlguacil", manejarIniciarVotacionAlguacil);
+    socket.on("esperaInicial", manejarEsperaInicial);
+    socket.on("nocheComienza", manejarNocheComienza);
+    socket.on("habilidadVidente", manejarHabilidadVidente);
+    socket.on("turnoHombresLobos", manejarTurnoHombresLobos);
+    socket.on("habilidadBruja", manejarHabilidadBruja);
+    socket.on("diaComienza", manejarDiaComienza);
+
+    // Limpiar eventos al desmontar el componente
+    return () => {
+      socket.off("iniciarVotacionAlguacil", manejarIniciarVotacionAlguacil);
+      socket.off("esperaInicial", manejarEsperaInicial);
+      socket.off("nocheComienza", manejarNocheComienza);
+      socket.off("habilidadVidente", manejarHabilidadVidente);
+      socket.off("turnoHombresLobos", manejarTurnoHombresLobos);
+      socket.off("habilidadBruja", manejarHabilidadBruja);
+      socket.off("diaComienza", manejarDiaComienza);
+    };
+  }, [
+    jornadaActual,
+    etapaActual,
+    jugadoresEstado,
+    indiceUsuario,
+    setModoDiaNoche,
+    setMostrarBotones,
+    setMostrarAnimacionVotacionAlguacil,
+    setMostrarBotonVotar,
+    setJornadaActual,
+    setVotos,
+    setVotoRealizado,
+    setPasoTurno,
+    setJugadorSeleccionado,
+  ]);
 
   // ---------------------------------------------------------------------------
   // Funciones de manejo de eventos
