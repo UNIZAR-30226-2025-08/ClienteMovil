@@ -26,8 +26,8 @@ const useGestorAnimaciones = ({
   start = false, // Para que no se haga trigger de la lógica de la animación hasta que se quiera
 }: GestorAnimacionesParams & { start?: boolean }) => {
   // Crear un array de objetos Animated.Value para cada animación
-  const [opacities] = useState(
-    Array(numAnimaciones).fill(new Animated.Value(0))
+  const [opacities] = useState(() =>
+    Array.from({ length: numAnimaciones }, () => new Animated.Value(0))
   );
 
   // Crear un array para gestionar la visibilidad de los componentes
