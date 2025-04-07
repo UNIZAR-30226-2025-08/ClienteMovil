@@ -63,15 +63,23 @@ export const getInfoRol = (rol: Rol) => {
       };
       roleInfo = { roleName: "CAZADOR", image: IMAGENES.CAZADOR };
       break;
-    default:
+    case "Vidente":
       habilidadInfo = {
         descripcion:
-          "Eres El Lobo. Tienes el poder de matar a un jugador durante la noche, pero ten cuidado de no ser descubierto.",
+          "Como vidente, tienes la capacidad de descubrir la verdadera identidad de un jugador cada noche. Observa con cuidado y elige bien a quién investigar.",
         recuerda:
-          "Recuerda: Los lobos deben ponerse de acuerdo sobre a quién asesinar en la noche.",
-        imagen: IMAGENES.HABILIDAD,
+          "Recuerda: La información que obtengas puede ser crucial para salvar a la aldea o desenmascarar a los lobos.",
+        imagen: IMAGENES.VIDENTE,
       };
-      roleInfo = { roleName: "ALDEANO", image: IMAGENES.ALDEANO };
+      roleInfo = { roleName: "VIDENTE", image: IMAGENES.VIDENTE };
+      break;
+    default:
+      habilidadInfo = {
+        descripcion: "??????.",
+        recuerda: "Recuerda: ??????.",
+        imagen: IMAGENES.IMAGEN_MISSING,
+      };
+      roleInfo = { roleName: "??????", image: IMAGENES.IMAGEN_MISSING };
       break;
   }
   return { habilidadInfo, roleInfo };
