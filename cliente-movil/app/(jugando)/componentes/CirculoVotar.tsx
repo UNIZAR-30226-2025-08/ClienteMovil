@@ -128,7 +128,18 @@ const CirculoVotar: React.FC<CirculoVotarProps> = ({
             </View>
 
             {/* Nombre del jugador */}
-            <Text style={estilos.nombreJugadorPartida}>{jugador.nombre}</Text>
+            <Text
+              style={[
+                estilos.nombreJugadorPartida,
+                {
+                  textShadowColor: "white",
+                  textShadowOffset: { width: -1, height: 1 },
+                  textShadowRadius: 2,
+                },
+              ]}
+            >
+              {jugador.nombre}
+            </Text>
 
             {/* Contenedor que muestra barras de votos: una barra por cada voto recibido */}
             <View style={estilos.contenedorVotos}>
