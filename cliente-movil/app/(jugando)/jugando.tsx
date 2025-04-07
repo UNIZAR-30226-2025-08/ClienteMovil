@@ -111,10 +111,16 @@ const PantallaJugando: React.FC = () => {
   // ---------------------------------------------------------------------------
 
   /**
-   * Controla la visualización de los botones de acción pasar turno y votar.
+   * Controla la visualización de todos los elementos de la partida: barra, botones, timer y jugadores
    * @type {boolean}
    */
   const [mostrarBotones, setMostrarBotones] = useState<boolean>(false);
+
+  /**
+   * Controla la visualización del botón de votar
+   * @type {boolean}
+   */
+  const [mostrarBotonVotar, setMostrarBotonVotar] = useState<boolean>(false);
 
   /**
    * Controla la visualización del chat.
@@ -167,7 +173,7 @@ const PantallaJugando: React.FC = () => {
   const [rolUsuario, setRolUsuario] = useState<Rol>("Aldeano"); // Por defecto villager
 
   /**
-   * Indica si el usuario ya realizó su voto.
+   * Indica si el usuario ya realizó su voto en una votación diurna.
    * @type {boolean}
    */
   const [votoRealizado, setVotoRealizado] = useState<boolean>(false);
@@ -398,10 +404,6 @@ const PantallaJugando: React.FC = () => {
    * Efecto que se dispara cuando el temporizador llega a 0.
    * Alterna el modo (día/noche), reinicia los estados de votación y resetea el temporizador.
    */
-  /**
-   * Efecto que se dispara cuando el temporizador llega a 0.
-   * Alterna el modo (día/noche), reinicia los estados de votación y resetea el temporizador.
-   */
   useEffect(() => {
     if (tiempoRestante === 0) {
       if (jornadaActual === 0) {
@@ -417,6 +419,7 @@ const PantallaJugando: React.FC = () => {
         setMostrarAnimacionVotacionAlguacil(true);
         setTimeout(() => {
           setMostrarAnimacionVotacionAlguacil(false);
+          setMostrarBotonVotar(true);
           setMostrarBotones(true);
           MODO_NOCHE_GLOBAL = false;
           setModoDiaNoche(MODO_NOCHE_GLOBAL);
@@ -684,16 +687,31 @@ const PantallaJugando: React.FC = () => {
       );
       return;
     }
-    setVotos((votosAnteriores: number[]): number[] => {
-      const nuevosVotos: number[] = [...votosAnteriores];
-      nuevosVotos[JugadorSeleccionado] += 1;
+    if (jornadaActual === 0) {
+      // Votación del alguacil
+      socket.emit("votarAlguacil", {
+        idPartida: idSala,
+        idJugador: usuarioID,
+        JugadorSeleccionado,
+      });
       logCustom(
         jornadaActual,
         etapaActual,
-        `Voto registrado para el jugador ${JugadorSeleccionado + 1}`
+        `Voto ALGUACIL registrado para el jugador ${JugadorSeleccionado + 1}`
       );
-      return nuevosVotos;
-    });
+    } else {
+      // Votación diurna o nocturna
+      setVotos((votosAnteriores: number[]): number[] => {
+        const nuevosVotos: number[] = [...votosAnteriores];
+        nuevosVotos[JugadorSeleccionado] += 1;
+        logCustom(
+          jornadaActual,
+          etapaActual,
+          `Voto DIURNO registrado para el jugador ${JugadorSeleccionado + 1}`
+        );
+        return nuevosVotos;
+      });
+    }
     setVotoRealizado(true);
     setJugadorSeleccionado(null);
   };
@@ -833,18 +851,20 @@ const PantallaJugando: React.FC = () => {
               - La función mostrarBotonesAccion determina la visibilidad según el modo de juego
                 o el rol del usuario (por ejemplo, permitiendo a los lobos interactuar durante la noche).
             */}
-            <ControlesAccion
-              habilidadInfo={habilidadInfo}
-              abrirHabilidad={handleAbrirHabilidad}
-              abrirChat={handleAbrirChat}
-              votarAJugador={votarAJugador}
-              manejarPasarTurno={manejarPasarTurno}
-              mostrarBotonesAccion={() =>
-                !MODO_NOCHE_GLOBAL || rolUsuario === "Hombre lobo"
-              }
-              votoRealizado={votoRealizado}
-              turnoPasado={pasoTurno}
-            />
+            {mostrarBotonVotar && (
+              <ControlesAccion
+                habilidadInfo={habilidadInfo}
+                abrirHabilidad={handleAbrirHabilidad}
+                abrirChat={handleAbrirChat}
+                votarAJugador={votarAJugador}
+                manejarPasarTurno={manejarPasarTurno}
+                mostrarBotonesAccion={() =>
+                  !MODO_NOCHE_GLOBAL || rolUsuario === "Hombre lobo"
+                }
+                votoRealizado={votoRealizado}
+                turnoPasado={pasoTurno}
+              />
+            )}
 
             {/* Componente BarraSuperior: 
                 Suele mostrar información relevante en la parte superior de la pantalla, 
