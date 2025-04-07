@@ -128,18 +128,63 @@ const CirculoVotar: React.FC<CirculoVotarProps> = ({
             </View>
 
             {/* Nombre del jugador */}
-            <Text
-              style={[
-                estilos.nombreJugadorPartida,
-                {
-                  textShadowColor: "white",
-                  textShadowOffset: { width: -1, height: 1 },
-                  textShadowRadius: 2,
-                },
-              ]}
-            >
-              {jugador.nombre}
-            </Text>
+            <View style={{ position: "relative" }}>
+              {/* Copias en blanco para que el texto tenga un borde */}
+              <Text
+                style={[
+                  estilos.nombreJugadorPartida,
+                  {
+                    position: "absolute",
+                    top: 1,
+                    left: 1,
+                    color: "white",
+                  },
+                ]}
+              >
+                {jugador.nombre}
+              </Text>
+              <Text
+                style={[
+                  estilos.nombreJugadorPartida,
+                  {
+                    position: "absolute",
+                    top: 1,
+                    left: -1,
+                    color: "white",
+                  },
+                ]}
+              >
+                {jugador.nombre}
+              </Text>
+              <Text
+                style={[
+                  estilos.nombreJugadorPartida,
+                  {
+                    position: "absolute",
+                    top: -1,
+                    left: 1,
+                    color: "white",
+                  },
+                ]}
+              >
+                {jugador.nombre}
+              </Text>
+              <Text
+                style={[
+                  estilos.nombreJugadorPartida,
+                  {
+                    position: "absolute",
+                    top: -1,
+                    left: -1,
+                    color: "white",
+                  },
+                ]}
+              >
+                {jugador.nombre}
+              </Text>
+              {/* Texto principal */}
+              <Text style={estilos.nombreJugadorPartida}>{jugador.nombre}</Text>
+            </View>
 
             {/* Contenedor que muestra barras de votos: una barra por cada voto recibido */}
             <View style={estilos.contenedorVotos}>
