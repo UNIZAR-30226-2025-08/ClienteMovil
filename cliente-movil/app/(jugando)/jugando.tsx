@@ -227,7 +227,7 @@ const PantallaJugando: React.FC = () => {
   });
 
   // ---------------------------------------------------------------------------
-  // Hook para la votación de alguacil
+  // Hook para la primera votación de alguacil
   // ---------------------------------------------------------------------------
   const [
     mostrarAnimacionVotacionAlguacil,
@@ -244,6 +244,64 @@ const PantallaJugando: React.FC = () => {
     numAnimaciones: 1,
     start: mostrarAnimacionVotacionAlguacil,
   });
+
+  // ---------------------------------------------------------------------------
+  // Hook para la segunda votación de alguacil
+  // ---------------------------------------------------------------------------
+
+  const [
+    mostrarAnimacionVotacionAlguacil2,
+    setMostrarAnimacionVotacionAlguacil2,
+  ] = useState(false);
+
+  const {
+    opacities: opacitiesVotacionAlguacil2,
+    mostrarComponentes: mostrarComponentesVotacionAlguacil2,
+  } = useGestorAnimaciones({
+    duracionFadeIn,
+    duracionEspera,
+    duracionFadeOut,
+    numAnimaciones: 1,
+    start: mostrarAnimacionVotacionAlguacil2,
+  });
+
+  // ---------------------------------------------------------------------------
+  // Hook para la animación de que es turno de la vidente
+  // ---------------------------------------------------------------------------
+
+  const [
+    iniciarAnimacionResultadosVidente,
+    setIniciarAnimacionResultadosVidente,
+  ] = useState(false);
+
+  const {
+    opacities: opacidadesVidenteYNoche,
+    mostrarComponentes: mostrarComponentesVidenteYNoche,
+  } = useGestorAnimaciones({
+    duracionFadeIn,
+    duracionEspera,
+    duracionFadeOut,
+    numAnimaciones: 3,
+    start: iniciarAnimacionResultadosVidente,
+  });
+
+  // ---------------------------------------------------------------------------
+  // Hook para la animación de que la vidente se duerme y despiertan los hombres lobo auuuuu
+  // ---------------------------------------------------------------------------
+
+  const [iniciarAnimacionLobos, setIniciarAnimacionLobos] = useState(false);
+
+  const {
+    opacities: opacitiesVidenteDuermeYDespiertanHombresLobo,
+    mostrarComponentes: mostrarComponentesVidenteDuermeYDespiertanHombresLobo,
+  } = useGestorAnimaciones({
+    duracionFadeIn,
+    duracionEspera,
+    duracionFadeOut,
+    numAnimaciones: 2,
+    start: iniciarAnimacionLobos,
+  });
+
   // ---------------------------------------------------------------------------
   // Hook para la animación del modo día/noche
   // ---------------------------------------------------------------------------
@@ -257,8 +315,12 @@ const PantallaJugando: React.FC = () => {
    * Hook que administra el temporizador del juego.
    * @returns {tiempoRestante, reiniciarTemporizador, setTemporizadorActivo}
    */
-  const { tiempoRestante, reiniciarTemporizador, setTemporizadorActivo } =
-    useTemporizador(15, false); // Tiempo para el tiempo tranquilo antes de la votación del alguacil
+  const {
+    tiempoRestante,
+    reiniciarTemporizador,
+    setTemporizadorActivo,
+    actualizarMaxTiempo,
+  } = useTemporizador(15, false); // Tiempo para el tiempo tranquilo antes de la votación del alguacil
 
   /**
    * Hook que administra la animación del chat.
@@ -470,6 +532,7 @@ const PantallaJugando: React.FC = () => {
       );
       if (jornadaActual === 0) {
       } else {
+        /*
         const nuevoModo: boolean = !MODO_NOCHE_GLOBAL;
         MODO_NOCHE_GLOBAL = nuevoModo;
         setModoDiaNoche(nuevoModo);
@@ -515,6 +578,7 @@ const PantallaJugando: React.FC = () => {
         setVotoRealizado(false);
         setPasoTurno(false);
         setJugadorSeleccionado(null);
+        */
         // reiniciarTemporizador(); Para que el backend controle cuando se reinicia el temporizador
       }
     }
@@ -597,7 +661,7 @@ const PantallaJugando: React.FC = () => {
         `Evento recibido: iniciarVotacionAlguacil - ${JSON.stringify(datos)}`,
         jugadoresEstado[indiceUsuario]
       );
-
+      actualizarMaxTiempo(25);
       MODO_NOCHE_GLOBAL = true;
       setModoDiaNoche(MODO_NOCHE_GLOBAL);
       setMostrarBotones(false);
@@ -643,8 +707,33 @@ const PantallaJugando: React.FC = () => {
         `Evento recibido: nocheComienza - ${JSON.stringify(datos)}`,
         jugadoresEstado[indiceUsuario]
       );
+
+      MODO_NOCHE_GLOBAL = true;
+      setModoDiaNoche(true);
+
+      const nuevaEtapa = "Noche";
+      const esNuevoDia = false;
+      const nuevaJornada = jornadaActual;
+
+      if (!votoRealizado) {
+        logCustom(
+          jornadaActual,
+          etapaActual,
+          "El jugador no ha votado en esta etapa",
+          jugadoresEstado[indiceUsuario]
+        );
+      }
+
+      logCustom(nuevaJornada, nuevaEtapa, "Comenzando nueva etapa");
+
+      setEtapaActual(nuevaEtapa);
+
+      setVotos(Array(CONSTANTES.NUMERICAS.CANTIDAD_IMAGENES).fill(0));
+      setVotoRealizado(false);
+      setPasoTurno(false);
+      setJugadorSeleccionado(null);
+
       setBackendState("nocheComienza");
-      // Código pendiente para cuando comienza la noche
     };
 
     /**
@@ -657,8 +746,24 @@ const PantallaJugando: React.FC = () => {
         `Evento recibido: habilidadVidente - ${JSON.stringify(datos)}`,
         jugadoresEstado[indiceUsuario]
       );
+
+      setMostrarBotones(false);
+      setIniciarAnimacionResultadosVidente(true);
+      setTimeout(() => {
+        setIniciarAnimacionResultadosVidente(false);
+        setMostrarBotonVotar(true);
+        setMostrarBotones(true);
+        setDeberiaResetearElTimer(true);
+        setJornadaActual(1);
+        setVotos(Array(CONSTANTES.NUMERICAS.CANTIDAD_IMAGENES).fill(0));
+        setVotoRealizado(false);
+        setPasoTurno(false);
+        setJugadorSeleccionado(null);
+      }, 12000);
+
+      actualizarMaxTiempo(15);
+      setDeberiaResetearElTimer(true);
       setBackendState("habilidadVidente");
-      // Código pendiente para la habilidad del vidente
     };
 
     /**
@@ -671,6 +776,27 @@ const PantallaJugando: React.FC = () => {
         `Evento recibido: turnoHombresLobos - ${JSON.stringify(datos)}`,
         jugadoresEstado[indiceUsuario]
       );
+
+      MODO_NOCHE_GLOBAL = true;
+      setModoDiaNoche(MODO_NOCHE_GLOBAL);
+      setMostrarBotones(false);
+      setIniciarAnimacionLobos(true);
+
+      setTimeout(() => {
+        setIniciarAnimacionLobos(false);
+        setMostrarBotonVotar(true);
+        setMostrarBotones(true);
+        setDeberiaResetearElTimer(true);
+        setJornadaActual(1);
+        setVotos(Array(CONSTANTES.NUMERICAS.CANTIDAD_IMAGENES).fill(0));
+        setVotoRealizado(false);
+        setPasoTurno(false);
+        setJugadorSeleccionado(null);
+      }, 8000);
+
+      actualizarMaxTiempo(30);
+      setDeberiaResetearElTimer(true);
+
       setBackendState("turnoHombresLobos");
       // Código pendiente para el turno de los lobos
     };
@@ -758,6 +884,26 @@ const PantallaJugando: React.FC = () => {
         etapaActual,
         `Evento empateVotacionAlguacil recibido: ${JSON.stringify(data)}`
       );
+
+      MODO_NOCHE_GLOBAL = true;
+      setModoDiaNoche(MODO_NOCHE_GLOBAL);
+      setMostrarBotones(false);
+      setMostrarAnimacionVotacionAlguacil2(true);
+
+      setTimeout(() => {
+        setMostrarAnimacionVotacionAlguacil2(false);
+        setMostrarBotonVotar(true);
+        setMostrarBotones(true);
+        MODO_NOCHE_GLOBAL = false;
+        setModoDiaNoche(MODO_NOCHE_GLOBAL);
+        setDeberiaResetearElTimer(true);
+        setJornadaActual(1);
+        setVotos(Array(CONSTANTES.NUMERICAS.CANTIDAD_IMAGENES).fill(0));
+        setVotoRealizado(false);
+        setPasoTurno(false);
+        setJugadorSeleccionado(null);
+      }, 4000);
+
       setMensajeAlguacil(data.mensaje);
     });
 
@@ -1012,7 +1158,6 @@ const PantallaJugando: React.FC = () => {
         jugadoresEstado[indiceUsuario]
       );
     } else {
-      // (Other vote types would go here)
       setVotos((votosAnteriores: number[]): number[] => {
         const nuevosVotos: number[] = [...votosAnteriores];
         nuevosVotos[JugadorSeleccionado] += 1;
@@ -1139,11 +1284,63 @@ const PantallaJugando: React.FC = () => {
         */}
         {mostrarAnimacionVotacionAlguacil && (
           <AnimacionGenerica
-            opacity={new Animated.Value(1)}
+            opacity={opacitiesVotacionAlguacil[0]}
             mostrarComponente={true}
             texto="EMPIEZAN LAS VOTACIONES DE ALGUACIL"
           />
         )}
+
+        {/*
+          Animación especial para iniciar las votaciones de alguacil por 2a vez en caso de que en la 1a haya habido empate
+        */}
+        {mostrarAnimacionVotacionAlguacil2 && (
+          <AnimacionGenerica
+            opacity={opacitiesVotacionAlguacil2[0]}
+            mostrarComponente={true}
+            texto="SE REPITEN LAS VOTACIONES DE ALGUACIL"
+          />
+        )}
+
+        {mostrarComponentesVidenteDuermeYDespiertanHombresLobo[0] && (
+          <AnimacionGenerica
+            opacity={opacitiesVidenteDuermeYDespiertanHombresLobo[0]}
+            mostrarComponente={true}
+            texto="LA VIDENTE SE VUELVE A DORMIR"
+          />
+        )}
+
+        {mostrarComponentesVidenteDuermeYDespiertanHombresLobo[1] && (
+          <AnimacionGenerica
+            opacity={opacitiesVidenteDuermeYDespiertanHombresLobo[1]}
+            mostrarComponente={true}
+            texto="LOS HOMBRES LOBO DE DESPIERTAN, SE RECONOCEN Y DESIGNAN UNA NUEVA VÍCTIMA"
+          />
+        )}
+
+        {mostrarComponentesVidenteYNoche[0] && (
+          <AnimacionGenerica
+            opacity={opacidadesVidenteYNoche[0]}
+            mostrarComponente={true}
+            texto={`RESULTADOS DE LA VOTACIóN DE ALGUACIL: `} //${mensajeAlguacil}`}
+          />
+        )}
+
+        {mostrarComponentesVidenteYNoche[1] && (
+          <AnimacionGenerica
+            opacity={opacidadesVidenteYNoche[1]}
+            mostrarComponente={true}
+            texto="SE HACE DE NOCHE LOS SUPERVIVIENTES SE VUELVEN A DORMIR"
+          />
+        )}
+
+        {mostrarComponentesVidenteYNoche[2] && (
+          <AnimacionGenerica
+            opacity={opacidadesVidenteYNoche[2]}
+            mostrarComponente={true}
+            texto="LA VIDENTE SE DESPIERTA Y SEÑALA A UN JUGADOR DEL QUE QUIERE CONOCER LA VERDADERA PERSONALIDAD"
+          />
+        )}
+
         {/*
           Renderizado condicional del mensaje de error:
           - Si errorMessage tiene contenido, se muestra el componente MensajeError.
