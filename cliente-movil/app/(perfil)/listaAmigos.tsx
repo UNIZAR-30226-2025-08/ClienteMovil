@@ -86,29 +86,7 @@ export default function AmigosScreen(): JSX.Element {
     idUsuario: number;
     nombre: string;
   } | null>(null);
-
-  /**
-   * Carga el estado de los amigos.
-  */
-  useEffect(() => {
-    // Escuchar el estado de los amigos
-    socket.on("estadoAmigo", ({ idUsuario, enLinea }) => {
-      // Aquí verificamos si el amigo está conectado o desconectado
-      console.log(`Amigo con ID: ${idUsuario} está ${enLinea ? "conectado" : "desconectado"}`);
-      setAmigosDetalles((prevAmigos) =>
-        prevAmigos.map((amigo) =>
-          amigo.idUsuario === idUsuario
-            ? { ...amigo, enLinea }
-            : amigo
-        )
-      );
-    });
   
-    return () => {
-      // Limpiamos la conexión cuando el componente se desmonte
-      socket.off("estadoAmigo");
-    };
-  }, [socket]);
 
   /**
    * Carga los datos del usuario cuando la pantalla gana foco.
@@ -136,45 +114,83 @@ export default function AmigosScreen(): JSX.Element {
   );
 
   useEffect(() => {
-    if (usuario && usuario.idUsuario) {
-      const fetchListadoAmigos = async () => {
+    const configurarSocket = async () => {
+      if (!usuario || !usuario.idUsuario) return;
+  
+      const idUsuario = usuario.idUsuario;
+  
+      // Conectar el socket si no está conectado
+      if (!socket.connected) {
+        socket.connect();
+      }
+  
+      // Registrar usuario en el socket
+      socket.emit("registrarUsuario", { idUsuario });
+  
+      // Obtener la lista de amigos desde el backend
+      const fetchFriends = async () => {
         try {
           const response = await axios.get(
-            `${BACKEND_URL}/api/amistad/listar/${usuario.idUsuario}`
+            `${BACKEND_URL}/api/amistad/listar/${idUsuario}`
           );
-          console.log("Datos recibidos del backend:", response.data);
-          setAmigos(response.data.amigos);
-          console.log("Lista de amigos (IDs):", response.data.amigos); // Verifica los IDs
-          cargarDetallesAmigos(response.data.amigos); // Llamar a la función para cargar los detalles de los amigos
+          console.log("Amigos recibidos del backend:", response.data.amigos);
+  
+          // Cargar detalles de los amigos y asignar enLinea como false inicialmente
+          const amigosDetalles = await Promise.all(
+            response.data.amigos.map(async (idAmigo: number) => {
+              const responseAmigo = await axios.post(
+                `${BACKEND_URL}/api/usuario/obtener_por_id`,
+                { idUsuario: idAmigo }
+              );
+              const usuarioAmigo = responseAmigo.data.usuario;
+              return { ...usuarioAmigo, enLinea: false }; // Inicializa enLinea como false
+            })
+          );
+  
+          setAmigosDetalles(amigosDetalles);
+          console.log("Detalles iniciales de amigos:", amigosDetalles);
         } catch (error) {
-          console.error("Error al obtener los amigos:", error);
-        } finally {
-          setLoading(false);
+          console.error("Error al obtener la lista de amigos:", error);
         }
       };
-      fetchListadoAmigos();
-    }
+  
+      await fetchFriends();
+  
+      // Solicitar el estado actual de los amigos
+      socket.emit("solicitarEstadoAmigos", { idUsuario });
+  
+      // Escuchar el estado de un amigo individual
+      const handleEstadoAmigo = ({ idUsuario, en_linea }: { idUsuario: number; en_linea: boolean }) => {
+        console.log(`Estado actualizado para amigo ID ${idUsuario}: ${en_linea ? "Conectado" : "Desconectado"}`);
+        setAmigosDetalles((prevDetalles) =>
+          prevDetalles.map((amigo) =>
+            amigo.idUsuario === idUsuario ? { ...amigo, enLinea: en_linea } : amigo
+          )
+        );
+      };
+  
+      // Escuchar el estado de todos los amigos
+      const handleEstadoAmigos = (estadoAmigos: { idUsuario: number; en_linea: boolean }[]) => {
+        console.log("Estado de todos los amigos recibido:", estadoAmigos);
+        setAmigosDetalles((prevDetalles) =>
+          prevDetalles.map((amigo) => {
+            const estado = estadoAmigos.find((e) => e.idUsuario === amigo.idUsuario);
+            return estado ? { ...amigo, enLinea: estado.en_linea } : amigo;
+          })
+        );
+      };
+  
+      socket.on("estadoAmigo", handleEstadoAmigo);
+      socket.on("estadoAmigos", handleEstadoAmigos);
+  
+      return () => {
+        socket.off("estadoAmigo", handleEstadoAmigo);
+        socket.off("estadoAmigos", handleEstadoAmigos);
+      };
+    };
+  
+    configurarSocket();
   }, [usuario]);
-
-  // Función para obtener los detalles de cada amigo
-  const cargarDetallesAmigos = async (idsAmigos: number[]) => {
-    try {
-      const amigosDetalles = await Promise.all(
-        idsAmigos.map(async (idAmigo) => {
-          const response = await axios.post(
-            `${BACKEND_URL}/api/usuario/obtener_por_id`,
-            {
-              idUsuario: idAmigo,
-            }
-          );
-          return response.data.usuario; // Aquí obtenemos el detalle de cada amigo
-        })
-      );
-      setAmigosDetalles(amigosDetalles); // Almacenamos los detalles completos de los amigos
-    } catch (error) {
-      console.error("Error al obtener los detalles de los amigos:", error);
-    }
-  };
 
   // Nueva función para enviar solicitud de amistad:
   const enviarSolicitud = async () => {
@@ -340,6 +356,7 @@ export default function AmigosScreen(): JSX.Element {
                       amigo.enLinea ? styles.enLinea : styles.desconectado,
                     ]}
                   />
+
                   <Text style={styles.nombre}>{amigo.nombre}</Text>
                   <TouchableOpacity
                     style={styles.botonEliminar}
