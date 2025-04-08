@@ -16,7 +16,7 @@ import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback } from "react";
-
+import socket from "@/app/(sala)/socket";
 /**
  * Mapa de avatares que relaciona claves con sus respectivas imágenes.
  *
@@ -51,6 +51,7 @@ type Jugador = {
   idUsuario: number;
   nombre: string;
   avatar?: string; // Campo opcional para la URL del avatar
+  enLinea?: boolean; // Campo opcional para el estado de conexión
 };
 
 /**
@@ -85,6 +86,29 @@ export default function AmigosScreen(): JSX.Element {
     idUsuario: number;
     nombre: string;
   } | null>(null);
+
+  /**
+   * Carga el estado de los amigos.
+  */
+  useEffect(() => {
+    // Escuchar el estado de los amigos
+    socket.on("estadoAmigo", ({ idUsuario, enLinea }) => {
+      // Aquí verificamos si el amigo está conectado o desconectado
+      console.log(`Amigo con ID: ${idUsuario} está ${enLinea ? "conectado" : "desconectado"}`);
+      setAmigosDetalles((prevAmigos) =>
+        prevAmigos.map((amigo) =>
+          amigo.idUsuario === idUsuario
+            ? { ...amigo, enLinea }
+            : amigo
+        )
+      );
+    });
+  
+    return () => {
+      // Limpiamos la conexión cuando el componente se desmonte
+      socket.off("estadoAmigo");
+    };
+  }, [socket]);
 
   /**
    * Carga los datos del usuario cuando la pantalla gana foco.
@@ -308,6 +332,14 @@ export default function AmigosScreen(): JSX.Element {
                     }
                     style={styles.imagenPerfil}
                   />
+
+                   {/* Círculo de estado de conexión */}
+                  <View
+                    style={[
+                      styles.estadoConexion,
+                      amigo.enLinea ? styles.enLinea : styles.desconectado,
+                    ]}
+                  />
                   <Text style={styles.nombre}>{amigo.nombre}</Text>
                   <TouchableOpacity
                     style={styles.botonEliminar}
@@ -468,5 +500,23 @@ const styles = StyleSheet.create({
     left: 230,
     top: "50%",
     transform: [{ translateY: -20 }],
+  },
+
+  estadoConexion: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,  
+    left: 33,
+    position: "absolute",  
+    bottom: 0,  
+    right: 0, 
+  },
+
+  enLinea: {
+    backgroundColor: "green",  // Círculo verde para conectado
+  },
+
+  desconectado: {
+    backgroundColor: "gray",  // Círculo gris para desconectado
   },
 });
