@@ -276,6 +276,7 @@ export default function SalaPreviaScreen(): JSX.Element {
           salaData: JSON.stringify(partidaPendiente.sala),
           rol: rolUsuario,
           usuarioID: usuarioData.id,
+          usuarioNombre: usuarioData.nombre,
         },
       });
 
