@@ -153,9 +153,9 @@ export const estilos = StyleSheet.create({
   },
 
   nombreJugadorPartida: {
-    marginTop: 4, 
-    color: "black", 
-    fontWeight: "bold"
+    marginTop: 4,
+    color: "black",
+    fontWeight: "bold",
   },
 
   iconoBoton: {
@@ -542,5 +542,15 @@ export const estilos = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#000",
+  },
+
+  iconoAlguacil: {
+    width: alto * 0.09,
+    height: alto * 0.09,
+    position: "absolute",
+    top: "30%",
+    left: "3%",
+    alignSelf: "center",
+    zIndex: 1,
   },
 });

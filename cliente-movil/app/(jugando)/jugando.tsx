@@ -14,6 +14,7 @@ import {
   TouchableWithoutFeedback,
   Animated,
   ActivityIndicator,
+  Image,
 } from "react-native";
 
 // Carga de fuentes personalizadas
@@ -712,12 +713,23 @@ const PantallaJugando: React.FC = () => {
    * @returns {void}
    */
   const handleAbrirChat = (): void => {
-    logCustom(
-      jornadaActual,
-      etapaActual,
-      `Chat abierto`,
-      jugadoresEstado[indiceUsuario]
-    );
+    if (etapaActual === "Noche" && rolUsuario !== "Hombre lobo") {
+      logCustom(
+        jornadaActual,
+        etapaActual,
+        `Error: intentar abrir chat por la noche sin ser hombre lobo, el usuario es ${rolUsuario}`,
+        jugadoresEstado[indiceUsuario]
+      );
+      mostrarError("Solo los lobos pueden usar el chat durante la noche.");
+      return;
+    } else {
+      logCustom(
+        jornadaActual,
+        etapaActual,
+        `Chat abierto`,
+        jugadoresEstado[indiceUsuario]
+      );
+    }
     setMostrarChat(true);
     abrirChat();
   };
@@ -1903,7 +1915,7 @@ const PantallaJugando: React.FC = () => {
               mostrarVotacion={mostrarBotonVotar}
             />
             {/* Componente BarraSuperior: 
-                Suele mostrar información relevante en la parte superior de la pantalla, 
+                Muestra información relevante en la parte superior de la pantalla, 
                 como el estado del juego o la identificación del rol. */}
             <BarraSuperior vivos={vivos} lobos={lobosVivos} />
 
@@ -1917,6 +1929,18 @@ const PantallaJugando: React.FC = () => {
                 <Text style={estilos.textoTemporizador}>{tiempoRestante}</Text>
               </View>
             </View>
+
+            {/*
+              Medalla de alguacil si procede enseñarla
+            */}
+            {indiceUsuario !== -1 &&
+              jugadoresEstado[indiceUsuario]?.esAlguacil &&
+              jugadoresEstado[indiceUsuario]?.estaVivo && (
+                <Image
+                  source={require("@/assets/images/alguacil-icon.png")}
+                  style={estilos.iconoAlguacil}
+                />
+              )}
 
             {/*
               Componente CirculoVotar:
