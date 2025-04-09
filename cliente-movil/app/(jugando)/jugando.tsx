@@ -1,5 +1,5 @@
 /**
- * @file PantallaJugando.tsx
+ * @file jugando.tsx
  * @description Componente principal de la pantalla de juego.
  * Maneja la lógica del juego, incluyendo estados, temporizador, votaciones, chat, habilidades y animaciones.
  * @module PantallaJugando
@@ -14,6 +14,7 @@ import {
   TouchableWithoutFeedback,
   Animated,
   ActivityIndicator,
+  Image,
 } from "react-native";
 
 // Carga de fuentes personalizadas
@@ -82,12 +83,14 @@ const PantallaJugando: React.FC = () => {
     Corben: require("@/assets/fonts/corben-regular.ttf"),
   });
 
-  const { idSala, salaData, rol, usuarioID } = useLocalSearchParams<{
-    idSala: string;
-    salaData: string;
-    rol: string;
-    usuarioID: string;
-  }>();
+  const { idSala, salaData, rol, usuarioID, usuarioNombre } =
+    useLocalSearchParams<{
+      idSala: string;
+      salaData: string;
+      rol: string;
+      usuarioID: string;
+      usuarioNombre: string;
+    }>();
   const sala = JSON.parse(salaData);
 
   // ---------------------------------------------------------------------------
@@ -164,6 +167,12 @@ const PantallaJugando: React.FC = () => {
   const [mensajeEventoVotacionDiurna, setMensajeEventoVotacionDiurna] =
     useState<string>("");
 
+  /*
+   * Mensaje informativo recibido del backend relacionado con a quién a han matado
+   * los lobos, recibido por la bruja justo antes de su turno.
+   */
+  const [mensajeEventoBruja, setMensajeEventoBruja] = useState<string>("");
+
   /**
    * Representa la "fase" en la que cree que el juego cree que está.
    */
@@ -220,6 +229,17 @@ const PantallaJugando: React.FC = () => {
   const [JugadorSeleccionado, setJugadorSeleccionado] = useState<number | null>(
     null
   );
+
+  // TODO
+  const [botellaSeleccionada, setBotellaSeleccionada] = useState<
+    "vida" | "muerte" | null
+  >(null);
+
+  // TODO
+  const [botellaVidaUsada, setBotellaVidaUsada] = useState<boolean>(false);
+
+  // TODO
+  const [botellaMuerteUsada, setBotellaMuerteUsada] = useState<boolean>(false);
 
   /**
    * Registra los votos de cada jugador para pasarselos al circulo de jugadores.
@@ -577,8 +597,12 @@ const PantallaJugando: React.FC = () => {
 
     const etapaParaMostrar = jornadaActual === 0 ? "Día" : etapaActual;
 
+    const now = new Date();
+    const horaExacta = now.toTimeString().slice(0, 8);
+    const milisegundos = now.getMilliseconds();
+
     console.log(
-      `${color}[Jornada ${jornadaActual} - ${etapaParaMostrar}] ${infoJugador} - ${message}\x1b[0m`
+      `${color}${horaExacta}.${milisegundos} [Jornada ${jornadaActual} - ${etapaParaMostrar}] ${infoJugador} - ${message}\x1b[0m`
     );
   }
 
@@ -712,12 +736,23 @@ const PantallaJugando: React.FC = () => {
    * @returns {void}
    */
   const handleAbrirChat = (): void => {
-    logCustom(
-      jornadaActual,
-      etapaActual,
-      `Chat abierto`,
-      jugadoresEstado[indiceUsuario]
-    );
+    if (etapaActual === "Noche" && rolUsuario !== "Hombre lobo") {
+      logCustom(
+        jornadaActual,
+        etapaActual,
+        `Error: intentar abrir chat por la noche sin ser hombre lobo, el usuario es ${rolUsuario}`,
+        jugadoresEstado[indiceUsuario]
+      );
+      mostrarError("Solo los lobos pueden usar el chat durante la noche.");
+      return;
+    } else {
+      logCustom(
+        jornadaActual,
+        etapaActual,
+        `Chat abierto`,
+        jugadoresEstado[indiceUsuario]
+      );
+    }
     setMostrarChat(true);
     abrirChat();
   };
@@ -768,6 +803,62 @@ const PantallaJugando: React.FC = () => {
     );
     cerrarHabilidad();
     setMostrarHabilidad(false);
+  };
+
+  // TODO comentar
+  const manejarSeleccionBotellaVida = () => {
+    setBotellaSeleccionada((prev) => (prev === "vida" ? null : "vida"));
+
+    if (botellaVidaUsada) {
+      logCustom(
+        jornadaActual,
+        etapaActual,
+        `Intento de uso de botella de vida fallido: el usuario ya ha usado la botella de vida`,
+        jugadoresEstado[indiceUsuario]
+      );
+      mostrarError("Ya has usado la pocima de vida");
+      return;
+    }
+
+    const jugadorObjetivo = jugadoresEstado[JugadorSeleccionado!];
+    if (JugadorSeleccionado !== null) {
+      socket.emit("usaPocionBruja", {
+        idPartida: idSala,
+        idJugador: usuarioID,
+        tipo: "curar",
+        idObjetivo: jugadorObjetivo.id,
+      });
+    }
+
+    setBotellaVidaUsada(true);
+  };
+
+  // TODO comentar
+  const manejarSeleccionBotellaMuerte = () => {
+    setBotellaSeleccionada((prev) => (prev === "muerte" ? null : "muerte"));
+
+    if (botellaMuerteUsada) {
+      logCustom(
+        jornadaActual,
+        etapaActual,
+        `Intento de uso de botella de muerte fallido: el usuario ya ha usado la botella de muerte`,
+        jugadoresEstado[indiceUsuario]
+      );
+      mostrarError("Ya has usado la pocima de muerte");
+      return;
+    }
+
+    const jugadorObjetivo = jugadoresEstado[JugadorSeleccionado!];
+    if (JugadorSeleccionado !== null) {
+      socket.emit("usaPocionBruja", {
+        idPartida: idSala,
+        idJugador: usuarioID,
+        tipo: "matar",
+        idObjetivo: jugadorObjetivo.id,
+      });
+    }
+
+    setBotellaMuerteUsada(true);
   };
 
   // ---------------------------------------------------------------------------
@@ -821,22 +912,30 @@ const PantallaJugando: React.FC = () => {
   // Conexión del chat con el backend
   // ---------------------------------------------------------------------------
 
-  /**
-   * Texto
-   *
-   */
-  socket.on("mensajeChat", (data) => {
-    console.log("LLega el mensaje a Frontend", data);
+  useEffect(() => {
+    /**
+     * Texto
+     *
+     */
+    socket.on("mensajeChat", (data) => {
+      console.log("Llega el mensaje a Frontend", data);
 
-    // Crear un nuevo objeto mensaje asegurando que tenga la estructura correcta
-    const nuevoMensaje: MensajeChat = {
-      id: mensajes.length + 1, // Asignar un ID incremental
-      texto: data.chat,
+      var mensaje = data.nombre + ": " + data.mensaje;
+
+      console.log("Tamaño de mensajes.length", mensajes.length);
+
+      const nuevoMensaje: MensajeChat = {
+        id: Date.now() + Math.random(),
+        texto: mensaje,
+      };
+
+      setMensajes((prevMensajes) => [...prevMensajes, nuevoMensaje]);
+    });
+
+    return () => {
+      socket.off("mensajeChat");
     };
-
-    // Agregar el nuevo mensaje a la lista
-    setMensajes((prevMensajes) => [...prevMensajes, nuevoMensaje]);
-  });
+  }, [idSala]);
 
   // ---------------------------------------------------------------------------
   // Fases de la partida según dicta el backend
@@ -906,8 +1005,6 @@ const PantallaJugando: React.FC = () => {
         setModoDiaNoche(EFECTO_PANTALLA_OSCURA);
 
         reiniciarTemporizador(); // 25 segundos tras el final de la animación épica
-
-        setJornadaActual(1);
 
         // Reiniciar efectios visuales de cualquier votación previa
         // setVotos(Array(CONSTANTES.NUMERICAS.CANTIDAD_IMAGENES).fill(0));
@@ -988,13 +1085,6 @@ const PantallaJugando: React.FC = () => {
       actualizarMaxTiempo(15);
 
       if (hayVidenteViva) {
-        logCustom(
-          jornadaActual,
-          etapaActual,
-          "Hay al menos un vidente vivo.",
-          jugadoresEstado[indiceUsuario]
-        );
-
         // Animación épica
         // (animaciones separadas porque no siempre se concatenan las 3, ver el siguiente else)
         setMostrarBotones(false);
@@ -1021,13 +1111,6 @@ const PantallaJugando: React.FC = () => {
           }, 4000); // 2ª animación de 4000 ms
         }, 4000); // 1ª animación de 4000 ms
       } else {
-        logCustom(
-          jornadaActual,
-          etapaActual,
-          "No hay vidente vivo, se omite la habilidad de vidente.",
-          jugadoresEstado[indiceUsuario]
-        );
-
         // Animación épica
         setMostrarBotones(false);
         setMostrarResultadosVotacionAlguacil(true);
@@ -1170,7 +1253,7 @@ const PantallaJugando: React.FC = () => {
       setMostrarAnimacionComponentesBrujaSeDespierta(true);
       setTimeout(() => {
         setMostrarAnimacionComponentesBrujaSeDespierta(false);
-        setMostrarBotonVotar(rolUsuario === "Bruja" ? true : false); // Solo dejarle "votar" a la bruja
+        setMostrarBotonVotar(false);
         setMostrarBotones(true);
 
         reiniciarTemporizador();
@@ -1272,7 +1355,7 @@ const PantallaJugando: React.FC = () => {
       logCustom(
         jornadaActual,
         etapaActual,
-        `Evento votoAlguacilRegistrado recibido: ${JSON.stringify(data)}`
+        `Evento recibido: votoAlguacilRegistrado - ${JSON.stringify(data)}`
       );
       if (data.estado && data.estado.jugadores) {
         setJugadoresEstado(data.estado.jugadores);
@@ -1284,7 +1367,7 @@ const PantallaJugando: React.FC = () => {
       logCustom(
         jornadaActual,
         etapaActual,
-        `Evento empateVotacionAlguacil recibido: ${JSON.stringify(data)}`,
+        `Evento recibido: empateVotacionAlguacil - ${JSON.stringify(data)}`,
         jugadoresEstado[indiceUsuario]
       );
 
@@ -1317,7 +1400,7 @@ const PantallaJugando: React.FC = () => {
       logCustom(
         jornadaActual,
         etapaActual,
-        `Evento segundoEmpateVotacionAlguacil recibido: ${JSON.stringify(
+        `Evento recibido: segundoEmpateVotacionAlguacil - ${JSON.stringify(
           data
         )}`,
         jugadoresEstado[indiceUsuario]
@@ -1330,7 +1413,7 @@ const PantallaJugando: React.FC = () => {
       logCustom(
         jornadaActual,
         etapaActual,
-        `Evento alguacilElegido recibido: ${JSON.stringify(data)}`,
+        `Evento recibido: alguacilElegido - ${JSON.stringify(data)}`,
         jugadoresEstado[indiceUsuario]
       );
       setMensajeEventoAlguacil(data.mensaje);
@@ -1375,7 +1458,7 @@ const PantallaJugando: React.FC = () => {
       logCustom(
         jornadaActual,
         etapaActual,
-        `Evento votoRegistrado recibido: ${JSON.stringify(data)}`,
+        `Evento recibido: votoRegistrado - ${JSON.stringify(data)}`,
         jugadoresEstado[indiceUsuario]
       );
       if (data.estado && data.estado.jugadores) {
@@ -1388,7 +1471,7 @@ const PantallaJugando: React.FC = () => {
       logCustom(
         jornadaActual,
         etapaActual,
-        `Evento resultadoVotosNoche recibido: ${JSON.stringify(data)}`,
+        `Evento recibido: resultadoVotosNoche - ${JSON.stringify(data)}`,
         jugadoresEstado[indiceUsuario]
       );
       if (data.estado && data.estado.jugadores) {
@@ -1404,7 +1487,7 @@ const PantallaJugando: React.FC = () => {
       logCustom(
         jornadaActual,
         etapaActual,
-        `Evento empateVotacionDia recibido: ${JSON.stringify(data)}`,
+        `Evento recibido: - empateVotacionDia${JSON.stringify(data)}`,
         jugadoresEstado[indiceUsuario]
       );
       setMensajeEventoVotacionDiurna(data.mensaje);
@@ -1416,7 +1499,7 @@ const PantallaJugando: React.FC = () => {
       logCustom(
         jornadaActual,
         etapaActual,
-        `Evento segundoEmpateVotacionDia recibido: ${JSON.stringify(data)}`,
+        `Evento recibido: segundoEmpateVotacionDia - ${JSON.stringify(data)}`,
         jugadoresEstado[indiceUsuario]
       );
       setMensajeEventoVotacionDiurna(data.mensaje);
@@ -1428,7 +1511,7 @@ const PantallaJugando: React.FC = () => {
       logCustom(
         jornadaActual,
         etapaActual,
-        `Evento resultadoVotosDia recibido: ${JSON.stringify(data)}`,
+        `Evento recibido: - resultadoVotosDia${JSON.stringify(data)}`,
         jugadoresEstado[indiceUsuario]
       );
       if (data.estado && data.estado.jugadores) {
@@ -1445,6 +1528,38 @@ const PantallaJugando: React.FC = () => {
       socket.off("empateVotacionDia");
       socket.off("segundoEmpateVotacionDia");
       socket.off("resultadoVotosDia");
+    };
+  }, [jugadoresEstado, indiceUsuario, jornadaActual, etapaActual]);
+
+  // ---------------------------------------------------------------------------
+  // Administración de recibir eventos de la habilidad de la vidente
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Efecto que administra el recibimiento de los eventos relacionados con la votación del alguacil.
+   *
+   * Se controlan los siguientes eventos:
+   * - "mensajeBruja": Notificación a la bruja de a quién a matado el lobo.
+   */
+
+  useEffect(() => {
+    const manejarMensajeBruja = (data: {
+      mensaje: string;
+      victima: string;
+    }) => {
+      logCustom(
+        jornadaActual,
+        etapaActual,
+        `Evento recibido: mensajeBruja - ${JSON.stringify(data)}`,
+        jugadoresEstado[indiceUsuario]
+      );
+      setMensajeEventoBruja(data.mensaje);
+    };
+
+    socket.on("mensajeBruja", manejarMensajeBruja);
+
+    return () => {
+      socket.off("mensajeBruja", manejarMensajeBruja);
     };
   }, [jugadoresEstado, indiceUsuario, jornadaActual, etapaActual]);
 
@@ -1517,15 +1632,27 @@ const PantallaJugando: React.FC = () => {
       mostrarError("No hay nada que votar aún :)");
       return;
     }
-    if (rolUsuario !== "Hombre lobo" && EFECTO_PANTALLA_OSCURA) {
+    if (rolUsuario !== "Hombre lobo" && backendState === "turnoHombresLobo") {
       logCustom(
         jornadaActual,
         etapaActual,
-        `Intento de selección de usuario fallido: Es de noche y no es lobo`,
+        `Intento de selección de usuario fallido: Es el turno de los lobos y no es lobo`,
         jugadoresEstado[indiceUsuario]
       );
       mostrarError(
-        "Solo los lobos pueden seleccionar jugadores durante la noche"
+        "Solo los lobos pueden seleccionar jugadores durante la votación nocturna"
+      );
+      return;
+    }
+    if (rolUsuario !== "Bruja" && backendState === "habilidadBruja") {
+      logCustom(
+        jornadaActual,
+        etapaActual,
+        `Intento de selección de usuario fallido: Es el turno de la bruja y no es bruja`,
+        jugadoresEstado[indiceUsuario]
+      );
+      mostrarError(
+        "Solo la bruja puede seleccionar jugadores durante el turno de la bruja"
       );
       return;
     }
@@ -1556,7 +1683,7 @@ const PantallaJugando: React.FC = () => {
         `Intento de selección fallido: Voto propio`,
         jugadoresEstado[indiceUsuario]
       );
-      mostrarError("¡No puedes votarte a ti mismo!");
+      mostrarError("¡No puedes seleccionarte a ti mismo!");
       return;
     }
     logCustom(
@@ -1896,14 +2023,27 @@ const PantallaJugando: React.FC = () => {
               votarAJugador={votarAJugador}
               manejarPasarTurno={manejarPasarTurno}
               mostrarBotonesAccion={() =>
-                !EFECTO_PANTALLA_OSCURA || rolUsuario === "Hombre lobo"
+                !EFECTO_PANTALLA_OSCURA ||
+                rolUsuario === "Hombre lobo" ||
+                (rolUsuario === "Bruja" && backendState === "habilidadBruja")
               }
               votoRealizado={votoRealizado}
               turnoPasado={pasoTurno}
               mostrarVotacion={mostrarBotonVotar}
+              mostrarBotellaVida={
+                rolUsuario === "Bruja" && backendState === "habilidadBruja"
+              }
+              mostrarBotellaMuerte={
+                rolUsuario === "Bruja" && backendState === "habilidadBruja"
+              }
+              botellaVidaUsada={botellaVidaUsada}
+              botellaMuerteUsada={botellaMuerteUsada}
+              manejarBotellaVida={manejarSeleccionBotellaVida}
+              manejarBotellaMuerte={manejarSeleccionBotellaMuerte}
+              botellaSeleccionada={botellaSeleccionada}
             />
             {/* Componente BarraSuperior: 
-                Suele mostrar información relevante en la parte superior de la pantalla, 
+                Muestra información relevante en la parte superior de la pantalla, 
                 como el estado del juego o la identificación del rol. */}
             <BarraSuperior vivos={vivos} lobos={lobosVivos} />
 
@@ -1917,6 +2057,18 @@ const PantallaJugando: React.FC = () => {
                 <Text style={estilos.textoTemporizador}>{tiempoRestante}</Text>
               </View>
             </View>
+
+            {/*
+              Medalla de alguacil si procede enseñarla
+            */}
+            {indiceUsuario !== -1 &&
+              jugadoresEstado[indiceUsuario]?.esAlguacil &&
+              jugadoresEstado[indiceUsuario]?.estaVivo && (
+                <Image
+                  source={require("@/assets/images/alguacil-icon.png")}
+                  style={estilos.iconoAlguacil}
+                />
+              )}
 
             {/*
               Componente CirculoVotar:
@@ -1949,6 +2101,7 @@ const PantallaJugando: React.FC = () => {
             socket={socket} // Aquí pasas el socket
             idSala={idSala} // Aquí pasas el idSala
             usuarioID={usuarioID} // Aquí pasas el usuarioData
+            usuarioNombre={usuarioNombre}
           />
         )}
 
