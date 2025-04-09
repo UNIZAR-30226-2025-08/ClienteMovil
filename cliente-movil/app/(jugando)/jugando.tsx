@@ -1695,6 +1695,17 @@ const PantallaJugando: React.FC = () => {
     );
   }, [jugadoresEstado]);
 
+  /**
+   * Verifica si el jugador local está muerto.
+   * Se calcula cada vez que el array de estado de los jugadores se modifica.
+   * @return `true` si el jugador local está muerto; de lo contrario, `false`
+   */
+  const jugadorLocalMuerto = useMemo(() => {
+    return indiceUsuario !== -1
+      ? !jugadoresEstado[indiceUsuario]?.estaVivo
+      : false;
+  }, [jugadoresEstado, indiceUsuario]);
+
   // ---------------------------------------------------------------------------
   // Hooks para realizar las votaciones
   // (seleccionar jugadores + botón votar + botón pasar turno)
@@ -1914,6 +1925,56 @@ const PantallaJugando: React.FC = () => {
     setVotoRealizado(true);
     setJugadorSeleccionado(null);
   };
+
+  // ---------------------------------------------------------------------------
+  // Administra la muerte del usuario local
+  // ---------------------------------------------------------------------------
+
+  useEffect(() => {
+    if (jugadorLocalMuerto) {
+      logCustom(
+        jornadaActual,
+        etapaActual,
+        "El jugador local ha muerto :,(",
+        jugadoresEstado[indiceUsuario]
+      );
+
+      setMostrarBotones(false);
+      setMostrarBotonVotar(false);
+      setMostrarChat(false);
+      setMostrarHabilidad(false);
+      cerrarChat();
+      cerrarHabilidad();
+      setJugadorSeleccionado(null);
+      setBotellaSeleccionada(null);
+    }
+  }, [jugadorLocalMuerto]);
+
+  // ---------------------------------------------------------------------------
+  // Administrar aviso de jugador desconectado
+  // ---------------------------------------------------------------------------
+
+  useEffect(() => {
+    /**
+     * Envía un log y muestra un error por pantalla cuando un jugador se desconecta.
+     * @param {Object} data - Contiene la información del jugador {nombre: string, id: string}
+     */
+    const handleJugadorSalido = (data: { nombre: string; id: string }) => {
+      logCustom(
+        jornadaActual,
+        etapaActual,
+        `Jugador salido: ${data.nombre} (${data.id})`,
+        jugadoresEstado[indiceUsuario]
+      );
+      mostrarError("El jugador ${data.nombre} se ha desconectado.");
+    };
+
+    socket.on("jugadorSalido", handleJugadorSalido);
+
+    return () => {
+      socket.off("jugadorSalido", handleJugadorSalido);
+    };
+  }, [jugadoresEstado, indiceUsuario, jornadaActual, etapaActual]);
 
   // ---------------------------------------------------------------------------
   // Returns
