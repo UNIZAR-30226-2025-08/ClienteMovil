@@ -257,10 +257,15 @@ export default function SalaPreviaScreen(): JSX.Element {
         return;
       }
 
+      // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      // Comentado porque frontend necesita estar en la sala
+      // para recibir eventos de backend durante la partida
+      /*
       socket.emit("salirSala", {
         idSala,
         idUsuario: usuarioData.id, // el ID real del socket
       });
+      */
 
       console.log("Futura partida:", partidaPendiente.partidaID);
 
@@ -403,7 +408,7 @@ export default function SalaPreviaScreen(): JSX.Element {
     router.push({
       pathname: "/(sala)/invitaramigos",
       params: {
-        idSala: idSala, 
+        idSala: idSala,
       },
     });
   };

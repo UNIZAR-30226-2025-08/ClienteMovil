@@ -16,7 +16,7 @@ import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback } from "react";
-
+import socket from "@/app/(sala)/socket";
 /**
  * Mapa de avatares que relaciona claves con sus respectivas imágenes.
  *
@@ -51,6 +51,7 @@ type Jugador = {
   idUsuario: number;
   nombre: string;
   avatar?: string; // Campo opcional para la URL del avatar
+  enLinea?: boolean; // Campo opcional para el estado de conexión
 };
 
 /**
@@ -85,6 +86,7 @@ export default function AmigosScreen(): JSX.Element {
     idUsuario: number;
     nombre: string;
   } | null>(null);
+  
 
   /**
    * Carga los datos del usuario cuando la pantalla gana foco.
@@ -112,45 +114,83 @@ export default function AmigosScreen(): JSX.Element {
   );
 
   useEffect(() => {
-    if (usuario && usuario.idUsuario) {
-      const fetchListadoAmigos = async () => {
+    const configurarSocket = async () => {
+      if (!usuario || !usuario.idUsuario) return;
+  
+      const idUsuario = usuario.idUsuario;
+  
+      // Conectar el socket si no está conectado
+      if (!socket.connected) {
+        socket.connect();
+      }
+  
+      // Registrar usuario en el socket
+      socket.emit("registrarUsuario", { idUsuario });
+  
+      // Obtener la lista de amigos desde el backend
+      const fetchFriends = async () => {
         try {
           const response = await axios.get(
-            `${BACKEND_URL}/api/amistad/listar/${usuario.idUsuario}`
+            `${BACKEND_URL}/api/amistad/listar/${idUsuario}`
           );
-          console.log("Datos recibidos del backend:", response.data);
-          setAmigos(response.data.amigos);
-          console.log("Lista de amigos (IDs):", response.data.amigos); // Verifica los IDs
-          cargarDetallesAmigos(response.data.amigos); // Llamar a la función para cargar los detalles de los amigos
+          console.log("Amigos recibidos del backend:", response.data.amigos);
+  
+          // Cargar detalles de los amigos y asignar enLinea como false inicialmente
+          const amigosDetalles = await Promise.all(
+            response.data.amigos.map(async (idAmigo: number) => {
+              const responseAmigo = await axios.post(
+                `${BACKEND_URL}/api/usuario/obtener_por_id`,
+                { idUsuario: idAmigo }
+              );
+              const usuarioAmigo = responseAmigo.data.usuario;
+              return { ...usuarioAmigo, enLinea: false }; // Inicializa enLinea como false
+            })
+          );
+  
+          setAmigosDetalles(amigosDetalles);
+          console.log("Detalles iniciales de amigos:", amigosDetalles);
         } catch (error) {
-          console.error("Error al obtener los amigos:", error);
-        } finally {
-          setLoading(false);
+          console.error("Error al obtener la lista de amigos:", error);
         }
       };
-      fetchListadoAmigos();
-    }
+  
+      await fetchFriends();
+  
+      // Solicitar el estado actual de los amigos
+      socket.emit("solicitarEstadoAmigos", { idUsuario });
+  
+      // Escuchar el estado de un amigo individual
+      const handleEstadoAmigo = ({ idUsuario, en_linea }: { idUsuario: number; en_linea: boolean }) => {
+        console.log(`Estado actualizado para amigo ID ${idUsuario}: ${en_linea ? "Conectado" : "Desconectado"}`);
+        setAmigosDetalles((prevDetalles) =>
+          prevDetalles.map((amigo) =>
+            amigo.idUsuario === idUsuario ? { ...amigo, enLinea: en_linea } : amigo
+          )
+        );
+      };
+  
+      // Escuchar el estado de todos los amigos
+      const handleEstadoAmigos = (estadoAmigos: { idUsuario: number; en_linea: boolean }[]) => {
+        console.log("Estado de todos los amigos recibido:", estadoAmigos);
+        setAmigosDetalles((prevDetalles) =>
+          prevDetalles.map((amigo) => {
+            const estado = estadoAmigos.find((e) => e.idUsuario === amigo.idUsuario);
+            return estado ? { ...amigo, enLinea: estado.en_linea } : amigo;
+          })
+        );
+      };
+  
+      socket.on("estadoAmigo", handleEstadoAmigo);
+      socket.on("estadoAmigos", handleEstadoAmigos);
+  
+      return () => {
+        socket.off("estadoAmigo", handleEstadoAmigo);
+        socket.off("estadoAmigos", handleEstadoAmigos);
+      };
+    };
+  
+    configurarSocket();
   }, [usuario]);
-
-  // Función para obtener los detalles de cada amigo
-  const cargarDetallesAmigos = async (idsAmigos: number[]) => {
-    try {
-      const amigosDetalles = await Promise.all(
-        idsAmigos.map(async (idAmigo) => {
-          const response = await axios.post(
-            `${BACKEND_URL}/api/usuario/obtener_por_id`,
-            {
-              idUsuario: idAmigo,
-            }
-          );
-          return response.data.usuario; // Aquí obtenemos el detalle de cada amigo
-        })
-      );
-      setAmigosDetalles(amigosDetalles); // Almacenamos los detalles completos de los amigos
-    } catch (error) {
-      console.error("Error al obtener los detalles de los amigos:", error);
-    }
-  };
 
   // Nueva función para enviar solicitud de amistad:
   const enviarSolicitud = async () => {
@@ -308,6 +348,15 @@ export default function AmigosScreen(): JSX.Element {
                     }
                     style={styles.imagenPerfil}
                   />
+
+                   {/* Círculo de estado de conexión */}
+                  <View
+                    style={[
+                      styles.estadoConexion,
+                      amigo.enLinea ? styles.enLinea : styles.desconectado,
+                    ]}
+                  />
+
                   <Text style={styles.nombre}>{amigo.nombre}</Text>
                   <TouchableOpacity
                     style={styles.botonEliminar}
@@ -468,5 +517,23 @@ const styles = StyleSheet.create({
     left: 230,
     top: "50%",
     transform: [{ translateY: -20 }],
+  },
+
+  estadoConexion: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,  
+    left: 33,
+    position: "absolute",  
+    bottom: 0,  
+    right: 0, 
+  },
+
+  enLinea: {
+    backgroundColor: "green",  // Círculo verde para conectado
+  },
+
+  desconectado: {
+    backgroundColor: "gray",  // Círculo gris para desconectado
   },
 });

@@ -8,12 +8,14 @@ import { CONSTANTES } from "../../../utils/jugando/constantes";
  * @param {boolean} activar - Bandera para activar el temporizador.
  */
 const useTemporizador = (tiempoInicial = 30, activar = false) => {
-  // Inicializamos el tiempo restante con el valor actual de tiempoInicial.
+  // Inicializamos el tiempo restante y el valor máximo con el valor actual de tiempoInicial.
+  const [tiempoMax, setTiempoMax] = useState(tiempoInicial);
   const [tiempoRestante, setTiempoRestante] = useState(tiempoInicial);
   const [temporizadorActivo, setTemporizadorActivo] = useState(activar);
 
   // Si el valor de tiempoInicial cambia, actualizamos el estado para reflejar el nuevo valor.
   useEffect(() => {
+    setTiempoMax(tiempoInicial);
     setTiempoRestante(tiempoInicial);
   }, [tiempoInicial]);
 
@@ -30,11 +32,21 @@ const useTemporizador = (tiempoInicial = 30, activar = false) => {
 
   /**
    * @function reiniciarTemporizador
-   * @description Reinicia el temporizador al valor actual de tiempoInicial y lo activa.
+   * @description Reinicia el temporizador al valor actual del tiempo máximo y lo activa.
    */
   const reiniciarTemporizador = () => {
-    setTiempoRestante(tiempoInicial);
+    setTiempoRestante(tiempoMax);
     setTemporizadorActivo(true);
+  };
+
+  /**
+   * @function actualizarMaxTiempo
+   * @description Cambia el valor máximo del temporizador y reinicia el tiempo restante.
+   * @param {number} nuevoTiempo - Nuevo valor del temporizador.
+   */
+  const actualizarMaxTiempo = (nuevoTiempo: number) => {
+    setTiempoMax(nuevoTiempo);
+    setTiempoRestante(nuevoTiempo);
   };
 
   return {
@@ -42,6 +54,7 @@ const useTemporizador = (tiempoInicial = 30, activar = false) => {
     reiniciarTemporizador,
     setTemporizadorActivo,
     temporizadorActivo,
+    actualizarMaxTiempo,
   };
 };
 
