@@ -35,6 +35,7 @@ interface ChatComponentProps {
   socket: Socket; // Socket e idSala para la comunicación con backend
   idSala: string;
   usuarioID: string; // Datos del usuario para obtener su ID
+  usuarioNombre: string;
 }
 
 /**
@@ -50,6 +51,7 @@ const ChatComponent: React.FC<ChatComponentProps> = ({
   socket,
   idSala,
   usuarioID,
+  usuarioNombre,
 }) => {
   const [mensaje, setMensaje] = useState(""); // 🔹 Estado para almacenar el mensaje
 
@@ -63,10 +65,13 @@ const ChatComponent: React.FC<ChatComponentProps> = ({
 
     console.log("Test usuarioID", usuarioID);
 
+    console.log("Test usuarioNombre", usuarioNombre);
+
     // 🔹 Emitir el mensaje al chat
     socket.emit("enviarMensaje", {
       idPartida: idSala,
       idJugador: usuarioID,
+      nombreJugador: usuarioNombre,
       mensaje: mensaje,
     });
 

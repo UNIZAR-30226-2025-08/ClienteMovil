@@ -83,12 +83,14 @@ const PantallaJugando: React.FC = () => {
     Corben: require("@/assets/fonts/corben-regular.ttf"),
   });
 
-  const { idSala, salaData, rol, usuarioID } = useLocalSearchParams<{
-    idSala: string;
-    salaData: string;
-    rol: string;
-    usuarioID: string;
-  }>();
+  const { idSala, salaData, rol, usuarioID, usuarioNombre } =
+    useLocalSearchParams<{
+      idSala: string;
+      salaData: string;
+      rol: string;
+      usuarioID: string;
+      usuarioNombre: string;
+    }>();
   const sala = JSON.parse(salaData);
 
   // ---------------------------------------------------------------------------
@@ -979,22 +981,30 @@ const PantallaJugando: React.FC = () => {
   // Conexión del chat con el backend
   // ---------------------------------------------------------------------------
 
-  /**
-   * Texto
-   *
-   */
-  socket.on("mensajeChat", (data) => {
-    console.log("LLega el mensaje a Frontend", data);
+  useEffect(() => {
+    /**
+     * Texto
+     *
+     */
+    socket.on("mensajeChat", (data) => {
+      console.log("Llega el mensaje a Frontend", data);
 
-    // Crear un nuevo objeto mensaje asegurando que tenga la estructura correcta
-    const nuevoMensaje: MensajeChat = {
-      id: mensajes.length + 1, // Asignar un ID incremental
-      texto: data.chat,
+      var mensaje = data.nombre + ": " + data.mensaje;
+
+      console.log("Tamaño de mensajes.length", mensajes.length);
+
+      const nuevoMensaje: MensajeChat = {
+        id: Date.now() + Math.random(),
+        texto: mensaje,
+      };
+
+      setMensajes((prevMensajes) => [...prevMensajes, nuevoMensaje]);
+    });
+
+    return () => {
+      socket.off("mensajeChat");
     };
-
-    // Agregar el nuevo mensaje a la lista
-    setMensajes((prevMensajes) => [...prevMensajes, nuevoMensaje]);
-  });
+  }, [idSala]);
 
   // ---------------------------------------------------------------------------
   // Fases de la partida según dicta el backend
@@ -2209,6 +2219,7 @@ const PantallaJugando: React.FC = () => {
             socket={socket} // Aquí pasas el socket
             idSala={idSala} // Aquí pasas el idSala
             usuarioID={usuarioID} // Aquí pasas el usuarioData
+            usuarioNombre={usuarioNombre}
           />
         )}
 
