@@ -91,7 +91,11 @@ export default function BuscarSalasScreen(): JSX.Element {
       const idUsuario = await AsyncStorage.getItem("idUsuario");
       const avatarUsuario = await AsyncStorage.getItem("avatarUsuario");
       if (nombreUsuario && idUsuario) {
-        setUsuarioData({ id: idUsuario, nombre: nombreUsuario, avatar: avatarUsuario ?? "avatar1"});
+        setUsuarioData({
+          id: idUsuario,
+          nombre: nombreUsuario,
+          avatar: avatarUsuario ?? "avatar1",
+        });
       }
     };
 
@@ -107,15 +111,19 @@ export default function BuscarSalasScreen(): JSX.Element {
       setSalaSeleccionada(sala);
       setMostrarModal(true);
     } else if (usuarioData) {
-      socket.emit("unirseSala", { 
-        idSala: sala.id, 
+      socket.emit("unirseSala", {
+        idSala: sala.id,
         usuario: {
           id: usuarioData.id,
           nombre: usuarioData.nombre,
           avatar: usuarioData.avatar,
         },
       });
-      router.push({ pathname: "/(sala)/sala", params: { idSala: sala.id } });
+      // Se envía la data completa de la sala, incluida la propiedad maxJugadores
+      router.push({
+        pathname: "/(sala)/sala",
+        params: { idSala: sala.id, salaData: JSON.stringify(sala) },
+      });
     } else {
       Alert.alert("Usuario no disponible", "No hay datos de usuario.");
     }
@@ -140,9 +148,13 @@ export default function BuscarSalasScreen(): JSX.Element {
         contrasena: password,
       });
       setMostrarModal(false);
+      // Envía además la data completa de la sala
       router.push({
         pathname: "/(sala)/sala",
-        params: { idSala: salaSeleccionada.id },
+        params: {
+          idSala: salaSeleccionada.id,
+          salaData: JSON.stringify(salaSeleccionada),
+        },
       });
     } else {
       Alert.alert("Contraseña incorrecta", "Por favor, intenta de nuevo.");
@@ -156,26 +168,35 @@ export default function BuscarSalasScreen(): JSX.Element {
           {/* Título principal */}
           <Text style={styles.titulo}>BUSCAR{"\n"}SALAS</Text>
 
-          {salas.map((sala, index) => (
-            <TouchableOpacity
-              key={index}
-              style={styles.salaContainer}
-              onPress={() => handleSalaPress(sala)}
-            >
-              <Text style={styles.texto}>
-                <Text style={styles.label}>ESTADO: </Text> {sala.estado}
-              </Text>
-              <Text style={styles.texto}>
-                <Text style={styles.label}>TIPO: </Text> {sala.tipo}
-              </Text>
-              {sala.privada && (
-                <Image source={iconoCandado} style={styles.iconoCandado} />
-              )}
-              <Text style={styles.texto}>
-                <Text style={styles.label}>NOMBRE: </Text> {sala.nombre}
-              </Text>
-            </TouchableOpacity>
-          ))}
+          {salas.map((sala, index) => {
+            // Obtén la cantidad actual y el máximo de jugadores
+            const currentPlayers = sala.jugadores ? sala.jugadores.length : 0;
+            const maxPlayers = sala.maxJugadores;
+            return (
+              <TouchableOpacity
+                key={index}
+                style={styles.salaContainer}
+                onPress={() => handleSalaPress(sala)}
+              >
+                <Text style={styles.texto}>
+                  <Text style={styles.label}>ESTADO: </Text> {sala.estado}
+                </Text>
+                <Text style={styles.texto}>
+                  <Text style={styles.label}>TIPO: </Text> {sala.tipo}
+                </Text>
+                {sala.privada && (
+                  <Image source={iconoCandado} style={styles.iconoCandado} />
+                )}
+                <Text style={styles.texto}>
+                  <Text style={styles.label}>NOMBRE: </Text> {sala.nombre}
+                </Text>
+                <Text style={styles.texto}>
+                  <Text style={styles.label}>JUGADORES: </Text> {currentPlayers}{" "}
+                  / {maxPlayers}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
 
           {/* Botón para regresar */}
           <TouchableOpacity

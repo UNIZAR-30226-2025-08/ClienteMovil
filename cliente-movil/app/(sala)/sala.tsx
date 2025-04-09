@@ -11,7 +11,6 @@ import {
 import { useRouter, useLocalSearchParams } from "expo-router";
 import socket from "@/app/(sala)/socket"; // Módulo de conexión
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import PantallaJugando from "../(jugando)/jugando"; // Permite acceso al paso de rol
 
 /**
  * Tipo de datos para representar un jugador dentro de la sala.
@@ -48,7 +47,10 @@ export default function SalaPreviaScreen(): JSX.Element {
     idSala: string;
     salaData: string;
   }>();
-  const salaInfo = salaData ? JSON.parse(salaData) : null;
+
+  // Parsea la data de la sala y obtiene el maximo de jugadores (por defecto 8)
+  const salaInfo = salaData ? JSON.parse(salaData) : {};
+  const totalSlots = salaInfo?.maxJugadores || 8;
 
   console.log("Información de la sala:", salaInfo);
 
@@ -101,10 +103,6 @@ export default function SalaPreviaScreen(): JSX.Element {
   useEffect(() => {
     if (salaData) {
       const sala = JSON.parse(salaData);
-      /*console.log(
-        "📋 Datos de la sala recibidos:",
-        JSON.stringify(sala, null, 2)
-      );*/
       setPlayers(
         sala.jugadores.map((j: any) => ({
           id: j.id,
@@ -257,16 +255,6 @@ export default function SalaPreviaScreen(): JSX.Element {
         return;
       }
 
-      // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-      // Comentado porque frontend necesita estar en la sala
-      // para recibir eventos de backend durante la partida
-      /*
-      socket.emit("salirSala", {
-        idSala,
-        idUsuario: usuarioData.id, // el ID real del socket
-      });
-      */
-
       console.log("Futura partida:", partidaPendiente.partidaID);
 
       router.push({
@@ -313,7 +301,7 @@ export default function SalaPreviaScreen(): JSX.Element {
   /**
    * Verifica si la cantidad de jugadores es igual al número máximo de jugadores.
    */
-  const playersComplete = players.length === salaInfo?.maxJugadores;
+  const playersComplete = players.length === totalSlots;
 
   /**
    * Maneja el botón "Iniciar Partida".
@@ -473,13 +461,11 @@ export default function SalaPreviaScreen(): JSX.Element {
   /**
    * Crea espacios vacíos para representar los slots disponibles en la sala.
    */
-  const totalSlots = salaInfo?.maxJugadores || 8; // Si no hay data, se queda en 8 por defecto
   const emptySlotsCount = totalSlots - players.length;
   const emptySlots = Array.from({ length: emptySlotsCount }, (_, i) => ({
     id: `empty-${i}`,
     name: "Vacío",
     avatar: "avatar1",
-    level: 0,
     isReady: false,
   }));
 
