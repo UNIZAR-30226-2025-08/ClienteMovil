@@ -17,9 +17,16 @@ const { TEXTOS, IMAGENES } = CONSTANTES;
 interface PropsBarraSuperior {
   vivos: number;
   lobos: number;
+  jornada: number;
+  etapa: string;
 }
 
-const BarraSuperior: React.FC<PropsBarraSuperior> = ({ vivos, lobos }) => (
+const BarraSuperior: React.FC<PropsBarraSuperior> = ({
+  vivos,
+  lobos,
+  jornada,
+  etapa,
+}) => (
   // Contenedor principal de la barra superior
   <View style={estilos.contenedorBarraSuperior}>
     {/* Sección izquierda: Información del pueblo */}
@@ -35,8 +42,10 @@ const BarraSuperior: React.FC<PropsBarraSuperior> = ({ vivos, lobos }) => (
 
     {/* Sección central: Información de la jornada */}
     <View style={estilos.seccionBarraSuperiorCentro}>
-      <Text style={estilos.textoBarraSuperiorTitulo}>{TEXTOS.JORNADA}</Text>
-      <Text style={estilos.textoBarraSuperiorSub}>{TEXTOS.DIA}</Text>
+      <Text style={estilos.textoBarraSuperiorTitulo}>JORNADA {jornada}</Text>
+      <Text style={estilos.textoBarraSuperiorSub}>
+        {etapa} {jornada}
+      </Text>
     </View>
 
     {/* Sección derecha: Información de los lobos */}

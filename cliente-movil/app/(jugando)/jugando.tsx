@@ -2291,7 +2291,12 @@ const PantallaJugando: React.FC = () => {
             {/* Componente BarraSuperior: 
                 Muestra información relevante en la parte superior de la pantalla, 
                 como el estado del juego o la identificación del rol. */}
-            <BarraSuperior vivos={vivos} lobos={lobosVivos} />
+            <BarraSuperior
+              vivos={vivos}
+              lobos={lobosVivos}
+              jornada={jornadaActual}
+              etapa={etapaActual}
+            />
 
             {/*
               Temporizador:
