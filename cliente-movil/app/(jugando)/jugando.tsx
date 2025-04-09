@@ -890,6 +890,10 @@ const PantallaJugando: React.FC = () => {
     setMostrarHabilidad(false);
   };
 
+  // ---------------------------------------------------------------------------
+  // Funciones que envían a backend acciones especiales de los roles
+  // ---------------------------------------------------------------------------
+
   /**
    * Controla la selección de la pocima de vida.
    * Si hay un jugador seleccionado, no se ha utilizado la poción de vida en ningún momento
@@ -933,6 +937,7 @@ const PantallaJugando: React.FC = () => {
     }
 
     if (JugadorSeleccionado !== null) {
+      // Llamenme precavido
       socket.emit("usaPocionBruja", {
         idPartida: idSala,
         idJugador: usuarioID,
@@ -993,6 +998,7 @@ const PantallaJugando: React.FC = () => {
     }
 
     if (JugadorSeleccionado !== null) {
+      // Llamenme precavido
       socket.emit("usaPocionBruja", {
         idPartida: idSala,
         idJugador: usuarioID,
@@ -1143,6 +1149,8 @@ const PantallaJugando: React.FC = () => {
       actualizarMaxTiempo(25);
 
       // Animación épica
+      cerrarChat();
+      cerrarHabilidad();
       EFECTO_PANTALLA_OSCURA = true;
       setModoDiaNoche(EFECTO_PANTALLA_OSCURA);
       setMostrarBotones(false);
@@ -1231,6 +1239,8 @@ const PantallaJugando: React.FC = () => {
       actualizarMaxTiempo(15);
 
       // Animación épica
+      cerrarChat();
+      cerrarHabilidad();
       EFECTO_PANTALLA_OSCURA = true;
       setModoDiaNoche(EFECTO_PANTALLA_OSCURA);
       setMostrarBotones(false);
@@ -1305,6 +1315,8 @@ const PantallaJugando: React.FC = () => {
       actualizarMaxTiempo(30);
 
       // Animación épica
+      cerrarChat();
+      cerrarHabilidad();
       EFECTO_PANTALLA_OSCURA = true;
       setModoDiaNoche(EFECTO_PANTALLA_OSCURA);
       setMostrarBotones(false);
@@ -1395,6 +1407,8 @@ const PantallaJugando: React.FC = () => {
       actualizarMaxTiempo(15);
 
       // Animación épica
+      cerrarChat();
+      cerrarHabilidad();
       EFECTO_PANTALLA_OSCURA = true;
       setModoDiaNoche(EFECTO_PANTALLA_OSCURA);
       setMostrarBotones(false);
@@ -1437,6 +1451,8 @@ const PantallaJugando: React.FC = () => {
       actualizarMaxTiempo(60);
 
       // Animación épica
+      cerrarChat();
+      cerrarHabilidad();
       EFECTO_PANTALLA_OSCURA = true;
       setModoDiaNoche(EFECTO_PANTALLA_OSCURA);
       setMostrarBotones(false);
@@ -1540,6 +1556,8 @@ const PantallaJugando: React.FC = () => {
       );
 
       // Animación épica
+      cerrarChat();
+      cerrarHabilidad();
       EFECTO_PANTALLA_OSCURA = true;
       setModoDiaNoche(EFECTO_PANTALLA_OSCURA);
       setMostrarBotones(false);
@@ -1659,7 +1677,7 @@ const PantallaJugando: React.FC = () => {
         jugadoresEstado[indiceUsuario]
       );
       setMensajeEventoVotacionDiurna(data.mensaje);
-      // TODO ANIMACION EMPATE DIURNO 2
+      // TODO!!! ANIMACION EMPATE DIURNO 1
     });
 
     // Evento: Segundo empate en la votación diurna
@@ -1671,7 +1689,7 @@ const PantallaJugando: React.FC = () => {
         jugadoresEstado[indiceUsuario]
       );
       setMensajeEventoVotacionDiurna(data.mensaje);
-      // TODO ANIMACION EMPATE DIURNO 2
+      // TODO!!! ANIMACION EMPATE DIURNO 2
     });
 
     // Evento: Resultado final de la votación diurna
@@ -2037,6 +2055,11 @@ const PantallaJugando: React.FC = () => {
         "El jugador local ha muerto :,(",
         jugadoresEstado[indiceUsuario]
       );
+
+      // TODO!!! Habrá que mostrar las animaciones correspondientes,
+      // llamar a la habilidad si es cazador,
+      // designar un nuevo alguacil,
+      //  si es alguacil manejar el que te pueda revivir la bruja
 
       setMostrarBotones(false);
       setMostrarBotonVotar(false);
