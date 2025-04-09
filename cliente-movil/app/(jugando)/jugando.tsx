@@ -241,6 +241,10 @@ const PantallaJugando: React.FC = () => {
   // TODO
   const [botellaMuerteUsada, setBotellaMuerteUsada] = useState<boolean>(false);
 
+  //TODO
+  const [botellaUsadaEnEsteTurno, setBotellaUsadaEnEsteTurno] =
+    useState<boolean>(false);
+
   /**
    * Registra los votos de cada jugador para pasarselos al circulo de jugadores.
    * @warning Actualmente nadie maneja esto, siempre es 0 !!!!!!!!!!!!!!!!!!!!
@@ -332,7 +336,7 @@ const PantallaJugando: React.FC = () => {
     duracionFadeIn,
     duracionEspera,
     duracionFadeOut,
-    numAnimaciones: 2,
+    numAnimaciones: 1,
     start: mostrarAnimacionInicioVotacionAlguacil,
   });
 
@@ -402,7 +406,7 @@ const PantallaJugando: React.FC = () => {
     duracionEspera,
     duracionFadeOut,
     numAnimaciones: 1,
-    start: mostrarAnimacionComponentesBrujaSeDespierta,
+    start: mostrarAnimacionComponenteJugadoresSeDespiertan,
   });
 
   /**
@@ -878,6 +882,27 @@ const PantallaJugando: React.FC = () => {
   const manejarSeleccionBotellaVida = () => {
     setBotellaSeleccionada((prev) => (prev === "vida" ? null : "vida"));
 
+    const jugadorObjetivo = jugadoresEstado[JugadorSeleccionado!];
+    if (JugadorSeleccionado === null) {
+      logCustom(
+        jornadaActual,
+        etapaActual,
+        `Intento de uso de botella de vida fallido: no hay un usuario seleccionado`,
+        jugadoresEstado[indiceUsuario]
+      );
+      mostrarError("Necesitas seleccionar a un jugador para usar las pocimas");
+      return;
+    }
+    if (botellaUsadaEnEsteTurno) {
+      logCustom(
+        jornadaActual,
+        etapaActual,
+        `Intento de uso de botella de vida fallido: el usuario ya ha usado una botella este turno`,
+        jugadoresEstado[indiceUsuario]
+      );
+      mostrarError("Ya has usado una pocima este turno");
+      return;
+    }
     if (botellaVidaUsada) {
       logCustom(
         jornadaActual,
@@ -885,11 +910,10 @@ const PantallaJugando: React.FC = () => {
         `Intento de uso de botella de vida fallido: el usuario ya ha usado la botella de vida`,
         jugadoresEstado[indiceUsuario]
       );
-      mostrarError("Ya has usado la pocima de vida");
+      mostrarError("Ya has usado la pocima de vida en otro turno");
       return;
     }
 
-    const jugadorObjetivo = jugadoresEstado[JugadorSeleccionado!];
     if (JugadorSeleccionado !== null) {
       socket.emit("usaPocionBruja", {
         idPartida: idSala,
@@ -897,15 +921,42 @@ const PantallaJugando: React.FC = () => {
         tipo: "curar",
         idObjetivo: jugadorObjetivo.id,
       });
+      logCustom(
+        jornadaActual,
+        etapaActual,
+        `Poción de curar usada`,
+        jugadoresEstado[indiceUsuario]
+      );
+      setBotellaVidaUsada(true);
+      setBotellaUsadaEnEsteTurno(true);
     }
-
-    setBotellaVidaUsada(true);
   };
 
   // TODO comentar
   const manejarSeleccionBotellaMuerte = () => {
     setBotellaSeleccionada((prev) => (prev === "muerte" ? null : "muerte"));
 
+    const jugadorObjetivo = jugadoresEstado[JugadorSeleccionado!];
+    if (JugadorSeleccionado === null) {
+      logCustom(
+        jornadaActual,
+        etapaActual,
+        `Intento de uso de botella de vida fallido: no hay un usuario seleccionado`,
+        jugadoresEstado[indiceUsuario]
+      );
+      mostrarError("Necesitas seleccionar a un jugador para usar las pocimas");
+      return;
+    }
+    if (botellaUsadaEnEsteTurno) {
+      logCustom(
+        jornadaActual,
+        etapaActual,
+        `Intento de uso de botella de vida fallido: el usuario ya ha usado una botella este turno`,
+        jugadoresEstado[indiceUsuario]
+      );
+      mostrarError("Ya has usado una pocima este turno");
+      return;
+    }
     if (botellaMuerteUsada) {
       logCustom(
         jornadaActual,
@@ -913,11 +964,10 @@ const PantallaJugando: React.FC = () => {
         `Intento de uso de botella de muerte fallido: el usuario ya ha usado la botella de muerte`,
         jugadoresEstado[indiceUsuario]
       );
-      mostrarError("Ya has usado la pocima de muerte");
+      mostrarError("Ya has usado la pocima de muerte en otro turno");
       return;
     }
 
-    const jugadorObjetivo = jugadoresEstado[JugadorSeleccionado!];
     if (JugadorSeleccionado !== null) {
       socket.emit("usaPocionBruja", {
         idPartida: idSala,
@@ -925,9 +975,16 @@ const PantallaJugando: React.FC = () => {
         tipo: "matar",
         idObjetivo: jugadorObjetivo.id,
       });
+      logCustom(
+        jornadaActual,
+        etapaActual,
+        `Poción de matar usada`,
+        jugadoresEstado[indiceUsuario]
+      );
+      mostrarError("Ya has usado una pocima este turno");
+      setBotellaMuerteUsada(true);
+      setBotellaUsadaEnEsteTurno(true);
     }
-
-    setBotellaMuerteUsada(true);
   };
 
   // ---------------------------------------------------------------------------
@@ -1080,7 +1137,7 @@ const PantallaJugando: React.FC = () => {
         setVotoRealizado(false);
         setPasoTurno(false);
         setJugadorSeleccionado(null);
-      }, 8000); // 2 animaciones de 8000 ms
+      }, 4000); // 1 animaciones de 4000 ms
     };
 
     /**
@@ -1099,10 +1156,6 @@ const PantallaJugando: React.FC = () => {
         `Evento recibido: nocheComienza - ${JSON.stringify(datos)}`,
         jugadoresEstado[indiceUsuario]
       );
-
-      // Animación épica
-      EFECTO_PANTALLA_OSCURA = true;
-      setModoDiaNoche(EFECTO_PANTALLA_OSCURA);
 
       setEtapaActual("Noche");
       setJornadaActual(jornadaActual + 1); // Las jornadas empiezan por la noche
@@ -1153,6 +1206,10 @@ const PantallaJugando: React.FC = () => {
       // El timer visual para el vidente será de 15 segundos tras su reinicio
       actualizarMaxTiempo(15);
 
+      // Animación épica
+      EFECTO_PANTALLA_OSCURA = true;
+      setModoDiaNoche(EFECTO_PANTALLA_OSCURA);
+      setMostrarBotones(false);
       if (hayVidenteViva) {
         // Animación épica
         // (animaciones separadas porque no siempre se concatenan las 3, ver el siguiente else)
@@ -1223,6 +1280,10 @@ const PantallaJugando: React.FC = () => {
       // El timer visual para los lobos será de 30 segundos tras su reinicio
       actualizarMaxTiempo(30);
 
+      // Animación épica
+      EFECTO_PANTALLA_OSCURA = true;
+      setModoDiaNoche(EFECTO_PANTALLA_OSCURA);
+      setMostrarBotones(false);
       if (hayVidenteViva) {
         logCustom(
           jornadaActual,
@@ -1277,12 +1338,6 @@ const PantallaJugando: React.FC = () => {
           setJugadorSeleccionado(null);
         }, 4000); // 1 animación de 4000 ms
       }
-
-      // Reiniciar efectios visuales de cualquier votación previa
-      // setVotos(Array(CONSTANTES.NUMERICAS.CANTIDAD_IMAGENES).fill(0));
-      setVotoRealizado(false);
-      setPasoTurno(false);
-      setJugadorSeleccionado(null);
     };
 
     /**
@@ -1350,6 +1405,9 @@ const PantallaJugando: React.FC = () => {
         `Evento recibido: diaComienza - ${JSON.stringify(datos)}`,
         jugadoresEstado[indiceUsuario]
       );
+
+      // Resetear el flag que no le permite a la bruja usar más de 1 poción por turno
+      setBotellaUsadaEnEsteTurno(false);
 
       // El timer visual para los días será de 60 segundos tras su reinicio
       actualizarMaxTiempo(60);
@@ -1719,7 +1777,10 @@ const PantallaJugando: React.FC = () => {
    */
   const administrarSeleccionJugadorVotacion = (index: number): void => {
     // Solo los lobos pueden seleccionar jugadores durante la noche
-    if (!mostrarBotonVotar) {
+    if (
+      !mostrarBotonVotar &&
+      !(rolUsuario == "Bruja" && backendState === "habilidadBruja") // La bruja tiene que poder seleccionar jugadores pero no tiene botón de votar
+    ) {
       logCustom(
         jornadaActual,
         etapaActual,
@@ -1751,6 +1812,20 @@ const PantallaJugando: React.FC = () => {
       mostrarError(
         "Solo la bruja puede seleccionar jugadores durante el turno de la bruja"
       );
+      return;
+    }
+    if (
+      rolUsuario === "Bruja" &&
+      backendState === "habilidadBruja" &&
+      botellaUsadaEnEsteTurno
+    ) {
+      logCustom(
+        jornadaActual,
+        etapaActual,
+        `Intento de selección de usuario fallido: La bruja ya ha utilizado una pocima este turno`,
+        jugadoresEstado[indiceUsuario]
+      );
+      mostrarError("Ya has utilizado una pocima en este turno");
       return;
     }
     if (pasoTurno) {
@@ -2055,15 +2130,7 @@ const PantallaJugando: React.FC = () => {
           <AnimacionGenerica
             opacity={opacitiesInicioVotacionAlguacil[0]}
             mostrarComponente={true}
-            texto="LOS JUGADORES DEBEN ELIMINAR DE MANERA CONSENSUADA A UN SOPECHOSO DE SER HOMBRE LOBO"
-          />
-        )}
-
-        {mostrarAnimacionInicioVotacionAlguacil && (
-          <AnimacionGenerica
-            opacity={opacitiesInicioVotacionAlguacil[1]}
-            mostrarComponente={true}
-            texto="EMPIEZAN LAS VOTACIONES DE ALGUACIL"
+            texto="LOS JUGADORES DEBEN ELEGIR DE MANERA CONSENSUADA QUIEN EJERCERÁ DE ALGUACIL"
           />
         )}
 
