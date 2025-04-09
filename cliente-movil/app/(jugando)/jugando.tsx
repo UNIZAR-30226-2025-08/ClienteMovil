@@ -230,18 +230,30 @@ const PantallaJugando: React.FC = () => {
     null
   );
 
-  // TODO
+  /**
+   * Guarda la selección actual del usuario local de las pocimas de bruja.
+   * @type {string | null}
+   */
   const [botellaSeleccionada, setBotellaSeleccionada] = useState<
     "vida" | "muerte" | null
   >(null);
 
-  // TODO
+  /**
+   * Controla si el usuario local ya ha usado su botella de vida.
+   * @type {boolean}
+   */
   const [botellaVidaUsada, setBotellaVidaUsada] = useState<boolean>(false);
 
-  // TODO
+  /**
+   * Controla si el usuario local ya ha usado su botella de muerte.
+   * @type {boolean}
+   */
   const [botellaMuerteUsada, setBotellaMuerteUsada] = useState<boolean>(false);
 
-  //TODO
+  /**
+   * Controla si el usuario ya ha usado su botella (cualquiera de las 2) en este turno,
+   * @type {boolean}
+   */
   const [botellaUsadaEnEsteTurno, setBotellaUsadaEnEsteTurno] =
     useState<boolean>(false);
 
@@ -878,7 +890,13 @@ const PantallaJugando: React.FC = () => {
     setMostrarHabilidad(false);
   };
 
-  // TODO comentar
+  /**
+   * Controla la selección de la pocima de vida.
+   * Si hay un jugador seleccionado, no se ha utilizado la poción de vida en ningún momento
+   * y no se ha utilizado otra poción (la de muerte en este turno) utiliza la pocima de vida.
+   *
+   * @returns {void}
+   */
   const manejarSeleccionBotellaVida = () => {
     setBotellaSeleccionada((prev) => (prev === "vida" ? null : "vida"));
 
@@ -932,7 +950,13 @@ const PantallaJugando: React.FC = () => {
     }
   };
 
-  // TODO comentar
+  /**
+   * Controla la selección de la pocima de muerte.
+   * Si hay un jugador seleccionado, no se ha utilizado la poción de vida en ningún momento
+   * y no se ha utilizado otra poción (la de vida en este turno) utiliza la pocima de muerte.
+   *
+   * @returns {void}
+   */
   const manejarSeleccionBotellaMuerte = () => {
     setBotellaSeleccionada((prev) => (prev === "muerte" ? null : "muerte"));
 
@@ -941,7 +965,7 @@ const PantallaJugando: React.FC = () => {
       logCustom(
         jornadaActual,
         etapaActual,
-        `Intento de uso de botella de vida fallido: no hay un usuario seleccionado`,
+        `Intento de uso de botella de muerte fallido: no hay un usuario seleccionado`,
         jugadoresEstado[indiceUsuario]
       );
       mostrarError("Necesitas seleccionar a un jugador para usar las pocimas");
@@ -951,7 +975,7 @@ const PantallaJugando: React.FC = () => {
       logCustom(
         jornadaActual,
         etapaActual,
-        `Intento de uso de botella de vida fallido: el usuario ya ha usado una botella este turno`,
+        `Intento de uso de botella de muerte fallido: el usuario ya ha usado una botella este turno`,
         jugadoresEstado[indiceUsuario]
       );
       mostrarError("Ya has usado una pocima este turno");
@@ -2155,7 +2179,7 @@ const PantallaJugando: React.FC = () => {
           <AnimacionGenerica
             opacity={opacidadesVidenteYNoche[0]}
             mostrarComponente={mostrarResultadosVotacionAlguacil}
-            texto={`RESULTADOS DE LA VOTACIÓN DE ALGUACIL:`} //TODO, no pone quién ha ganado ${mensajeEventoAlguacil}`}
+            texto={`RESULTADOS DE LA VOTACIÓN DE ALGUACIL HABRÁ QUE CONECTARLO DE ALGUNA MANERA:`}
           />
         )}
 
