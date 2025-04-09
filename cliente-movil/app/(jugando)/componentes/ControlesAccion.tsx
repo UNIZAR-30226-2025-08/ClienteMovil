@@ -3,10 +3,6 @@ import { View, TouchableOpacity, Text, Image } from "react-native";
 import { CONSTANTES } from "../../../utils/jugando/constantes";
 import { estilos } from "../../../utils/jugando/jugando.styles";
 
-/**
- * @interface ControlesAccionProps
- * @description Propiedades que recibe el componente ControlesAccion.
- */
 interface ControlesAccionProps {
   habilidadInfo: any;
   abrirHabilidad: () => void;
@@ -14,9 +10,16 @@ interface ControlesAccionProps {
   votarAJugador: () => void;
   mostrarBotonesAccion: () => boolean;
   votoRealizado: boolean;
-  manejarPasarTurno: () => void; // Para manejar la acción de pasar turno
-  turnoPasado: boolean; // Para indicar si el turno se ha pasado
-  mostrarVotacion: boolean; // Nuevo prop para controlar la visibilidad de los botones de votar y pasar turno
+  manejarPasarTurno: () => void;
+  turnoPasado: boolean;
+  mostrarVotacion: boolean;
+  mostrarBotellaVida: boolean;
+  mostrarBotellaMuerte: boolean;
+  botellaVidaUsada: boolean;
+  botellaMuerteUsada: boolean;
+  manejarBotellaVida: () => void;
+  manejarBotellaMuerte: () => void;
+  botellaSeleccionada: "vida" | "muerte" | null;
 }
 
 /**
@@ -33,6 +36,13 @@ const ControlesAccion: React.FC<ControlesAccionProps> = ({
   manejarPasarTurno,
   turnoPasado,
   mostrarVotacion,
+  mostrarBotellaVida,
+  mostrarBotellaMuerte,
+  botellaVidaUsada,
+  botellaMuerteUsada,
+  manejarBotellaVida,
+  manejarBotellaMuerte,
+  botellaSeleccionada,
 }) => {
   return (
     <>
@@ -88,6 +98,47 @@ const ControlesAccion: React.FC<ControlesAccionProps> = ({
             <Text style={estilos.textoBoton}>
               {CONSTANTES.TEXTOS.BOTON_VOTAR}
             </Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
+      {/* Contenedor de las botellas */}
+      {mostrarBotonesAccion() && mostrarBotellaMuerte && mostrarBotellaVida && (
+        <View
+          style={
+            mostrarVotacion
+              ? estilos.contenedorBotellas
+              : estilos.contenedorBotellasSinVotar
+          }
+        >
+          <TouchableOpacity
+            style={[
+              estilos.botonBotella,
+              !mostrarBotellaVida && estilos.botonOculto,
+              botellaVidaUsada && estilos.botonUsado,
+              botellaSeleccionada === "vida" && estilos.botonSeleccionado,
+            ]}
+            onPress={manejarBotellaVida}
+          >
+            <Image
+              source={require("../../../assets/images/botella-vida.png")}
+              style={estilos.iconoBotella}
+            />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[
+              estilos.botonBotella,
+              !mostrarBotellaMuerte && estilos.botonOculto,
+              botellaMuerteUsada && estilos.botonUsado,
+              botellaSeleccionada === "muerte" && estilos.botonSeleccionado,
+            ]}
+            onPress={manejarBotellaMuerte}
+          >
+            <Image
+              source={require("../../../assets/images/botella-muerte.png")}
+              style={estilos.iconoBotella}
+            />
           </TouchableOpacity>
         </View>
       )}

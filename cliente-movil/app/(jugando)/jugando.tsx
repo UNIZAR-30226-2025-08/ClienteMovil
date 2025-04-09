@@ -1,5 +1,5 @@
 /**
- * @file PantallaJugando.tsx
+ * @file jugando.tsx
  * @description Componente principal de la pantalla de juego.
  * Maneja la lógica del juego, incluyendo estados, temporizador, votaciones, chat, habilidades y animaciones.
  * @module PantallaJugando
@@ -221,6 +221,11 @@ const PantallaJugando: React.FC = () => {
   const [JugadorSeleccionado, setJugadorSeleccionado] = useState<number | null>(
     null
   );
+
+  // TODO
+  const [botellaSeleccionada, setBotellaSeleccionada] = useState<
+    "vida" | "muerte" | null
+  >(null);
 
   /**
    * Registra los votos de cada jugador para pasarselos al circulo de jugadores.
@@ -578,8 +583,12 @@ const PantallaJugando: React.FC = () => {
 
     const etapaParaMostrar = jornadaActual === 0 ? "Día" : etapaActual;
 
+    const now = new Date();
+    const horaExacta = now.toTimeString().slice(0, 8);
+    const milisegundos = now.getMilliseconds();
+
     console.log(
-      `${color}[Jornada ${jornadaActual} - ${etapaParaMostrar}] ${infoJugador} - ${message}\x1b[0m`
+      `${color}${horaExacta}.${milisegundos} [Jornada ${jornadaActual} - ${etapaParaMostrar}] ${infoJugador} - ${message}\x1b[0m`
     );
   }
 
@@ -782,6 +791,17 @@ const PantallaJugando: React.FC = () => {
     setMostrarHabilidad(false);
   };
 
+  // TODO
+  const manejarSeleccionBotellaVida = () => {
+    setBotellaSeleccionada((prev) => (prev === "vida" ? null : "vida"));
+    // Lógica adicional para el uso de poción si es necesario
+  };
+
+  const manejarSeleccionBotellaMuerte = () => {
+    setBotellaSeleccionada((prev) => (prev === "muerte" ? null : "muerte"));
+    // Lógica adicional para el uso de poción si es necesario
+  };
+
   // ---------------------------------------------------------------------------
   // Control de la conexión de la partida
   // ---------------------------------------------------------------------------
@@ -919,8 +939,6 @@ const PantallaJugando: React.FC = () => {
 
         reiniciarTemporizador(); // 25 segundos tras el final de la animación épica
 
-        setJornadaActual(1);
-
         // Reiniciar efectios visuales de cualquier votación previa
         // setVotos(Array(CONSTANTES.NUMERICAS.CANTIDAD_IMAGENES).fill(0));
         setVotoRealizado(false);
@@ -1000,13 +1018,6 @@ const PantallaJugando: React.FC = () => {
       actualizarMaxTiempo(15);
 
       if (hayVidenteViva) {
-        logCustom(
-          jornadaActual,
-          etapaActual,
-          "Hay al menos un vidente vivo.",
-          jugadoresEstado[indiceUsuario]
-        );
-
         // Animación épica
         // (animaciones separadas porque no siempre se concatenan las 3, ver el siguiente else)
         setMostrarBotones(false);
@@ -1033,13 +1044,6 @@ const PantallaJugando: React.FC = () => {
           }, 4000); // 2ª animación de 4000 ms
         }, 4000); // 1ª animación de 4000 ms
       } else {
-        logCustom(
-          jornadaActual,
-          etapaActual,
-          "No hay vidente vivo, se omite la habilidad de vidente.",
-          jugadoresEstado[indiceUsuario]
-        );
-
         // Animación épica
         setMostrarBotones(false);
         setMostrarResultadosVotacionAlguacil(true);
@@ -1182,7 +1186,7 @@ const PantallaJugando: React.FC = () => {
       setMostrarAnimacionComponentesBrujaSeDespierta(true);
       setTimeout(() => {
         setMostrarAnimacionComponentesBrujaSeDespierta(false);
-        setMostrarBotonVotar(rolUsuario === "Bruja" ? true : false); // Solo dejarle "votar" a la bruja
+        setMostrarBotonVotar(false);
         setMostrarBotones(true);
 
         reiniciarTemporizador();
@@ -1284,7 +1288,7 @@ const PantallaJugando: React.FC = () => {
       logCustom(
         jornadaActual,
         etapaActual,
-        `Evento votoAlguacilRegistrado recibido: ${JSON.stringify(data)}`
+        `Evento recibido: votoAlguacilRegistrado - ${JSON.stringify(data)}`
       );
       if (data.estado && data.estado.jugadores) {
         setJugadoresEstado(data.estado.jugadores);
@@ -1296,7 +1300,7 @@ const PantallaJugando: React.FC = () => {
       logCustom(
         jornadaActual,
         etapaActual,
-        `Evento empateVotacionAlguacil recibido: ${JSON.stringify(data)}`,
+        `Evento recibido: empateVotacionAlguacil - ${JSON.stringify(data)}`,
         jugadoresEstado[indiceUsuario]
       );
 
@@ -1329,7 +1333,7 @@ const PantallaJugando: React.FC = () => {
       logCustom(
         jornadaActual,
         etapaActual,
-        `Evento segundoEmpateVotacionAlguacil recibido: ${JSON.stringify(
+        `Evento recibido: segundoEmpateVotacionAlguacil - ${JSON.stringify(
           data
         )}`,
         jugadoresEstado[indiceUsuario]
@@ -1342,7 +1346,7 @@ const PantallaJugando: React.FC = () => {
       logCustom(
         jornadaActual,
         etapaActual,
-        `Evento alguacilElegido recibido: ${JSON.stringify(data)}`,
+        `Evento recibido: alguacilElegido - ${JSON.stringify(data)}`,
         jugadoresEstado[indiceUsuario]
       );
       setMensajeEventoAlguacil(data.mensaje);
@@ -1387,7 +1391,7 @@ const PantallaJugando: React.FC = () => {
       logCustom(
         jornadaActual,
         etapaActual,
-        `Evento votoRegistrado recibido: ${JSON.stringify(data)}`,
+        `Evento recibido: votoRegistrado - ${JSON.stringify(data)}`,
         jugadoresEstado[indiceUsuario]
       );
       if (data.estado && data.estado.jugadores) {
@@ -1400,7 +1404,7 @@ const PantallaJugando: React.FC = () => {
       logCustom(
         jornadaActual,
         etapaActual,
-        `Evento resultadoVotosNoche recibido: ${JSON.stringify(data)}`,
+        `Evento recibido: resultadoVotosNoche - ${JSON.stringify(data)}`,
         jugadoresEstado[indiceUsuario]
       );
       if (data.estado && data.estado.jugadores) {
@@ -1416,7 +1420,7 @@ const PantallaJugando: React.FC = () => {
       logCustom(
         jornadaActual,
         etapaActual,
-        `Evento empateVotacionDia recibido: ${JSON.stringify(data)}`,
+        `Evento recibido: - empateVotacionDia${JSON.stringify(data)}`,
         jugadoresEstado[indiceUsuario]
       );
       setMensajeEventoVotacionDiurna(data.mensaje);
@@ -1428,7 +1432,7 @@ const PantallaJugando: React.FC = () => {
       logCustom(
         jornadaActual,
         etapaActual,
-        `Evento segundoEmpateVotacionDia recibido: ${JSON.stringify(data)}`,
+        `Evento recibido: segundoEmpateVotacionDia - ${JSON.stringify(data)}`,
         jugadoresEstado[indiceUsuario]
       );
       setMensajeEventoVotacionDiurna(data.mensaje);
@@ -1440,7 +1444,7 @@ const PantallaJugando: React.FC = () => {
       logCustom(
         jornadaActual,
         etapaActual,
-        `Evento resultadoVotosDia recibido: ${JSON.stringify(data)}`,
+        `Evento recibido: - resultadoVotosDia${JSON.stringify(data)}`,
         jugadoresEstado[indiceUsuario]
       );
       if (data.estado && data.estado.jugadores) {
@@ -1908,11 +1912,24 @@ const PantallaJugando: React.FC = () => {
               votarAJugador={votarAJugador}
               manejarPasarTurno={manejarPasarTurno}
               mostrarBotonesAccion={() =>
-                !EFECTO_PANTALLA_OSCURA || rolUsuario === "Hombre lobo"
+                !EFECTO_PANTALLA_OSCURA ||
+                rolUsuario === "Hombre lobo" ||
+                (rolUsuario === "Bruja" && backendState === "habilidadBruja")
               }
               votoRealizado={votoRealizado}
               turnoPasado={pasoTurno}
               mostrarVotacion={mostrarBotonVotar}
+              mostrarBotellaVida={
+                rolUsuario === "Bruja" && backendState === "habilidadBruja"
+              }
+              mostrarBotellaMuerte={
+                rolUsuario === "Bruja" && backendState === "habilidadBruja"
+              }
+              botellaVidaUsada={false}
+              botellaMuerteUsada={false}
+              manejarBotellaVida={manejarSeleccionBotellaVida}
+              manejarBotellaMuerte={manejarSeleccionBotellaMuerte}
+              botellaSeleccionada={botellaSeleccionada}
             />
             {/* Componente BarraSuperior: 
                 Muestra información relevante en la parte superior de la pantalla, 

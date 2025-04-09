@@ -553,4 +553,63 @@ export const estilos = StyleSheet.create({
     alignSelf: "center",
     zIndex: 1,
   },
+
+  contenedorBotellas: {
+    position: "absolute",
+    top: alto * 0.2,
+    right: ancho * 0.05,
+    zIndex: 2,
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: ancho * 0.005,
+    marginTop: TAMANIO_TEMPORIZADOR + alto * 0.02,
+    paddingBottom: ancho * 0.03,
+  },
+
+  contenedorBotellasSinVotar: {
+    position: "absolute",
+    top: alto * 0.2,
+    right: ancho * 0.05,
+    zIndex: 2,
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: ancho * 0.005,
+    marginTop: 0,
+    paddingBottom: ancho * 0.03,
+  },
+
+  botonBotella: {
+    backgroundColor: "#262522",
+    width: ancho * 0.16,
+    height: ancho * 0.16,
+    borderRadius: ancho * 0.08,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 0,
+    overflow: "visible",
+  },
+
+  iconoBotella: {
+    width: "80%",
+    height: "80%",
+    resizeMode: "contain",
+  },
+
+  botonOculto: {
+    display: "none",
+  },
+
+  botonSeleccionado: {
+    borderColor: "#00FF00",
+    borderWidth: 2,
+    borderRadius: ancho * 0.08,
+  },
+
+  botonUsado: {
+    opacity: 0.5,
+    borderWidth: 2,
+    borderColor: "#ff0000",
+  },
 });
