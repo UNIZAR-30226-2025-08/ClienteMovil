@@ -330,7 +330,7 @@ const PantallaJugando: React.FC = () => {
     duracionFadeIn,
     duracionEspera,
     duracionFadeOut,
-    numAnimaciones: 1,
+    numAnimaciones: 2,
     start: mostrarAnimacionInicioVotacionAlguacil,
   });
 
@@ -378,6 +378,75 @@ const PantallaJugando: React.FC = () => {
     duracionFadeOut,
     numAnimaciones: 1,
     start: mostrarAnimacionComponentesBrujaSeDespierta,
+  });
+
+  /**
+   * Controla si se muestra la animación de los jugadores se despiertan.
+   * @type {boolean}
+   */
+  const [
+    mostrarAnimacionComponenteJugadoresSeDespiertan,
+    setMostrarAnimacionComponenteJugadoresSeDespiertan,
+  ] = useState(false);
+
+  /**
+   * Opacidades y visibilidad para la animación de los jugadores se despiertan.
+   */
+  const {
+    opacities: opacitiesJugadoresSeDespiertan,
+    mostrarComponentes: mostrarComponenteJugadoresSeDespiertan,
+  } = useGestorAnimaciones({
+    duracionFadeIn,
+    duracionEspera,
+    duracionFadeOut,
+    numAnimaciones: 1,
+    start: mostrarAnimacionComponentesBrujaSeDespierta,
+  });
+
+  /**
+   * Controla si se muestra la animación de anunciar que se van a mostrar los jugadores eliminados durante la noche.
+   * @type {boolean}
+   */
+  const [
+    mostrarAnimacionComponenteAnunciarMuertosNoche,
+    setMostrarAnimacionComponenteAnunciarMuertosNoche,
+  ] = useState(false);
+
+  /**
+   * Opacidades y visibilidad para la animación de anunciar que se van a mostrar los jugadores eliminados durante la noche.
+   */
+  const {
+    opacities: opacitiesAnunciarMuertosNoche,
+    mostrarComponentes: mostrarComponenteAnunciarMuertosNoche,
+  } = useGestorAnimaciones({
+    duracionFadeIn,
+    duracionEspera,
+    duracionFadeOut,
+    numAnimaciones: 1,
+    start: mostrarAnimacionComponenteAnunciarMuertosNoche,
+  });
+
+  /**
+   * Controla si se muestra la animación para mostrar los resultados de los jugadores eliminados durante la noche.
+   * @type {boolean}
+   */
+  const [
+    mostrarAnimacionMostrarMuertosNoche,
+    setMostrarAnimacionMostrarMuertosNoche,
+  ] = useState(false);
+
+  /**
+   * Opacidades y visibilidad para la animación para mostrar los resultados de los jugadores eliminados durante la noche.
+   */
+  const {
+    opacities: opacitiesMostrarMuertosNoche,
+    mostrarComponentes: mostrarComponenteMostrarMuertosNoche,
+  } = useGestorAnimaciones({
+    duracionFadeIn,
+    duracionEspera,
+    duracionFadeOut,
+    numAnimaciones: 1,
+    start: mostrarAnimacionMostrarMuertosNoche,
   });
 
   /**
@@ -1001,7 +1070,7 @@ const PantallaJugando: React.FC = () => {
         setVotoRealizado(false);
         setPasoTurno(false);
         setJugadorSeleccionado(null);
-      }, 4000); // 1 animación de 4000 ms
+      }, 8000); // 2 animaciones de 8000 ms
     };
 
     /**
@@ -1276,19 +1345,36 @@ const PantallaJugando: React.FC = () => {
       actualizarMaxTiempo(60);
 
       // Animación épica
-      EFECTO_PANTALLA_OSCURA = false;
+      EFECTO_PANTALLA_OSCURA = true;
       setModoDiaNoche(EFECTO_PANTALLA_OSCURA);
+      setMostrarBotones(false);
+      setMostrarAnimacionComponenteJugadoresSeDespiertan(true);
+      setTimeout(() => {
+        setMostrarAnimacionComponenteJugadoresSeDespiertan(false);
+        setMostrarAnimacionComponenteAnunciarMuertosNoche(true);
 
-      setMostrarBotonVotar(true);
-      setMostrarBotones(true);
+        setTimeout(() => {
+          setMostrarAnimacionComponenteAnunciarMuertosNoche(false);
+          setMostrarAnimacionMostrarMuertosNoche(true);
 
-      reiniciarTemporizador();
+          setTimeout(() => {
+            setMostrarAnimacionMostrarMuertosNoche(false);
+            setMostrarBotones(true);
+            setMostrarBotonVotar(true);
 
-      // Reiniciar efectios visuales de cualquier votación previa
-      // setVotos(Array(CONSTANTES.NUMERICAS.CANTIDAD_IMAGENES).fill(0));
-      setVotoRealizado(false);
-      setPasoTurno(false);
-      setJugadorSeleccionado(null);
+            EFECTO_PANTALLA_OSCURA = false;
+            setModoDiaNoche(EFECTO_PANTALLA_OSCURA);
+
+            reiniciarTemporizador();
+
+            // Reiniciar efectios visuales de cualquier votación previa
+            // setVotos(Array(CONSTANTES.NUMERICAS.CANTIDAD_IMAGENES).fill(0));
+            setVotoRealizado(false);
+            setPasoTurno(false);
+            setJugadorSeleccionado(null);
+          }, 4000);
+        }, 4000);
+      }, 4000);
     };
 
     // Registro de eventos con sus respectivos manejadores
@@ -1898,6 +1984,14 @@ const PantallaJugando: React.FC = () => {
           <AnimacionGenerica
             opacity={opacitiesInicioVotacionAlguacil[0]}
             mostrarComponente={true}
+            texto="LOS JUGADORES DEBEN ELIMINAR DE MANERA CONSENSUADA A UN SOPECHOSO DE SER HOMBRE LOBO"
+          />
+        )}
+
+        {mostrarAnimacionInicioVotacionAlguacil && (
+          <AnimacionGenerica
+            opacity={opacitiesInicioVotacionAlguacil[1]}
+            mostrarComponente={true}
             texto="EMPIEZAN LAS VOTACIONES DE ALGUACIL"
           />
         )}
@@ -1976,6 +2070,30 @@ const PantallaJugando: React.FC = () => {
             opacity={opacitiesBrujaSeDespierta[0]}
             mostrarComponente={true}
             texto="LA BRUJA SE DESPIERTA, OBSERVA LA NUEVA VÍCTIMA DE LOS HOMBRES LOBO. USARÁ SU POCIÓN CURATIVA O SU POCIÓN VENENOSA"
+          />
+        )}
+
+        {mostrarComponenteJugadoresSeDespiertan && (
+          <AnimacionGenerica
+            opacity={opacitiesJugadoresSeDespiertan[0]}
+            mostrarComponente={mostrarComponenteJugadoresSeDespiertan[0]}
+            texto="AMANECE EN LA ALDEA, TODO EL MUNDO DESPIERTA Y ABRE LOS OJOS"
+          />
+        )}
+
+        {mostrarComponenteAnunciarMuertosNoche && (
+          <AnimacionGenerica
+            opacity={opacitiesAnunciarMuertosNoche[0]}
+            mostrarComponente={mostrarComponenteAnunciarMuertosNoche[0]}
+            texto="A CONTINUACIÓN SE MUESTRAN LAS VÍCTIMAS DE LA ÚLTIMA NOCHE"
+          />
+        )}
+
+        {mostrarComponenteMostrarMuertosNoche && (
+          <AnimacionGenerica
+            opacity={opacitiesMostrarMuertosNoche[0]}
+            mostrarComponente={mostrarComponenteMostrarMuertosNoche[0]}
+            texto="HAY QUE CONECTAR ESTO PARA QUE MUESTRE QUIEN HA MUERTO"
           />
         )}
 

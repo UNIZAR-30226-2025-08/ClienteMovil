@@ -3,6 +3,7 @@
  *
  * Este componente calcula la posición de cada jugador en función del ángulo y del radio máximo,
  * renderizando cada imagen en una posición circular y mostrando una barra por cada voto recibido.
+ * Si el jugador está muerto, se muestra un ícono de calavera sobre su avatar.
  *
  * @component
  * @param {Object} props - Props del componente.
@@ -16,6 +17,7 @@ import React from "react";
 import { View, Image, TouchableOpacity, Text } from "react-native";
 import { estilos } from "../../../utils/jugando/jugando.styles";
 import { CONSTANTES } from "../../../utils/jugando/constantes";
+
 const { NUMERICAS, DIMENSIONES, COLORES } = CONSTANTES;
 const { ANCHO, ALTO } = DIMENSIONES;
 
@@ -30,6 +32,9 @@ const avatarMap: Record<string, any> = {
   avatar7: require("@/assets/images/imagenPerfil7.webp"),
   avatar8: require("@/assets/images/imagenPerfil8.webp"),
 };
+
+// Imagen de calavera para jugadores muertos
+const imagenCalavera = require("@/assets/images/calavera.png");
 
 interface CirculoVotarProps {
   jugadores: {
@@ -88,7 +93,6 @@ const CirculoVotar: React.FC<CirculoVotarProps> = ({
           radioMaximo *
           Math.sin(angulo) *
           (1 - NUMERICAS.FACTOR_ENCOGIMIENTO_VERTICAL);
-        // Determina si el jugador actual está seleccionado para resaltar su imagen.
         const isSelected = JugadorSeleccionado === indice;
 
         //console.log(`Jugador: ${jugador.nombre}, avatar: ${jugador.avatar}`);
@@ -121,10 +125,28 @@ const CirculoVotar: React.FC<CirculoVotarProps> = ({
                   height: tamanioImagen,
                   borderWidth: 3,
                   borderColor: isSelected ? COLORES.SELECCIONADO : "white",
+                  position: "relative",
                 },
               ]}
             >
               <Image source={avatarFuente} style={estilos.imagenCirculo} />
+
+              {/* Superposición de calavera para jugadores muertos */}
+              {jugador.estaVivo && (
+                <Image
+                  source={imagenCalavera}
+                  style={[
+                    estilos.imagenCirculo,
+                    {
+                      position: "absolute",
+                      top: 0,
+                      left: 0,
+                      // tintColor: "#FFF",
+                      opacity: 0.9,
+                    },
+                  ]}
+                />
+              )}
             </View>
 
             {/* Nombre del jugador */}

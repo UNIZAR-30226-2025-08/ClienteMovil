@@ -24,7 +24,7 @@ interface ControlesAccionProps {
 
 /**
  * @component ControlesAccion
- * @description Renderiza los botones de acción y votación.
+ * @description Renderiza los botones de habilidad, votación, chat, pasar turno y pocimas de la bruja.
  */
 const ControlesAccion: React.FC<ControlesAccionProps> = ({
   habilidadInfo,
