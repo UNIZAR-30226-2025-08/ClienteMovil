@@ -165,6 +165,12 @@ const PantallaJugando: React.FC = () => {
   const [mensajeEventoVotacionDiurna, setMensajeEventoVotacionDiurna] =
     useState<string>("");
 
+  /*
+   * Mensaje informativo recibido del backend relacionado con a quién a han matado
+   * los lobos, recibido por la bruja justo antes de su turno.
+   */
+  const [mensajeEventoBruja, setMensajeEventoBruja] = useState<string>("");
+
   /**
    * Representa la "fase" en la que cree que el juego cree que está.
    */
@@ -226,6 +232,12 @@ const PantallaJugando: React.FC = () => {
   const [botellaSeleccionada, setBotellaSeleccionada] = useState<
     "vida" | "muerte" | null
   >(null);
+
+  // TODO
+  const [botellaVidaUsada, setBotellaVidaUsada] = useState<boolean>(false);
+
+  // TODO
+  const [botellaMuerteUsada, setBotellaMuerteUsada] = useState<boolean>(false);
 
   /**
    * Registra los votos de cada jugador para pasarselos al circulo de jugadores.
@@ -791,15 +803,60 @@ const PantallaJugando: React.FC = () => {
     setMostrarHabilidad(false);
   };
 
-  // TODO
+  // TODO comentar
   const manejarSeleccionBotellaVida = () => {
     setBotellaSeleccionada((prev) => (prev === "vida" ? null : "vida"));
-    // Lógica adicional para el uso de poción si es necesario
+
+    if (botellaVidaUsada) {
+      logCustom(
+        jornadaActual,
+        etapaActual,
+        `Intento de uso de botella de vida fallido: el usuario ya ha usado la botella de vida`,
+        jugadoresEstado[indiceUsuario]
+      );
+      mostrarError("Ya has usado la pocima de vida");
+      return;
+    }
+
+    const jugadorObjetivo = jugadoresEstado[JugadorSeleccionado!];
+    if (JugadorSeleccionado !== null) {
+      socket.emit("usaPocionBruja", {
+        idPartida: idSala,
+        idJugador: usuarioID,
+        tipo: "curar",
+        idObjetivo: jugadorObjetivo.id,
+      });
+    }
+
+    setBotellaVidaUsada(true);
   };
 
+  // TODO comentar
   const manejarSeleccionBotellaMuerte = () => {
     setBotellaSeleccionada((prev) => (prev === "muerte" ? null : "muerte"));
-    // Lógica adicional para el uso de poción si es necesario
+
+    if (botellaMuerteUsada) {
+      logCustom(
+        jornadaActual,
+        etapaActual,
+        `Intento de uso de botella de muerte fallido: el usuario ya ha usado la botella de muerte`,
+        jugadoresEstado[indiceUsuario]
+      );
+      mostrarError("Ya has usado la pocima de muerte");
+      return;
+    }
+
+    const jugadorObjetivo = jugadoresEstado[JugadorSeleccionado!];
+    if (JugadorSeleccionado !== null) {
+      socket.emit("usaPocionBruja", {
+        idPartida: idSala,
+        idJugador: usuarioID,
+        tipo: "matar",
+        idObjetivo: jugadorObjetivo.id,
+      });
+    }
+
+    setBotellaMuerteUsada(true);
   };
 
   // ---------------------------------------------------------------------------
@@ -1465,6 +1522,38 @@ const PantallaJugando: React.FC = () => {
   }, [jugadoresEstado, indiceUsuario, jornadaActual, etapaActual]);
 
   // ---------------------------------------------------------------------------
+  // Administración de recibir eventos de la habilidad de la vidente
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Efecto que administra el recibimiento de los eventos relacionados con la votación del alguacil.
+   *
+   * Se controlan los siguientes eventos:
+   * - "mensajeBruja": Notificación a la bruja de a quién a matado el lobo.
+   */
+
+  useEffect(() => {
+    const manejarMensajeBruja = (data: {
+      mensaje: string;
+      victima: string;
+    }) => {
+      logCustom(
+        jornadaActual,
+        etapaActual,
+        `Evento recibido: mensajeBruja - ${JSON.stringify(data)}`,
+        jugadoresEstado[indiceUsuario]
+      );
+      setMensajeEventoBruja(data.mensaje);
+    };
+
+    socket.on("mensajeBruja", manejarMensajeBruja);
+
+    return () => {
+      socket.off("mensajeBruja", manejarMensajeBruja);
+    };
+  }, [jugadoresEstado, indiceUsuario, jornadaActual, etapaActual]);
+
+  // ---------------------------------------------------------------------------
   // Memos para calcular en demanda valores importantes
   // ---------------------------------------------------------------------------
 
@@ -1533,15 +1622,27 @@ const PantallaJugando: React.FC = () => {
       mostrarError("No hay nada que votar aún :)");
       return;
     }
-    if (rolUsuario !== "Hombre lobo" && EFECTO_PANTALLA_OSCURA) {
+    if (rolUsuario !== "Hombre lobo" && backendState === "turnoHombresLobo") {
       logCustom(
         jornadaActual,
         etapaActual,
-        `Intento de selección de usuario fallido: Es de noche y no es lobo`,
+        `Intento de selección de usuario fallido: Es el turno de los lobos y no es lobo`,
         jugadoresEstado[indiceUsuario]
       );
       mostrarError(
-        "Solo los lobos pueden seleccionar jugadores durante la noche"
+        "Solo los lobos pueden seleccionar jugadores durante la votación nocturna"
+      );
+      return;
+    }
+    if (rolUsuario !== "Bruja" && backendState === "habilidadBruja") {
+      logCustom(
+        jornadaActual,
+        etapaActual,
+        `Intento de selección de usuario fallido: Es el turno de la bruja y no es bruja`,
+        jugadoresEstado[indiceUsuario]
+      );
+      mostrarError(
+        "Solo la bruja puede seleccionar jugadores durante el turno de la bruja"
       );
       return;
     }
@@ -1572,7 +1673,7 @@ const PantallaJugando: React.FC = () => {
         `Intento de selección fallido: Voto propio`,
         jugadoresEstado[indiceUsuario]
       );
-      mostrarError("¡No puedes votarte a ti mismo!");
+      mostrarError("¡No puedes seleccionarte a ti mismo!");
       return;
     }
     logCustom(
@@ -1925,8 +2026,8 @@ const PantallaJugando: React.FC = () => {
               mostrarBotellaMuerte={
                 rolUsuario === "Bruja" && backendState === "habilidadBruja"
               }
-              botellaVidaUsada={false}
-              botellaMuerteUsada={false}
+              botellaVidaUsada={botellaVidaUsada}
+              botellaMuerteUsada={botellaMuerteUsada}
               manejarBotellaVida={manejarSeleccionBotellaVida}
               manejarBotellaMuerte={manejarSeleccionBotellaMuerte}
               botellaSeleccionada={botellaSeleccionada}
