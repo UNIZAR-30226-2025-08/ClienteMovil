@@ -16,18 +16,19 @@ jobs:
         with:
           node-version: "18"
 
-      - name: Abrir cliente-movil
-        run: cd cliente-movil
-
       - name: Instalar dependencias
-        run: npm install
+        run: |
+          cd cliente-movil
+          npm install
 
       - name: Generar documentación de cliente-movil
-        run: npm run docs
+        run: |
+          cd cliente-movil
+          npm run docs
 
       - name: Desplegar documentación de cliente-movil en GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./docs
+          publish_dir: ./cliente-movil/docs
           publish_branch: gh-pages
