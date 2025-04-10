@@ -199,6 +199,12 @@ const PantallaJugando: React.FC = () => {
   // ---------------------------------------------------------------------------
 
   /**
+   * Controla que texto se muestra en el botón de "VOTAR"
+   * @type {string}
+   */
+  const [textoBotonVotar, setTextoBotonVotar] = useState<string>("VOTAR");
+
+  /**
    * Controla la visualización de todos los elementos de la partida: barra, botones, timer y jugadores.
    * @type {boolean}
    */
@@ -1235,6 +1241,9 @@ const PantallaJugando: React.FC = () => {
         return;
       }
 
+      // Cambiar el texto del botón de "VOTAR" a "VISUALIZAR"
+      setTextoBotonVotar("VISUALIZAR");
+
       // El timer visual para el vidente será de 15 segundos tras su reinicio
       actualizarMaxTiempo(15);
 
@@ -1310,6 +1319,9 @@ const PantallaJugando: React.FC = () => {
         `Evento recibido: turnoHombresLobos - ${JSON.stringify(datos)}`,
         jugadoresEstado[indiceUsuario]
       );
+
+      // Poner el texto del botón de votar a "VOTAR" (si hay algún vidente vivo, valdrá "VISUALIZAR")
+      setTextoBotonVotar("VOTAR");
 
       // El timer visual para los lobos será de 30 segundos tras su reinicio
       actualizarMaxTiempo(30);
@@ -1819,17 +1831,18 @@ const PantallaJugando: React.FC = () => {
    */
   const administrarSeleccionJugadorVotacion = (index: number): void => {
     // Solo los lobos pueden seleccionar jugadores durante la noche
-    if (
-      !mostrarBotonVotar &&
-      !(rolUsuario == "Bruja" && backendState === "habilidadBruja") // La bruja tiene que poder seleccionar jugadores pero no tiene botón de votar
-    ) {
+    // La vidente tiene que poder seleccionar jugadores pero no tiene botón de votar
+    if (rolUsuario !== "Vidente" && backendState === "habilidadVidente") {
+      // videnterevela
       logCustom(
         jornadaActual,
         etapaActual,
-        `Intento de selección de usuario fallido: No hay nada que votar`,
+        `Intento de selección de usuario fallido: Es el turno de la vidente y no es vidente`,
         jugadoresEstado[indiceUsuario]
       );
-      mostrarError("No hay nada que votar aún :)");
+      mostrarError(
+        "Solo la vidente puede seleccionar jugadores durante el turno de la vidente"
+      );
       return;
     }
     if (rolUsuario !== "Hombre lobo" && backendState === "turnoHombresLobo") {
@@ -1856,6 +1869,7 @@ const PantallaJugando: React.FC = () => {
       );
       return;
     }
+    /*
     if (
       rolUsuario === "Bruja" &&
       backendState === "habilidadBruja" &&
@@ -1868,6 +1882,22 @@ const PantallaJugando: React.FC = () => {
         jugadoresEstado[indiceUsuario]
       );
       mostrarError("Ya has utilizado una pocima en este turno");
+      return;
+    }
+    */
+    if (rolUsuario == "Vidente" && backendState === "habilidadVidente") {
+      const jugadorObjetivo = jugadoresEstado[JugadorSeleccionado!];
+      logCustom(
+        jornadaActual,
+        etapaActual,
+        `Vidente solicita ver la habilidad del jugador ${jugadorObjetivo.id}`,
+        jugadoresEstado[indiceUsuario]
+      );
+      socket.emit("videnteRevela", {
+        idPartida: idSala,
+        idJugador: usuarioID,
+        idObjetivo: jugadorObjetivo.id,
+      });
       return;
     }
     if (pasoTurno) {
@@ -1983,7 +2013,7 @@ const PantallaJugando: React.FC = () => {
       );
     }
     // Votación diurna
-    else {
+    else if (backendState === "diaComienza") {
       setVotos((votosAnteriores: number[]): number[] => {
         const nuevosVotos: number[] = [...votosAnteriores];
         nuevosVotos[JugadorSeleccionado] += 1;
@@ -2001,6 +2031,19 @@ const PantallaJugando: React.FC = () => {
         );
         return nuevosVotos;
       });
+    } else {
+      // "Votación" de la vidente
+      socket.emit("videnteRevela", {
+        idPartida: idSala,
+        idJugador: usuarioID,
+        idObjetivo: jugadorObjetivo.id,
+      });
+      logCustom(
+        jornadaActual,
+        etapaActual,
+        `La vidente local pide visualizar a ${jugadorObjetivo.id}`,
+        jugadoresEstado[indiceUsuario]
+      );
     }
     setVotoRealizado(true);
     setJugadorSeleccionado(null);
@@ -2334,6 +2377,7 @@ const PantallaJugando: React.FC = () => {
               manejarBotellaVida={manejarSeleccionBotellaVida}
               manejarBotellaMuerte={manejarSeleccionBotellaMuerte}
               botellaSeleccionada={botellaSeleccionada}
+              textoBotonVotar={textoBotonVotar}
             />
             {/* Componente BarraSuperior: 
                 Muestra información relevante en la parte superior de la pantalla, 

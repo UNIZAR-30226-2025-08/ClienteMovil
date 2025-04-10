@@ -20,6 +20,7 @@ interface ControlesAccionProps {
   manejarBotellaVida: () => void;
   manejarBotellaMuerte: () => void;
   botellaSeleccionada: "vida" | "muerte" | null;
+  textoBotonVotar: string;
 }
 
 /**
@@ -43,6 +44,7 @@ const ControlesAccion: React.FC<ControlesAccionProps> = ({
   manejarBotellaVida,
   manejarBotellaMuerte,
   botellaSeleccionada,
+  textoBotonVotar,
 }) => {
   return (
     <>
@@ -95,9 +97,7 @@ const ControlesAccion: React.FC<ControlesAccionProps> = ({
             ]}
             onPress={votarAJugador}
           >
-            <Text style={estilos.textoBoton}>
-              {CONSTANTES.TEXTOS.BOTON_VOTAR}
-            </Text>
+            <Text style={estilos.textoBoton}>{textoBotonVotar}</Text>
           </TouchableOpacity>
         </View>
       )}
