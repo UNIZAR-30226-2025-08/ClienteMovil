@@ -1,0 +1,21 @@
+{
+  "entryPoints": ["./app", "./components", "./hooks", "./utils", "./constants"],
+  "entryPointStrategy": "expand",
+  "out": "docs",
+  "exclude": [
+    "**/node_modules/**",
+    "**/tests/**",
+    "**/*.test.ts",
+    "**/*.spec.ts",
+    "**/__tests__/**"
+  ],
+  "includeVersion": true,
+  "name": "Cliente Móvil - Los Hombres Lobo de Castronegro",
+  "theme": "default",
+  "excludePrivate": true,
+  "excludeProtected": true,
+  "excludeExternals": true,
+  "readme": "README.md",
+  "tsconfig": "./tsconfig.json",
+  "logLevel": "Error"
+}

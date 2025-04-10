@@ -1,6 +1,7 @@
 /**
- * @file HabilidadPopup - Popup animado que muestra la información de una habilidad.
+ * Popup animado que muestra la información de una habilidad.
  *
+ * @category Components
  * @component
  * @param {Object} props - Props del componente.
  * @param {Object} props.habilidadInfo - Objeto con información de la habilidad (descripción, recordatorio e imagen).

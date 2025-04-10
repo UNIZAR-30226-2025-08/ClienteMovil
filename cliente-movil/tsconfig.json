@@ -4,6 +4,10 @@
     "esModuleInterop": true,
     "strict": true,
     "jsx": "react-native",
+    "moduleResolution": "bundler",
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
     "paths": {
       "@/*": ["./*"]
     }

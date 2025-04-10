@@ -71,7 +71,6 @@ const ChatComponent: React.FC<ChatComponentProps> = ({
     socket.emit("enviarMensaje", {
       idPartida: idSala,
       idJugador: usuarioID,
-      nombreJugador: usuarioNombre,
       mensaje: mensaje,
     });
 
