@@ -474,6 +474,29 @@ const PantallaJugando: React.FC = () => {
   });
 
   /**
+   * Controla si se muestra la animación para mostrarle a la vidente la identidad del jugador al que ha seleccionado.
+   * @type {boolean}
+   */
+  const [
+    mostrarAnimacionResultadosHabilidadVidente,
+    setMostrarAnimacionResultadosHabilidadVidente,
+  ] = useState(false);
+
+  /**
+   * Opacidades y visibilidad para la animación para mostrarle a la vidente la identidad del jugador al que ha seleccionado.
+   */
+  const {
+    opacities: opacitiesMostrarResultadosHabilidadVidente,
+    mostrarComponentes: mostrarComponenteResultadosHabilidadVidente,
+  } = useGestorAnimaciones({
+    duracionFadeIn,
+    duracionEspera,
+    duracionFadeOut,
+    numAnimaciones: 1,
+    start: mostrarAnimacionResultadosHabilidadVidente,
+  });
+
+  /**
    * Controla si se muestra la animación que anuncia los resultados definitivos de las votaciones de alguacil.
    * @type {boolean}
    */
@@ -1332,11 +1355,11 @@ const PantallaJugando: React.FC = () => {
       EFECTO_PANTALLA_OSCURA = true;
       setModoDiaNoche(EFECTO_PANTALLA_OSCURA);
       setMostrarBotones(false);
-      if (hayVidenteViva) {
+      if (hayVidenteViva && (rolUsuario !== "Vidente" || jugadorLocalMuerto)) {
         logCustom(
           jornadaActual,
           etapaActual,
-          "Hay al menos un vidente vivo..",
+          "Hay al menos un vidente vivo + el jugador local no es vidente",
           jugadoresEstado[indiceUsuario]
         );
 
@@ -1361,7 +1384,10 @@ const PantallaJugando: React.FC = () => {
             setJugadorSeleccionado(null);
           }, 4000); // 2ª animación de 4000 ms
         }, 4000); // 1ª animación de 4000 ms
-      } else {
+      } else if (
+        !hayVidenteViva &&
+        (rolUsuario !== "Vidente" || jugadorLocalMuerto)
+      ) {
         logCustom(
           jornadaActual,
           etapaActual,
@@ -1385,6 +1411,42 @@ const PantallaJugando: React.FC = () => {
           setPasoTurno(false);
           setJugadorSeleccionado(null);
         }, 4000); // 1 animación de 4000 ms
+      } else if (
+        hayVidenteViva &&
+        rolUsuario === "Vidente" &&
+        !jugadorLocalMuerto
+      ) {
+        logCustom(
+          jornadaActual,
+          etapaActual,
+          "Hay al menos un vidente vivo + el jugador local es vidente",
+          jugadoresEstado[indiceUsuario]
+        );
+
+        // Animación épica si hay una vidente viva y el jugador local es la vidente
+        setMostrarBotones(false);
+        setMostrarAnimacionResultadosHabilidadVidente(true);
+        setTimeout(() => {
+          setMostrarAnimacionResultadosHabilidadVidente(true);
+          setMostrarAnimacionVidenteSeDuerme(true);
+          setTimeout(() => {
+            setMostrarAnimacionVidenteSeDuerme(false);
+            setMostrarAnimacionLobosSeDespiertan(true);
+            setTimeout(() => {
+              setMostrarAnimacionLobosSeDespiertan(false);
+              setMostrarBotonVotar(true);
+              setMostrarBotones(true);
+
+              reiniciarTemporizador();
+
+              // Reiniciar efectios visuales de cualquier votación previa
+              // setVotos(Array(CONSTANTES.NUMERICAS.CANTIDAD_IMAGENES).fill(0));
+              setVotoRealizado(false);
+              setPasoTurno(false);
+              setJugadorSeleccionado(null);
+            }, 4000); // 3ª animación de 4000 ms
+          }, 4000); // 2ª animación de 4000 ms
+        }, 4000); // 1ª animación de 4000 ms
       }
     };
 
@@ -1955,6 +2017,20 @@ const PantallaJugando: React.FC = () => {
       );
       return;
     }
+    if (
+      votoRealizado &&
+      backendState == "habilidadVidente" &&
+      rolUsuario == "Vidente"
+    ) {
+      mostrarError("Solo puedes revelar la identidad de 1 jugador por turno");
+      logCustom(
+        jornadaActual,
+        etapaActual,
+        `Intento de voto fallido: Este vidente ya ha solicitado revelar a un jugador`,
+        jugadoresEstado[indiceUsuario]
+      );
+      return;
+    }
     if (votoRealizado) {
       mostrarError("Solo puedes votar a un jugador por turno");
       logCustom(
@@ -2029,10 +2105,13 @@ const PantallaJugando: React.FC = () => {
           `Voto DIURNO registrado para el jugador ${JugadorSeleccionado + 1}`,
           jugadoresEstado[indiceUsuario]
         );
+        setVotoRealizado(true);
+        setJugadorSeleccionado(null);
         return nuevosVotos;
       });
-    } else {
-      // "Votación" de la vidente
+    }
+    // "Votación" de la vidente
+    else if (backendState === "habilidadVidente") {
       socket.emit("videnteRevela", {
         idPartida: idSala,
         idJugador: usuarioID,
@@ -2102,7 +2181,7 @@ const PantallaJugando: React.FC = () => {
       // TODO!!! Habrá que mostrar las animaciones correspondientes,
       // llamar a la habilidad si es cazador,
       // designar un nuevo alguacil,
-      //  si es alguacil manejar el que te pueda revivir la bruja
+      // si es alguacil manejar el que te pueda revivir la bruja
 
       setMostrarBotones(false);
       setMostrarBotonVotar(false);
@@ -2322,6 +2401,14 @@ const PantallaJugando: React.FC = () => {
             opacity={opacitiesMostrarMuertosNoche[0]}
             mostrarComponente={mostrarComponenteMostrarMuertosNoche[0]}
             texto="HAY QUE CONECTAR ESTO PARA QUE MUESTRE QUIEN HA MUERTO"
+          />
+        )}
+
+        {mostrarComponenteResultadosHabilidadVidente && (
+          <AnimacionGenerica
+            opacity={opacitiesMostrarResultadosHabilidadVidente[0]}
+            mostrarComponente={mostrarComponenteResultadosHabilidadVidente[0]}
+            texto="HAY QUE CONECTAR ESTO PARA QUE LA VIDENTE SEPA QUIEN HA MUERTO"
           />
         )}
 
