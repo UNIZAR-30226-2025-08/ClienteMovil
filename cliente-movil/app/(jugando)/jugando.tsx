@@ -79,6 +79,7 @@ const PantallaJugando: React.FC = () => {
   // ---------------------------------------------------------------------------
   // Carga de fuentes
   // ---------------------------------------------------------------------------
+
   const [fuentesCargadas] = useFonts({
     Corben: require("@/assets/fonts/corben-regular.ttf"),
   });
@@ -193,6 +194,19 @@ const PantallaJugando: React.FC = () => {
    * @type {boolean}
    */
   const [pasoTurno, setPasoTurno] = useState<boolean>(false);
+
+  // ---------------------------------------------------------------------------
+  // Constantes para controlar los tiempos de timer que se le muestran a los usuario
+  // ---------------------------------------------------------------------------
+
+  // Esto es lo que quieres modificar para cambiar los timers visuales durante la partida
+  const CONST_TIEMPO_ESPERA_INICAL = 15;
+  const CONST_TIEMPO_VOTACION_ALGUACIL = 25;
+  const CONST_TIEMPO_HABILIDAD_VIDENTE = 15;
+  const CONST_TIEMPO_VOTACION_NOCTURNA = 30;
+  const CONST_TIEMPO_HABILIDAD_BRUJA = 15;
+  const CONST_TIEMPO_VOTACION_DIURNA = 60;
+  const CONST_TIEMPO_HABILIDAD_CAZADOR = 15;
 
   // ---------------------------------------------------------------------------
   // Estados más orientados a la Interfaz de Usuario (UI)
@@ -598,7 +612,7 @@ const PantallaJugando: React.FC = () => {
     reiniciarTemporizador,
     setTemporizadorActivo,
     actualizarMaxTiempo,
-  } = useTemporizador(15, false);
+  } = useTemporizador(CONST_TIEMPO_ESPERA_INICAL, false);
 
   /**
    * Hook que administra la animación del chat.
@@ -1175,7 +1189,7 @@ const PantallaJugando: React.FC = () => {
       );
 
       // El timer visua de las votaciones del alguacil será de 25 segundos tras su reinicio
-      actualizarMaxTiempo(25);
+      actualizarMaxTiempo(CONST_TIEMPO_VOTACION_ALGUACIL);
 
       // Animación épica
       cerrarChat();
@@ -1268,7 +1282,7 @@ const PantallaJugando: React.FC = () => {
       setTextoBotonVotar("VISUALIZAR");
 
       // El timer visual para el vidente será de 15 segundos tras su reinicio
-      actualizarMaxTiempo(15);
+      actualizarMaxTiempo(CONST_TIEMPO_HABILIDAD_VIDENTE);
 
       // Animación épica
       cerrarChat();
@@ -1347,7 +1361,7 @@ const PantallaJugando: React.FC = () => {
       setTextoBotonVotar("VOTAR");
 
       // El timer visual para los lobos será de 30 segundos tras su reinicio
-      actualizarMaxTiempo(30);
+      actualizarMaxTiempo(CONST_TIEMPO_VOTACION_NOCTURNA);
 
       // Animación épica
       cerrarChat();
@@ -1478,7 +1492,7 @@ const PantallaJugando: React.FC = () => {
       );
 
       // El timer visual para la bruja será de 15 segundos tras su reinicio
-      actualizarMaxTiempo(15);
+      actualizarMaxTiempo(CONST_TIEMPO_HABILIDAD_BRUJA);
 
       // Animación épica
       cerrarChat();
@@ -1522,7 +1536,7 @@ const PantallaJugando: React.FC = () => {
       setBotellaUsadaEnEsteTurno(false);
 
       // El timer visual para los días será de 60 segundos tras su reinicio
-      actualizarMaxTiempo(60);
+      actualizarMaxTiempo(CONST_TIEMPO_VOTACION_DIURNA);
 
       // Animación épica
       cerrarChat();
