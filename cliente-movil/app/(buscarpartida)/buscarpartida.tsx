@@ -29,6 +29,7 @@ const iconoCandado = require("@/assets/images/candado.png");
  * @returns {JSX.Element} Pantalla de búsqueda de salas.
  */
 export default function BuscarSalasScreen(): JSX.Element {
+  /** Hook de navegación de Expo Router */
   const router = useRouter();
 
   const [salas, setSalas] = useState<any[]>([]);

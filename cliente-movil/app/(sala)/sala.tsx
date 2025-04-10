@@ -13,7 +13,13 @@ import socket from "@/app/(sala)/socket"; // Módulo de conexión
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 /**
- * Tipo de datos para representar un jugador dentro de la sala.
+ * Interfaz que define la estructura de un jugador en la sala
+ *
+ * @property id - Identificador único del jugador
+ * @property name - Nombre del jugador
+ * @property avatar - Clave del avatar del jugador
+ * @property isReady - Indica si el jugador está listo para comenzar
+ * @property isOwner - Indica si el jugador es el dueño de la sala
  */
 type Player = {
   id: string;
@@ -23,7 +29,13 @@ type Player = {
   isOwner?: boolean; // Indica si es el dueño de la sala
 };
 
-// Define el tipo para el estado del usuario
+/**
+ * Interfaz que define los datos del usuario actual
+ *
+ * @property id - Identificador único del usuario
+ * @property nombre - Nombre del usuario
+ * @property avatar - Clave del avatar del usuario (opcional)
+ */
 type UsuarioData = {
   id: string;
   nombre: string;
@@ -31,15 +43,22 @@ type UsuarioData = {
 };
 
 /**
- * Pantalla de sala previa a la partida.
+ * Componente principal de la pantalla de sala
  *
- * Permite a los jugadores unirse, marcarse como listos y al anfitrión iniciar la partida.
+ * @remarks
+ * Este componente maneja la sala de espera antes de iniciar una partida con las siguientes características:
+ * - Muestra la lista de jugadores en la sala
+ * - Permite a los jugadores marcar su estado como listo/no listo
+ * - Permite al lider de la sala iniciar la partida cuando todos estén listos
+ * - Maneja la expulsión de jugadores (solo para el lider)
+ * - Gestiona la navegación y eventos de socket
  *
  * @returns {JSX.Element} Pantalla de la sala previa al juego.
  */
 export default function SalaPreviaScreen(): JSX.Element {
   const router = useRouter(); // Usamos useRouter para manejar la navegación
 
+  /** Estado para almacenar el rol del usuario en la partida */
   const [rolUsuario, setRolUsuario] = useState<string | null>(null);
 
   // Obtén el idSala pasado como parámetro al navegar
@@ -50,21 +69,35 @@ export default function SalaPreviaScreen(): JSX.Element {
 
   // Parsea la data de la sala y obtiene el maximo de jugadores (por defecto 8)
   const salaInfo = salaData ? JSON.parse(salaData) : {};
+
+  /** Número máximo de jugadores permitidos en la sala */
   const totalSlots = salaInfo?.maxJugadores || 8;
 
   console.log("Información de la sala:", salaInfo);
 
+  /** Estado para almacenar la lista de jugadores en la sala */
   const [players, setPlayers] = useState<Player[]>([]);
-  // Nuevo estado para el nombre de la sala
+
+  /** Estado para el nombre de la sala */
   const [roomName, setRoomName] = useState(
     salaInfo && salaInfo.nombre && salaInfo.nombre.trim() !== ""
       ? salaInfo.nombre
       : "Sala sin nombre"
   );
 
+  /** Estado para los datos del usuario actual */
   const [usuarioData, setUsuarioData] = useState<UsuarioData | null>(null);
+
+  /** Estado para almacenar datos de la partida pendiente */
   const [partidaPendiente, setPartidaPendiente] = useState<any>(null);
 
+  /**
+   * Maneja el evento de retroceso del dispositivo
+   *
+   * @remarks
+   * Se ejecuta cuando el usuario presiona el botón de retroceso
+   * Muestra un diálogo de confirmación antes de salir de la sala
+   */
   useEffect(() => {
     const handleBackPress = () => {
       if (!usuarioData) {
@@ -100,6 +133,14 @@ export default function SalaPreviaScreen(): JSX.Element {
     };
   }, [usuarioData, idSala, socket]);
 
+  /**
+   * Actualiza la lista de jugadores cuando cambia la información de la sala
+   *
+   * @remarks
+   * Se ejecuta cuando:
+   * - Se reciben datos iniciales de la sala
+   * - Se recibe una actualización de la sala desde el servidor
+   */
   useEffect(() => {
     if (salaData) {
       const sala = JSON.parse(salaData);
@@ -113,7 +154,7 @@ export default function SalaPreviaScreen(): JSX.Element {
         }))
       );
     }
-    // Suscribirte a "actualizarSala" para cambios futuros...
+    // Suscribirse a "actualizarSala" para cambios futuros
     socket.on("actualizarSala", (sala) => {
       console.log("Evento actualizarSala recibido:", sala);
       setPlayers(

@@ -22,34 +22,27 @@ import CryptoJS from "crypto-js"; // Importamos crypto-js
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const imagenPortada = require("@/assets/images/imagen-portada.png");
-const imagenGoogle = require("@/assets/images/google-icon.png");
 const imagenFondoInicioSesion = require("@/assets/images/fondo-inicio-sesion.jpg");
 
 /**
- * Pantalla de inicio de sesión de la aplicación.
- * Permite a los usuarios ingresar sus credenciales para autenticarse.
+ * Componente principal de la pantalla de inicio de sesión.
  *
- * @returns {JSX.Element} Pantalla de inicio de sesión.
+ * @remarks
+ * Este componente maneja la autenticación de usuarios mediante correo electrónico y contraseña.
+ *
+ * @returns {JSX.Element | null} La pantalla de inicio de sesión o null si las fuentes no están cargadas
  */
 export default function App(): JSX.Element | null {
-  /**
-   * URL del backend obtenida de las constantes de Expo.
-   */
+  /** URL del backend obtenida de las constantes de Expo */
   const BACKEND_URL = Constants.expoConfig?.extra?.backendUrl;
 
-  /**
-   * Hook de navegación de Expo Router.
-   */
+  /** Hook de navegación de Expo Router */
   const router = useRouter();
 
-  /**
-   * Estado para almacenar el correo electrónico ingresado por el usuario.
-   */
+  /** Estado para el correo electrónico del usuario */
   const [correo, setCorreo] = useState("");
 
-  /**
-   * Estado para almacenar la contraseña ingresada por el usuario.
-   */
+  /** Estado para la contraseña del usuario */
   const [contrasena, setContrasena] = useState("");
 
   /**
@@ -69,8 +62,16 @@ export default function App(): JSX.Element | null {
   }
 
   /**
-   * Maneja la acción de iniciar sesión del usuario.
-   * Valida los campos de entrada y envía una solicitud al backend.
+   * Maneja el proceso de inicio de sesión
+   *
+   * @remarks
+   * Realiza las siguientes acciones:
+   * 1. Valida las credenciales
+   * 2. Encripta la contraseña
+   * 3. Envía la solicitud al backend
+   * 4. Maneja la respuesta y navega al dashboard si es exitosa
+   *
+   * @throws {Error} Si hay un error en el proceso de autenticación
    */
   const handleLogin = async (): Promise<void> => {
     // Si el usuario no ha rellenado el campo de correo o contraseña
@@ -224,11 +225,6 @@ export default function App(): JSX.Element | null {
                 </Link>
               </Text>
 
-              <TouchableOpacity style={styles.botonGoogle}>
-                <Image source={imagenGoogle} style={styles.imagenGoogle} />
-                <Text style={styles.textoGoogle}>Continuar con Google</Text>
-              </TouchableOpacity>
-
               <TouchableOpacity
                 style={styles.botonEntrar}
                 onPress={handleLogin}
@@ -333,28 +329,6 @@ const styles = StyleSheet.create({
   linkRegistro: {
     color: "blue",
     fontWeight: "bold",
-  },
-
-  botonGoogle: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#fff",
-    borderRadius: 10,
-    width: "70%",
-    justifyContent: "center",
-    marginTop: 15,
-    height: 35,
-    elevation: 3,
-  },
-
-  imagenGoogle: {
-    width: 20,
-    height: 20,
-    marginRight: 10,
-  },
-
-  textoGoogle: {
-    fontSize: 16,
   },
 
   botonEntrar: {

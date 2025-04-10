@@ -19,7 +19,10 @@ const imagenFondoRoles = require("@/assets/images/fondo-roles.jpg");
 const imagenAtras = require("@/assets/images/botonAtras.png");
 
 export default function NotificacionesScreen(): JSX.Element {
+  /** Hook de navegación de Expo Router */
   const router = useRouter();
+
+  /** URL del backend obtenida de las constantes de Expo */
   const BACKEND_URL = Constants.expoConfig?.extra?.backendUrl;
 
   // Estado para almacenar las notificaciones
@@ -46,7 +49,14 @@ export default function NotificacionesScreen(): JSX.Element {
     cargarUsuario();
   }, []);
 
-  // Obtener las notificaciones cuando se tiene el usuario o se cambia el tipo
+  /**
+   * Obtiene las notificaciones del usuario desde el backend
+   *
+   * @remarks
+   * Se ejecuta cuando:
+   * - Se carga el ID del usuario
+   * - Cambia el tipo de notificación
+   */
   useEffect(() => {
     if (usuarioId) {
       fetchNotificaciones();
