@@ -1,0 +1,34 @@
+name: Desplegar documentación de cliente-movil en GitHub Pages
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout del repositorio
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+
+      - name: Instalar dependencias
+        run: |
+          cd cliente-movil
+          npm install
+
+      - name: Generar documentación de cliente-movil
+        run: |
+          cd cliente-movil
+          npm run docs
+
+      - name: Desplegar documentación de cliente-movil en GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./cliente-movil/docs
+          publish_branch: gh-pages
