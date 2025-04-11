@@ -14,6 +14,8 @@ import {
 import { useRouter } from "expo-router";
 import socket from "@/app/(sala)/socket"; // Módulo de conexión
 import AsyncStorage from "@react-native-async-storage/async-storage";
+// Importa la cabecera
+import Cabecera from "@/components/Cabecera";
 
 /**
  * Imágenes utilizadas en la pantalla de búsqueda de salas.
@@ -164,6 +166,9 @@ export default function BuscarSalasScreen(): JSX.Element {
   return (
     <View style={styles.container}>
       <ImageBackground source={imagenFondo} style={styles.image}>
+        {/* Agregar la cabecera en la parte superior */}
+        <Cabecera />
+
         <ScrollView contentContainerStyle={styles.scrollContenido}>
           {/* Título principal */}
           <Text style={styles.titulo}>BUSCAR{"\n"}SALAS</Text>
