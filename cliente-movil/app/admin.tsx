@@ -14,15 +14,22 @@ import Constants from "expo-constants";
 import axios from "axios";
 import { useFocusEffect } from "@react-navigation/native";
 
+/** URL del backend obtenida de las constantes de Expo */
 const BACKEND_URL = Constants.expoConfig?.extra?.backendUrl;
 
-// Ejemplo de función para obtener usuario por ID
+/**
+ * Obtiene los datos de un usuario específico desde el backend
+ *
+ * @param userId - ID del usuario a obtener
+ * @returns {Promise<Object>} Datos del usuario
+ * @throws {Error} Si hay un error al obtener los datos del usuario
+ */
 async function fetchUserData(userId: number) {
   const response = await axios.post(
     `${BACKEND_URL}/api/usuario/obtener_por_id`,
     { idUsuario: userId }
   );
- // Alert.alert("Usuario Obtenido", JSON.stringify(response.data.usuario)); // Muestra lo recibido en un alert
+  // Alert.alert("Usuario Obtenido", JSON.stringify(response.data.usuario)); // Muestra lo recibido en un alert
   return response.data.usuario; // Ajusta según la estructura que devuelva el backend
 }
 
@@ -47,7 +54,12 @@ export default function AdminSuggestionsScreen() {
   // Estado de carga (opcional)
   const [loading, setLoading] = useState(true);
 
-  // Función para cargar las sugerencias desde el backend
+  /**
+   * Carga las sugerencias desde el backend
+   *
+   * @remarks
+   * Se ejecuta al montar el componente y cada vez que se enfoca la pantalla
+   */
   const loadSuggestions = async () => {
     try {
       const response = await axios.get(`${BACKEND_URL}/api/sugerencias/todas`);

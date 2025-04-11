@@ -24,21 +24,22 @@ import { useRouter } from "expo-router";
 
 // Importación de imágenes utilizadas en la pantalla
 const imagenPortada = require("@/assets/images/imagen-portada.png");
-const imagenGoogle = require("@/assets/images/google-icon.png");
 const imagenFondoInicioSesion = require("@/assets/images/fondo-inicio-sesion.jpg");
 
 /**
- * Pantalla de registro de usuario.
+ * Componente principal de la pantalla de registro
  *
- * Permite a los usuarios registrarse proporcionando un nombre, correo y contraseña.
- * Incluye validaciones de entrada y encriptación de la contraseña antes de enviarla al servidor.
+ * @remarks
+ * Este componente maneja el registro de nuevos usuarios con las siguientes características:
+ * - Validación de campos obligatorios
+ * - Validación de formato de correo electrónico
+ * - Encriptación de contraseña antes de enviarla al servidor
+ * - Manejo de errores y mensajes de retroalimentación
  *
- * @returns {JSX.Element | null} Pantalla de registro.
+ * @returns {JSX.Element | null} La pantalla de registro o null si las fuentes no están cargadas
  */
 export default function RegistroScreen() {
-  /**
-   * URL del backend obtenida de las constantes de Expo.
-   */
+  /** URL del backend obtenida de las constantes de Expo */
   const BACKEND_URL = Constants.expoConfig?.extra?.backendUrl;
 
   /**
@@ -88,10 +89,17 @@ export default function RegistroScreen() {
   }
 
   /**
-   * Función que maneja el registro del usuario.
+   * Maneja el proceso de registro de usuario
    *
-   * Realiza validaciones antes de enviar los datos al backend.
-   * Si el registro es exitoso, almacena los datos en AsyncStorage y redirige a la pantalla de inicio de sesión.
+   * @remarks
+   * Realiza las siguientes acciones:
+   * 1. Valida los campos obligatorios
+   * 2. Valida el formato del correo electrónico
+   * 3. Encripta la contraseña
+   * 4. Envía la solicitud al backend
+   * 5. Maneja la respuesta, guarda los datos del usuario en AsyncStorage y navega a la pantalla de inicio
+   *
+   * @throws {Error} Si hay un error en el proceso de registro
    */
   const handleRegister = async () => {
     // Si el usuario no ha rellenado el campo de correo o contraseña
@@ -235,11 +243,6 @@ export default function RegistroScreen() {
                 </TouchableOpacity>
               </View>
 
-              <TouchableOpacity style={styles.botonGoogle}>
-                <Image source={imagenGoogle} style={styles.imagenGoogle} />
-                <Text style={styles.textoGoogle}>Registrarse con Google</Text>
-              </TouchableOpacity>
-
               <TouchableOpacity
                 style={styles.botonEntrar}
                 onPress={handleRegister}
@@ -327,25 +330,6 @@ const styles = StyleSheet.create({
   linkRegistro: {
     color: "blue",
     fontWeight: "bold",
-  },
-  botonGoogle: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#fff",
-    borderRadius: 10,
-    width: "70%",
-    justifyContent: "center",
-    marginTop: 15,
-    height: 35,
-    elevation: 3,
-  },
-  imagenGoogle: {
-    width: 20,
-    height: 20,
-    marginRight: 10,
-  },
-  textoGoogle: {
-    fontSize: 16,
   },
   botonEntrar: {
     backgroundColor: "#008f39",

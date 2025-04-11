@@ -63,6 +63,8 @@ export default function RankingScreen(): JSX.Element {
   const [ranking, setRanking] = useState<Jugador[]>([]);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+
+  /** URL del backend obtenida de las constantes de Expo */
   const BACKEND_URL = Constants.expoConfig?.extra?.backendUrl;
 
   useEffect(() => {

@@ -64,6 +64,8 @@ export default function VidenteScreen(): JSX.Element | null {
         {/* Descripción del rol */}
         <Text style={styles.textoVidente}>
           ELIGE UN JUGADOR Y EL NARRADOR LE MOSTRARÁ LA CARTA DE DICHO JUGADOR.
+          DE ESTA FORMA, PODRÁ CONOCER SU ROL, OBTENIENDO INFORMACIÓN
+          PRIVILEGIADA.
         </Text>
 
         {/* Botón para regresar a la pantalla anterior */}

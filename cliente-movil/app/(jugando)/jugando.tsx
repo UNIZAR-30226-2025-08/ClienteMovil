@@ -745,16 +745,15 @@ const PantallaJugando: React.FC = () => {
    */
   useEffect(() => {
     socket.on("enPartida", (data) => {
-      // console.log("Evento enPartida recibido");
-      // console.log("Jugadores recibidos enPartida (raw):", data.sala.jugadores);
+      console.log("Evento enPartida recibido");
+      console.log("Jugadores recibidos enPartida (raw):", data.sala.jugadores);
 
       // Versión legible en JSON del estado
-      /*
+
       console.log(
         "Jugadores enPartida (stringify):",
         JSON.stringify(data.sala.jugadores, null, 2)
       );
-      */
 
       setJugadoresEstado(data.sala.jugadores);
     });
@@ -1085,16 +1084,16 @@ const PantallaJugando: React.FC = () => {
   useEffect(() => {
     if (!idSala) return;
 
-    // Emitir evento al backend para solicitar el estado actual de la partida
-    socket.emit("obtenerEstadoPartida", { idPartida: idSala });
-    console.log("[PantallaJugando] → Emitiendo obtenerEstadoPartida", idSala);
+    // Emitir evento al backend para solicitar el estado actual de los jugadores
+    socket.emit("obtenerEstadoJugadores", { idPartida: idSala });
+    console.log("[PantallaJugando] → Emitiendo obtenerEstadoJugadores", idSala);
 
-    // Escuchar la respuesta del backend con los datos de la sala
-    socket.on("estadoPartida", (data) => {
-      console.log("→ Respuesta estadoPartida:", data);
+    // Escuchar la respuesta del backend con los datos de los jugadores
+    socket.on("estadoJugadores", (data) => {
+      console.log("→ Respuesta estadoJugadores:", data);
 
       if (data.error) {
-        console.log("Error al obtener estado de la partida:", data.error);
+        console.log("Error al obtener estado de los jugadores:", data.error);
         return;
       }
 
@@ -1103,7 +1102,7 @@ const PantallaJugando: React.FC = () => {
 
     // Limpiar el listener al desmontar
     return () => {
-      socket.off("estadoPartida");
+      socket.off("estadoJugadores");
     };
   }, [idSala]);
 

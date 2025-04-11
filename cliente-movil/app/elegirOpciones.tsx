@@ -269,7 +269,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "bold",
     textAlign: "center",
-    width: "100%", // Asegura que el texto se centre correctamente
+    width: "100%",
   },
 
   textoPartida: {
