@@ -191,6 +191,27 @@ export default function PerfilScreen(): JSX.Element | null {
     router.push("/elegirOpciones");
   };
 
+  useEffect(() => {
+    AsyncStorage.setItem("nombreUsuario", nombre).catch((error) =>
+      console.error("Error guardando nombreUsuario:", error)
+    );
+  }, [nombre]);
+
+  useEffect(() => {
+    AsyncStorage.setItem("rolFavorito", rolFavorito).catch((error) =>
+      console.error("Error guardando rolFavorito:", error)
+    );
+  }, [rolFavorito]);
+
+  useEffect(() => {
+    // Suponiendo que 'avatar' es un string (la clave del avatar)
+    if (typeof avatar === "string") {
+      AsyncStorage.setItem("avatarUsuario", avatar).catch((error) =>
+        console.error("Error guardando avatarUsuario:", error)
+      );
+    }
+  }, [avatar]);
+
   return (
     <View style={styles.container}>
       <ImageBackground
