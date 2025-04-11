@@ -15,6 +15,7 @@ import Constants from "expo-constants";
 import { useRouter } from "expo-router";
 import { useFonts } from "expo-font";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import NotificationButton from "@/components/NotificationButton";
 
 /**
  * Mapa que relaciona claves de avatar con las imágenes correspondientes.
@@ -35,7 +36,6 @@ const avatarMap: Record<string, any> = {
  */
 const imagenPortada = require("@/assets/images/imagen-portada.png");
 const imagenPorDefecto = require("@/assets/images/imagenPerfil.webp");
-const imagenNotificaciones = require("@/assets/images/noti_icon.png");
 
 /**
  * Pantalla para elegir una partida.
@@ -149,17 +149,11 @@ export default function ElegirPartidaScreen(): JSX.Element | null {
         </Link>
 
         {/* Botón de Notificaciones */}
-        <TouchableOpacity
-          style={styles.botonNotificaciones}
-          onPress={() => router.push("/notificaciones")}
-        >
+        <View style={styles.botonNotificaciones}>
           <View style={styles.iconoNotificacionesContainer}>
-            <Image
-              source={imagenNotificaciones}
-              style={styles.iconoNotificaciones}
-            />
+            <NotificationButton />
           </View>
-        </TouchableOpacity>
+        </View>
       </ImageBackground>
     </View>
   );
@@ -261,19 +255,15 @@ const styles = StyleSheet.create({
 
   botonNotificaciones: {
     position: "absolute",
-    top: 40,
-    right: 20,
+    top: 10,
+    right: 10,
     padding: 10,
+    zIndex: 10, // ensures it's above other elements
   },
 
   iconoNotificacionesContainer: {
-    backgroundColor: "rgba(0, 0, 0, 0.6)",
+    backgroundColor: "transparent",
     borderRadius: 10,
     padding: 5,
-  },
-
-  iconoNotificaciones: {
-    width: 40,
-    height: 40,
   },
 });

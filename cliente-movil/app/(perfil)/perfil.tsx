@@ -191,24 +191,6 @@ export default function PerfilScreen(): JSX.Element | null {
     router.back();
   };
 
-  useEffect(() => {
-    AsyncStorage.setItem("nombreUsuario", nombre).catch((err) =>
-      console.error("Error al guardar nombreUsuario:", err)
-    );
-  }, [nombre]);
-
-  useEffect(() => {
-    AsyncStorage.setItem("rolFavorito", rolFavorito).catch((err) =>
-      console.error("Error al guardar rolFavorito:", err)
-    );
-  }, [rolFavorito]);
-
-  useEffect(() => {
-    AsyncStorage.setItem("avatarUsuario", avatar).catch((err) =>
-      console.error("Error al guardar avatarUsuario:", err)
-    );
-  }, [avatar]);
-
   return (
     <View style={styles.container}>
       <ImageBackground

@@ -1,4 +1,4 @@
-import React, { useState } from "react"; // Importar useState desde React
+import React, { useState, useCallback } from "react";
 import {
   ImageBackground,
   StyleSheet,
@@ -8,13 +8,13 @@ import {
   TouchableOpacity,
   ActivityIndicator,
 } from "react-native";
-
 import { useRouter } from "expo-router";
 import { useFonts } from "expo-font";
 import Constants from "expo-constants";
 import { useFocusEffect } from "@react-navigation/native";
-import { useCallback } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+
+import NotificationButton from "@/components/NotificationButton";
 
 /**
  * Mapa que relaciona claves de avatar con las imágenes correspondientes.
@@ -30,52 +30,24 @@ const avatarMap: Record<string, any> = {
   avatar8: require("@/assets/images/imagenPerfil8.webp"),
 };
 
-/**
- * Recursos de imágenes utilizados en la pantalla.
- */
 const imagenPortada = require("@/assets/images/imagen-portada.png");
 const imagenPorDefecto = require("@/assets/images/imagenPerfil.webp");
-const imagenNotificaciones = require("@/assets/images/noti_icon.png");
 
-/**
- * Pantalla de opciones principales del juego.
- *
- * Permite acceder a diferentes secciones como jugar, ver roles, opciones,
- * contacto y cerrar sesión.
- *
- * @returns {JSX.Element | null} Pantalla de opciones del juego.
- */
 export default function OpcionesScreen(): JSX.Element | null {
-  /**
-   * Recupera la URL del backend desde las configuraciones de la aplicación.
-   */
-  const BACKEND_URL = Constants.expoConfig?.extra?.backendUrl;
   const router = useRouter();
 
-  /**
-   * Estado que almacena la información del usuario.
-   */
   const [usuario, setUsuario] = useState<{
     nombre: string;
-    avatar?: string;
+    avatar?: any;
   } | null>(null);
-
-  /**
-   * Estado de carga para mostrar un indicador mientras se recuperan los datos.
-   */
   const [loading, setLoading] = useState(true);
 
-  /**
-   * Carga los datos del usuario cuando la pantalla gana foco.
-   */
   useFocusEffect(
     useCallback(() => {
       const cargarUsuario = async () => {
         try {
           const nombre = await AsyncStorage.getItem("nombreUsuario");
           const avatarClave = await AsyncStorage.getItem("avatarUsuario");
-
-          // Convertimos la clave en la imagen correspondiente en el mapa
           const avatar = avatarClave ? avatarMap[avatarClave] : undefined;
 
           setUsuario({
@@ -88,35 +60,25 @@ export default function OpcionesScreen(): JSX.Element | null {
           setLoading(false);
         }
       };
-
       cargarUsuario();
     }, [])
   );
 
-  /**
-   * Cierra la sesión del usuario eliminando los datos almacenados.
-   */
   const cerrarSesion = async () => {
     try {
       await AsyncStorage.removeItem("nombreUsuario");
       await AsyncStorage.removeItem("avatarUsuario");
-      setUsuario(null); // Restablecer el estado del usuario
-      router.push("/"); // Redirigir a la pantalla de inicio de sesión
+      setUsuario(null);
+      router.push("/");
     } catch (error) {
       console.error("Error al cerrar sesión:", error);
     }
   };
 
-  /**
-   * Carga la fuente personalizada `GhostShadow`.
-   */
   const [loaded] = useFonts({
     GhostShadow: require("@/assets/fonts/ghost-shadow.ttf"),
   });
 
-  /**
-   * Si la fuente aún no ha terminado de cargarse, se retorna `null` para evitar errores.
-   */
   if (!loaded) {
     return null;
   }
@@ -130,68 +92,59 @@ export default function OpcionesScreen(): JSX.Element | null {
       >
         <View style={styles.overlay} />
 
-        {/* Muestra un indicador de carga si los datos aún están cargando */}
         {loading ? (
           <ActivityIndicator size="large" color="#fff" style={styles.loader} />
         ) : (
           <>
-            {/* Contenedor del perfil del usuario */}
-            <TouchableOpacity
-              onPress={() => router.push("/perfil")}
-              style={styles.contenedorPerfil}
-            >
-              <Image
-                source={usuario?.avatar ? usuario.avatar : imagenPorDefecto}
-                style={styles.profileImage}
-              />
-            </TouchableOpacity>
+            {/* 
+              Contenedor de la imagen con position: "absolute" 
+              para no desplazar otros elementos.
+              Se ubica en la misma posición de antes (top: 100).
+              Le damos zIndex: 1 para que un dropdown con zIndex mayor se superponga. 
+            */}
+            <View style={styles.contenedorPerfil}>
+              <TouchableOpacity onPress={() => router.push("/perfil")}>
+                <Image
+                  source={usuario?.avatar ? usuario.avatar : imagenPorDefecto}
+                  style={styles.profileImage}
+                />
+              </TouchableOpacity>
+            </View>
 
-            {/* Nombre del jugador */}
             <Text style={styles.nombrePlayer}>
               {usuario?.nombre || "Usuario"}
             </Text>
 
-            {/* Botón para jugar */}
             <TouchableOpacity
               style={styles.boton}
               onPress={() => router.push("/(partida)/elegirTipoPartida")}
             >
               <Text style={styles.textoBoton}>JUGAR</Text>
             </TouchableOpacity>
-
-            {/* Botón para ver cómo jugar */}
             <TouchableOpacity
               style={styles.boton}
               onPress={() => router.push("/(comoJugar)/comoJugar")}
             >
               <Text style={styles.textoBoton}>¿CÓMO JUGAR?</Text>
             </TouchableOpacity>
-
-            {/* Botón para ver los roles */}
             <TouchableOpacity
               style={styles.boton}
               onPress={() => router.push("/roles")}
             >
               <Text style={styles.textoBoton}>ROLES</Text>
             </TouchableOpacity>
-
-            {/* Botón para acceder a las opciones */}
             <TouchableOpacity
               style={styles.boton}
               onPress={() => router.push("/(opciones)/opciones")}
             >
               <Text style={styles.textoBoton}>OPCIONES</Text>
             </TouchableOpacity>
-
-            {/* Botón para ver la sección de contacto */}
             <TouchableOpacity
               style={styles.boton}
               onPress={() => router.push("/(sugerencias)/sugerencias")}
             >
               <Text style={styles.textoBoton}>SUGERENCIAS</Text>
             </TouchableOpacity>
-
-            {/* Botón para cerrar sesión */}
             <TouchableOpacity
               style={styles.botonCerrarSesion}
               onPress={cerrarSesion}
@@ -201,20 +154,17 @@ export default function OpcionesScreen(): JSX.Element | null {
           </>
         )}
 
-        {/* Botón de notificaciones */}
-        <TouchableOpacity
-          style={styles.botonNotificaciones}
-          onPress={() => router.push("/notificaciones")}
-        >
+        {/* 
+          Botón de notificaciones con position: "absolute"
+          (igual que antes), y un zIndex mayor para que el menú 
+          sobresalga sobre la imagen (que tiene zIndex: 1).
+        */}
+        <View style={styles.botonNotificaciones}>
           <View style={styles.iconoNotificacionesContainer}>
-            <Image
-              source={imagenNotificaciones}
-              style={styles.iconoNotificaciones}
-            />
+            <NotificationButton />
           </View>
-        </TouchableOpacity>
+        </View>
 
-        {/* Nuevo Botón de Ranking */}
         <TouchableOpacity
           style={styles.botonRanking}
           onPress={() => router.push("/ranking")}
@@ -228,33 +178,35 @@ export default function OpcionesScreen(): JSX.Element | null {
   );
 }
 
-// Estilos de la pantalla
+// Estilos
 const styles = StyleSheet.create({
-  container: {
+  container: { flex: 1, flexDirection: "column" },
+
+  image: {
+    width: "100%",
+    height: "100%",
     flex: 1,
-    flexDirection: "column",
+    justifyContent: "center",
+  },
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0, 0, 0, 0.4)",
   },
 
+  loader: {
+    position: "absolute",
+    top: "50%",
+    alignSelf: "center",
+  },
+
+  // Contenedor con position absolute para que no desplace nada
+  // y zIndex menor (1) para que el dropdown con zIndex alto lo tape
   contenedorPerfil: {
     position: "absolute",
     top: 100,
     alignSelf: "center",
     zIndex: 1,
   },
-
-  image: {
-    width: "100%",
-    height: "100%",
-    flex: 1,
-    resizeMode: "cover",
-    justifyContent: "center",
-  },
-
-  overlay: {
-    ...StyleSheet.absoluteFillObject, // Cubre toda el área de la imagen
-    backgroundColor: "rgba(0, 0, 0, 0.4)", // Fondo negro semitransparente, puedes ajustar la opacidad
-  },
-
   profileImage: {
     width: 100,
     height: 100,
@@ -263,93 +215,13 @@ const styles = StyleSheet.create({
 
   nombrePlayer: {
     position: "absolute",
-    top: 205, // Ajusta la distancia desde la parte superior
-    alignSelf: "center", // Centra horizontalmente
+    top: 205,
+    alignSelf: "center",
     color: "white",
     fontSize: 20,
     fontWeight: "bold",
     textAlign: "center",
     width: "100%",
-  },
-
-  textoPartida: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "white",
-    textShadowColor: "rgba(0, 0, 0, 0.75)", // Sombra de texto
-    textShadowOffset: { width: 2, height: 2 },
-    textShadowRadius: 10,
-    textAlign: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.6)",
-    position: "absolute", // Fija el contenedor en la parte inferior
-    top: 250, // Ajusta la distancia desde la parte inferior
-    width: "100%",
-    paddingVertical: 10,
-    borderRadius: 20,
-  },
-
-  textoComoJugar: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "white",
-    textShadowColor: "rgba(0, 0, 0, 0.75)", // Sombra de texto
-    textShadowOffset: { width: 2, height: 2 },
-    textShadowRadius: 10,
-    textAlign: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.6)",
-    position: "absolute", // Fija el contenedor en la parte inferior
-    top: 325, // Ajusta la distancia desde la parte inferior
-    width: "100%",
-    paddingVertical: 10,
-    borderRadius: 20,
-  },
-
-  textoRoles: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "white",
-    textShadowColor: "rgba(0, 0, 0, 0.75)", // Sombra de texto
-    textShadowOffset: { width: 2, height: 2 },
-    textShadowRadius: 10,
-    textAlign: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.6)",
-    position: "absolute", // Fija el contenedor en la parte inferior
-    top: 400, // Ajusta la distancia desde la parte inferior
-    width: "100%",
-    paddingVertical: 10,
-    borderRadius: 20,
-  },
-
-  textoOpciones: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "white",
-    textShadowColor: "rgba(0, 0, 0, 0.75)", // Sombra de texto
-    textShadowOffset: { width: 2, height: 2 },
-    textShadowRadius: 10,
-    textAlign: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.6)",
-    position: "absolute", // Fija el contenedor en la parte inferior
-    top: 475, // Ajusta la distancia desde la parte inferior
-    width: "100%",
-    paddingVertical: 10,
-    borderRadius: 20,
-  },
-
-  textoContacto: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "white",
-    textShadowColor: "rgba(0, 0, 0, 0.75)", // Sombra de texto
-    textShadowOffset: { width: 2, height: 2 },
-    textShadowRadius: 10,
-    textAlign: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.6)",
-    position: "absolute", // Fija el contenedor en la parte inferior
-    top: 550, // Ajusta la distancia desde la parte inferior
-    width: "100%",
-    paddingVertical: 10,
-    borderRadius: 20,
   },
 
   boton: {
@@ -360,18 +232,11 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     width: "100%",
   },
-
   textoBoton: {
     fontSize: 20,
     fontWeight: "bold",
     color: "white",
     textAlign: "center",
-  },
-
-  loader: {
-    position: "absolute",
-    top: "50%",
-    alignSelf: "center",
   },
 
   botonCerrarSesion: {
@@ -385,37 +250,33 @@ const styles = StyleSheet.create({
     bottom: 50,
   },
 
+  // Botón de notificaciones
   botonNotificaciones: {
     position: "absolute",
-    top: 40,
-    right: 20,
+    top: 10,
+    right: 10,
     padding: 10,
+    zIndex: 10, // superior a 1 => se superpone a la imagen
   },
-
   iconoNotificacionesContainer: {
-    backgroundColor: "rgba(0, 0, 0, 0.6)", // Fondo negro semitransparente
+    backgroundColor: "transparent",
     borderRadius: 10,
     padding: 5,
   },
 
-  iconoNotificaciones: {
-    width: 40, // Aumenta el tamaño de la imagen
-    height: 40, // Aumenta el tamaño de la imagen
-  },
-
+  // Botón de Ranking
   botonRanking: {
     position: "absolute",
     top: 40,
     left: 20,
     padding: 10,
+    zIndex: 10,
   },
-
   iconoRankingContainer: {
     backgroundColor: "rgba(0,0,0,0.6)",
     borderRadius: 10,
     padding: 5,
   },
-
   iconoRanking: {
     fontSize: 30,
     color: "white",

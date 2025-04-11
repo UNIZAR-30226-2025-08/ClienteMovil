@@ -167,9 +167,12 @@ export default function BuscarSalasScreen(): JSX.Element {
   return (
     <View style={styles.container}>
       <ImageBackground source={imagenFondo} style={styles.image}>
-        {/* Agregar la cabecera en la parte superior */}
-        <Cabecera />
+        {/* Contenedor para la cabecera con posición absoluta */}
+        <View style={styles.headerContainer}>
+          <Cabecera />
+        </View>
 
+        {/* Contenido principal con paddingTop para dejar espacio a la cabecera */}
         <ScrollView contentContainerStyle={styles.scrollContenido}>
           {/* Título principal */}
           <Text style={styles.titulo}>BUSCAR{"\n"}SALAS</Text>
@@ -256,8 +259,17 @@ const styles = StyleSheet.create({
   image: {
     flex: 1,
     resizeMode: "cover",
+    position: "relative", // Para que el header se superponga
     justifyContent: "center",
     alignItems: "center",
+  },
+
+  headerContainer: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 9999,
   },
 
   titulo: {
@@ -265,7 +277,7 @@ const styles = StyleSheet.create({
     color: "white",
     fontWeight: "bold",
     textAlign: "center",
-    marginTop: 80, // Ajusta este valor según sea necesario para centrar el texto verticalmente
+    marginTop: 20, // Ajusta este valor según sea necesario para centrar el texto verticalmente
   },
 
   rectanglesContainer: {
@@ -371,6 +383,7 @@ const styles = StyleSheet.create({
   },
 
   scrollContenido: {
+    paddingTop: 120, // Espacio suficiente para la cabecera y dropdown
     paddingBottom: 20,
     alignItems: "center",
     width: "80%",
