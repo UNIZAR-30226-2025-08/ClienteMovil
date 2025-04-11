@@ -10,7 +10,7 @@ import {
   Alert,
   ScrollView,
 } from "react-native";
-import { useRouter } from "expo-router";
+import { useRouter, useFocusEffect } from "expo-router"; // o de '@react-navigation/native'
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import Constants from "expo-constants";
@@ -64,6 +64,20 @@ const Cabecera = ({ compacto = false }) => {
     };
     fetchUser();
   }, []);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      const fetchUserData = async () => {
+        const nombre = await AsyncStorage.getItem("nombreUsuario");
+        const avatar =
+          (await AsyncStorage.getItem("avatarUsuario")) || "avatar1";
+        const rolFavorito =
+          (await AsyncStorage.getItem("rolFavorito")) || "Sin rol favorito";
+        setUser({ ...user, nombre, avatar, rolFavorito });
+      };
+      fetchUserData();
+    }, [])
+  );
 
   // Socket para recibir invitaciones
   useEffect(() => {

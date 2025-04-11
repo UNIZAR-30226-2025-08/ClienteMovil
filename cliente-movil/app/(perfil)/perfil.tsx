@@ -188,28 +188,25 @@ export default function PerfilScreen(): JSX.Element | null {
    * Redirige a la pantalla principal de opciones.
    */
   const irAtras = () => {
-    router.push("/elegirOpciones");
+    router.back();
   };
 
   useEffect(() => {
-    AsyncStorage.setItem("nombreUsuario", nombre).catch((error) =>
-      console.error("Error guardando nombreUsuario:", error)
+    AsyncStorage.setItem("nombreUsuario", nombre).catch((err) =>
+      console.error("Error al guardar nombreUsuario:", err)
     );
   }, [nombre]);
 
   useEffect(() => {
-    AsyncStorage.setItem("rolFavorito", rolFavorito).catch((error) =>
-      console.error("Error guardando rolFavorito:", error)
+    AsyncStorage.setItem("rolFavorito", rolFavorito).catch((err) =>
+      console.error("Error al guardar rolFavorito:", err)
     );
   }, [rolFavorito]);
 
   useEffect(() => {
-    // Suponiendo que 'avatar' es un string (la clave del avatar)
-    if (typeof avatar === "string") {
-      AsyncStorage.setItem("avatarUsuario", avatar).catch((error) =>
-        console.error("Error guardando avatarUsuario:", error)
-      );
-    }
+    AsyncStorage.setItem("avatarUsuario", avatar).catch((err) =>
+      console.error("Error al guardar avatarUsuario:", err)
+    );
   }, [avatar]);
 
   return (
