@@ -147,6 +147,6 @@ const styles = StyleSheet.create({
     position: "absolute",
     width: 230,
     left: "25%",
-    bottom: "25%",
+    top: "45%",
   },
 });

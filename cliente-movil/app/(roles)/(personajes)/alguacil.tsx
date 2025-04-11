@@ -64,9 +64,9 @@ export default function AlguacilScreen(): JSX.Element | null {
 
         {/* Descripción del rol */}
         <Text style={styles.textoAlguacil}>
-          ESTE NO ES UN ROL NORMAL, SE OBTIENE POR MMAYORÍA EN UNA VOTACIÓN DEL
+          ESTE NO ES UN ROL NORMAL, SE OBTIENE POR MAYORÍA EN UNA VOTACIÓN DEL
           PUEBLO. EL VOTO DEL ALGUACIL VALE EL DOBLE EN LAS VOTACIONES DE LA
-          ALDEA
+          ALDEA. AL MORIR, ELEGIRÁ A SU SUCESOR, A QUIÉN LE PASARÁ EL CARGO.
         </Text>
 
         {/* Botón para regresar a la pantalla anterior */}
@@ -145,6 +145,6 @@ const styles = StyleSheet.create({
     position: "absolute",
     width: 230,
     left: "25%",
-    bottom: "25%",
+    top: "45%",
   },
 });
