@@ -13,6 +13,7 @@ import {
   Text,
   TouchableWithoutFeedback,
   Animated,
+  Alert,
   ActivityIndicator,
   Image,
 } from "react-native";
@@ -1112,8 +1113,7 @@ const PantallaJugando: React.FC = () => {
 
   useEffect(() => {
     /**
-     * Texto
-     *
+     * Socket.on para escuchar los mensajes del chat diurno
      */
     socket.on("mensajeChat", (data) => {
       console.log("Llega el mensaje a Frontend", data);
@@ -1130,8 +1130,30 @@ const PantallaJugando: React.FC = () => {
       setMensajes((prevMensajes) => [...prevMensajes, nuevoMensaje]);
     });
 
+    /**
+     * Socket.on para escuchar los mensajes privados que se intercambian los lobos
+     */
+    socket.on("mensajePrivado", (data) => {
+      console.log("Llega el mensaje privado a Frontend");
+      if (rolUsuario === "Hombre lobo") {
+        var mensaje = data.nombre + ": " + data.mensaje;
+
+        console.log("Tamaño de mensajes.length", mensajes.length);
+
+        const nuevoMensaje: MensajeChat = {
+          id: Date.now() + Math.random(),
+          texto: mensaje,
+        };
+
+        setMensajes((prevMensajes) => [...prevMensajes, nuevoMensaje]);
+      } else {
+        console.log("Error en el envio de mensaje privado en Backend");
+      }
+    });
+
     return () => {
       socket.off("mensajeChat");
+      socket.off("mensajePrivado");
     };
   }, [idSala]);
 
@@ -1151,6 +1173,7 @@ const PantallaJugando: React.FC = () => {
    * - turnoHombresLobos: Gestiona la acción de los hombres lobo.
    * - habilidadBruja: Activa la habilidad de la bruja (si está viva).
    * - diaComienza: Maneja el comienzo del día.
+   * - partidaFinalizada: Maneja el final de la Partida
    */
   useEffect(() => {
     /**
@@ -1312,9 +1335,9 @@ const PantallaJugando: React.FC = () => {
               setVotoRealizado(false);
               setPasoTurno(false);
               setJugadorSeleccionado(null);
-            }, 4000); // 3ª animación de 4000 ms
-          }, 4000); // 2ª animación de 4000 ms
-        }, 4000); // 1ª animación de 4000 ms
+            }, 3000); // 3ª animación de 4000 ms
+          }, 3000); // 2ª animación de 4000 ms
+        }, 3000); // 1ª animación de 4000 ms
       } else {
         // Animación épica
         setMostrarBotones(false);
@@ -1534,6 +1557,9 @@ const PantallaJugando: React.FC = () => {
       // Resetear el flag que no le permite a la bruja usar más de 1 poción por turno
       setBotellaUsadaEnEsteTurno(false);
 
+      // Establecer Etapa a valor "Dia"
+      setEtapaActual("Día");
+
       // El timer visual para los días será de 60 segundos tras su reinicio
       actualizarMaxTiempo(CONST_TIEMPO_VOTACION_DIURNA);
 
@@ -1572,6 +1598,15 @@ const PantallaJugando: React.FC = () => {
       }, 4000);
     };
 
+    /**
+     * Manejador del evento "partidaFinalizada".
+     *
+     * @param {any} datos - Datos recibidos del evento.
+     */
+    const manejarPartidaFinalizada = (datos: any) => {
+      Alert.alert("Sin hacer", "La partida ha finalizado. Frontend sin montar");
+    };
+
     // Registro de eventos con sus respectivos manejadores
     socket.on("iniciarVotacionAlguacil", manejarIniciarVotacionAlguacil);
     socket.on("esperaInicial", manejarEsperaInicial);
@@ -1580,6 +1615,7 @@ const PantallaJugando: React.FC = () => {
     socket.on("turnoHombresLobos", manejarTurnoHombresLobos);
     socket.on("habilidadBruja", manejarHabilidadBruja);
     socket.on("diaComienza", manejarDiaComienza);
+    socket.on("partidaFinalizada", manejarPartidaFinalizada);
 
     // Limpieza: remueve los listeners al desmontar el componente
     return () => {
@@ -1590,6 +1626,7 @@ const PantallaJugando: React.FC = () => {
       socket.off("turnoHombresLobos", manejarTurnoHombresLobos);
       socket.off("habilidadBruja", manejarHabilidadBruja);
       socket.off("diaComienza", manejarDiaComienza);
+      socket.off("partidaFinalizada");
     };
   }, [
     jornadaActual,
@@ -1600,6 +1637,7 @@ const PantallaJugando: React.FC = () => {
     setMostrarBotones,
     setMostrarAnimacionInicioVotacionAlguacil,
     setMostrarBotonVotar,
+    setEtapaActual,
     setJornadaActual,
     setVotos,
     setVotoRealizado,
@@ -1961,7 +1999,7 @@ const PantallaJugando: React.FC = () => {
     }
     */
     if (rolUsuario == "Vidente" && backendState === "habilidadVidente") {
-      const jugadorObjetivo = jugadoresEstado[JugadorSeleccionado!];
+      /*const jugadorObjetivo = jugadoresEstado[JugadorSeleccionado!];
       logCustom(
         jornadaActual,
         etapaActual,
@@ -1972,7 +2010,7 @@ const PantallaJugando: React.FC = () => {
         idPartida: idSala,
         idJugador: usuarioID,
         idObjetivo: jugadorObjetivo.id,
-      });
+      });*/
       return;
     }
     if (pasoTurno) {
@@ -2312,7 +2350,7 @@ const PantallaJugando: React.FC = () => {
           <AnimacionGenerica
             opacity={opacitiesInicioVotacionAlguacil[0]}
             mostrarComponente={true}
-            texto="LOS JUGADORES DEBEN ELEGIR DE MANERA CONSENSUADA QUIEN EJERCERÁ DE ALGUACIL"
+            texto="LOS JUGADORES DEBEN ELEGIR POR MAYORÍA SIMPLE QUIEN EJERCERÁ DE ALGUACIL"
           />
         )}
 

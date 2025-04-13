@@ -58,13 +58,13 @@ export default function ComoJugarScreen(): JSX.Element | null {
         <Image source={imageLobo} style={styles.imageLobo}></Image>
         <Image source={imagenPapiro} style={styles.imagePapiro}></Image>
         <Text style={styles.textoComoJugar}>
-          Se reparten los roles a los jugadores. Cada jugador mira su carta para
-          saber cuál es su personaje, información que mantendrá en secreto a
-          menos que sea eliminado. El Narrador decide si los aldeanos votarán
-          ahora un Alguacil (función adicional, independiente del personaje) por
-          mayoría simple, o si el Alguacil será elegido más tarde en el
-          transcurso de la partida. El voto del Alguacil cuenta como dos votos.
-          El juego comienza en la noche.
+          Antes de iniciar la partida, se repartirán los roles. Cada jugador
+          conocerá el suyo pero no el de los demás jugadores. Los roles sólo se
+          revelarán al morir un jugador o al finalizar la partida. Al comienzo
+          de la partida los aldeanos votarán un Alguacil (función adicional,
+          independiente del rol del personaje) por mayoría simple. El voto del
+          Alguacil cuenta como dos votos. Tras votar, el ciclo de juego comienza
+          en la noche.
         </Text>
 
         {/* Botón para ir a la fase de Noche */}
