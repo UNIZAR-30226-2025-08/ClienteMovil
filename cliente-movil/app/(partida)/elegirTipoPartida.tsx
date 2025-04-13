@@ -17,6 +17,9 @@ import { useFonts } from "expo-font";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import NotificationButton from "@/components/NotificationButton";
 
+// Importación para el botón de atrás
+const imagenAtras = require("@/assets/images/botonAtras.png");
+
 /**
  * Mapa que relaciona claves de avatar con las imágenes correspondientes.
  */
@@ -62,6 +65,8 @@ export default function ElegirPartidaScreen(): JSX.Element | null {
    */
   const [loading, setLoading] = useState(true); // Estado de carga
 
+  const router = useRouter();
+
   /**
    * Carga los datos del usuario cuando la pantalla gana foco.
    */
@@ -90,8 +95,6 @@ export default function ElegirPartidaScreen(): JSX.Element | null {
     }, [])
   );
 
-  const router = useRouter();
-
   /**
    * Carga la fuente personalizada `GhostShadow`.
    */
@@ -115,6 +118,14 @@ export default function ElegirPartidaScreen(): JSX.Element | null {
         style={styles.image}
       >
         <View style={styles.overlay} />
+
+        {/* Botón de ir hacia atrás en posición absoluta */}
+        <TouchableOpacity
+          style={styles.botonAtras}
+          onPress={() => router.back()}
+        >
+          <Image source={imagenAtras} style={styles.imagenAtras} />
+        </TouchableOpacity>
 
         {/* Contenedor del perfil del usuario */}
         <TouchableOpacity
@@ -265,5 +276,18 @@ const styles = StyleSheet.create({
     backgroundColor: "transparent",
     borderRadius: 10,
     padding: 5,
+  },
+
+  // Estilos para el botón "ir hacia atrás" centrado en la parte inferior
+  botonAtras: {
+    position: "absolute",
+    bottom: 20,
+    alignSelf: "center",
+    zIndex: 10,
+  },
+
+  imagenAtras: {
+    width: 50,
+    height: 50,
   },
 });

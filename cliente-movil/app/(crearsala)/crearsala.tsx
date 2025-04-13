@@ -14,6 +14,7 @@ import {
 import { useRouter } from "expo-router";
 import socket from "@/app/(sala)/socket"; // Módulo de conexión con socket.io
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import Cabecera from "@/components/Cabecera";
 
 /**
  * Definición de los roles disponibles en el juego con sus imágenes y cantidad inicial.
@@ -354,11 +355,14 @@ const CrearSala = (): JSX.Element => {
         source={require("@/assets/images/fondo-roles.jpg")}
         style={styles.image}
       >
-        {/* Título */}
-        <Text style={styles.header}>Server Settings</Text>
+        <View style={styles.headerContainer}>
+          <Cabecera />
+        </View>
 
         {/* Input para el nombre del servidor */}
-        <Text style={styles.label}>Nombre del Servidor:</Text>
+        <Text style={[styles.label, { marginTop: 90 }]}>
+          Nombre del Servidor:
+        </Text>
         <TextInput
           style={styles.input}
           value={nombreServidor}
@@ -534,6 +538,13 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "rgba(0,0,0,0.5)",
+  },
+  headerContainer: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 9999,
   },
 });
 

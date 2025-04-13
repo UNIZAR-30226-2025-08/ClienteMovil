@@ -131,12 +131,6 @@ const NotificationButton = () => {
         );
         setNotificaciones(response.data.solicitudes || []);
         setSolicitudesPendientes(response.data.solicitudes || []);
-      } else if (tipoNotificacion === "sugerencias") {
-        const { data } = await axios.post(
-          `${BACKEND_URL}/api/sugerencias/usuario`,
-          { idUsuario: userId }
-        );
-        setNotificaciones(data.sugerencias || []);
       }
     } catch (error) {
       console.error("Error al obtener notificaciones:", error);
@@ -290,15 +284,6 @@ const NotificationButton = () => {
               >
                 <Text style={styles.filtroTexto}>Invitaciones</Text>
               </TouchableOpacity>
-              <TouchableOpacity
-                style={[
-                  styles.filtroButton,
-                  tipoNotificacion === "sugerencias" && styles.filtroActivo,
-                ]}
-                onPress={() => handleTipoChange("sugerencias")}
-              >
-                <Text style={styles.filtroTexto}>Sugerencias</Text>
-              </TouchableOpacity>
             </View>
 
             <View style={styles.notifContent}>
@@ -404,14 +389,6 @@ const NotificationButton = () => {
                         </View>
                       </View>
                     ))}
-                  {tipoNotificacion === "sugerencias" && (
-                    <Text style={styles.notifText}>
-                      Sugerencia:{" "}
-                      <Text style={{ fontWeight: "bold" }}>
-                        {notificaciones[0]?.contenido || "Sin contenido"}
-                      </Text>
-                    </Text>
-                  )}
                 </ScrollView>
               ) : (
                 <Text style={styles.notifText}>No hay notificaciones.</Text>

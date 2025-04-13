@@ -59,9 +59,7 @@ const Cabecera = ({ compacto = false }) => {
         const nombre = await AsyncStorage.getItem("nombreUsuario");
         const avatar =
           (await AsyncStorage.getItem("avatarUsuario")) || "avatar1";
-        const rolFavorito =
-          (await AsyncStorage.getItem("rolFavorito")) || "Sin rol favorito";
-        setUser({ id: parsedId, nombre, avatar, rolFavorito });
+        setUser({ id: parsedId, nombre, avatar });
       } catch (error) {
         console.error("Error al cargar usuario:", error);
       }
@@ -75,9 +73,7 @@ const Cabecera = ({ compacto = false }) => {
         const nombre = await AsyncStorage.getItem("nombreUsuario");
         const avatar =
           (await AsyncStorage.getItem("avatarUsuario")) || "avatar1";
-        const rolFavorito =
-          (await AsyncStorage.getItem("rolFavorito")) || "Sin rol favorito";
-        setUser({ ...user, nombre, avatar, rolFavorito });
+        setUser({ ...user, nombre, avatar });
       };
       fetchUserData();
     }, [])
@@ -141,12 +137,6 @@ const Cabecera = ({ compacto = false }) => {
         setNotificaciones(response.data.solicitudes || []);
         // Sincronizamos también el badge con el estado de solicitudes pendientes
         setSolicitudesPendientes(response.data.solicitudes || []);
-      } else if (tipoNotificacion === "sugerencias") {
-        const { data } = await axios.post(
-          `${BACKEND_URL}/api/sugerencias/usuario`,
-          { idUsuario: userId }
-        );
-        setNotificaciones(data.sugerencias || []);
       }
     } catch (error) {
       console.error("Error al obtener notificaciones:", error);
@@ -261,7 +251,6 @@ const Cabecera = ({ compacto = false }) => {
       params: {
         nombre: user.nombre,
         avatar: user.avatar || "",
-        rolFavorito: user.rolFavorito || "Sin rol favorito",
       },
     });
   };
@@ -282,9 +271,6 @@ const Cabecera = ({ compacto = false }) => {
             <View style={styles.profileInfo}>
               <Text style={styles.userName}>
                 {user.nombre || "NombreCuenta"}
-              </Text>
-              <Text style={styles.rol}>
-                {user.rolFavorito || "Sin rol favorito"}
               </Text>
             </View>
           </TouchableOpacity>
@@ -322,15 +308,6 @@ const Cabecera = ({ compacto = false }) => {
                 onPress={() => handleTipoChange("invitaciones")}
               >
                 <Text style={styles.filtroTexto}>Invitaciones</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[
-                  styles.filtroButton,
-                  tipoNotificacion === "sugerencias" && styles.filtroActivo,
-                ]}
-                onPress={() => handleTipoChange("sugerencias")}
-              >
-                <Text style={styles.filtroTexto}>Sugerencias</Text>
               </TouchableOpacity>
             </View>
 
@@ -440,14 +417,6 @@ const Cabecera = ({ compacto = false }) => {
                             </View>
                           ))}
                         </ScrollView>
-                      )}
-                      {tipoNotificacion === "sugerencias" && (
-                        <Text style={styles.notifText}>
-                          Sugerencia:{" "}
-                          <Text style={{ fontWeight: "bold" }}>
-                            {notif.contenido || "Sin contenido"}
-                          </Text>
-                        </Text>
                       )}
                     </View>
                   ))}

@@ -115,36 +115,34 @@ export default function OpcionesScreen(): JSX.Element | null {
               {usuario?.nombre || "Usuario"}
             </Text>
 
-            <TouchableOpacity
-              style={styles.boton}
-              onPress={() => router.push("/(partida)/elegirTipoPartida")}
-            >
-              <Text style={styles.textoBoton}>JUGAR</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.boton}
-              onPress={() => router.push("/(comoJugar)/comoJugar")}
-            >
-              <Text style={styles.textoBoton}>¿CÓMO JUGAR?</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.boton}
-              onPress={() => router.push("/roles")}
-            >
-              <Text style={styles.textoBoton}>ROLES</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.boton}
-              onPress={() => router.push("/(opciones)/opciones")}
-            >
-              <Text style={styles.textoBoton}>OPCIONES</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.boton}
-              onPress={() => router.push("/(sugerencias)/sugerencias")}
-            >
-              <Text style={styles.textoBoton}>SUGERENCIAS</Text>
-            </TouchableOpacity>
+            {/* Nuevo contenedor absoluto para los botones */}
+            <View style={styles.contenedorBotones}>
+              <TouchableOpacity
+                style={styles.boton}
+                onPress={() => router.push("/(partida)/elegirTipoPartida")}
+              >
+                <Text style={styles.textoBoton}>JUGAR</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.boton}
+                onPress={() => router.push("/(comoJugar)/comoJugar")}
+              >
+                <Text style={styles.textoBoton}>¿CÓMO JUGAR?</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.boton}
+                onPress={() => router.push("/roles")}
+              >
+                <Text style={styles.textoBoton}>ROLES</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.boton}
+                onPress={() => router.push("/(sugerencias)/sugerencias")}
+              >
+                <Text style={styles.textoBoton}>SUGERENCIAS</Text>
+              </TouchableOpacity>
+            </View>
+
             <TouchableOpacity
               style={styles.botonCerrarSesion}
               onPress={cerrarSesion}
@@ -221,6 +219,13 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "bold",
     textAlign: "center",
+    width: "100%",
+  },
+
+  contenedorBotones: {
+    position: "absolute",
+    top: 240,
+    alignSelf: "center",
     width: "100%",
   },
 

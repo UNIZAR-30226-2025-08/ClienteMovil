@@ -163,6 +163,13 @@ export default function SugerenciasScreen(): JSX.Element | null {
           <Text style={styles.textoEnviar}>ENVIAR</Text>
         </TouchableOpacity>
 
+        <TouchableOpacity
+          style={[styles.botonEnviar, { marginTop: 10 }]}
+          onPress={() => router.push("/(sugerencias)/listarSugerencias")}
+        >
+          <Text style={styles.textoEnviar}>VER SUGERENCIAS</Text>
+        </TouchableOpacity>
+
         {/* Botón de regresar a la pantalla anterior */}
         <TouchableOpacity style={styles.containerAtras} onPress={irAtras}>
           <Image source={imagenAtras} style={styles.imageAtras} />
@@ -227,10 +234,11 @@ const styles = StyleSheet.create({
   },
 
   textoAsunto: {
-    fontSize: 18,
+    fontSize: 16,
     color: "white",
     marginLeft: "20%",
-    marginTop: 150,
+    marginTop: 160,
+    textAlign: "left",
   },
 
   smallInput: {
@@ -262,7 +270,8 @@ const styles = StyleSheet.create({
 
   textoEnviar: {
     fontWeight: "bold",
-    fontSize: 20,
+    fontSize: 18,
     color: "white",
+    textAlign: "center",
   },
 });
