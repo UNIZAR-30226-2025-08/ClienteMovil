@@ -1335,9 +1335,9 @@ const PantallaJugando: React.FC = () => {
               setVotoRealizado(false);
               setPasoTurno(false);
               setJugadorSeleccionado(null);
-            }, 4000); // 3ª animación de 4000 ms
-          }, 4000); // 2ª animación de 4000 ms
-        }, 4000); // 1ª animación de 4000 ms
+            }, 3000); // 3ª animación de 4000 ms
+          }, 3000); // 2ª animación de 4000 ms
+        }, 3000); // 1ª animación de 4000 ms
       } else {
         // Animación épica
         setMostrarBotones(false);
@@ -1999,7 +1999,7 @@ const PantallaJugando: React.FC = () => {
     }
     */
     if (rolUsuario == "Vidente" && backendState === "habilidadVidente") {
-      const jugadorObjetivo = jugadoresEstado[JugadorSeleccionado!];
+      /*const jugadorObjetivo = jugadoresEstado[JugadorSeleccionado!];
       logCustom(
         jornadaActual,
         etapaActual,
@@ -2010,7 +2010,7 @@ const PantallaJugando: React.FC = () => {
         idPartida: idSala,
         idJugador: usuarioID,
         idObjetivo: jugadorObjetivo.id,
-      });
+      });*/
       return;
     }
     if (pasoTurno) {
