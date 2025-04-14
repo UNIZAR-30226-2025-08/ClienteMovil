@@ -1879,6 +1879,17 @@ const PantallaJugando: React.FC = () => {
     };
   }, [jugadoresEstado, indiceUsuario, jornadaActual, etapaActual]);
 
+  // ---------------------------------------------------------------------------
+  // Administración de recibir eventos de la habilidad de la vidente
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Efecto que administra el recibimiento de los eventos relacionados con la habilidad de la vidente.
+   *
+   * Se controlan los siguientes eventos:
+   * - "manejarVisionJugador": Notificación a la vidente del rol del jugador al que ha seleccionado
+   */
+
   useEffect(() => {
     const manejarVisionJugador = (data: { mensaje: string; rol: string }) => {
       logCustom(
