@@ -8,18 +8,59 @@ import React from "react";
 import { View, Text, Animated } from "react-native";
 import animacionesEstilos from "../../../../utils/jugando/styles.animaciones";
 
-/**
- * @interface AnimacionGenericaProps
- * @description Define las propiedades necesarias para el componente AnimacionGenerica.
- * @property {Animated.Value} opacity - Controla la opacidad del componente (de 0 a 1).
- * @property {boolean} mostrarComponente - Determina si el componente debe renderizarse.
- * @property {string} texto - Texto que se mostrará en la animación.
- */
 interface AnimacionGenericaProps {
   opacity: Animated.Value;
   mostrarComponente: boolean;
   texto: string;
 }
+
+/**
+ * Función auxiliar que recibe un texto y devuelve un array de componentes <Text>
+ * en el que cada aparición de las palabras clave se pinta con su color correspondiente,
+ * mientras que el resto del texto se mantiene con el estilo por defecto.
+ *
+ * @param {string} texto - Texto a analizar y renderizar.
+ * @returns {React.ReactNode[]} Array de elementos <Text> con estilos aplicados.
+ */
+const subrayarTexto = (texto: string): React.ReactNode[] => {
+  // Definimos las palabras clave en una expresión regular (ignora mayúsculas/minúsculas)
+  const regex = /(hombres lobo|cazador|vidente|bruja|alguacil)/gi;
+  const partes = texto.split(regex);
+
+  return partes.map((parte, index) => {
+    // Si la parte coincide con alguna palabra clave, se pinta con el color asignado.
+    if (parte.match(regex)) {
+      const parteLower = parte.toLowerCase();
+      let color = "white"; // color por defecto
+      switch (parteLower) {
+        case "hombres lobo":
+          color = "red";
+          break;
+        case "cazador":
+          color = "blue";
+          break;
+        case "vidente":
+          color = "purple";
+          break;
+        case "bruja":
+          color = "orange";
+          break;
+        case "alguacil":
+          color = "yellow";
+          break;
+        default:
+          break;
+      }
+      return (
+        <Text key={index} style={{ color }}>
+          {parte}
+        </Text>
+      );
+    }
+    // La parte que no es palabra clave se pinta con el estilo por defecto
+    return <Text key={index}>{parte}</Text>;
+  });
+};
 
 /**
  * @component AnimacionGenerica
@@ -33,7 +74,7 @@ interface AnimacionGenericaProps {
  * <AnimacionGenerica
  *   opacity={fadeAnimation}
  *   mostrarComponente={showAnimation}
- *   texto="¡Bienvenido a la aventura!"
+ *   texto="Bienvenido a la aventura. Los Hombres lobo están al acecho"
  * />
  */
 const AnimacionGenerica: React.FC<AnimacionGenericaProps> = ({
@@ -54,7 +95,9 @@ const AnimacionGenerica: React.FC<AnimacionGenericaProps> = ({
           },
         ]}
       >
-        <Text style={animacionesEstilos.textoAnimacion}>{texto}</Text>
+        <Text style={animacionesEstilos.textoAnimacion}>
+          {subrayarTexto(texto)}
+        </Text>
       </Animated.View>
     </View>
   );
