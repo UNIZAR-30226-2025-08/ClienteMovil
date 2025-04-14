@@ -2030,7 +2030,8 @@ const PantallaJugando: React.FC = () => {
   }, [jugadoresEstado, indiceUsuario]);
 
   // ---------------------------------------------------------------------------
-  // Experimental
+  // Experimental, no está probado aún !!!!!!!!!!!!!!!!!!!!!
+  // Devuelve un string con los muertos de cada noche
   // ---------------------------------------------------------------------------
 
   const usePrevious = <T,>(value: T): T | undefined => {
@@ -2647,7 +2648,7 @@ const PantallaJugando: React.FC = () => {
           <AnimacionGenerica
             opacity={opacitiesBrujaSeDespierta[0]}
             mostrarComponente={true}
-            texto="LA BRUJA SE DESPIERTA, OBSERVA LA NUEVA VÍCTIMA DE LOS HOMBRES LOBO. USARÁ SU POCIÓN CURATIVA O SU POCIÓN VENENOSA"
+            texto="LA BRUJA SE DESPIERTA, OBSERVA LA NUEVA VÍCTIMA. USARÁ SU POCIÓN CURATIVA O SU POCIÓN VENENOSA"
           />
         )}
 
@@ -2666,7 +2667,9 @@ const PantallaJugando: React.FC = () => {
             texto={
               muertosUltimaRondaString === ""
                 ? "NO HAN MUERTO JUGADORES DURANTE ESTA NOCHE"
-                : `${muertosUltimaRondaString.toUpperCase()} HAN MUERTO DURANTE LA NOCHE`
+                : `${muertosUltimaRondaString.toUpperCase()} ${
+                    muertosUltimaRondaString.includes(",") ? "HAN" : "HA"
+                  } MUERTO DURANTE LA NOCHE`
             }
           />
         )}
