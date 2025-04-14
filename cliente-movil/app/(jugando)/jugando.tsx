@@ -475,7 +475,7 @@ const PantallaJugando: React.FC = () => {
   const [
     mostrarAnimacionComponenteAnunciarMuertosNoche,
     setMostrarAnimacionComponenteAnunciarMuertosNoche,
-  ] = useState(false);
+  ] = useState<boolean>(false);
 
   /**
    * Opacidades y visibilidad para la animación de anunciar que se van a mostrar los jugadores eliminados durante la noche.
@@ -487,7 +487,7 @@ const PantallaJugando: React.FC = () => {
     duracionFadeIn,
     duracionEspera,
     duracionFadeOut,
-    numAnimaciones: 1,
+    numAnimaciones: 2,
     start: mostrarAnimacionComponenteAnunciarMuertosNoche,
   });
 
@@ -1439,6 +1439,10 @@ const PantallaJugando: React.FC = () => {
         (rolUsuario !== "Vidente" || jugadorLocalMuerto)
       ) {
         // Animación épica si no hay una vidente viva
+        cerrarChat();
+        cerrarHabilidad();
+        EFECTO_PANTALLA_OSCURA = true;
+        setModoDiaNoche(EFECTO_PANTALLA_OSCURA);
         setMostrarBotones(false);
         setMostrarAnimacionLobosSeDespiertan(true);
         setTimeout(() => {
@@ -1465,6 +1469,10 @@ const PantallaJugando: React.FC = () => {
 
         // Animación épica si hay una vidente viva
         // (animaciones separadas porque no siempre se concatenan las 2, ver el siguiente else)
+        cerrarChat();
+        cerrarHabilidad();
+        EFECTO_PANTALLA_OSCURA = true;
+        setModoDiaNoche(EFECTO_PANTALLA_OSCURA);
         setMostrarBotones(false);
         setMostrarAnimacionVidenteSeDuerme(true);
         setTimeout(() => {
@@ -1497,6 +1505,10 @@ const PantallaJugando: React.FC = () => {
         );
 
         // Animación épica si hay una vidente viva y el jugador local es la vidente
+        cerrarChat();
+        cerrarHabilidad();
+        EFECTO_PANTALLA_OSCURA = true;
+        setModoDiaNoche(EFECTO_PANTALLA_OSCURA);
         setMostrarBotones(false);
         setMostrarAnimacionResultadosHabilidadVidente(true);
         setTimeout(() => {
@@ -1617,7 +1629,6 @@ const PantallaJugando: React.FC = () => {
         setTimeout(() => {
           setMostrarAnimacionComponenteAnunciarMuertosNoche(false);
           setMostrarAnimacionMostrarMuertosNoche(true);
-
           setTimeout(() => {
             setMostrarAnimacionMostrarMuertosNoche(false);
             setMostrarBotones(true);
@@ -1630,6 +1641,7 @@ const PantallaJugando: React.FC = () => {
 
             // Reiniciar efectios visuales de cualquier votación previa
             // setVotos(Array(CONSTANTES.NUMERICAS.CANTIDAD_IMAGENES).fill(0));
+            setBotellaSeleccionada(null);
             setVotoRealizado(false);
             setPasoTurno(false);
             setJugadorSeleccionado(null);
@@ -2066,7 +2078,7 @@ const PantallaJugando: React.FC = () => {
    * @returns {void}
    */
   const administrarSeleccionJugadorVotacion = (index: number): void => {
-    if (rolUsuario !== "Hombre lobo" && backendState === "turnoHombresLobo") {
+    if (rolUsuario !== "Hombre lobo" && backendState === "turnoHombresLobos") {
       logCustom(
         jornadaActual,
         etapaActual,
@@ -2308,6 +2320,18 @@ const PantallaJugando: React.FC = () => {
         jugadoresEstado[indiceUsuario]
       );
     } else if (backendState === "habilidadBruja") {
+      if (botellaSeleccionada == null) {
+        mostrarError(
+          "Tienes que seleccionar una poción para usarla en un jugador"
+        );
+        logCustom(
+          jornadaActual,
+          etapaActual,
+          `Intento de voto bruja fallido: Ninguna poción seleccionado`,
+          jugadoresEstado[indiceUsuario]
+        );
+        return;
+      }
       if (botellaSeleccionada === "vida") {
         socket.emit("usaPocionBruja", {
           idPartida: idSala,
@@ -2536,7 +2560,7 @@ const PantallaJugando: React.FC = () => {
             texto={
               nombreAlguacil === ""
                 ? `NO SE HA LLEGADO A UN ACUERDO DE QUIÉN ES EL ALGUACIL`
-                : `${nombreAlguacil} ES EL ALGUACIL`
+                : `${nombreAlguacil.toUpperCase()} ES EL ALGUACIL`
             }
           />
         )}
@@ -2554,7 +2578,7 @@ const PantallaJugando: React.FC = () => {
             texto={
               nombreAlguacil === ""
                 ? `NO SE HA LLEGADO A UN ACUERDO DE QUIÉN ES EL ALGUACIL`
-                : `${nombreAlguacil} ES EL ALGUACIL`
+                : `${nombreAlguacil.toUpperCase()} ES EL ALGUACIL`
             }
           />
         )}
@@ -2635,23 +2659,23 @@ const PantallaJugando: React.FC = () => {
           />
         )}
 
-        {mostrarComponenteAnunciarMuertosNoche && (
+        {mostrarComponenteAnunciarMuertosNoche[0] && (
           <AnimacionGenerica
             opacity={opacitiesAnunciarMuertosNoche[0]}
             mostrarComponente={mostrarComponenteAnunciarMuertosNoche[0]}
-            texto="A CONTINUACIÓN SE MUESTRAN LAS VÍCTIMAS DE LA ÚLTIMA NOCHE"
-          />
-        )}
-
-        {mostrarComponenteMostrarMuertosNoche && (
-          <AnimacionGenerica
-            opacity={opacitiesMostrarMuertosNoche[0]}
-            mostrarComponente={mostrarComponenteMostrarMuertosNoche[0]}
             texto={
               muertosUltimaRondaString === ""
                 ? "NO HAN MUERTO JUGADORES DURANTE ESTA NOCHE"
-                : `${muertosUltimaRondaString} HAN MUERTO DURANTE LA NOCHE`
+                : `${muertosUltimaRondaString.toUpperCase()} HAN MUERTO DURANTE LA NOCHE`
             }
+          />
+        )}
+
+        {mostrarComponenteMostrarMuertosNoche[0] && (
+          <AnimacionGenerica
+            opacity={opacitiesMostrarMuertosNoche[0]}
+            mostrarComponente={mostrarComponenteMostrarMuertosNoche[0]}
+            texto="LOS JUGADORES DEBEN ELEGIR POR MAYORÍA SIMPLE A UN SOPECHOSO DE SER HOMBRE LOBO"
           />
         )}
 
@@ -2659,7 +2683,7 @@ const PantallaJugando: React.FC = () => {
           <AnimacionGenerica
             opacity={opacitiesMostrarResultadosHabilidadVidente[0]}
             mostrarComponente={mostrarComponenteResultadosHabilidadVidente[0]}
-            texto={`El jugador ${idObjetivoVidente} es ${rolObjetivoVidente}.`}
+            texto={`El jugador ${idObjetivoVidente.toUpperCase()} es ${rolObjetivoVidente.toUpperCase()}.`}
           />
         )}
 
