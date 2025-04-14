@@ -25,7 +25,7 @@ const animacionesEstilos = StyleSheet.create({
    */
   textoAnimacion: {
     color: "white",
-    fontFamily: "Corben-Regular",
+    fontFamily: "Corben",
     textAlign: "center",
     includeFontPadding: false,
     paddingHorizontal: ancho * 0.05,
@@ -37,7 +37,7 @@ const animacionesEstilos = StyleSheet.create({
    * @description Estilos para el texto del rol de la animación inicial 2 (aldeano, hombre lobo, ...)
    */
   textoRol: {
-    fontFamily: "Corben-Regular",
+    fontFamily: "Corben",
     textAlign: "center",
     includeFontPadding: false,
     paddingHorizontal: ancho * 0.05,

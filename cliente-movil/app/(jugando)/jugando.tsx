@@ -6,7 +6,7 @@
  */
 
 // React y librerías base
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import {
   View,
   ImageBackground,
@@ -292,6 +292,37 @@ const PantallaJugando: React.FC = () => {
    */
   const { habilidadInfo, roleInfo } = getInfoRol(rolUsuario);
 
+  /**
+   * Nombre del jugador que ha ganado la votación del alguacil.
+   */
+  const [nombreAlguacil, setNombreAlguacil] = useState<string>("");
+
+  /**
+   * Nombre de los jugadores que han muerto en esta ronda.
+   */
+  const [nombresJugadoresMuertos, setNombresJugadoresMuertos] =
+    useState<string>("");
+
+  /**
+   * TODO COMENTAR
+   */
+  const [mensajeEventoVidente, setMensajeEventoVidente] = useState("");
+
+  /**
+   * TODO COMENTAR
+   */
+  const [idObjetivoVidente, setIdObjetivoVidente] = useState("");
+
+  /**
+   * TODO COMENTAR
+   */
+  const [rolObjetivoVidente, setRolObjetivoVidente] = useState("");
+
+  /**
+   * TODO COMENTAR avisar a la bruja de la victima
+   */
+  const [nombreVictimaBruja, setNombreVictimaBruja] = useState<string>("");
+
   // ---------------------------------------------------------------------------
   // Animaciones épicas de la partida
   // ---------------------------------------------------------------------------
@@ -449,7 +480,7 @@ const PantallaJugando: React.FC = () => {
   const [
     mostrarAnimacionComponenteAnunciarMuertosNoche,
     setMostrarAnimacionComponenteAnunciarMuertosNoche,
-  ] = useState(false);
+  ] = useState<boolean>(false);
 
   /**
    * Opacidades y visibilidad para la animación de anunciar que se van a mostrar los jugadores eliminados durante la noche.
@@ -461,7 +492,7 @@ const PantallaJugando: React.FC = () => {
     duracionFadeIn,
     duracionEspera,
     duracionFadeOut,
-    numAnimaciones: 1,
+    numAnimaciones: 2,
     start: mostrarAnimacionComponenteAnunciarMuertosNoche,
   });
 
@@ -512,27 +543,14 @@ const PantallaJugando: React.FC = () => {
   });
 
   /**
-   * Controla si se muestra la animación que anuncia los resultados definitivos de las votaciones de alguacil.
+   * Controla si se muestra la animación que anuncia los resultados definitivos de las votaciones de alguacil +
+   * la vidente se despierta + la vidente va a seleccionar a un jugador.
    * @type {boolean}
    */
   const [
-    mostrarResultadosVotacionAlguacil,
-    setMostrarResultadosVotacionAlguacil,
+    mostrarResultadosVotacionAlguacilYDespiertaVidente1Jornada,
+    setMostrarResultadosVotacionAlguacilYDespiertaVidente1Jornada,
   ] = useState<boolean>(false);
-
-  /**
-   * Controla si se muestra la animación que indíca que los jugadores se van a dormir.
-   * @type {boolean}
-   */
-  const [mostrarJugadoresSeDuermen, setMostrarJugadoresSeDuermen] =
-    useState<boolean>(false);
-
-  /**
-   * Controla si se muestra la animación que anuncia que la vidente se despierta.
-   * @type {boolean}
-   */
-  const [mostrarVidenteSeDespierta, setMostrarVidenteSeDespierta] =
-    useState<boolean>(false);
 
   /**
    * Opacidades y visibilidad para la secuencia animada de la votación del alguacil,
@@ -546,7 +564,92 @@ const PantallaJugando: React.FC = () => {
     duracionEspera,
     duracionFadeOut,
     numAnimaciones: 3,
+    start: mostrarResultadosVotacionAlguacilYDespiertaVidente1Jornada,
+  });
+
+  /**
+   * TODO COMENTAR
+   */
+  const [mostrarDespiertaVidente, setMostrarDespiertaVidente] =
+    useState<boolean>(false);
+
+  /**
+   * TODO COMENTAR
+   */
+  const {
+    opacities: opacitiesDespiertaVidente,
+    mostrarComponentes: mostrarComponentesDespiertaVidente,
+  } = useGestorAnimaciones({
+    duracionFadeIn,
+    duracionEspera,
+    duracionFadeOut,
+    numAnimaciones: 2,
+    start: mostrarDespiertaVidente,
+  });
+
+  /**
+   * TODO.
+   * @type {boolean}
+   */
+  const [
+    mostrarResultadosVotacionAlguacil,
+    setMostrarResultadosVotacionAlguacil,
+  ] = useState<boolean>(false);
+
+  /**
+   * Opacidades y visibilidad para la secuencia animada de la votación del alguacil
+   */
+  const {
+    opacities: opacidadesResultadosVotacionAlguacil,
+    mostrarComponentes: mostrarComponentesResultadosVotacionAlguacil,
+  } = useGestorAnimaciones({
+    duracionFadeIn,
+    duracionEspera,
+    duracionFadeOut,
+    numAnimaciones: 1,
     start: mostrarResultadosVotacionAlguacil,
+  });
+
+  /**
+   * TODO.
+   * @type {boolean}
+   */
+  const [mostrarJugadorDevorado, setMostrarJugadorDevorado] =
+    useState<boolean>(false);
+
+  /**
+   * OTODO
+   */
+  const {
+    opacities: opacidadMostrarJugadorDevorado,
+    mostrarComponentes: mostrarComponentesMostrarJugadorDevorado,
+  } = useGestorAnimaciones({
+    duracionFadeIn,
+    duracionEspera,
+    duracionFadeOut,
+    numAnimaciones: 1,
+    start: mostrarJugadorDevorado,
+  });
+
+  /**
+   * TODO.
+   * @type {boolean}
+   */
+  const [mostrarVictimaBruja, setMostrarVictimaBruja] =
+    useState<boolean>(false);
+
+  /**
+   * TODO
+   */
+  const {
+    opacities: opacidadMostrarVictimaBruja,
+    mostrarComponentes: mostrarComponentesMostrarVictimaBruja,
+  } = useGestorAnimaciones({
+    duracionFadeIn,
+    duracionEspera,
+    duracionFadeOut,
+    numAnimaciones: 1,
+    start: mostrarVictimaBruja,
   });
 
   /**
@@ -948,21 +1051,23 @@ const PantallaJugando: React.FC = () => {
     setBotellaSeleccionada((prev) => (prev === "vida" ? null : "vida"));
 
     const jugadorObjetivo = jugadoresEstado[JugadorSeleccionado!];
+    /*
     if (JugadorSeleccionado === null) {
       logCustom(
         jornadaActual,
         etapaActual,
-        `Intento de uso de botella de vida fallido: no hay un usuario seleccionado`,
+        `Intento de selección de botella de vida fallido: no hay un usuario seleccionado`,
         jugadoresEstado[indiceUsuario]
       );
       mostrarError("Necesitas seleccionar a un jugador para usar las pocimas");
       return;
     }
+    */
     if (botellaUsadaEnEsteTurno) {
       logCustom(
         jornadaActual,
         etapaActual,
-        `Intento de uso de botella de vida fallido: el usuario ya ha usado una botella este turno`,
+        `Intento de selección de botella de vida fallido: el usuario ya ha usado una botella este turno`,
         jugadoresEstado[indiceUsuario]
       );
       mostrarError("Ya has usado una pocima este turno");
@@ -972,29 +1077,11 @@ const PantallaJugando: React.FC = () => {
       logCustom(
         jornadaActual,
         etapaActual,
-        `Intento de uso de botella de vida fallido: el usuario ya ha usado la botella de vida`,
+        `Intento de selección de botella de vida fallido: el usuario ya ha usado la botella de vida`,
         jugadoresEstado[indiceUsuario]
       );
       mostrarError("Ya has usado la pocima de vida en otro turno");
       return;
-    }
-
-    if (JugadorSeleccionado !== null) {
-      // Llamenme precavido
-      socket.emit("usaPocionBruja", {
-        idPartida: idSala,
-        idJugador: usuarioID,
-        tipo: "curar",
-        idObjetivo: jugadorObjetivo.id,
-      });
-      logCustom(
-        jornadaActual,
-        etapaActual,
-        `Poción de curar usada`,
-        jugadoresEstado[indiceUsuario]
-      );
-      setBotellaVidaUsada(true);
-      setBotellaUsadaEnEsteTurno(true);
     }
   };
 
@@ -1009,21 +1096,23 @@ const PantallaJugando: React.FC = () => {
     setBotellaSeleccionada((prev) => (prev === "muerte" ? null : "muerte"));
 
     const jugadorObjetivo = jugadoresEstado[JugadorSeleccionado!];
+    /*
     if (JugadorSeleccionado === null) {
       logCustom(
         jornadaActual,
         etapaActual,
-        `Intento de uso de botella de muerte fallido: no hay un usuario seleccionado`,
+        `Intento de selección de botella de muerte fallido: no hay un usuario seleccionado`,
         jugadoresEstado[indiceUsuario]
       );
       mostrarError("Necesitas seleccionar a un jugador para usar las pocimas");
       return;
     }
+    */
     if (botellaUsadaEnEsteTurno) {
       logCustom(
         jornadaActual,
         etapaActual,
-        `Intento de uso de botella de muerte fallido: el usuario ya ha usado una botella este turno`,
+        `Intento de selección de botella de muerte fallido: el usuario ya ha usado una botella este turno`,
         jugadoresEstado[indiceUsuario]
       );
       mostrarError("Ya has usado una pocima este turno");
@@ -1033,30 +1122,11 @@ const PantallaJugando: React.FC = () => {
       logCustom(
         jornadaActual,
         etapaActual,
-        `Intento de uso de botella de muerte fallido: el usuario ya ha usado la botella de muerte`,
+        `Intento de selección de botella de muerte fallido: el usuario ya ha usado la botella de muerte`,
         jugadoresEstado[indiceUsuario]
       );
       mostrarError("Ya has usado la pocima de muerte en otro turno");
       return;
-    }
-
-    if (JugadorSeleccionado !== null) {
-      // Llamenme precavido
-      socket.emit("usaPocionBruja", {
-        idPartida: idSala,
-        idJugador: usuarioID,
-        tipo: "matar",
-        idObjetivo: jugadorObjetivo.id,
-      });
-      logCustom(
-        jornadaActual,
-        etapaActual,
-        `Poción de matar usada`,
-        jugadoresEstado[indiceUsuario]
-      );
-      mostrarError("Ya has usado una pocima este turno");
-      setBotellaMuerteUsada(true);
-      setBotellaUsadaEnEsteTurno(true);
     }
   };
 
@@ -1300,9 +1370,6 @@ const PantallaJugando: React.FC = () => {
         return;
       }
 
-      // Cambiar el texto del botón de "VOTAR" a "VISUALIZAR"
-      setTextoBotonVotar("VISUALIZAR");
-
       // El timer visual para el vidente será de 15 segundos tras su reinicio
       actualizarMaxTiempo(CONST_TIEMPO_HABILIDAD_VIDENTE);
 
@@ -1312,53 +1379,45 @@ const PantallaJugando: React.FC = () => {
       EFECTO_PANTALLA_OSCURA = true;
       setModoDiaNoche(EFECTO_PANTALLA_OSCURA);
       setMostrarBotones(false);
-      if (hayVidenteViva) {
+
+      if (hayVidenteViva && jornadaActual == 0) {
         // Animación épica
         // (animaciones separadas porque no siempre se concatenan las 3, ver el siguiente else)
         setMostrarBotones(false);
-        setMostrarResultadosVotacionAlguacil(true);
+        setMostrarResultadosVotacionAlguacilYDespiertaVidente1Jornada(true);
         setTimeout(() => {
-          setMostrarResultadosVotacionAlguacil(false);
-          setMostrarJugadoresSeDuermen(true);
-          setTimeout(() => {
-            setMostrarJugadoresSeDuermen(false);
-            setMostrarVidenteSeDespierta(true);
-            setTimeout(() => {
-              setMostrarVidenteSeDespierta(false);
-              setMostrarBotonVotar(rolUsuario === "Vidente" ? true : false); // Solo se muestra el botón "votar" para la vidente
-              setMostrarBotones(true);
+          setMostrarResultadosVotacionAlguacilYDespiertaVidente1Jornada(false);
+          setTextoBotonVotar("VISUALIZAR");
+          setMostrarBotonVotar(rolUsuario === "Vidente" ? true : false); // Solo se muestra el botón "votar" para la vidente
+          setMostrarBotones(true);
 
-              reiniciarTemporizador();
+          reiniciarTemporizador();
 
-              // Reiniciar efectos visuales de cualquier votación previa
-              // setVotos(Array(CONSTANTES.NUMERICAS.CANTIDAD_IMAGENES).fill(0));
-              setVotoRealizado(false);
-              setPasoTurno(false);
-              setJugadorSeleccionado(null);
-            }, 3000); // 3ª animación de 4000 ms
-          }, 3000); // 2ª animación de 4000 ms
-        }, 3000); // 1ª animación de 4000 ms
-      } else {
+          // Reiniciar efectos visuales de cualquier votación previa
+          // setVotos(Array(CONSTANTES.NUMERICAS.CANTIDAD_IMAGENES).fill(0));
+          setVotoRealizado(false);
+          setPasoTurno(false);
+          setJugadorSeleccionado(null);
+        }, 12000); // 3ª animaciones de 4000 ms
+      } else if (hayVidenteViva && jornadaActual > 0) {
         // Animación épica
+        // (animaciones separadas porque no siempre se concatenan las 3, ver el siguiente else)
         setMostrarBotones(false);
-        setMostrarResultadosVotacionAlguacil(true);
+        setMostrarDespiertaVidente(true);
         setTimeout(() => {
-          setMostrarResultadosVotacionAlguacil(false);
-          setMostrarJugadoresSeDuermen(true);
-          setTimeout(() => {
-            setMostrarJugadoresSeDuermen(false);
-            setMostrarBotonVotar(false);
-            setMostrarBotones(true);
+          setMostrarDespiertaVidente(false);
+          setTextoBotonVotar("VISUALIZAR");
+          setMostrarBotonVotar(rolUsuario === "Vidente" ? true : false); // Solo se muestra el botón "votar" para la vidente
+          setMostrarBotones(true);
 
-            reiniciarTemporizador();
+          reiniciarTemporizador();
 
-            // Reiniciar efectos visuales de cualquier votación previa
-            // setVotos(Array(CONSTANTES.NUMERICAS.CANTIDAD_IMAGENES).fill(0));
-            setVotoRealizado(false);
-            setPasoTurno(false);
-            setJugadorSeleccionado(null);
-          }, 4000); // 2ª animación de 4000 ms
-        }, 4000); // 1ª animación de 4000 ms
+          // Reiniciar efectos visuales de cualquier votación previa
+          // setVotos(Array(CONSTANTES.NUMERICAS.CANTIDAD_IMAGENES).fill(0));
+          setVotoRealizado(false);
+          setPasoTurno(false);
+          setJugadorSeleccionado(null);
+        }, 8000); // 2ª animaciones de 4000 ms
       }
     };
 
@@ -1385,22 +1444,70 @@ const PantallaJugando: React.FC = () => {
       // El timer visual para los lobos será de 30 segundos tras su reinicio
       actualizarMaxTiempo(CONST_TIEMPO_VOTACION_NOCTURNA);
 
-      // Animación épica
-      cerrarChat();
-      cerrarHabilidad();
-      EFECTO_PANTALLA_OSCURA = true;
-      setModoDiaNoche(EFECTO_PANTALLA_OSCURA);
-      setMostrarBotones(false);
-      if (hayVidenteViva && (rolUsuario !== "Vidente" || jugadorLocalMuerto)) {
+      if (!hayVidenteViva && jornadaActual == 1) {
+        // Animación épica
+        // (animaciones separadas porque no siempre se concatenan las 3, ver el siguiente else)
+        cerrarChat();
+        cerrarHabilidad();
+        EFECTO_PANTALLA_OSCURA = true;
+        setModoDiaNoche(EFECTO_PANTALLA_OSCURA);
+        setMostrarBotones(false);
+        setMostrarResultadosVotacionAlguacilYDespiertaVidente1Jornada(true);
+        setTimeout(() => {
+          setMostrarResultadosVotacionAlguacilYDespiertaVidente1Jornada(false);
+          setMostrarAnimacionLobosSeDespiertan(true);
+          setTimeout(() => {
+            setMostrarAnimacionLobosSeDespiertan(false);
+            setMostrarBotonVotar(true);
+            setMostrarBotones(true);
+
+            reiniciarTemporizador();
+
+            // Reiniciar efectios visuales de cualquier votación previa
+            // setVotos(Array(CONSTANTES.NUMERICAS.CANTIDAD_IMAGENES).fill(0));
+            setVotoRealizado(false);
+            setPasoTurno(false);
+            setJugadorSeleccionado(null);
+          }, 4000); // 1ª animación de 4000 ms
+        }, 8000); // 2ª animaciones de 4000 ms
+      } else if (jornadaActual != 1 && !hayVidenteViva) {
+        // Animación épica si no hay una vidente viva
+        cerrarChat();
+        cerrarHabilidad();
+        EFECTO_PANTALLA_OSCURA = true;
+        setModoDiaNoche(EFECTO_PANTALLA_OSCURA);
+        setMostrarBotones(false);
+        setMostrarAnimacionLobosSeDespiertan(true);
+        setTimeout(() => {
+          setMostrarAnimacionLobosSeDespiertan(false);
+          setMostrarBotonVotar(true);
+          setMostrarBotones(true);
+
+          reiniciarTemporizador();
+
+          // Reiniciar efectios visuales de cualquier votación previa
+          // setVotos(Array(CONSTANTES.NUMERICAS.CANTIDAD_IMAGENES).fill(0));
+          setVotoRealizado(false);
+          setPasoTurno(false);
+          setJugadorSeleccionado(null);
+        }, 4000); // 1 animación de 4000 ms
+      } else if (
+        hayVidenteViva &&
+        (rolUsuario !== "Vidente" || jugadorLocalMuerto)
+      ) {
         logCustom(
           jornadaActual,
           etapaActual,
-          "Hay al menos un vidente vivo + el jugador local no es vidente",
+          "Hay al menos un vidente vivo + el jugador local no es vidente vivo",
           jugadoresEstado[indiceUsuario]
         );
 
         // Animación épica si hay una vidente viva
         // (animaciones separadas porque no siempre se concatenan las 2, ver el siguiente else)
+        cerrarChat();
+        cerrarHabilidad();
+        EFECTO_PANTALLA_OSCURA = true;
+        setModoDiaNoche(EFECTO_PANTALLA_OSCURA);
         setMostrarBotones(false);
         setMostrarAnimacionVidenteSeDuerme(true);
         setTimeout(() => {
@@ -1421,33 +1528,6 @@ const PantallaJugando: React.FC = () => {
           }, 4000); // 2ª animación de 4000 ms
         }, 4000); // 1ª animación de 4000 ms
       } else if (
-        !hayVidenteViva &&
-        (rolUsuario !== "Vidente" || jugadorLocalMuerto)
-      ) {
-        logCustom(
-          jornadaActual,
-          etapaActual,
-          "No hay vidente vivo.",
-          jugadoresEstado[indiceUsuario]
-        );
-
-        // Animación épica si no hay una vidente viva
-        setMostrarBotones(false);
-        setMostrarAnimacionLobosSeDespiertan(true);
-        setTimeout(() => {
-          setMostrarAnimacionLobosSeDespiertan(false);
-          setMostrarBotonVotar(true);
-          setMostrarBotones(true);
-
-          reiniciarTemporizador();
-
-          // Reiniciar efectios visuales de cualquier votación previa
-          // setVotos(Array(CONSTANTES.NUMERICAS.CANTIDAD_IMAGENES).fill(0));
-          setVotoRealizado(false);
-          setPasoTurno(false);
-          setJugadorSeleccionado(null);
-        }, 4000); // 1 animación de 4000 ms
-      } else if (
         hayVidenteViva &&
         rolUsuario === "Vidente" &&
         !jugadorLocalMuerto
@@ -1455,11 +1535,15 @@ const PantallaJugando: React.FC = () => {
         logCustom(
           jornadaActual,
           etapaActual,
-          "Hay al menos un vidente vivo + el jugador local es vidente",
+          "Hay al menos un vidente vivo + el jugador local es vidente vivo",
           jugadoresEstado[indiceUsuario]
         );
 
         // Animación épica si hay una vidente viva y el jugador local es la vidente
+        cerrarChat();
+        cerrarHabilidad();
+        EFECTO_PANTALLA_OSCURA = true;
+        setModoDiaNoche(EFECTO_PANTALLA_OSCURA);
         setMostrarBotones(false);
         setMostrarAnimacionResultadosHabilidadVidente(true);
         setTimeout(() => {
@@ -1516,26 +1600,54 @@ const PantallaJugando: React.FC = () => {
       // El timer visual para la bruja será de 15 segundos tras su reinicio
       actualizarMaxTiempo(CONST_TIEMPO_HABILIDAD_BRUJA);
 
-      // Animación épica
-      cerrarChat();
-      cerrarHabilidad();
-      EFECTO_PANTALLA_OSCURA = true;
-      setModoDiaNoche(EFECTO_PANTALLA_OSCURA);
-      setMostrarBotones(false);
-      setMostrarAnimacionComponentesBrujaSeDespierta(true);
-      setTimeout(() => {
-        setMostrarAnimacionComponentesBrujaSeDespierta(false);
-        setMostrarBotonVotar(false);
-        setMostrarBotones(true);
+      if (rolUsuario !== "Bruja") {
+        // Animación épica
+        cerrarChat();
+        cerrarHabilidad();
+        EFECTO_PANTALLA_OSCURA = true;
+        setModoDiaNoche(EFECTO_PANTALLA_OSCURA);
+        setMostrarBotones(false);
+        setMostrarAnimacionComponentesBrujaSeDespierta(true);
+        setTimeout(() => {
+          setMostrarAnimacionComponentesBrujaSeDespierta(false);
+          setMostrarBotonVotar(false);
+          setMostrarBotones(true);
 
-        reiniciarTemporizador();
+          reiniciarTemporizador();
 
-        // Reiniciar efectios visuales de cualquier votación previa
-        // setVotos(Array(CONSTANTES.NUMERICAS.CANTIDAD_IMAGENES).fill(0));
-        setVotoRealizado(false);
-        setPasoTurno(false);
-        setJugadorSeleccionado(null);
-      }, 4000); // 1 animación de 4000 ms
+          // Reiniciar efectios visuales de cualquier votación previa
+          // setVotos(Array(CONSTANTES.NUMERICAS.CANTIDAD_IMAGENES).fill(0));
+          setVotoRealizado(false);
+          setPasoTurno(false);
+          setJugadorSeleccionado(null);
+        }, 4000); // 1 animación de 4000 ms
+      } else {
+        // Animación épica
+        cerrarChat();
+        cerrarHabilidad();
+        EFECTO_PANTALLA_OSCURA = true;
+        setModoDiaNoche(EFECTO_PANTALLA_OSCURA);
+        setMostrarBotones(false);
+        setMostrarVictimaBruja(true);
+        setTimeout(() => {
+          setMostrarVictimaBruja(false);
+          setMostrarAnimacionComponentesBrujaSeDespierta(true);
+          setTimeout(() => {
+            setMostrarAnimacionComponentesBrujaSeDespierta(false);
+            setTextoBotonVotar("POCIÓN");
+            setMostrarBotonVotar(true);
+            setMostrarBotones(true);
+
+            reiniciarTemporizador();
+
+            // Reiniciar efectios visuales de cualquier votación previa
+            // setVotos(Array(CONSTANTES.NUMERICAS.CANTIDAD_IMAGENES).fill(0));
+            setVotoRealizado(false);
+            setPasoTurno(false);
+            setJugadorSeleccionado(null);
+          }, 4000); // 1 animación de 4000 ms
+        }, 4000); // 1 animación de 4000 ms
+      }
     };
 
     /**
@@ -1553,6 +1665,8 @@ const PantallaJugando: React.FC = () => {
         `Evento recibido: diaComienza - ${JSON.stringify(datos)}`,
         jugadoresEstado[indiceUsuario]
       );
+
+      setTextoBotonVotar("VOTAR");
 
       // Resetear el flag que no le permite a la bruja usar más de 1 poción por turno
       setBotellaUsadaEnEsteTurno(false);
@@ -1577,7 +1691,6 @@ const PantallaJugando: React.FC = () => {
         setTimeout(() => {
           setMostrarAnimacionComponenteAnunciarMuertosNoche(false);
           setMostrarAnimacionMostrarMuertosNoche(true);
-
           setTimeout(() => {
             setMostrarAnimacionMostrarMuertosNoche(false);
             setMostrarBotones(true);
@@ -1590,6 +1703,7 @@ const PantallaJugando: React.FC = () => {
 
             // Reiniciar efectios visuales de cualquier votación previa
             // setVotos(Array(CONSTANTES.NUMERICAS.CANTIDAD_IMAGENES).fill(0));
+            setBotellaSeleccionada(null);
             setVotoRealizado(false);
             setPasoTurno(false);
             setJugadorSeleccionado(null);
@@ -1664,7 +1778,8 @@ const PantallaJugando: React.FC = () => {
       logCustom(
         jornadaActual,
         etapaActual,
-        `Evento recibido: votoAlguacilRegistrado - ${JSON.stringify(data)}`
+        `Evento recibido: votoAlguacilRegistrado - ${JSON.stringify(data)}`,
+        jugadoresEstado[indiceUsuario]
       );
       if (data.estado && data.estado.jugadores) {
         setJugadoresEstado(data.estado.jugadores);
@@ -1728,6 +1843,10 @@ const PantallaJugando: React.FC = () => {
         jugadoresEstado[indiceUsuario]
       );
       setMensajeEventoAlguacil(data.mensaje);
+
+      setNombreAlguacil(
+        data.mensaje.match(/^(.+?) ha sido elegido como alguacil\./)?.[1]
+      );
 
       // Actualizar la información de qué jugadore es alguacil
       if (data.alguacil) {
@@ -1843,11 +1962,11 @@ const PantallaJugando: React.FC = () => {
   }, [jugadoresEstado, indiceUsuario, jornadaActual, etapaActual]);
 
   // ---------------------------------------------------------------------------
-  // Administración de recibir eventos de la habilidad de la vidente
+  // Administración de recibir eventos de la habilidad de la bruja
   // ---------------------------------------------------------------------------
 
   /**
-   * Efecto que administra el recibimiento de los eventos relacionados con la votación del alguacil.
+   * Efecto que administra el recibimiento de los eventos relacionados con la habilidad de la bruja.
    *
    * Se controlan los siguientes eventos:
    * - "mensajeBruja": Notificación a la bruja de a quién a matado el lobo.
@@ -1864,6 +1983,15 @@ const PantallaJugando: React.FC = () => {
         `Evento recibido: mensajeBruja - ${JSON.stringify(data)}`,
         jugadoresEstado[indiceUsuario]
       );
+
+      const regex = /Los lobos van a atacar a ([^\.]+)\./;
+      const match = data.mensaje.match(regex);
+
+      if (match) {
+        const nombre = match[1];
+        setNombreVictimaBruja(nombre);
+      }
+
       setMensajeEventoBruja(data.mensaje);
     };
 
@@ -1871,6 +1999,47 @@ const PantallaJugando: React.FC = () => {
 
     return () => {
       socket.off("mensajeBruja", manejarMensajeBruja);
+    };
+  }, [jugadoresEstado, indiceUsuario, jornadaActual, etapaActual]);
+
+  // ---------------------------------------------------------------------------
+  // Administración de recibir eventos de la habilidad de la vidente
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Efecto que administra el recibimiento de los eventos relacionados con la habilidad de la vidente.
+   *
+   * Se controlan los siguientes eventos:
+   * - "manejarVisionJugador": Notificación a la vidente del rol del jugador al que ha seleccionado
+   */
+
+  useEffect(() => {
+    const manejarVisionJugador = (data: { mensaje: string; rol: string }) => {
+      logCustom(
+        jornadaActual,
+        etapaActual,
+        `Evento recibido: visionJugador - ${JSON.stringify(data)}`,
+        jugadoresEstado[indiceUsuario]
+      );
+
+      const regex = /El jugador (\d+) es (.+)\./;
+      const match = data.mensaje.match(regex);
+
+      if (match) {
+        const idObjetivo = match[1];
+        const rolObjetivo = match[2];
+
+        setIdObjetivoVidente(idObjetivo);
+        setRolObjetivoVidente(rolObjetivo);
+      }
+
+      setMensajeEventoVidente(data.mensaje);
+    };
+
+    socket.on("visionJugador", manejarVisionJugador);
+
+    return () => {
+      socket.off("visionJugador", manejarVisionJugador);
     };
   }, [jugadoresEstado, indiceUsuario, jornadaActual, etapaActual]);
 
@@ -1932,6 +2101,44 @@ const PantallaJugando: React.FC = () => {
   }, [jugadoresEstado, indiceUsuario]);
 
   // ---------------------------------------------------------------------------
+  // Experimental, no está probado aún !!!!!!!!!!!!!!!!!!!!!
+  // Devuelve un string con los muertos de cada noche
+  // ---------------------------------------------------------------------------
+
+  const usePrevious = <T,>(value: T): T | undefined => {
+    const ref = useRef<T>();
+    useEffect(() => {
+      ref.current = value;
+    }, [value]);
+    return ref.current;
+  };
+
+  // Guarda el estado previo de jugadoresEstado
+  const prevJugadoresEstado = usePrevious(jugadoresEstado);
+
+  /**
+   * Calcula y devuelve un string con los nombres concatenados de los jugadores que han muerto en la última ronda.
+   * Se compara el estado previo de jugadoresEstado con el actual para detectar cambios de 'vivo' a 'muerto'.
+   *
+   * @returns {string} Nombres concatenados de los jugadores muertos, separados por comas.
+   */
+  const muertosUltimaRondaString = useMemo(() => {
+    // Si no hay estado previo, retorna un string vacío.
+    if (!prevJugadoresEstado) return "";
+
+    // Filtra los jugadores que estaban vivos anteriormente pero que ahora están muertos.
+    const muertos = prevJugadoresEstado.filter(
+      (prevJugador) =>
+        prevJugador.estaVivo &&
+        !jugadoresEstado.find((current) => current.id === prevJugador.id)
+          ?.estaVivo
+    );
+
+    // Extrae los nombres y los une en un string separado por comas.
+    return muertos.map((jugador) => jugador.nombre).join(", ");
+  }, [prevJugadoresEstado, jugadoresEstado]);
+
+  // ---------------------------------------------------------------------------
   // Hooks para realizar las votaciones
   // (seleccionar jugadores + botón votar + botón pasar turno)
   // ---------------------------------------------------------------------------
@@ -1943,22 +2150,7 @@ const PantallaJugando: React.FC = () => {
    * @returns {void}
    */
   const administrarSeleccionJugadorVotacion = (index: number): void => {
-    // Solo los lobos pueden seleccionar jugadores durante la noche
-    // La vidente tiene que poder seleccionar jugadores pero no tiene botón de votar
-    if (rolUsuario !== "Vidente" && backendState === "habilidadVidente") {
-      // videnterevela
-      logCustom(
-        jornadaActual,
-        etapaActual,
-        `Intento de selección de usuario fallido: Es el turno de la vidente y no es vidente`,
-        jugadoresEstado[indiceUsuario]
-      );
-      mostrarError(
-        "Solo la vidente puede seleccionar jugadores durante el turno de la vidente"
-      );
-      return;
-    }
-    if (rolUsuario !== "Hombre lobo" && backendState === "turnoHombresLobo") {
+    if (rolUsuario !== "Hombre lobo" && backendState === "turnoHombresLobos") {
       logCustom(
         jornadaActual,
         etapaActual,
@@ -1982,6 +2174,18 @@ const PantallaJugando: React.FC = () => {
       );
       return;
     }
+    if (rolUsuario !== "Vidente" && backendState === "habilidadVidente") {
+      logCustom(
+        jornadaActual,
+        etapaActual,
+        `Intento de selección de usuario fallido: Es el turno de la vidente y no es vidente`,
+        jugadoresEstado[indiceUsuario]
+      );
+      mostrarError(
+        "Solo la vidente puede seleccionar jugadores durante el turno de la vidente"
+      );
+      return;
+    }
     /*
     if (
       rolUsuario === "Bruja" &&
@@ -1998,21 +2202,6 @@ const PantallaJugando: React.FC = () => {
       return;
     }
     */
-    if (rolUsuario == "Vidente" && backendState === "habilidadVidente") {
-      /*const jugadorObjetivo = jugadoresEstado[JugadorSeleccionado!];
-      logCustom(
-        jornadaActual,
-        etapaActual,
-        `Vidente solicita ver la habilidad del jugador ${jugadorObjetivo.id}`,
-        jugadoresEstado[indiceUsuario]
-      );
-      socket.emit("videnteRevela", {
-        idPartida: idSala,
-        idJugador: usuarioID,
-        idObjetivo: jugadorObjetivo.id,
-      });*/
-      return;
-    }
     if (pasoTurno) {
       logCustom(
         jornadaActual,
@@ -2088,6 +2277,34 @@ const PantallaJugando: React.FC = () => {
         jornadaActual,
         etapaActual,
         `Intento de voto fallido: Voto ya realizado`,
+        jugadoresEstado[indiceUsuario]
+      );
+      return;
+    }
+    if (
+      JugadorSeleccionado === null &&
+      rolUsuario == "Vidente" &&
+      backendState == "habilidadVidente"
+    ) {
+      mostrarError("Tienes que seleccionar a un jugador para visualizarlo");
+      logCustom(
+        jornadaActual,
+        etapaActual,
+        `Intento de voto vidente fallido: Ningún jugador seleccionado`,
+        jugadoresEstado[indiceUsuario]
+      );
+      return;
+    }
+    if (
+      JugadorSeleccionado === null &&
+      rolUsuario == "Bruja" &&
+      backendState == "habilidadBruja"
+    ) {
+      mostrarError("Tienes que seleccionar a un jugador para usar una poción");
+      logCustom(
+        jornadaActual,
+        etapaActual,
+        `Intento de voto bruja fallido: Ningún jugador seleccionado`,
         jugadoresEstado[indiceUsuario]
       );
       return;
@@ -2174,6 +2391,49 @@ const PantallaJugando: React.FC = () => {
         `La vidente local pide visualizar a ${jugadorObjetivo.id}`,
         jugadoresEstado[indiceUsuario]
       );
+    } else if (backendState === "habilidadBruja") {
+      if (botellaSeleccionada == null) {
+        mostrarError(
+          "Tienes que seleccionar una poción para usarla en un jugador"
+        );
+        logCustom(
+          jornadaActual,
+          etapaActual,
+          `Intento de voto bruja fallido: Ninguna poción seleccionado`,
+          jugadoresEstado[indiceUsuario]
+        );
+        return;
+      }
+      if (botellaSeleccionada === "vida") {
+        socket.emit("usaPocionBruja", {
+          idPartida: idSala,
+          idJugador: usuarioID,
+          tipo: "curar",
+          idObjetivo: jugadorObjetivo.id,
+        });
+        logCustom(
+          jornadaActual,
+          etapaActual,
+          `Poción de curar usada`,
+          jugadoresEstado[indiceUsuario]
+        );
+        setBotellaVidaUsada(true);
+      } else if (botellaSeleccionada === "muerte") {
+        socket.emit("usaPocionBruja", {
+          idPartida: idSala,
+          idJugador: usuarioID,
+          tipo: "matar",
+          idObjetivo: jugadorObjetivo.id,
+        });
+        logCustom(
+          jornadaActual,
+          etapaActual,
+          `Poción de matar usada`,
+          jugadoresEstado[indiceUsuario]
+        );
+        setBotellaMuerteUsada(true);
+      }
+      setBotellaUsadaEnEsteTurno(true);
     }
     setVotoRealizado(true);
     setJugadorSeleccionado(null);
@@ -2365,6 +2625,18 @@ const PantallaJugando: React.FC = () => {
           />
         )}
 
+        {mostrarComponentesResultadosVotacionAlguacil && (
+          <AnimacionGenerica
+            opacity={opacidadesResultadosVotacionAlguacil[0]}
+            mostrarComponente={true}
+            texto={
+              nombreAlguacil === ""
+                ? `NO SE HA LLEGADO A UN ACUERDO DE QUIÉN ES EL ALGUACIL`
+                : `${nombreAlguacil.toUpperCase()} ES EL ALGUACIL`
+            }
+          />
+        )}
+
         {/*
           Mostrar animación de que la vidente se va a dormir y los lobos se despiertan:
           -mostrarComponentesVidenteYNoche[0]: resultados de la votación del alguacil
@@ -2374,15 +2646,19 @@ const PantallaJugando: React.FC = () => {
         {mostrarComponentesVidenteYNoche[0] && (
           <AnimacionGenerica
             opacity={opacidadesVidenteYNoche[0]}
-            mostrarComponente={mostrarResultadosVotacionAlguacil}
-            texto={`RESULTADOS DE LA VOTACIÓN DE ALGUACIL HABRÁ QUE CONECTARLO DE ALGUNA MANERA:`}
+            mostrarComponente={mostrarComponentesVidenteYNoche[0]}
+            texto={
+              nombreAlguacil === ""
+                ? `NO SE HA LLEGADO A UN ACUERDO DE QUIÉN ES EL ALGUACIL`
+                : `${nombreAlguacil.toUpperCase()} ES EL ALGUACIL`
+            }
           />
         )}
 
         {mostrarComponentesVidenteYNoche[1] && (
           <AnimacionGenerica
             opacity={opacidadesVidenteYNoche[1]}
-            mostrarComponente={mostrarJugadoresSeDuermen}
+            mostrarComponente={mostrarComponentesVidenteYNoche[1]}
             texto="SE HACE DE NOCHE LOS SUPERVIVIENTES SE VUELVEN A DORMIR"
           />
         )}
@@ -2390,7 +2666,25 @@ const PantallaJugando: React.FC = () => {
         {mostrarComponentesVidenteYNoche[2] && (
           <AnimacionGenerica
             opacity={opacidadesVidenteYNoche[2]}
-            mostrarComponente={mostrarVidenteSeDespierta}
+            mostrarComponente={
+              mostrarComponentesVidenteYNoche[2] && hayVidenteViva
+            }
+            texto="LA VIDENTE SE DESPIERTA Y SEÑALA A UN JUGADOR DEL QUE QUIERE CONOCER LA VERDADERA PERSONALIDAD"
+          />
+        )}
+
+        {mostrarComponentesDespiertaVidente[0] && (
+          <AnimacionGenerica
+            opacity={opacitiesDespiertaVidente[0]}
+            mostrarComponente={mostrarComponentesDespiertaVidente[0]}
+            texto="LOS HOMBRES LOBO SE DESPIERTAN, SE RECONOCEN Y DESIGNAN UNA NUEVA VÍCTIMA"
+          />
+        )}
+
+        {mostrarComponentesDespiertaVidente[1] && (
+          <AnimacionGenerica
+            opacity={opacitiesDespiertaVidente[1]}
+            mostrarComponente={mostrarComponentesDespiertaVidente[1]}
             texto="LA VIDENTE SE DESPIERTA Y SEÑALA A UN JUGADOR DEL QUE QUIERE CONOCER LA VERDADERA PERSONALIDAD"
           />
         )}
@@ -2419,7 +2713,7 @@ const PantallaJugando: React.FC = () => {
             mostrarComponente={
               mostrarComponentesVidenteSeDuermeLobosSeDespiertan[1]
             }
-            texto="LOS HOMBRES LOBO DE DESPIERTAN, SE RECONOCEN Y DESIGNAN UNA NUEVA VÍCTIMA"
+            texto="LOS HOMBRES LOBO SE DESPIERTAN, SE RECONOCEN Y DESIGNAN UNA NUEVA VÍCTIMA"
           />
         )}
 
@@ -2427,7 +2721,7 @@ const PantallaJugando: React.FC = () => {
           <AnimacionGenerica
             opacity={opacitiesBrujaSeDespierta[0]}
             mostrarComponente={true}
-            texto="LA BRUJA SE DESPIERTA, OBSERVA LA NUEVA VÍCTIMA DE LOS HOMBRES LOBO. USARÁ SU POCIÓN CURATIVA O SU POCIÓN VENENOSA"
+            texto="LA BRUJA SE DESPIERTA, OBSERVA LA NUEVA VÍCTIMA. USARÁ SU POCIÓN CURATIVA O SU POCIÓN VENENOSA"
           />
         )}
 
@@ -2435,23 +2729,41 @@ const PantallaJugando: React.FC = () => {
           <AnimacionGenerica
             opacity={opacitiesJugadoresSeDespiertan[0]}
             mostrarComponente={mostrarComponenteJugadoresSeDespiertan[0]}
-            texto="AMANECE EN LA ALDEA, TODO EL MUNDO DESPIERTA Y ABRE LOS OJOS"
+            texto="LOS JUGADORES SE DESPIERTAN"
           />
         )}
 
-        {mostrarComponenteAnunciarMuertosNoche && (
+        {mostrarVictimaBruja && (
+          <AnimacionGenerica
+            opacity={opacidadMostrarVictimaBruja[0]}
+            mostrarComponente={mostrarComponentesMostrarVictimaBruja[0]}
+            texto={
+              nombreVictimaBruja === ""
+                ? `LOS HOMBRES LOBO NO HAN DEVORADO A NADIE`
+                : `LOS HOMBRES LOBO HAN DEVORADO A ${nombreVictimaBruja.toUpperCase()}`
+            }
+          />
+        )}
+
+        {mostrarComponenteAnunciarMuertosNoche[0] && (
           <AnimacionGenerica
             opacity={opacitiesAnunciarMuertosNoche[0]}
             mostrarComponente={mostrarComponenteAnunciarMuertosNoche[0]}
-            texto="A CONTINUACIÓN SE MUESTRAN LAS VÍCTIMAS DE LA ÚLTIMA NOCHE"
+            texto={
+              muertosUltimaRondaString === ""
+                ? "NO HAN MUERTO JUGADORES DURANTE ESTA NOCHE"
+                : `${muertosUltimaRondaString.toUpperCase()} ${
+                    muertosUltimaRondaString.includes(",") ? "HAN" : "HA"
+                  } MUERTO DURANTE LA NOCHE`
+            }
           />
         )}
 
-        {mostrarComponenteMostrarMuertosNoche && (
+        {mostrarComponenteMostrarMuertosNoche[0] && (
           <AnimacionGenerica
             opacity={opacitiesMostrarMuertosNoche[0]}
             mostrarComponente={mostrarComponenteMostrarMuertosNoche[0]}
-            texto="HAY QUE CONECTAR ESTO PARA QUE MUESTRE QUIEN HA MUERTO"
+            texto="LOS JUGADORES DEBEN ELEGIR POR MAYORÍA SIMPLE A UN SOPECHOSO DE SER HOMBRE LOBO"
           />
         )}
 
@@ -2459,7 +2771,7 @@ const PantallaJugando: React.FC = () => {
           <AnimacionGenerica
             opacity={opacitiesMostrarResultadosHabilidadVidente[0]}
             mostrarComponente={mostrarComponenteResultadosHabilidadVidente[0]}
-            texto="HAY QUE CONECTAR ESTO PARA QUE LA VIDENTE SEPA QUIEN HA MUERTO"
+            texto={`El jugador ${idObjetivoVidente.toUpperCase()} es ${rolObjetivoVidente.toUpperCase()}.`}
           />
         )}
 
@@ -2499,7 +2811,9 @@ const PantallaJugando: React.FC = () => {
               mostrarBotonesAccion={() =>
                 !EFECTO_PANTALLA_OSCURA ||
                 rolUsuario === "Hombre lobo" ||
-                (rolUsuario === "Bruja" && backendState === "habilidadBruja")
+                (rolUsuario === "Bruja" && backendState === "habilidadBruja") ||
+                (rolUsuario === "Vidente" &&
+                  backendState === "habilidadVidente")
               }
               votoRealizado={votoRealizado}
               turnoPasado={pasoTurno}
