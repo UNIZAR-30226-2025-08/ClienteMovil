@@ -19,7 +19,7 @@
       "softwareKeyboardLayoutMode": "pan"
     },
     "extra": {
-      "backendUrl": "http://192.168.1.236:5000"
+      "backendUrl": "http://192.168.175.144:5000"
     },
     "web": {
       "bundler": "metro",
