@@ -24,7 +24,7 @@ interface AnimacionGenericaProps {
  */
 const subrayarTexto = (texto: string): React.ReactNode[] => {
   // Definimos las palabras clave en una expresión regular (ignora mayúsculas/minúsculas)
-  const regex = /(hombres? lobo|cazador|vidente|bruja|alguacil)/gi;
+  const regex = /(hombres? lobo|cazador|vidente|bruja|alguacil|pueblo)/gi;
   const partes = texto.split(regex);
 
   return partes.map((parte, index) => {
@@ -49,6 +49,9 @@ const subrayarTexto = (texto: string): React.ReactNode[] => {
           color = "orange";
           break;
         case "alguacil":
+          color = "yellow";
+          break;
+        case "pueblo":
           color = "yellow";
           break;
         default:
