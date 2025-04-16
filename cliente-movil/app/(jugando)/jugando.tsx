@@ -16,13 +16,14 @@ import {
   Alert,
   ActivityIndicator,
   Image,
+  BackHandler,
 } from "react-native";
 
 // Carga de fuentes personalizadas
 import { useFonts } from "expo-font";
 
 // Navegación y parámetros locales
-import { useLocalSearchParams } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 
 // Conexión vía WebSocket con el servidor del juego, la partida asume que ya está conectado
 import socket from "@/app/(sala)/socket";
