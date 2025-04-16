@@ -16,13 +16,14 @@ import {
   Alert,
   ActivityIndicator,
   Image,
+  BackHandler,
 } from "react-native";
 
 // Carga de fuentes personalizadas
 import { useFonts } from "expo-font";
 
 // Navegación y parámetros locales
-import { useLocalSearchParams } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 
 // Conexión vía WebSocket con el servidor del juego, la partida asume que ya está conectado
 import socket from "@/app/(sala)/socket";
@@ -77,6 +78,8 @@ interface MensajeChat {
  * @returns {JSX.Element | null} El componente renderizado o null si las fuentes aún no se han cargado.
  */
 const PantallaJugando: React.FC = () => {
+  const router = useRouter(); // !!!! MOVER????
+
   // ---------------------------------------------------------------------------
   // Carga de fuentes
   // ---------------------------------------------------------------------------
@@ -886,6 +889,41 @@ const PantallaJugando: React.FC = () => {
     return () => {
       socket.off("enPartida");
       socket.off("actualizarSala");
+    };
+  }, []);
+
+  /**
+   * Maneja el evento de retroceso del dispositivo
+   *
+   * @remarks
+   * Se ejecuta cuando el usuario presiona el botón de retroceso
+   * Muestra un diálogo de confirmación antes de salir de la sala
+   */
+  useEffect(() => {
+    const handleBackPress = () => {
+      Alert.alert(
+        "Salir de la partida",
+        "¿Estás seguro de que quieres salir?",
+        [
+          { text: "Cancelar", style: "cancel" },
+          {
+            text: "Salir",
+            onPress: () => {
+              router.back(); // Regresa a la pantalla anterior
+            },
+          },
+        ]
+      );
+
+      return true; // <- Esto es correcto aquí
+    };
+
+    // Agrega el event listener
+    BackHandler.addEventListener("hardwareBackPress", handleBackPress);
+
+    // Limpia el event listener al desmontar
+    return () => {
+      BackHandler.removeEventListener("hardwareBackPress", handleBackPress);
     };
   }, []);
 
