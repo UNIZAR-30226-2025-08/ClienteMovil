@@ -69,6 +69,7 @@ enum Estado {
   diaComienza,
   habilidadCazador,
   partidaFinalizada,
+  usuarioLocalMuerto,
 }
 
 /**
@@ -1150,6 +1151,32 @@ const Jugando: React.FC = () => {
     numAnimaciones: 2,
     start: mostrarAnimacionInicioDia2,
   });
+
+  /**
+   * Controla si se muestra la animación de cuando el usuario local ha muerto.
+   * @type {boolean}
+   */
+  const [
+    mostrarAnimacionUsuarioLocalMuerto,
+    setMostrarAnimacionUsuarioLocalMuerto,
+  ] = useState<boolean>(false);
+
+  /**
+   * Valores de opacidad y visibilidad para la animación de cuando el usuario local ha muerto.
+   * @type {boolean}
+   * Generados por el hook `useGestorAnimaciones`.
+   */
+  const {
+    opacities: opacitiesUsuarioLocalMuerto,
+    mostrarComponentes: mostrarComponentesUsuarioLocalMuerto,
+  } = useGestorAnimaciones({
+    duracionFadeIn,
+    duracionEspera,
+    duracionFadeOut,
+    numAnimaciones: 1,
+    start: mostrarAnimacionUsuarioLocalMuerto,
+  });
+
   // ---------------------------------------------------------------------------
   // Hooks para realizar las votaciones
   // (seleccionar jugadores + botón votar + botón pasar turno)
@@ -1705,6 +1732,29 @@ const Jugando: React.FC = () => {
       ? !jugadoresEstado[indiceUsuario]?.estaVivo
       : false;
   }, [jugadoresEstado, indiceUsuario]);
+
+  // ---------------------------------------------------------------------------
+  // Encolar el evento correspondiente cuando el usuario local ha muerto
+  // ---------------------------------------------------------------------------
+
+  const prevMuertoRef = useRef<boolean>(jugadorLocalMuerto);
+
+  useEffect(() => {
+    const antes = prevMuertoRef.current;
+    const ahora = jugadorLocalMuerto;
+
+    if (!antes && ahora) {
+      logCustom(
+        jornadaActual,
+        etapaActual,
+        `Evento local detectado: usuarioLocalMuerto`,
+        jugadoresEstado[indiceUsuario]
+      );
+      agregarEstado(Estado.usuarioLocalMuerto);
+    }
+
+    prevMuertoRef.current = ahora;
+  }, [jugadorLocalMuerto]);
 
   // ---------------------------------------------------------------------------
   // Recibir eventos del backend
@@ -2297,6 +2347,26 @@ const Jugando: React.FC = () => {
         setPasoTurno(false);
         setJugadorSeleccionado(null);
         break;
+      case Estado.usuarioLocalMuerto:
+        if (etapaActual === "Día") {
+          setPlantillaActual(plantillaAnimacionDia);
+        } /* else if (etapaActual === "Noche" )*/ else {
+          setPlantillaActual(plantillaAnimacionNoche);
+        }
+        reiniciarTemporizador();
+        setVotoRealizado(false);
+        setPasoTurno(false);
+        setJugadorSeleccionado(null);
+
+        setMostrarAnimacionUsuarioLocalMuerto(true);
+
+        await new Promise((resolve) => setTimeout(resolve, duracionAnimacion));
+
+        setMostrarAnimacionUsuarioLocalMuerto(false);
+
+        agregarEstado(Estado.partidaFinalizada);
+
+        break;
       case Estado.partidaFinalizada:
         Alert.alert(
           "Sin hacer",
@@ -2477,6 +2547,13 @@ const Jugando: React.FC = () => {
             opacity={opacitiesInicioDia2[1]}
             mostrarComponente={mostrarComponentesInicioDia2[1]}
             texto="COMIENZAN LAS VOTACIONES"
+          />
+        )}
+        {mostrarAnimacionUsuarioLocalMuerto && (
+          <AnimacionGenerica
+            opacity={opacitiesUsuarioLocalMuerto[1]}
+            mostrarComponente={mostrarComponentesUsuarioLocalMuerto[1]}
+            texto="HAS MUERTO"
           />
         )}
         {errorMessage && (
