@@ -252,8 +252,9 @@ const Jugando: React.FC = () => {
   useEffect(() => {
     // console.log("Valor de rol:", rol);
     setRolUsuario(rol as Rol);
+    agregarEstado(Estado.esperaInicial);
     // console.log("Sala en juego:", sala);
-
+    /*
     setTimeout(() => {
       setMostrarAnimacionInicio1(false);
       setMostrarAnimacionInicio2(true);
@@ -269,6 +270,7 @@ const Jugando: React.FC = () => {
         }, duracionAnimacion);
       }, duracionAnimacion);
     }, duracionAnimacion);
+    */
   }, []);
 
   // ---------------------------------------------------------------------------
@@ -778,7 +780,7 @@ const Jugando: React.FC = () => {
    * @type {boolean}
    */
   const [mostrarAnimacionInicio1, setMostrarAnimacionInicio1] =
-    useState<boolean>(true);
+    useState<boolean>(false);
 
   /**
    * Controla si se muestra la segunda animación de inicio.
@@ -1761,6 +1763,7 @@ const Jugando: React.FC = () => {
       );
       agregarEstado(Estado.iniciarVotacionAlguacil);
     });
+    /* Nunca llega?
     socket.on("esperaInicial", (data) => {
       logCustom(
         jornadaActual,
@@ -1770,6 +1773,7 @@ const Jugando: React.FC = () => {
       );
       agregarEstado(Estado.esperaInicial);
     });
+    */
     socket.on("nocheComienza", (data) => {
       logCustom(
         jornadaActual,
@@ -2055,7 +2059,27 @@ const Jugando: React.FC = () => {
   const procesarEstado = async (estado: Estado): Promise<void> => {
     switch (estado) {
       case Estado.esperaInicial:
-        // No hacer nada XD
+        setPlantillaActual(plantillaAnimacionDia);
+
+        setMostrarAnimacionInicio1(true);
+
+        await new Promise((resolve) => setTimeout(resolve, duracionAnimacion));
+
+        setMostrarAnimacionInicio1(false);
+        setMostrarAnimacionInicio2(true);
+
+        await new Promise((resolve) => setTimeout(resolve, duracionAnimacion));
+
+        setMostrarAnimacionInicio2(false);
+        setMostrarAnimacionInicio3(true);
+
+        await new Promise((resolve) => setTimeout(resolve, duracionAnimacion));
+
+        setMostrarAnimacionInicio3(false);
+
+        setTemporizadorActivo(true);
+        setPlantillaActual(plantillaEsperaInicial);
+
         break;
       case Estado.iniciarVotacionAlguacil:
         setPlantillaActual(plantillaAnimacionDia);
@@ -2283,6 +2307,14 @@ const Jugando: React.FC = () => {
         break;
     }
   };
+
+  if (!fuentesCargadas) {
+    return (
+      <View style={estilos.cargando}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
 
   /**
    * Datos de la sala parseados desde JSON.

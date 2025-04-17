@@ -30,6 +30,7 @@ const animacionesEstilos = StyleSheet.create({
     includeFontPadding: false,
     paddingHorizontal: ancho * 0.05,
     fontSize: ancho * 0.1,
+    lineHeight: ancho * 0.12,
   },
 
   /**
