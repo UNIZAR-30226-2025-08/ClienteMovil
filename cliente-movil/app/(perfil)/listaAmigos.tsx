@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -15,19 +15,8 @@ import Constants from "expo-constants";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "@react-navigation/native";
-import { useCallback } from "react";
 import socket from "@/app/(sala)/socket";
-/**
- * Mapa de avatares que relaciona claves con sus respectivas imágenes.
- *
- * @remarks
- * Se utiliza para obtener la imagen correspondiente a la clave almacenada en la base de datos.
- *
- * @example
- * ```ts
- * const avatar = avatarMap["avatar1"]; // Obtiene la imagen para 'avatar1'
- * ```
- */
+
 const avatarMap: Record<string, any> = {
   avatar1: require("@/assets/images/imagenPerfil.webp"),
   avatar2: require("@/assets/images/imagenPerfil2.webp"),
@@ -39,65 +28,40 @@ const avatarMap: Record<string, any> = {
   avatar8: require("@/assets/images/imagenPerfil8.webp"),
 };
 
-/**
- * Tipo que representa a un jugador en el ranking.
- *
- * @property idUsuario - Identificador único del jugador.
- * @property nombre - Nombre del jugador.
- * @property victorias - Número de victorias del jugador.
- * @property avatar - Clave del avatar asignado al jugador (opcional).
- */
 type Jugador = {
-  idUsuario: number;
+  idUsuario?: number; // Puede venir en idUsuario o en id
+  id?: number; // Se contempla ambas opciones
   nombre: string;
-  avatar?: string; // Campo opcional para la URL del avatar
-  enLinea?: boolean; // Campo opcional para el estado de conexión
+  avatar?: string;
+  enLinea?: boolean;
+  enSala?: boolean;
+  sala?: string | number;
 };
 
-/**
- * Imágenes utilizadas en la pantalla de lista de amigos.
- */
 const imagenFondoRoles = require("@/assets/images/fondo-roles.jpg");
 const imagenAtras = require("@/assets/images/botonAtras.png");
-
-// Imagen por defecto para nuevos amigos (o la que prefieras)
 const imagenPerfilDefecto = require("@/assets/images/imagenPerfil.webp");
 
-/**
- * Pantalla de lista de amigos.
- * Permite visualizar amigos, agregar nuevos y regresar a la pantalla anterior.
- *
- * @returns {JSX.Element} Pantalla de lista de amigos.
- */
 export default function AmigosScreen(): JSX.Element {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const BACKEND_URL = Constants.expoConfig?.extra?.backendUrl;
-  // Lista de amigos en estado para poder modificarla
-  const [amigos, setAmigos] = useState<number[]>([]);
-  const [amigosDetalles, setAmigosDetalles] = useState<Jugador[]>([]); // Almacenar detalles de los amigos
-  // Estado para almacenar el nombre del nuevo amigo
+  const [amigosDetalles, setAmigosDetalles] = useState<Jugador[]>([]);
   const [nuevoAmigo, setNuevoAmigo] = useState("");
-
-  // Estado para el mensaje
   const [mensaje, setMensaje] = useState<string | null>(null);
-
   const [usuario, setUsuario] = useState<{
     idUsuario: number;
     nombre: string;
   } | null>(null);
-  
+  const [salaActual, setSalaActual] = useState<any>(null);
+  const [salasPublicas, setSalasPublicas] = useState<any[]>([]);
 
-  /**
-   * Carga los datos del usuario cuando la pantalla gana foco.
-   */
   useFocusEffect(
     useCallback(() => {
       const cargarUsuario = async () => {
         try {
           const idUsuario = await AsyncStorage.getItem("idUsuario");
           const nombre = await AsyncStorage.getItem("nombreUsuario");
-
           setUsuario({
             idUsuario: idUsuario ? parseInt(idUsuario) : 0,
             nombre: nombre ?? "Usuario",
@@ -108,7 +72,6 @@ export default function AmigosScreen(): JSX.Element {
           setLoading(false);
         }
       };
-
       cargarUsuario();
     }, [])
   );
@@ -116,122 +79,134 @@ export default function AmigosScreen(): JSX.Element {
   useEffect(() => {
     const configurarSocket = async () => {
       if (!usuario || !usuario.idUsuario) return;
-  
       const idUsuario = usuario.idUsuario;
-  
-      // Conectar el socket si no está conectado
       if (!socket.connected) {
         socket.connect();
       }
-  
-      // Registrar usuario en el socket
       socket.emit("registrarUsuario", { idUsuario });
-  
-      // Obtener la lista de amigos desde el backend
+
+      // Obtener la lista de amigos y asignar propiedades por defecto
       const fetchFriends = async () => {
         try {
           const response = await axios.get(
             `${BACKEND_URL}/api/amistad/listar/${idUsuario}`
           );
-          console.log("Amigos recibidos del backend:", response.data.amigos);
-  
-          // Cargar detalles de los amigos y asignar enLinea como false inicialmente
-          const amigosDetalles = await Promise.all(
-            response.data.amigos.map(async (idAmigo: number) => {
+          const amigosIds = response.data.amigos;
+          const detalles = await Promise.all(
+            amigosIds.map(async (idAmigo: number) => {
               const responseAmigo = await axios.post(
                 `${BACKEND_URL}/api/usuario/obtener_por_id`,
                 { idUsuario: idAmigo }
               );
               const usuarioAmigo = responseAmigo.data.usuario;
-              return { ...usuarioAmigo, enLinea: false }; // Inicializa enLinea como false
+              return {
+                ...usuarioAmigo,
+                enLinea: false,
+                enSala: false,
+                sala: null,
+              };
             })
           );
-  
-          setAmigosDetalles(amigosDetalles);
-          console.log("Detalles iniciales de amigos:", amigosDetalles);
+          setAmigosDetalles(detalles);
         } catch (error) {
           console.error("Error al obtener la lista de amigos:", error);
         }
       };
-  
+
       await fetchFriends();
-  
-      // Solicitar el estado actual de los amigos
       socket.emit("solicitarEstadoAmigos", { idUsuario });
-  
-      // Escuchar el estado de un amigo individual
-      const handleEstadoAmigo = ({ idUsuario, en_linea }: { idUsuario: number; en_linea: boolean }) => {
-        console.log(`Estado actualizado para amigo ID ${idUsuario}: ${en_linea ? "Conectado" : "Desconectado"}`);
+
+      const handleEstadoAmigo = ({
+        idUsuario,
+        en_linea,
+        enSala,
+        sala,
+      }: {
+        idUsuario: number;
+        en_linea: boolean;
+        enSala?: boolean;
+        sala?: string | number;
+      }) => {
         setAmigosDetalles((prevDetalles) =>
           prevDetalles.map((amigo) =>
-            amigo.idUsuario === idUsuario ? { ...amigo, enLinea: en_linea } : amigo
+            amigo.idUsuario === idUsuario || amigo.id === idUsuario
+              ? {
+                  ...amigo,
+                  enLinea: en_linea,
+                  enSala: enSala ?? amigo.enSala,
+                  sala: sala ?? amigo.sala,
+                }
+              : amigo
           )
         );
       };
-  
-      // Escuchar el estado de todos los amigos
-      const handleEstadoAmigos = (estadoAmigos: { idUsuario: number; en_linea: boolean }[]) => {
-        console.log("Estado de todos los amigos recibido:", estadoAmigos);
+
+      const handleEstadoAmigos = (
+        estadoAmigos: { idUsuario: number; en_linea: boolean }[]
+      ) => {
         setAmigosDetalles((prevDetalles) =>
           prevDetalles.map((amigo) => {
-            const estado = estadoAmigos.find((e) => e.idUsuario === amigo.idUsuario);
+            const friendKey = amigo.idUsuario || amigo.id;
+            const estado = estadoAmigos.find((e) => e.idUsuario === friendKey);
             return estado ? { ...amigo, enLinea: estado.en_linea } : amigo;
           })
         );
       };
-  
+
       socket.on("estadoAmigo", handleEstadoAmigo);
       socket.on("estadoAmigos", handleEstadoAmigos);
-  
+
       return () => {
         socket.off("estadoAmigo", handleEstadoAmigo);
         socket.off("estadoAmigos", handleEstadoAmigos);
       };
     };
-  
     configurarSocket();
   }, [usuario]);
 
-  // Nueva función para enviar solicitud de amistad:
+  // Obtener las salas públicas desde el backend
+  useEffect(() => {
+    if (!usuario || !usuario.idUsuario) return;
+    socket.emit("obtenerSalas");
+    const handleListaSalas = (salas: any) => {
+      const salasArray = Array.isArray(salas) ? salas : Object.values(salas);
+      const publicSalas = salasArray.filter(
+        (sala) =>
+          sala.tipo &&
+          sala.tipo.toLowerCase() === "publica" &&
+          Array.isArray(sala.jugadores)
+      );
+      console.log("Salas públicas filtradas:", publicSalas);
+      setSalasPublicas(publicSalas);
+    };
+    socket.on("listaSalas", handleListaSalas);
+    return () => {
+      socket.off("listaSalas", handleListaSalas);
+    };
+  }, [usuario]);
+
+  // Función para enviar solicitud de amistad
   const enviarSolicitud = async () => {
     if (!nuevoAmigo.trim() || !usuario) return;
-
     try {
-      // Buscar el usuario por nombre
       const responseUsuario = await axios.post(
         `${BACKEND_URL}/api/usuario/obtener_por_nombre`,
         { nombre: nuevoAmigo.trim() }
       );
       if (!responseUsuario.data.usuario) {
-        //Alert.alert("Depuración", "Usuario no encontrado");
         setMensaje("Usuario no encontrado");
         return;
       }
-
-      // Muestra la información del usuario en un Alert
-      /*Alert.alert(
-        "Depuración",
-        `Usuario encontrado:\n${JSON.stringify(responseUsuario.data.usuario)}`
-      );*/
-
       const idReceptor = responseUsuario.data.usuario.idUsuario;
-      //Alert.alert("Depuración", `Usuario encontrado: ID ${idReceptor}`);
-
-      // Enviar la solicitud de amistad
       const responseSolicitud = await axios.post(
         `${BACKEND_URL}/api/solicitud/enviar`,
-        {
-          idEmisor: usuario.idUsuario,
-          idReceptor: idReceptor,
-        }
+        { idEmisor: usuario.idUsuario, idReceptor }
       );
       if (responseSolicitud.data.solicitud) {
-        //Alert.alert("Depuración", "Solicitud enviada con éxito");
         setMensaje("¡Solicitud enviada con éxito!");
       }
     } catch (error) {
       console.error("Error al enviar solicitud:", error);
-      //Alert.alert("Depuración", "Error al enviar solicitud");
       setMensaje("Error al enviar solicitud");
     } finally {
       setNuevoAmigo("");
@@ -239,9 +214,35 @@ export default function AmigosScreen(): JSX.Element {
     }
   };
 
+  // Función para unirse a la sala pública en la que se encuentre el amigo
+  const unirseASalaPublica = async (sala: any) => {
+    if (salaActual) {
+      socket.emit("salirDeSala", {
+        idUsuario: usuario?.idUsuario,
+        idSala: salaActual.id,
+      });
+      await AsyncStorage.removeItem("salaActual");
+      setSalaActual(null);
+      setMensaje("Has salido de tu sala actual.");
+      setTimeout(() => setMensaje(null), 1500);
+    }
+    socket.emit("unirseSala", {
+      idSala: sala.id,
+      usuario: {
+        id: usuario?.idUsuario,
+        nombre: usuario?.nombre,
+        avatar: "avatar1",
+      },
+    });
+    router.push({
+      pathname: "/(sala)/sala",
+      params: { idSala: sala.id, salaData: JSON.stringify(sala) },
+    });
+  };
+
+  // Navegar al perfil del amigo
   const handlePress = async (idUsuario: number) => {
     try {
-      console.log("Presionando perfil del amigo con ID:", idUsuario);
       await AsyncStorage.setItem("amigoId", idUsuario.toString());
       router.push({
         pathname: "/perfilAmigo",
@@ -252,40 +253,18 @@ export default function AmigosScreen(): JSX.Element {
     }
   };
 
-  /**
-   * Función para eliminar un amigo de la lista.
-   */
+  // Función para eliminar un amigo
   const eliminarAmigo = async (idAmigo: number) => {
     if (!usuario) return;
-
-    if (!idAmigo) {
-      console.error("ID del amigo no válido:", idAmigo); // Verificación adicional
-      return;
-    }
-
-    console.log("Enviando datos:", {
-      idUsuario1: usuario.idUsuario,
-      idUsuario2: idAmigo,
-    });
-
     try {
       await axios.delete(`${BACKEND_URL}/api/amistad/eliminar`, {
         headers: { "Content-Type": "application/json" },
-        data: {
-          idUsuario1: usuario.idUsuario,
-          idUsuario2: idAmigo,
-        },
+        data: { idUsuario1: usuario.idUsuario, idUsuario2: idAmigo },
       });
-
-      // Filtrar la lista de amigos eliminando al amigo con el ID especificado
-      setAmigosDetalles((prevAmigosDetalles) =>
-        prevAmigosDetalles.filter((amigo) => amigo.idUsuario !== idAmigo)
+      setAmigosDetalles((prev) =>
+        prev.filter((amigo) => (amigo.idUsuario || amigo.id) !== idAmigo)
       );
-
-      // Mostrar el mensaje de éxito
       setMensaje("¡Amigo eliminado con éxito!");
-
-      // Ocultar el mensaje después de 3 segundos
       setTimeout(() => setMensaje(null), 1500);
     } catch (error) {
       console.error("Error al eliminar amigo:", error);
@@ -300,22 +279,16 @@ export default function AmigosScreen(): JSX.Element {
         style={styles.image}
       >
         <View style={styles.overlay} />
-
-        {/* Título */}
         <Text style={styles.titulo}>Lista de Amigos</Text>
-
-        {/* Mostrar mensaje de éxito o error */}
         {mensaje && (
           <View style={styles.mensajeExitoContainer}>
             <Text style={styles.mensajeExito}>{mensaje}</Text>
           </View>
         )}
-
-        {/* Contenedor para añadir nuevo amigo (ahora envío de solicitud) */}
         <View style={styles.addFriendContainer}>
           <TextInput
             style={styles.input}
-            placeholder="Nombre del usuario" // Se actualiza el placeholder
+            placeholder="Nombre del usuario"
             placeholderTextColor="#666"
             value={nuevoAmigo}
             onChangeText={setNuevoAmigo}
@@ -327,20 +300,27 @@ export default function AmigosScreen(): JSX.Element {
             <Text style={styles.botonAnadirTexto}>ENVIAR SOLICITUD</Text>
           </TouchableOpacity>
         </View>
-
-        {/* Lista de amigos desplazable */}
         <ScrollView
           contentContainerStyle={styles.scrollContainer}
           showsVerticalScrollIndicator={false}
         >
-          {amigosDetalles.map((amigo) => (
-            <TouchableOpacity
-              key={amigo.idUsuario}
-              onPress={() => handlePress(amigo.idUsuario)}
-              activeOpacity={0.7} // Da un efecto visual al presionar
-            >
-              <View style={styles.amigoContainer}>
-                <View style={styles.cardHeader}>
+          {amigosDetalles.map((amigo) => {
+            // Se utiliza friendId tomando idUsuario o id
+            const friendId = Number(amigo.idUsuario || amigo.id);
+            // Busca si el amigo aparece en alguna sala pública (comparando números)
+            const salaDelAmigo = salasPublicas.find(
+              (sala) =>
+                Array.isArray(sala.jugadores) &&
+                sala.jugadores.some(
+                  (jugador: any) => Number(jugador.id) === friendId
+                )
+            );
+            return (
+              <View key={friendId} style={styles.amigoContainer}>
+                <TouchableOpacity
+                  style={styles.cardInfo}
+                  onPress={() => handlePress(friendId)}
+                >
                   <Image
                     source={
                       avatarMap[amigo.avatar || "avatar1"] ||
@@ -348,29 +328,36 @@ export default function AmigosScreen(): JSX.Element {
                     }
                     style={styles.imagenPerfil}
                   />
-
-                   {/* Círculo de estado de conexión */}
-                  <View
-                    style={[
-                      styles.estadoConexion,
-                      amigo.enLinea ? styles.enLinea : styles.desconectado,
-                    ]}
-                  />
-
-                  <Text style={styles.nombre}>{amigo.nombre}</Text>
+                  <View style={styles.infoContainer}>
+                    <Text style={styles.nombre}>{amigo.nombre}</Text>
+                    <View
+                      style={[
+                        styles.estadoConexion,
+                        amigo.enLinea ? styles.enLinea : styles.desconectado,
+                      ]}
+                    />
+                  </View>
+                </TouchableOpacity>
+                <View style={styles.actionButtons}>
+                  {salaDelAmigo && (
+                    <TouchableOpacity
+                      style={styles.botonUnirse}
+                      onPress={() => unirseASalaPublica(salaDelAmigo)}
+                    >
+                      <Text style={styles.textoBoton}>UNIRSE</Text>
+                    </TouchableOpacity>
+                  )}
                   <TouchableOpacity
                     style={styles.botonEliminar}
-                    onPress={() => eliminarAmigo(amigo.idUsuario)}
+                    onPress={() => eliminarAmigo(friendId)}
                   >
-                    <Text style={styles.botonAnadirTexto}>ELIMINAR</Text>
+                    <Text style={styles.textoBoton}>ELIMINAR</Text>
                   </TouchableOpacity>
                 </View>
               </View>
-            </TouchableOpacity>
-          ))}
+            );
+          })}
         </ScrollView>
-
-        {/* Botón para volver atrás (con imagen) */}
         <TouchableOpacity
           style={styles.containerAtras}
           onPress={() => router.back()}
@@ -382,9 +369,6 @@ export default function AmigosScreen(): JSX.Element {
   );
 }
 
-/**
- * Estilos de la pantalla de lista de amigos.
- */
 const styles = StyleSheet.create({
   container: { flex: 1 },
   image: {
@@ -394,12 +378,10 @@ const styles = StyleSheet.create({
     resizeMode: "cover",
     justifyContent: "center",
   },
-
   overlay: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: "rgba(0, 0, 0, 0.4)",
   },
-
   titulo: {
     fontSize: 28,
     fontWeight: "bold",
@@ -407,7 +389,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginTop: 60,
   },
-
   mensajeExitoContainer: {
     position: "absolute",
     top: 50,
@@ -419,20 +400,12 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     zIndex: 10,
   },
-
   mensajeExito: {
     color: "white",
     fontSize: 18,
     fontWeight: "bold",
     textAlign: "center",
   },
-
-  cardHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-
-  // Contenedor para añadir amigo
   addFriendContainer: {
     flexDirection: "row",
     alignItems: "center",
@@ -440,13 +413,6 @@ const styles = StyleSheet.create({
     marginTop: 20,
     marginHorizontal: 20,
   },
-
-  rank: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginRight: 10,
-  },
-
   input: {
     flex: 1,
     backgroundColor: "#fff",
@@ -456,84 +422,45 @@ const styles = StyleSheet.create({
     marginRight: 10,
     color: "#000",
   },
-
   botonAnadir: {
     backgroundColor: "#008f39",
     borderRadius: 10,
     paddingVertical: 10,
     paddingHorizontal: 15,
   },
-
-  botonAnadirTexto: {
-    color: "#fff",
-    fontWeight: "bold",
-  },
-
-  scrollContainer: {
-    marginTop: 20,
-    paddingHorizontal: 20,
-    paddingBottom: 80, // Espacio para evitar que el último elemento quede oculto
-  },
-
+  botonAnadirTexto: { color: "#fff", fontWeight: "bold" },
+  scrollContainer: { marginTop: 20, paddingHorizontal: 20, paddingBottom: 80 },
   amigoContainer: {
+    backgroundColor: "rgba(255, 255, 255, 0.8)",
+    borderRadius: 15,
+    padding: 15,
+    marginBottom: 15,
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.8)",
-    padding: 15,
-    borderRadius: 15,
-    marginBottom: 15,
+    justifyContent: "space-between",
   },
-
-  imagenPerfil: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+  cardInfo: { flexDirection: "row", alignItems: "center" },
+  imagenPerfil: { width: 50, height: 50, borderRadius: 25, marginRight: 10 },
+  infoContainer: { flexDirection: "column", justifyContent: "center" },
+  nombre: { fontSize: 18, fontWeight: "bold", color: "black" },
+  estadoConexion: { width: 12, height: 12, borderRadius: 6, marginTop: 4 },
+  enLinea: { backgroundColor: "green" },
+  desconectado: { backgroundColor: "gray" },
+  actionButtons: { flexDirection: "row", alignItems: "center" },
+  botonUnirse: {
+    backgroundColor: "#008f39",
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 15,
     marginRight: 10,
   },
-
-  nombre: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "black",
-  },
-
-  containerAtras: {
-    position: "absolute",
-    bottom: 20,
-    left: "46%",
-  },
-
-  imageAtras: {
-    height: 40,
-    width: 40,
-  },
-
   botonEliminar: {
     backgroundColor: "#FF0000",
     borderRadius: 10,
     paddingVertical: 10,
     paddingHorizontal: 15,
-    position: "absolute",
-    left: 230,
-    top: "50%",
-    transform: [{ translateY: -20 }],
   },
-
-  estadoConexion: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,  
-    left: 33,
-    position: "absolute",  
-    bottom: 0,  
-    right: 0, 
-  },
-
-  enLinea: {
-    backgroundColor: "green",  // Círculo verde para conectado
-  },
-
-  desconectado: {
-    backgroundColor: "gray",  // Círculo gris para desconectado
-  },
+  textoBoton: { color: "#fff", fontWeight: "bold" },
+  containerAtras: { position: "absolute", bottom: 20, left: "46%" },
+  imageAtras: { height: 40, width: 40 },
 });

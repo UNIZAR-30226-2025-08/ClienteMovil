@@ -20,6 +20,7 @@ import { useRouter } from "expo-router";
 import axios from "axios"; // Importamos axios
 import CryptoJS from "crypto-js"; // Importamos crypto-js
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import socket from "@/app/(sala)/socket";
 
 const imagenPortada = require("@/assets/images/imagen-portada.png");
 const imagenFondoInicioSesion = require("@/assets/images/fondo-inicio-sesion.jpg");
@@ -152,6 +153,10 @@ export default function App(): JSX.Element | null {
         if (adminResponse.data.esAdministrador) {
           router.push("/admin");
         } else {
+          // Registrar usuario en línea si NO es admin
+          socket.emit("registrarUsuario", {
+            idUsuario: data.usuario.idUsuario,
+          });
           router.push("/entrar");
         }
       } else {
