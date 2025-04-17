@@ -298,7 +298,7 @@ export default function SalaPreviaScreen(): JSX.Element {
 
       console.log("Futura partida:", partidaPendiente.partidaID);
 
-      router.push({
+      router.replace({
         pathname: "/(jugando)/jugando",
         params: {
           idSala: partidaPendiente.partidaID,

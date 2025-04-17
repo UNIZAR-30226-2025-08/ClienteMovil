@@ -93,6 +93,8 @@ type PlantillaUI = {
  * @returns {JSX.Element | null} El componente renderizado o null si las fuentes aún no se han cargado.
  */
 const Jugando: React.FC = () => {
+  const router = useRouter(); // !!!! MOVER????
+
   /**
    * Carga de fuentes personalizadas para la interfaz del juego.
    */
@@ -162,6 +164,34 @@ const Jugando: React.FC = () => {
   // ---------------------------------------------------------------------------
   // Efectos de inicialización
   // ---------------------------------------------------------------------------
+
+  useEffect(() => {
+    const handleBackPress = () => {
+      Alert.alert(
+        "Salir de la partida",
+        "¿Estás seguro de que quieres salir?",
+        [
+          { text: "Cancelar", style: "cancel" },
+          {
+            text: "Salir",
+            onPress: () => {
+              router.back(); // Regresa a la pantalla anterior
+            },
+          },
+        ]
+      );
+
+      return true; // <- Esto es correcto aquí
+    };
+
+    // Agrega el event listener
+    BackHandler.addEventListener("hardwareBackPress", handleBackPress);
+
+    // Limpia el event listener al desmontar
+    return () => {
+      BackHandler.removeEventListener("hardwareBackPress", handleBackPress);
+    };
+  }, []);
 
   /**
    * Conecta la partida a los sockets y escucha eventos clave como "enPartida" y "actualizarSala".
