@@ -635,7 +635,7 @@ const Jugando: React.FC = () => {
     mostrarBotonVotar: jugadoresEstado[indiceUsuario].esAlguacil,
     mostrarMedallaAlguacilPropia: true,
     valorOpacidadPantallaOscura: 0.95,
-    textoBotonVotar: "ELIGE",
+    textoBotonVotar: "MATAR",
   };
 
   const plantillaVotacionDiurna: PlantillaUI = {
@@ -661,7 +661,7 @@ const Jugando: React.FC = () => {
     mostrarBotonVotar: true,
     mostrarMedallaAlguacilPropia: true,
     valorOpacidadPantallaOscura: 0,
-    textoBotonVotar: "VOTAR",
+    textoBotonVotar: "ELIGE",
   };
 
   const [plantillaActual, setPlantillaActual] = useState<PlantillaUI>(
