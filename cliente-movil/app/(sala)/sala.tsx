@@ -298,7 +298,7 @@ export default function SalaPreviaScreen(): JSX.Element {
 
       console.log("Futura partida:", partidaPendiente.partidaID);
 
-      router.replace({
+      router.push({
         pathname: "/(jugando)/jugando",
         params: {
           idSala: partidaPendiente.partidaID,
@@ -420,11 +420,20 @@ export default function SalaPreviaScreen(): JSX.Element {
       Alert.alert("Error", "No se pudo obtener la información del usuario.");
       return;
     }
-    socket.emit("salirSala", {
-      idSala,
-      idUsuario: usuarioData.id, // el ID real del socket
-    });
-    router.back(); // Regresa a la pantalla anterior
+
+    Alert.alert("Salir de la sala", "¿Estás seguro de que quieres salir?", [
+      { text: "Cancelar", style: "cancel" },
+      {
+        text: "Salir",
+        onPress: () => {
+          socket.emit("salirSala", {
+            idSala,
+            idUsuario: usuarioData.id,
+          });
+          router.back();
+        },
+      },
+    ]);
   };
 
   /**
