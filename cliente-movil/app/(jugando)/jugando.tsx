@@ -1860,6 +1860,14 @@ const Jugando: React.FC = () => {
       );
       agregarEstado(Estado.habilidadBruja);
     });
+    socket.on("habilidadCazador", (data) => {
+      logCustom(
+        jornadaActual,
+        etapaActual,
+        `Evento recibido: habilidadCazador - ${JSON.stringify(data)}`
+      );
+      agregarEstado(Estado.habilidadCazador);
+    });
     socket.on("diaComienza", (data) => {
       logCustom(
         jornadaActual,
@@ -2019,6 +2027,7 @@ const Jugando: React.FC = () => {
       socket.off("habilidadVidente");
       socket.off("turnoHombresLobos");
       socket.off("habilidadBruja");
+      socket.off("habilidadCazador");
       socket.off("diaComienza");
       socket.off("partidaFinalizada");
       socket.off("votoAlguacilRegistrado");
@@ -2061,26 +2070,83 @@ const Jugando: React.FC = () => {
     colaEstadosRef.current = colaEstados;
   }, [colaEstados]);
 
+  const prevEstadoRef = useRef<Estado | null>(null);
+
+  async function procesarFinalEstado(estado: Estado): Promise<void> {
+    switch (estado) {
+      case Estado.habilidadVidente:
+        if (!hayVidenteViva) break;
+        if (rolUsuario === "Vidente") {
+          setPlantillaActual(plantillaAnimacionNoche);
+          cerrarHabilidad();
+          cerrarChat();
+          setMostrarAnimacionEjecutarHabilidadVidente(true);
+
+          await new Promise((resolve) =>
+            setTimeout(resolve, duracionAnimacion)
+          );
+
+          setMostrarAnimacionEjecutarHabilidadVidente(false);
+          setRolObjetivoVidente(""); // Limpiar, por si la vidente no envía/recibe una nueva petición tras esta, que se marque claramente que no ha recibido nada
+        }
+
+        setPlantillaActual(plantillaAnimacionNoche);
+        cerrarHabilidad();
+        cerrarChat();
+        setMostrarAnimacionFinalHabilidadVidente(true);
+
+        await new Promise((resolve) => setTimeout(resolve, duracionAnimacion));
+
+        setMostrarAnimacionFinalHabilidadVidente(false);
+        break;
+      case Estado.turnoHombresLobos:
+        setPlantillaActual(plantillaAnimacionNoche);
+        cerrarHabilidad();
+        cerrarChat();
+        setMostrarAnimacionFinalTurnoHombresLobo(true);
+
+        await new Promise((resolve) => setTimeout(resolve, duracionAnimacion));
+
+        setMostrarAnimacionFinalTurnoHombresLobo(false);
+        break;
+      case Estado.habilidadBruja:
+        if (!hayBrujaViva) break;
+        setPlantillaActual(plantillaAnimacionNoche);
+        cerrarHabilidad();
+        cerrarChat();
+        setMostrarAnimacionFinalHabilidadBruja(true);
+
+        await new Promise((resolve) => setTimeout(resolve, duracionAnimacion));
+
+        setMostrarAnimacionFinalHabilidadBruja(false);
+        break;
+      default:
+        break;
+    }
+  }
+
   /**
    * Procesa el siguiente estado en la cola de forma segura.
    */
   const procesarSiguienteEstado = async () => {
-    // Evitar procesamiento concurrente
     if (procesando || colaEstadosRef.current.length === 0) return;
-
     setProcesando(true);
 
-    // Obtener el siguiente estado de la referencia actual
-    const [siguiente, ...resto] = colaEstadosRef.current;
+    const siguiente = colaEstadosRef.current[0];
 
-    // Actualizar la cola usando el estado más reciente
-    setColaEstados((prev) => {
-      // Verificar coincidencia para evitar conflictos
-      if (prev[0] !== siguiente) return prev;
-      return prev.slice(1);
-    });
+    if (prevEstadoRef.current !== null) {
+      try {
+        await procesarFinalEstado(prevEstadoRef.current);
+      } catch (err) {
+        console.error("Error exit de", prevEstadoRef.current, err);
+      }
+    }
 
+    prevEstadoRef.current = siguiente;
+
+    setColaEstados((prev) => prev.slice(1));
     setEstadoActual(siguiente);
+
     await procesarEstado(siguiente);
 
     setProcesando(false);
@@ -2201,32 +2267,6 @@ const Jugando: React.FC = () => {
         setJugadorSeleccionado(null);
         break;
       case Estado.turnoHombresLobos:
-        if (hayVidenteViva && rolUsuario === "Vidente") {
-          setPlantillaActual(plantillaAnimacionNoche);
-          cerrarHabilidad();
-          cerrarChat();
-          setMostrarAnimacionEjecutarHabilidadVidente(true);
-
-          await new Promise((resolve) =>
-            setTimeout(resolve, duracionAnimacion)
-          );
-
-          setMostrarAnimacionEjecutarHabilidadVidente(false);
-          setRolObjetivoVidente(""); // Limpiar, por si la vidente no envía/recibe una nueva petición tras esta, que se marque claramente que no ha recibido nada
-        }
-        if (hayVidenteViva) {
-          setPlantillaActual(plantillaAnimacionNoche);
-          cerrarHabilidad();
-          cerrarChat();
-          setMostrarAnimacionFinalHabilidadVidente(true);
-
-          await new Promise((resolve) =>
-            setTimeout(resolve, duracionAnimacion)
-          );
-
-          setMostrarAnimacionFinalHabilidadVidente(false);
-        }
-
         setPlantillaActual(plantillaAnimacionNoche);
         cerrarHabilidad();
         cerrarChat();
@@ -2247,11 +2287,6 @@ const Jugando: React.FC = () => {
         setPlantillaActual(plantillaAnimacionNoche);
         cerrarHabilidad();
         cerrarChat();
-        setMostrarAnimacionFinalTurnoHombresLobo(true);
-
-        await new Promise((resolve) => setTimeout(resolve, duracionAnimacion));
-
-        setMostrarAnimacionFinalTurnoHombresLobo(false);
 
         setMostrarAnimacionInicioHabilidadBruja(true);
 
@@ -2283,29 +2318,6 @@ const Jugando: React.FC = () => {
         // Implementar lógica similar con await si es necesario
         break;
       case Estado.diaComienza:
-        if (!hayBrujaViva) {
-          setPlantillaActual(plantillaAnimacionNoche);
-          cerrarHabilidad();
-          cerrarChat();
-          setMostrarAnimacionFinalTurnoHombresLobo(true);
-
-          await new Promise((resolve) =>
-            setTimeout(resolve, duracionAnimacion)
-          );
-
-          setMostrarAnimacionFinalTurnoHombresLobo(false);
-        } else if (hayBrujaViva) {
-          setPlantillaActual(plantillaAnimacionNoche);
-          cerrarHabilidad();
-          cerrarChat();
-          setMostrarAnimacionFinalHabilidadBruja(true);
-
-          await new Promise((resolve) =>
-            setTimeout(resolve, duracionAnimacion)
-          );
-
-          setMostrarAnimacionFinalHabilidadBruja(false);
-        }
         setEtapaActual("Día");
         setJornadaActual(jornadaActual + 1);
         setOpacity(0.5); // Si no estuviese esto, no le daría tiempo a actualizarse para este case
