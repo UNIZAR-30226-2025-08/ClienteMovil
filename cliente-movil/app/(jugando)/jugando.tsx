@@ -141,7 +141,7 @@ const Jugando: React.FC = () => {
     if (!idSala) return;
 
     // Emitir evento al backend para solicitar el estado actual de los jugadores
-    socket.emit("obtenerEstadoJugadores", { idPartida: idSala });
+    // socket.emit("obtenerEstadoJugadores", { idPartida: idSala });
     // console.log("[PantallaJugando] → Emitiendo obtenerEstadoJugadores", idSala);
 
     // Escuchar la respuesta del backend con los datos de los jugadores
@@ -2412,6 +2412,23 @@ const Jugando: React.FC = () => {
         setJugadorSeleccionado(null);
         break;
       case Estado.diaComienza:
+        const nuevosJugadores = await new Promise<typeof jugadoresEstado>(
+          (resolve) => {
+            const handler = (data: { jugadores: typeof jugadoresEstado }) => {
+              socket.off("estadoJugadores", handler);
+              resolve(data.jugadores);
+            };
+            socket.on("estadoJugadores", handler);
+            socket.emit("obtenerEstadoJugadores", { idPartida: idSala });
+          }
+        );
+
+        setJugadoresEstado(nuevosJugadores);
+        if (jugadorLocalMuerto) {
+          agregarEstado(Estado.usuarioLocalMuerto);
+          break;
+        }
+
         setEtapaActual("Día");
         setJornadaActual(jornadaActual + 1);
         setOpacity(0.5); // Si no estuviese esto, no le daría tiempo a actualizarse para este case
