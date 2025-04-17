@@ -625,7 +625,7 @@ const Jugando: React.FC = () => {
     textoBotonVotar: "TIRAR",
   };
 
-  const plantillaHabilidadCazador: PlantillaUI = {
+  const plantillaHabilidadCazadorNoche: PlantillaUI = {
     mostrarControlesAccion: true,
     mostrarCirculoJugadores: true,
     mostrarBarraSuperior: true,
@@ -635,6 +635,19 @@ const Jugando: React.FC = () => {
     mostrarBotonVotar: jugadoresEstado[indiceUsuario].esAlguacil,
     mostrarMedallaAlguacilPropia: true,
     valorOpacidadPantallaOscura: 0.95,
+    textoBotonVotar: "MATAR",
+  };
+
+  const plantillaHabilidadCazadorDia: PlantillaUI = {
+    mostrarControlesAccion: true,
+    mostrarCirculoJugadores: true,
+    mostrarBarraSuperior: true,
+    mostrarBotellas: false,
+    mostrarPantallaOscura: false,
+    mostrarTemporizador: true,
+    mostrarBotonVotar: jugadoresEstado[indiceUsuario].esAlguacil,
+    mostrarMedallaAlguacilPropia: true,
+    valorOpacidadPantallaOscura: 0,
     textoBotonVotar: "MATAR",
   };
 
@@ -660,7 +673,7 @@ const Jugando: React.FC = () => {
     mostrarTemporizador: true,
     mostrarBotonVotar: true,
     mostrarMedallaAlguacilPropia: true,
-    valorOpacidadPantallaOscura: 0,
+    valorOpacidadPantallaOscura: 0.95,
     textoBotonVotar: "ELIGE",
   };
 
@@ -2534,7 +2547,12 @@ const Jugando: React.FC = () => {
 
         setMostrarAnimacionInicioTurnoCazador(false);
 
-        setPlantillaActual(plantillaHabilidadCazador);
+        if (etapaActual === "Día") {
+          setPlantillaActual(plantillaHabilidadCazadorDia);
+        } /* else if (etapaActual === "Noche" )*/ else {
+          setPlantillaActual(plantillaHabilidadCazadorNoche);
+        }
+
         reiniciarTemporizador();
         setVotoRealizado(false);
         setPasoTurno(false);
