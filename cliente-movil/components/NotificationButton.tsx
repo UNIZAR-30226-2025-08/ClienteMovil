@@ -81,39 +81,10 @@ const NotificationButton = () => {
 
   // Configuración del socket para recibir invitaciones
   useEffect(() => {
-    socket.on("invitacionSala", async (data) => {
-      // data contiene: { idAmigo, idSala, idInvitador }
-      try {
-        // Primero, obtenemos los datos completos (para el nombre, etc.) del invitador.
-        const responseName = await axios.post(
-          `${BACKEND_URL}/api/usuario/obtener_por_id`,
-          {
-            idUsuario: data.idInvitador,
-          }
-        );
-        const usuarioInvitador = responseName.data.usuario;
-
-        // Luego, usamos la nueva función para obtener solo el avatar por el id.
-        const responseAvatar = await axios.post(
-          `${BACKEND_URL}/api/usuario/obtener_avatar_por_id`,
-          {
-            idUsuario: data.idInvitador,
-          }
-        );
-        const avatarInvitador = responseAvatar.data.avatar;
-
-        const invitacionEnriquecida = {
-          ...data,
-          nombreInvitador: usuarioInvitador.nombre,
-          avatarInvitador: avatarInvitador, // Se utiliza el avatar obtenido con la nueva función
-        };
-
-        setWsInvitaciones((prev: any[]) => [...prev, invitacionEnriquecida]);
-      } catch (error) {
-        console.error("Error al obtener datos del invitador:", error);
-        // En caso de error, se agrega la invitación sin los datos enriquecidos.
-        setWsInvitaciones((prev: any[]) => [...prev, data]);
-      }
+    socket.on("invitacionSala", (data) => {
+      setWsInvitaciones((prev: any[]) => [...prev, data]);
+      setInvitationData(data);
+      setShowInvitationModal(true);
     });
     return () => {
       socket.off("invitacionSala");
@@ -376,22 +347,15 @@ const NotificationButton = () => {
                       <View key={idx} style={styles.notifItem}>
                         <View style={styles.cardContainer}>
                           <View style={styles.cardHeader}>
-                            {notif.avatarInvitador &&
-                            avatarMap[notif.avatarInvitador] ? (
+                            {notif.avatarInvitador && (
                               <Image
-                                source={avatarMap[notif.avatarInvitador]}
-                                style={styles.cardAvatar}
-                              />
-                            ) : (
-                              <Image
-                                source={require("@/assets/images/imagenPerfil.webp")}
+                                source={{ uri: notif.avatarInvitador }}
                                 style={styles.cardAvatar}
                               />
                             )}
                             <View style={{ flex: 1 }}>
                               <Text style={styles.cardTitle}>
-                                {notif.nombreInvitador ||
-                                  "Invitador desconocido"}
+                                {notif.nombreInvitador}
                               </Text>
                               <Text style={styles.cardSubtitle}>
                                 te invitó a una partida{" "}

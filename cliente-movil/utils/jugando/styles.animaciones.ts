@@ -30,6 +30,7 @@ const animacionesEstilos = StyleSheet.create({
     includeFontPadding: false,
     paddingHorizontal: ancho * 0.05,
     fontSize: ancho * 0.1,
+    lineHeight: ancho * 0.12,
   },
 
   /**
@@ -49,8 +50,8 @@ const animacionesEstilos = StyleSheet.create({
    * @description Estilos para la imagen del rol de la animación inicial 2
    */
   imagenRol: {
-    width: ancho * 0.3,
-    height: ancho * 0.3,
+    width: ancho * 0.6,
+    height: ancho * 0.6,
     marginVertical: alto * 0.02,
     resizeMode: "contain", // Para que la imagen no se corte
   },

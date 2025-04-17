@@ -43,9 +43,7 @@ const BarraSuperior: React.FC<PropsBarraSuperior> = ({
     {/* Sección central: Información de la jornada */}
     <View style={estilos.seccionBarraSuperiorCentro}>
       <Text style={estilos.textoBarraSuperiorTitulo}>JORNADA {jornada}</Text>
-      <Text style={estilos.textoBarraSuperiorSub}>
-        {etapa} {jornada}
-      </Text>
+      <Text style={estilos.textoBarraSuperiorSub}>{etapa}</Text>
     </View>
 
     {/* Sección derecha: Información de los lobos */}

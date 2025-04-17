@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react"; // Importar useState, useEffect y useRef desde React
+import React, { useState, useEffect } from "react"; // Importar useState desde React
 import {
   ImageBackground,
   StyleSheet,
@@ -7,7 +7,6 @@ import {
   Image,
   TouchableOpacity,
   ActivityIndicator,
-  Alert, // Para mostrar errores
 } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback } from "react";
@@ -17,7 +16,6 @@ import { useRouter } from "expo-router";
 import { useFonts } from "expo-font";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import NotificationButton from "@/components/NotificationButton";
-import io from "socket.io-client"; // Importar socket.io-client
 
 // Importación para el botón de atrás
 const imagenAtras = require("@/assets/images/botonAtras.png");
@@ -58,7 +56,6 @@ export default function ElegirPartidaScreen(): JSX.Element | null {
    * Estado para almacenar los datos del usuario.
    */
   const [usuario, setUsuario] = useState<{
-    id: number;
     nombre: string;
     avatar?: string;
   } | null>(null);
@@ -66,12 +63,9 @@ export default function ElegirPartidaScreen(): JSX.Element | null {
   /**
    * Estado de carga para mostrar un indicador mientras se recuperan los datos.
    */
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true); // Estado de carga
 
   const router = useRouter();
-
-  // Referencia para la conexión socket
-  const socketRef = useRef<any>(null);
 
   /**
    * Carga los datos del usuario cuando la pantalla gana foco.
@@ -83,13 +77,10 @@ export default function ElegirPartidaScreen(): JSX.Element | null {
           const nombre = await AsyncStorage.getItem("nombreUsuario");
           const avatarClave = await AsyncStorage.getItem("avatarUsuario");
 
-          const storedId = await AsyncStorage.getItem("idUsuario");
-          const id = Number(storedId);
-
+          // Convertimos la clave en la imagen correspondiente en el mapa
           const avatar = avatarClave ? avatarMap[avatarClave] : undefined;
 
           setUsuario({
-            id,
             nombre: nombre ?? "Usuario",
             avatar: avatar || undefined,
           });
@@ -105,20 +96,6 @@ export default function ElegirPartidaScreen(): JSX.Element | null {
   );
 
   /**
-   * Conectar con el backend utilizando socket.io.
-   */
-  useEffect(() => {
-    if (BACKEND_URL) {
-      socketRef.current = io(BACKEND_URL);
-    }
-    return () => {
-      if (socketRef.current) {
-        socketRef.current.disconnect();
-      }
-    };
-  }, [BACKEND_URL]);
-
-  /**
    * Carga la fuente personalizada `GhostShadow`.
    */
   const [loaded] = useFonts({
@@ -132,40 +109,9 @@ export default function ElegirPartidaScreen(): JSX.Element | null {
     return null;
   }
 
-  /**
-   * Función para unirse a una partida rápida.
-   */
-  const joinQuickMatch = () => {
-    if (!usuario) return;
-
-    const usuarioPayload = {
-      id: usuario.id,
-      nombre: usuario.nombre,
-      avatar: usuario.avatar,
-    };
-
-    // Emitimos el evento "unirseRapido" al servidor
-    socketRef.current.emit("unirseRapido", { usuario: usuarioPayload });
-
-    // Escuchamos posibles errores
-    socketRef.current.on("error", (mensaje: string) => {
-      Alert.alert("Error", mensaje);
-    });
-
-    // Cuando se reciba la sala
-    socketRef.current.on("salaActualizada", (sala: any) => {
-      router.push({
-        pathname: "/(sala)/sala",
-        params: {
-          idSala: sala.id,
-          salaData: JSON.stringify(sala),
-        },
-      });
-    });
-  };
-
   return (
     <View style={styles.container}>
+      {/* Fondo de pantalla */}
       <ImageBackground
         source={imagenPortada}
         resizeMode="cover"
@@ -173,6 +119,7 @@ export default function ElegirPartidaScreen(): JSX.Element | null {
       >
         <View style={styles.overlay} />
 
+        {/* Botón de ir hacia atrás en posición absoluta */}
         <TouchableOpacity
           style={styles.botonAtras}
           onPress={() => router.back()}
@@ -180,6 +127,7 @@ export default function ElegirPartidaScreen(): JSX.Element | null {
           <Image source={imagenAtras} style={styles.imagenAtras} />
         </TouchableOpacity>
 
+        {/* Contenedor del perfil del usuario */}
         <TouchableOpacity
           onPress={() => router.push("/perfil")}
           style={styles.contenedorPerfil}
@@ -190,13 +138,15 @@ export default function ElegirPartidaScreen(): JSX.Element | null {
           />
         </TouchableOpacity>
 
+        {/* Nombre del jugador */}
         <Text style={styles.nombrePlayer}>{usuario?.nombre || "Usuario"}</Text>
 
         {/* Botón de Partida Rápida */}
-        <TouchableOpacity onPress={joinQuickMatch} style={styles.textoPartida}>
-          <Text style={styles.textInsideLink}>PARTIDA RÁPIDA</Text>
-        </TouchableOpacity>
+        <Link href={"/jugando"} style={styles.textoPartida}>
+          PARTIDA RÁPIDA
+        </Link>
 
+        {/* Botón para Buscar Salas */}
         <Link
           href={"/(buscarpartida)/buscarpartida"}
           style={styles.textoComoJugar}
@@ -204,10 +154,12 @@ export default function ElegirPartidaScreen(): JSX.Element | null {
           BUSCAR SALAS
         </Link>
 
+        {/* Botón para Crear Partida */}
         <Link href={"/(crearsala)/crearsala"} style={styles.textoRoles}>
           CREAR PARTIDA
         </Link>
 
+        {/* Botón de Notificaciones */}
         <View style={styles.botonNotificaciones}>
           <View style={styles.iconoNotificacionesContainer}>
             <NotificationButton />
@@ -271,24 +223,13 @@ const styles = StyleSheet.create({
     textShadowColor: "rgba(0, 0, 0, 0.75)",
     textShadowOffset: { width: 2, height: 2 },
     textShadowRadius: 10,
+    textAlign: "center",
     backgroundColor: "rgba(255, 255, 255, 0.6)",
     position: "absolute",
     top: 250,
     width: "100%",
     paddingVertical: 10,
     borderRadius: 20,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-
-  textInsideLink: {
-    color: "white",
-    fontSize: 20,
-    fontWeight: "bold",
-    textShadowColor: "rgba(0, 0, 0, 0.75)",
-    textShadowOffset: { width: 2, height: 2 },
-    textShadowRadius: 10,
-    textAlign: "center",
   },
 
   textoComoJugar: {
@@ -323,13 +264,12 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
 
-  // Botón Notificaciones
   botonNotificaciones: {
     position: "absolute",
     top: 10,
     right: 10,
     padding: 10,
-    zIndex: 10,
+    zIndex: 10, // ensures it's above other elements
   },
 
   iconoNotificacionesContainer: {
@@ -338,6 +278,7 @@ const styles = StyleSheet.create({
     padding: 5,
   },
 
+  // Estilos para el botón "ir hacia atrás" centrado en la parte inferior
   botonAtras: {
     position: "absolute",
     bottom: 20,

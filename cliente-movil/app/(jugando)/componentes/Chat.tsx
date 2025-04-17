@@ -7,7 +7,7 @@
  * @param {Animated.Value} props.posicionChat - Valor animado que controla la posición vertical del chat.
  * @param {Function} props.onClose - Función que se ejecuta al cerrar el chat.
  */
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   Animated,
   Text,
@@ -54,17 +54,20 @@ const ChatComponent: React.FC<ChatComponentProps> = ({
   usuarioNombre,
 }) => {
   const [mensaje, setMensaje] = useState(""); // 🔹 Estado para almacenar el mensaje
+  const scrollViewRef = useRef<ScrollView>(null); // Ref para controlar el scroll
+
+  // Auto‐scroll al final cuando cambian los mensajes
+  useEffect(() => {
+    scrollViewRef.current?.scrollToEnd({ animated: true });
+  }, [mensajes]);
 
   // Función para manejar el envío del mensaje
   const handleEnviarMensaje = () => {
     if (!mensaje.trim()) return; // Evita enviar mensajes vacíos
 
     console.log("Enviando mensaje:", mensaje);
-
     console.log("Test idSala", idSala);
-
     console.log("Test usuarioID", usuarioID);
-
     console.log("Test usuarioNombre", usuarioNombre);
 
     // 🔹 Emitir el mensaje al chat
@@ -107,10 +110,17 @@ const ChatComponent: React.FC<ChatComponentProps> = ({
       <View style={estilos.separadorChat} />
 
       {/* Contenedor scrollable para los mensajes del chat */}
-      <ScrollView contentContainerStyle={estilos.contenedorMensajesChat}>
-        {mensajes.map((mensaje) => (
-          <Text key={mensaje.id} style={estilos.mensajeChat}>
-            {mensaje.texto}
+      <ScrollView
+        ref={scrollViewRef}
+        contentContainerStyle={estilos.contenedorMensajesChat}
+        /*
+        onContentSizeChange={() =>
+          scrollViewRef.current?.scrollToEnd({ animated: true })
+        }*/
+      >
+        {mensajes.map((m) => (
+          <Text key={m.id} style={estilos.mensajeChat}>
+            {m.texto}
           </Text>
         ))}
       </ScrollView>

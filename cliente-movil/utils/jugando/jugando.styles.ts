@@ -537,12 +537,6 @@ export const estilos = StyleSheet.create({
     includeFontPadding: false,
     textAlignVertical: "center",
   },
-  cargando: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#000",
-  },
 
   iconoAlguacil: {
     width: alto * 0.09,
@@ -611,5 +605,11 @@ export const estilos = StyleSheet.create({
     opacity: 0.5,
     borderWidth: 2,
     borderColor: "#ff0000",
+  },
+
+  cargando: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
