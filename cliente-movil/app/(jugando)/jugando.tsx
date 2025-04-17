@@ -1177,6 +1177,56 @@ const Jugando: React.FC = () => {
     start: mostrarAnimacionUsuarioLocalMuerto,
   });
 
+  /**
+   * Controla si se muestra la animación de cuando empieza el turno del cazador.
+   * @type {boolean}
+   */
+  const [
+    mostrarAnimacionInicioTurnoCazador,
+    setMostrarAnimacionInicioTurnoCazador,
+  ] = useState<boolean>(false);
+
+  /**
+   * Valores de opacidad y visibilidad para la animación de cuando empieza el turno del cazador.
+   * @type {boolean}
+   * Generados por el hook `useGestorAnimaciones`.
+   */
+  const {
+    opacities: opacitiesInicioTurnoCazador,
+    mostrarComponentes: mostrarComponentesInicioTurnoCazador,
+  } = useGestorAnimaciones({
+    duracionFadeIn,
+    duracionEspera,
+    duracionFadeOut,
+    numAnimaciones: 1,
+    start: mostrarAnimacionInicioTurnoCazador,
+  });
+
+  /**
+   * Controla si se muestra la animación de cuando termina el turno del cazador.
+   * @type {boolean}
+   */
+  const [
+    mostrarAnimacionFinalTurnoCazador,
+    setMostrarAnimacionFinalTurnoCazador,
+  ] = useState<boolean>(false);
+
+  /**
+   * Valores de opacidad y visibilidad para la animación de cuando termina el turno del cazador.
+   * @type {boolean}
+   * Generados por el hook `useGestorAnimaciones`.
+   */
+  const {
+    opacities: opacitiesFinalTurnoCazador,
+    mostrarComponentes: mostrarComponentesFinalTurnoCazador,
+  } = useGestorAnimaciones({
+    duracionFadeIn,
+    duracionEspera,
+    duracionFadeOut,
+    numAnimaciones: 1,
+    start: mostrarAnimacionFinalTurnoCazador,
+  });
+
   // ---------------------------------------------------------------------------
   // Hooks para realizar las votaciones
   // (seleccionar jugadores + botón votar + botón pasar turno)
@@ -1493,6 +1543,18 @@ const Jugando: React.FC = () => {
         setBotellaMuerteUsada(true);
       }
       setBotellaUsadaEnEsteTurno(true);
+    } else if (estadoActual === Estado.habilidadCazador) {
+      socket.emit("cazadorDispara", {
+        idPartida: idSala,
+        idJugador: usuarioID,
+        idObjetivo: jugadorObjetivo.id,
+      });
+      logCustom(
+        jornadaActual,
+        etapaActual,
+        `El cazador usa su habilidad`,
+        jugadoresEstado[indiceUsuario]
+      );
     }
     setVotoRealizado(true);
     setJugadorSeleccionado(null);
@@ -2120,6 +2182,20 @@ const Jugando: React.FC = () => {
 
         setMostrarAnimacionFinalHabilidadBruja(false);
         break;
+      case Estado.habilidadCazador:
+        if (etapaActual === "Día") {
+          setPlantillaActual(plantillaAnimacionDia);
+        } else {
+          setPlantillaActual(plantillaAnimacionNoche);
+        }
+        cerrarHabilidad();
+        cerrarChat();
+        setMostrarAnimacionFinalTurnoCazador(true);
+
+        await new Promise((resolve) => setTimeout(resolve, duracionAnimacion));
+
+        setMostrarAnimacionFinalTurnoCazador(false);
+        break;
       default:
         break;
     }
@@ -2315,7 +2391,25 @@ const Jugando: React.FC = () => {
         setJugadorSeleccionado(null);
         break;
       case Estado.habilidadCazador:
-        // Implementar lógica similar con await si es necesario
+        if (etapaActual === "Día") {
+          setPlantillaActual(plantillaAnimacionDia);
+        } /* else if (etapaActual === "Noche" )*/ else {
+          setPlantillaActual(plantillaAnimacionNoche);
+        }
+        cerrarHabilidad();
+        cerrarChat();
+
+        setMostrarAnimacionInicioTurnoCazador(true);
+
+        await new Promise((resolve) => setTimeout(resolve, duracionAnimacion));
+
+        setMostrarAnimacionInicioTurnoCazador(false);
+
+        setPlantillaActual(plantillaHabilidadCazador);
+        reiniciarTemporizador();
+        setVotoRealizado(false);
+        setPasoTurno(false);
+        setJugadorSeleccionado(null);
         break;
       case Estado.diaComienza:
         setEtapaActual("Día");
@@ -2376,6 +2470,7 @@ const Jugando: React.FC = () => {
 
         setMostrarAnimacionUsuarioLocalMuerto(false);
 
+        if (rolUsuario === "Cazador") break;
         agregarEstado(Estado.partidaFinalizada);
 
         break;
@@ -2566,6 +2661,20 @@ const Jugando: React.FC = () => {
             opacity={opacitiesUsuarioLocalMuerto[1]}
             mostrarComponente={mostrarComponentesUsuarioLocalMuerto[1]}
             texto="HAS MUERTO"
+          />
+        )}
+        {mostrarAnimacionInicioTurnoCazador && (
+          <AnimacionGenerica
+            opacity={opacitiesInicioTurnoCazador[0]}
+            mostrarComponente={mostrarComponentesInicioTurnoCazador[0]}
+            texto="EL CAZADOR VA A MORIR. DISPARARÁ A QUIÉN CREA QUE ES UN HOMBRE LOBO"
+          />
+        )}
+        {mostrarAnimacionFinalTurnoCazador && (
+          <AnimacionGenerica
+            opacity={opacitiesFinalTurnoCazador[0]}
+            mostrarComponente={mostrarComponentesFinalTurnoCazador[0]}
+            texto="EL CAZADOR CAE ÉPICAMENTE EN EL SUELO MUERTO."
           />
         )}
         {errorMessage && (
