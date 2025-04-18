@@ -644,7 +644,7 @@ const Jugando: React.FC = () => {
     mostrarBotellas: false,
     mostrarPantallaOscura: false,
     mostrarTemporizador: true,
-    mostrarBotonVotar: jugadoresEstado[indiceUsuario]?.esAlguacil ?? false,
+    mostrarBotonVotar: rolUsuario === "Cazador",
     mostrarMedallaAlguacilPropia: true,
     valorOpacidadPantallaOscura: 0,
     textoBotonVotar: "MATAR",
@@ -670,7 +670,7 @@ const Jugando: React.FC = () => {
     mostrarBotellas: false,
     mostrarPantallaOscura: false,
     mostrarTemporizador: true,
-    mostrarBotonVotar: true,
+    mostrarBotonVotar: jugadoresEstado[indiceUsuario]?.esAlguacil ?? false,
     mostrarMedallaAlguacilPropia: true,
     valorOpacidadPantallaOscura: 0.95,
     textoBotonVotar: "ELIGE",
@@ -2331,6 +2331,7 @@ const Jugando: React.FC = () => {
         break;
       case Estado.habilidadBruja:
         if (!hayBrujaViva) break;
+        setNombreVictimaBruja(""); // Limpiar, por si la bruja no recibe una nueva petición tras esta, que se marque claramente que no ha recibido nada
         setPlantillaActual(plantillaAnimacionNoche);
         cerrarHabilidad();
         cerrarChat();
@@ -2560,7 +2561,6 @@ const Jugando: React.FC = () => {
           );
 
           setMostrarAnimacionEnseñarVictimaALaBruja(false);
-          setNombreVictimaBruja(""); // Limpiar, por si la bruja no recibe una nueva petición tras esta, que se marque claramente que no ha recibido nada
         }
 
         setPlantillaActual(plantillaHabilidadBruja);
