@@ -1323,6 +1323,7 @@ const Jugando: React.FC = () => {
         jugadoresEstado[indiceUsuario]
       );
       mostrarError("No hay nada que votar todavía");
+      return;
     }
     if (estadoActual === Estado.habilidadVidente && rolUsuario !== "Vidente") {
       logCustom(
@@ -1410,7 +1411,10 @@ const Jugando: React.FC = () => {
       mostrarError("Solo puedes votar a un jugador por turno");
       return;
     }
-    if (index === indiceUsuario) {
+    if (
+      index === indiceUsuario &&
+      !(estadoActual === Estado.habilidadBruja && rolUsuario === "Bruja")
+    ) {
       logCustom(
         jornadaActual,
         etapaActual,
@@ -1418,6 +1422,19 @@ const Jugando: React.FC = () => {
         jugadoresEstado[indiceUsuario]
       );
       mostrarError("¡No puedes seleccionarte a ti mismo!");
+      return;
+    }
+    if (
+      !jugadoresEstado[index].estaVivo &&
+      !(estadoActual === Estado.habilidadBruja && rolUsuario === "Bruja")
+    ) {
+      logCustom(
+        jornadaActual,
+        etapaActual,
+        `Intento de selección fallido: Selección a muerto`,
+        jugadoresEstado[indiceUsuario]
+      );
+      mostrarError("¡No puedes seleccionar a jugadores muertos!");
       return;
     }
     logCustom(
