@@ -71,6 +71,8 @@ enum Estado {
   habilidadCazador,
   partidaFinalizada,
   usuarioLocalMuerto,
+  empateVotacionDia,
+  resultadoVotosDia,
 }
 
 /**
@@ -2140,9 +2142,10 @@ const Jugando: React.FC = () => {
         `Evento recibido: alguacilElegido - ${JSON.stringify(data)}`,
         jugadoresEstado[indiceUsuario]
       );
-      setNombreAlguacilElegido(
-        data.mensaje.match(/^(.+?) ha sido elegido como alguacil\./)?.[1]
-      );
+      const regex =
+        /^(.+?) (?:ha sido elegido como alguacil\.|se convierte en el nuevo alguacil\.)/;
+      const match = data.mensaje.match(regex);
+      setNombreAlguacilElegido(match?.[1] ?? "");
       // Actualizar la información de qué jugador es alguacil
       if (data.alguacil) {
         setJugadoresEstado((prevJugadores) =>
@@ -2178,6 +2181,7 @@ const Jugando: React.FC = () => {
         `Evento recibido: empateVotacionDia - ${JSON.stringify(data)}`,
         jugadoresEstado[indiceUsuario]
       );
+      agregarEstado(Estado.empateVotacionDia);
     });
     socket.on("segundoEmpateVotacionDia", (data) => {
       logCustom(
