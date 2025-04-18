@@ -2768,11 +2768,13 @@ const Jugando: React.FC = () => {
             opacity={opacitiesAlguacilElegido[0]}
             mostrarComponente={mostrarComponentesAlguacilElegido[0]}
             texto={
-              nombreAlguacilElegido === ""
-                ? `NO SE HA LLEGADO A UN ACUERDO DE QUIÉN ES EL ALGUACIL`
-                : jugadoresEstado[indiceUsuario].esAlguacil
-                ? `HAS SIDO EL ELEGIDO POR EL PUEBLO`
-                : `${nombreAlguacilElegido.toUpperCase()} ES EL ALGUACIL`
+              !nombreAlguacilElegido // cubre "" o undefined
+                ? "NO SE HA LLEGADO A UN ACUERDO DE QUIÉN ES EL ALGUACIL"
+                : jugadoresEstado[indiceUsuario]?.esAlguacil
+                ? "HAS SIDO EL ELEGIDO POR EL PUEBLO"
+                : `${(
+                    nombreAlguacilElegido || ""
+                  ).toUpperCase()} ES EL ALGUACIL`
             }
           />
         )}
