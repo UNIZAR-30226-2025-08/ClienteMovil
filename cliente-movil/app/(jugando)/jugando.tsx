@@ -1508,6 +1508,7 @@ const Jugando: React.FC = () => {
     }
     if (
       votoRealizado &&
+      botellaUsadaEnEsteTurno &&
       estadoActual === Estado.habilidadBruja &&
       rolUsuario === "Bruja"
     ) {
