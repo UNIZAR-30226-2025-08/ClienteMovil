@@ -2331,6 +2331,7 @@ const Jugando: React.FC = () => {
         break;
       case Estado.habilidadBruja:
         if (!hayBrujaViva) break;
+        setBotellaUsadaEnEsteTurno(false);
         setNombreVictimaBruja(""); // Limpiar, por si la bruja no recibe una nueva petición tras esta, que se marque claramente que no ha recibido nada
         setPlantillaActual(plantillaAnimacionNoche);
         cerrarHabilidad();
