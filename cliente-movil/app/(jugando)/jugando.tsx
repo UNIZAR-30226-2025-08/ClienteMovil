@@ -1621,6 +1621,34 @@ const Jugando: React.FC = () => {
         );
         return;
       }
+      if (
+        botellaSeleccionada === "muerte" &&
+        jugadorObjetivo.id === usuarioID
+      ) {
+        mostrarError("No puedes lanzarte la poción de muerte a ti misma");
+        logCustom(
+          jornadaActual,
+          etapaActual,
+          `Intento de acción bruja fallido: La bruja intentó matarse a sí misma`,
+          jugadoresEstado[indiceUsuario]
+        );
+        return;
+      }
+      if (
+        botellaSeleccionada === "vida" &&
+        jugadorObjetivo.nombre !== nombreVictimaBruja
+      ) {
+        mostrarError(
+          "Solo puedes revivir a la persona que han matado los hombres lobo esta noche"
+        );
+        logCustom(
+          jornadaActual,
+          etapaActual,
+          `Intento de acción bruja fallido: intentó revivir a ${jugadorObjetivo.nombre}, no a ${nombreVictimaBruja}`,
+          jugadoresEstado[indiceUsuario]
+        );
+        return;
+      }
       if (botellaSeleccionada === "vida") {
         socket.emit("usaPocionBruja", {
           idPartida: idSala,
