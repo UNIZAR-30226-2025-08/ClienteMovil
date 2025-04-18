@@ -252,28 +252,27 @@ const Jugando: React.FC = () => {
    * @warning console.logs comentados porque petan la consola
    */
   useEffect(() => {
-    // console.log("Valor de rol:", rol);
-    setRolUsuario(rol as Rol);
-    agregarEstado(Estado.esperaInicial);
-    // console.log("Sala en juego:", sala);
-    /*
-    setTimeout(() => {
-      setMostrarAnimacionInicio1(false);
-      setMostrarAnimacionInicio2(true);
+    const fetchJugadores = async () => {
+      setRolUsuario(rol as Rol);
+      agregarEstado(Estado.esperaInicial);
 
-      setTimeout(() => {
-        setMostrarAnimacionInicio2(false);
-        setMostrarAnimacionInicio3(true);
+      const nuevosJugadores = await new Promise<typeof jugadoresEstado>(
+        (resolve) => {
+          const handler = (data: { jugadores: typeof jugadoresEstado }) => {
+            socket.off("estadoJugadores", handler);
+            resolve(data.jugadores);
+          };
 
-        setTimeout(() => {
-          setMostrarAnimacionInicio3(false);
-          setTemporizadorActivo(true);
-          setPlantillaActual(plantillaEsperaInicial);
-        }, duracionAnimacion);
-      }, duracionAnimacion);
-    }, duracionAnimacion);
-    */
-  }, []);
+          socket.on("estadoJugadores", handler);
+          socket.emit("obtenerEstadoJugadores", { idPartida: idSala });
+        }
+      );
+
+      setJugadoresEstado(nuevosJugadores);
+    };
+
+    fetchJugadores();
+  }, [rol, idSala]);
 
   // ---------------------------------------------------------------------------
   // Logs custom
