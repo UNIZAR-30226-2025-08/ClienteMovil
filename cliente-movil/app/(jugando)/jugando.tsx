@@ -2493,7 +2493,7 @@ const Jugando: React.FC = () => {
 
         setMostrarAnimacionInicioHabilidadBruja(false);
 
-        if (rolUsuario == "Bruja") {
+        if (rolUsuario === "Bruja") {
           setPlantillaActual(plantillaAnimacionNoche);
           cerrarHabilidad();
           cerrarChat();
