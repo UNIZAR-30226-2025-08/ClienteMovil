@@ -2590,7 +2590,7 @@ const Jugando: React.FC = () => {
 
         setMostrarAnimacionInicioDia1(false);
 
-        setPlantillaActual(plantillaAnimacionDia);
+        setPlantillaActual(plantillaEsperaInicial);
         reiniciarTemporizador();
         setVotoRealizado(false);
         setPasoTurno(false);
