@@ -2346,6 +2346,17 @@ const Jugando: React.FC = () => {
         cerrarChat();
         setMostrarAnimacionFinalHabilidadAlguacil(true);
 
+        const nuevosJugadores = await new Promise<typeof jugadoresEstado>(
+          (resolve) => {
+            const handler = (data: { jugadores: typeof jugadoresEstado }) => {
+              socket.off("estadoJugadores", handler);
+              resolve(data.jugadores);
+            };
+            socket.on("estadoJugadores", handler);
+            socket.emit("obtenerEstadoJugadores", { idPartida: idSala });
+          }
+        );
+
         await new Promise((resolve) => setTimeout(resolve, duracionAnimacion));
 
         setMostrarAnimacionFinalHabilidadAlguacil(false);
