@@ -1305,6 +1305,31 @@ const Jugando: React.FC = () => {
     start: mostrarAnimacionFinalHabilidadAlguacil,
   });
 
+  /**
+   * Controla si se muestra la animación de cuando termina la sucesión del alguacil.
+   * @type {boolean}
+   */
+  const [
+    mostrarAnimacionEmpateVotacionDiurna,
+    setMostrarAnimacionEmpateVotacionDiurna,
+  ] = useState<boolean>(false);
+
+  /**
+   * Valores de opacidad y visibilidad para la animación de cuando termina la sucesión del alguacil.
+   * @type {boolean}
+   * Generados por el hook `useGestorAnimaciones`.
+   */
+  const {
+    opacities: opacitiesEmpateVotacionDiurna,
+    mostrarComponentes: mostrarComponentesEmpateVotacionDiurna,
+  } = useGestorAnimaciones({
+    duracionFadeIn,
+    duracionEspera,
+    duracionFadeOut,
+    numAnimaciones: 1,
+    start: mostrarAnimacionEmpateVotacionDiurna,
+  });
+
   // ---------------------------------------------------------------------------
   // Hooks para realizar las votaciones
   // (seleccionar jugadores + botón votar + botón pasar turno)
@@ -1583,7 +1608,10 @@ const Jugando: React.FC = () => {
       );
     }
     // Votación diurna
-    else if (estadoActual === Estado.diaComienza) {
+    else if (
+      estadoActual === Estado.diaComienza ||
+      estadoActual === Estado.empateVotacionDia
+    ) {
       socket.emit("votar", {
         idPartida: idSala,
         idJugador: usuarioID,
@@ -2699,6 +2727,24 @@ const Jugando: React.FC = () => {
         agregarEstado(Estado.partidaFinalizada);
 
         break;
+      case Estado.empateVotacionDia:
+        setPlantillaActual(plantillaAnimacionDia);
+        cerrarHabilidad();
+        cerrarChat();
+
+        setMostrarAnimacionEmpateVotacionDiurna(true);
+
+        await new Promise((resolve) => setTimeout(resolve, duracionAnimacion));
+
+        setMostrarAnimacionEmpateVotacionDiurna(false);
+
+        setPlantillaActual(plantillaVotacionDiurna);
+        reiniciarTemporizador();
+        setVotoRealizado(false);
+        setPasoTurno(false);
+        setJugadorSeleccionado(null);
+
+        break;
       case Estado.partidaFinalizada:
         Alert.alert(
           "Sin hacer",
@@ -2759,7 +2805,7 @@ const Jugando: React.FC = () => {
           <AnimacionGenerica
             opacity={opacitiesPrimeraVotacionAlguacil[0]}
             mostrarComponente={mostrarComponentesPrimeraVotacionAlguacil[0]}
-            texto="LOS JUGADORES DEBEN ELEGIR DE MANERA CONSENSUADA QUIEN EJERCERÁ DE ALGUACIL"
+            texto="LOS JUGADORES DEBEN ELEGIR DE MANERA POR MAYORÍA SIMPLE QUIEN EJERCERÁ DE ALGUACIL"
           />
         )}
         {mostrarAnimacionSegundaVotacionAlguacil && (
@@ -2873,7 +2919,7 @@ const Jugando: React.FC = () => {
           <AnimacionGenerica
             opacity={opacitiesInicioDia2[0]}
             mostrarComponente={mostrarComponentesInicioDia2[0]}
-            texto="LOS JUGADORES DEBEN ELIMINAR DE MANERA CONSENSUADA A UN SOPECHOSO DE SER HOMBRE LOBO"
+            texto="LOS JUGADORES DEBEN ELIMINAR DE MANERA MAYORÍA SIMPLE A UN SOPECHOSO DE SER HOMBRE LOBO"
           />
         )}
         {mostrarAnimacionInicioDia2 && (
@@ -2916,6 +2962,13 @@ const Jugando: React.FC = () => {
             opacity={opacitiesFinalHabilidadAlguacil[0]}
             mostrarComponente={mostrarComponentesFinalHabilidadAlguacil[0]}
             texto="EL ANTIGUO ALGUACIL CAE ÉPICAMENTE EN EL SUELO MUERTO."
+          />
+        )}
+        {mostrarAnimacionEmpateVotacionDiurna && (
+          <AnimacionGenerica
+            opacity={opacitiesEmpateVotacionDiurna[0]}
+            mostrarComponente={mostrarComponentesEmpateVotacionDiurna[0]}
+            texto="NO SE HA LLEGADO A UNA MAYORÍA SIMPLE DE A QUÉ JUGADOR MATAR."
           />
         )}
         {errorMessage && (
