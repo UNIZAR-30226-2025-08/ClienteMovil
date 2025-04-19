@@ -117,7 +117,8 @@ export default function SalaPreviaScreen(): JSX.Element {
               idSala,
               idUsuario: usuarioData.id, // El ID real del usuario
             });
-
+            // Notificar a todos que la sala ha cambiado
+            socket.emit("actualizarSala", { idSala });
             router.back(); // Regresa a la pantalla anterior
           },
         },
@@ -430,6 +431,8 @@ export default function SalaPreviaScreen(): JSX.Element {
             idSala,
             idUsuario: usuarioData.id,
           });
+          // Notificar a todos que la sala ha cambiado
+          socket.emit("actualizarSala", { idSala });
           router.back();
         },
       },

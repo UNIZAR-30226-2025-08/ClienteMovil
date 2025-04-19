@@ -270,7 +270,7 @@ const NotificationButton = () => {
       Alert.alert("Éxito", "Te has unido a la sala");
       router.push({
         pathname: "/(sala)/sala",
-        params: { idSala: notif.idSala },
+        params: { idSala: notif.idSala, salaData: JSON.stringify(salaData) },
       });
     });
   };
