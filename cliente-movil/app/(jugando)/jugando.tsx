@@ -66,10 +66,13 @@ enum Estado {
   habilidadVidente,
   turnoHombresLobos,
   habilidadBruja,
+  habilidadAlguacil,
   diaComienza,
   habilidadCazador,
   partidaFinalizada,
   usuarioLocalMuerto,
+  empateVotacionDia,
+  resultadoVotosDia,
 }
 
 /**
@@ -141,7 +144,7 @@ const Jugando: React.FC = () => {
     if (!idSala) return;
 
     // Emitir evento al backend para solicitar el estado actual de los jugadores
-    socket.emit("obtenerEstadoJugadores", { idPartida: idSala });
+    // socket.emit("obtenerEstadoJugadores", { idPartida: idSala });
     // console.log("[PantallaJugando] → Emitiendo obtenerEstadoJugadores", idSala);
 
     // Escuchar la respuesta del backend con los datos de los jugadores
@@ -251,28 +254,27 @@ const Jugando: React.FC = () => {
    * @warning console.logs comentados porque petan la consola
    */
   useEffect(() => {
-    // console.log("Valor de rol:", rol);
-    setRolUsuario(rol as Rol);
-    agregarEstado(Estado.esperaInicial);
-    // console.log("Sala en juego:", sala);
-    /*
-    setTimeout(() => {
-      setMostrarAnimacionInicio1(false);
-      setMostrarAnimacionInicio2(true);
+    const fetchJugadores = async () => {
+      setRolUsuario(rol as Rol);
+      agregarEstado(Estado.esperaInicial);
 
-      setTimeout(() => {
-        setMostrarAnimacionInicio2(false);
-        setMostrarAnimacionInicio3(true);
+      const nuevosJugadores = await new Promise<typeof jugadoresEstado>(
+        (resolve) => {
+          const handler = (data: { jugadores: typeof jugadoresEstado }) => {
+            socket.off("estadoJugadores", handler);
+            resolve(data.jugadores);
+          };
 
-        setTimeout(() => {
-          setMostrarAnimacionInicio3(false);
-          setTemporizadorActivo(true);
-          setPlantillaActual(plantillaEsperaInicial);
-        }, duracionAnimacion);
-      }, duracionAnimacion);
-    }, duracionAnimacion);
-    */
-  }, []);
+          socket.on("estadoJugadores", handler);
+          socket.emit("obtenerEstadoJugadores", { idPartida: idSala });
+        }
+      );
+
+      setJugadoresEstado(nuevosJugadores);
+    };
+
+    fetchJugadores();
+  }, [rol, idSala]);
 
   // ---------------------------------------------------------------------------
   // Logs custom
@@ -624,7 +626,7 @@ const Jugando: React.FC = () => {
     textoBotonVotar: "TIRAR",
   };
 
-  const plantillaHabilidadCazador: PlantillaUI = {
+  const plantillaHabilidadCazadorNoche: PlantillaUI = {
     mostrarControlesAccion: true,
     mostrarCirculoJugadores: true,
     mostrarBarraSuperior: true,
@@ -634,6 +636,19 @@ const Jugando: React.FC = () => {
     mostrarBotonVotar: rolUsuario === "Cazador",
     mostrarMedallaAlguacilPropia: true,
     valorOpacidadPantallaOscura: 0.95,
+    textoBotonVotar: "MATAR",
+  };
+
+  const plantillaHabilidadCazadorDia: PlantillaUI = {
+    mostrarControlesAccion: true,
+    mostrarCirculoJugadores: true,
+    mostrarBarraSuperior: true,
+    mostrarBotellas: false,
+    mostrarPantallaOscura: false,
+    mostrarTemporizador: true,
+    mostrarBotonVotar: rolUsuario === "Cazador",
+    mostrarMedallaAlguacilPropia: true,
+    valorOpacidadPantallaOscura: 0,
     textoBotonVotar: "MATAR",
   };
 
@@ -648,6 +663,19 @@ const Jugando: React.FC = () => {
     mostrarMedallaAlguacilPropia: true,
     valorOpacidadPantallaOscura: 0,
     textoBotonVotar: "VOTAR",
+  };
+
+  const plantillaHabilidadAlguacil: PlantillaUI = {
+    mostrarControlesAccion: true,
+    mostrarCirculoJugadores: true,
+    mostrarBarraSuperior: true,
+    mostrarBotellas: false,
+    mostrarPantallaOscura: false,
+    mostrarTemporizador: true,
+    mostrarBotonVotar: jugadoresEstado[indiceUsuario]?.esAlguacil ?? false,
+    mostrarMedallaAlguacilPropia: true,
+    valorOpacidadPantallaOscura: 0.95,
+    textoBotonVotar: "ELIGE",
   };
 
   const [plantillaActual, setPlantillaActual] = useState<PlantillaUI>(
@@ -1177,6 +1205,131 @@ const Jugando: React.FC = () => {
     start: mostrarAnimacionUsuarioLocalMuerto,
   });
 
+  /**
+   * Controla si se muestra la animación de cuando empieza el turno del cazador.
+   * @type {boolean}
+   */
+  const [
+    mostrarAnimacionInicioTurnoCazador,
+    setMostrarAnimacionInicioTurnoCazador,
+  ] = useState<boolean>(false);
+
+  /**
+   * Valores de opacidad y visibilidad para la animación de cuando empieza el turno del cazador.
+   * @type {boolean}
+   * Generados por el hook `useGestorAnimaciones`.
+   */
+  const {
+    opacities: opacitiesInicioTurnoCazador,
+    mostrarComponentes: mostrarComponentesInicioTurnoCazador,
+  } = useGestorAnimaciones({
+    duracionFadeIn,
+    duracionEspera,
+    duracionFadeOut,
+    numAnimaciones: 1,
+    start: mostrarAnimacionInicioTurnoCazador,
+  });
+
+  /**
+   * Controla si se muestra la animación de cuando termina el turno del cazador.
+   * @type {boolean}
+   */
+  const [
+    mostrarAnimacionFinalTurnoCazador,
+    setMostrarAnimacionFinalTurnoCazador,
+  ] = useState<boolean>(false);
+
+  /**
+   * Valores de opacidad y visibilidad para la animación de cuando termina el turno del cazador.
+   * @type {boolean}
+   * Generados por el hook `useGestorAnimaciones`.
+   */
+  const {
+    opacities: opacitiesFinalTurnoCazador,
+    mostrarComponentes: mostrarComponentesFinalTurnoCazador,
+  } = useGestorAnimaciones({
+    duracionFadeIn,
+    duracionEspera,
+    duracionFadeOut,
+    numAnimaciones: 1,
+    start: mostrarAnimacionFinalTurnoCazador,
+  });
+
+  /**
+   * Controla si se muestra la animación de cuando empieza la sucesión del alguacil.
+   * @type {boolean}
+   */
+  const [
+    mostrarAnimacionInicioHabilidadAlguacil,
+    setMostrarAnimacionInicioHabilidadAlguacil,
+  ] = useState<boolean>(false);
+
+  /**
+   * Valores de opacidad y visibilidad para la animación de cuando empieza la sucesión del alguacil.
+   * @type {boolean}
+   * Generados por el hook `useGestorAnimaciones`.
+   */
+  const {
+    opacities: opacitiesInicioHabilidadAlguacil,
+    mostrarComponentes: mostrarComponentesInicioHabilidadAlguacil,
+  } = useGestorAnimaciones({
+    duracionFadeIn,
+    duracionEspera,
+    duracionFadeOut,
+    numAnimaciones: 1,
+    start: mostrarAnimacionInicioHabilidadAlguacil,
+  });
+
+  /**
+   * Controla si se muestra la animación de cuando termina la sucesión del alguacil.
+   * @type {boolean}
+   */
+  const [
+    mostrarAnimacionFinalHabilidadAlguacil,
+    setMostrarAnimacionFinalHabilidadAlguacil,
+  ] = useState<boolean>(false);
+
+  /**
+   * Valores de opacidad y visibilidad para la animación de cuando termina la sucesión del alguacil.
+   * @type {boolean}
+   * Generados por el hook `useGestorAnimaciones`.
+   */
+  const {
+    opacities: opacitiesFinalHabilidadAlguacil,
+    mostrarComponentes: mostrarComponentesFinalHabilidadAlguacil,
+  } = useGestorAnimaciones({
+    duracionFadeIn,
+    duracionEspera,
+    duracionFadeOut,
+    numAnimaciones: 1,
+    start: mostrarAnimacionFinalHabilidadAlguacil,
+  });
+
+  /**
+   * Controla si se muestra la animación de cuando termina la sucesión del alguacil.
+   * @type {boolean}
+   */
+  const [
+    mostrarAnimacionEmpateVotacionDiurna,
+    setMostrarAnimacionEmpateVotacionDiurna,
+  ] = useState<boolean>(false);
+
+  /**
+   * Valores de opacidad y visibilidad para la animación de cuando termina la sucesión del alguacil.
+   * @type {boolean}
+   * Generados por el hook `useGestorAnimaciones`.
+   */
+  const {
+    opacities: opacitiesEmpateVotacionDiurna,
+    mostrarComponentes: mostrarComponentesEmpateVotacionDiurna,
+  } = useGestorAnimaciones({
+    duracionFadeIn,
+    duracionEspera,
+    duracionFadeOut,
+    numAnimaciones: 1,
+    start: mostrarAnimacionEmpateVotacionDiurna,
+  });
+
   // ---------------------------------------------------------------------------
   // Hooks para realizar las votaciones
   // (seleccionar jugadores + botón votar + botón pasar turno)
@@ -1197,6 +1350,7 @@ const Jugando: React.FC = () => {
         jugadoresEstado[indiceUsuario]
       );
       mostrarError("No hay nada que votar todavía");
+      return;
     }
     if (estadoActual === Estado.habilidadVidente && rolUsuario !== "Vidente") {
       logCustom(
@@ -1237,6 +1391,21 @@ const Jugando: React.FC = () => {
       );
       return;
     }
+    if (
+      estadoActual === Estado.habilidadAlguacil &&
+      jugadoresEstado[indiceUsuario].esAlguacil !== true
+    ) {
+      logCustom(
+        jornadaActual,
+        etapaActual,
+        `Intento de selección de usuario fallido: Es el turno del alguacil y no es alguacil`,
+        jugadoresEstado[indiceUsuario]
+      );
+      mostrarError(
+        "Solo el alguacil puede seleccionar jugadores durante el turno del alguacil"
+      );
+      return;
+    }
     if (estadoActual === Estado.habilidadCazador && rolUsuario !== "Cazador") {
       logCustom(
         jornadaActual,
@@ -1269,7 +1438,10 @@ const Jugando: React.FC = () => {
       mostrarError("Solo puedes votar a un jugador por turno");
       return;
     }
-    if (index === indiceUsuario) {
+    if (
+      index === indiceUsuario &&
+      !(estadoActual === Estado.habilidadBruja && rolUsuario === "Bruja")
+    ) {
       logCustom(
         jornadaActual,
         etapaActual,
@@ -1277,6 +1449,19 @@ const Jugando: React.FC = () => {
         jugadoresEstado[indiceUsuario]
       );
       mostrarError("¡No puedes seleccionarte a ti mismo!");
+      return;
+    }
+    if (
+      !jugadoresEstado[index].estaVivo &&
+      !(estadoActual === Estado.habilidadBruja && rolUsuario === "Bruja")
+    ) {
+      logCustom(
+        jornadaActual,
+        etapaActual,
+        `Intento de selección fallido: Selección a muerto`,
+        jugadoresEstado[indiceUsuario]
+      );
+      mostrarError("¡No puedes seleccionar a jugadores muertos!");
       return;
     }
     logCustom(
@@ -1350,6 +1535,7 @@ const Jugando: React.FC = () => {
     }
     if (
       votoRealizado &&
+      botellaUsadaEnEsteTurno &&
       estadoActual === Estado.habilidadBruja &&
       rolUsuario === "Bruja"
     ) {
@@ -1422,7 +1608,10 @@ const Jugando: React.FC = () => {
       );
     }
     // Votación diurna
-    else if (estadoActual === Estado.diaComienza) {
+    else if (
+      estadoActual === Estado.diaComienza ||
+      estadoActual === Estado.empateVotacionDia
+    ) {
       socket.emit("votar", {
         idPartida: idSala,
         idJugador: usuarioID,
@@ -1463,6 +1652,34 @@ const Jugando: React.FC = () => {
         );
         return;
       }
+      if (
+        botellaSeleccionada === "muerte" &&
+        jugadorObjetivo.id === usuarioID
+      ) {
+        mostrarError("No puedes lanzarte la poción de muerte a ti misma");
+        logCustom(
+          jornadaActual,
+          etapaActual,
+          `Intento de acción bruja fallido: La bruja intentó matarse a sí misma`,
+          jugadoresEstado[indiceUsuario]
+        );
+        return;
+      }
+      if (
+        botellaSeleccionada === "vida" &&
+        jugadorObjetivo.nombre !== nombreVictimaBruja
+      ) {
+        mostrarError(
+          "Solo puedes revivir a la persona que han matado los hombres lobo esta noche"
+        );
+        logCustom(
+          jornadaActual,
+          etapaActual,
+          `Intento de acción bruja fallido: intentó revivir a ${jugadorObjetivo.nombre}, no a ${nombreVictimaBruja}`,
+          jugadoresEstado[indiceUsuario]
+        );
+        return;
+      }
       if (botellaSeleccionada === "vida") {
         socket.emit("usaPocionBruja", {
           idPartida: idSala,
@@ -1493,6 +1710,30 @@ const Jugando: React.FC = () => {
         setBotellaMuerteUsada(true);
       }
       setBotellaUsadaEnEsteTurno(true);
+    } else if (estadoActual === Estado.habilidadCazador) {
+      socket.emit("cazadorDispara", {
+        idPartida: idSala,
+        idJugador: usuarioID,
+        idObjetivo: jugadorObjetivo.id,
+      });
+      logCustom(
+        jornadaActual,
+        etapaActual,
+        `El cazador usa su habilidad`,
+        jugadoresEstado[indiceUsuario]
+      );
+    } else if (estadoActual === Estado.habilidadAlguacil) {
+      socket.emit("elegirSucesor", {
+        idPartida: idSala,
+        idJugador: usuarioID,
+        idObjetivo: jugadorObjetivo.id,
+      });
+      logCustom(
+        jornadaActual,
+        etapaActual,
+        `El alguacil elige su sucesor`,
+        jugadoresEstado[indiceUsuario]
+      );
     }
     setVotoRealizado(true);
     setJugadorSeleccionado(null);
@@ -1860,6 +2101,23 @@ const Jugando: React.FC = () => {
       );
       agregarEstado(Estado.habilidadBruja);
     });
+    socket.on("habilidadAlguacil", (data) => {
+      logCustom(
+        jornadaActual,
+        etapaActual,
+        `Evento recibido: habilidadAlguacil - ${JSON.stringify(data)}`,
+        jugadoresEstado[indiceUsuario]
+      );
+      agregarEstado(Estado.habilidadAlguacil);
+    });
+    socket.on("habilidadCazador", (data) => {
+      logCustom(
+        jornadaActual,
+        etapaActual,
+        `Evento recibido: habilidadCazador - ${JSON.stringify(data)}`
+      );
+      agregarEstado(Estado.habilidadCazador);
+    });
     socket.on("diaComienza", (data) => {
       logCustom(
         jornadaActual,
@@ -1912,9 +2170,10 @@ const Jugando: React.FC = () => {
         `Evento recibido: alguacilElegido - ${JSON.stringify(data)}`,
         jugadoresEstado[indiceUsuario]
       );
-      setNombreAlguacilElegido(
-        data.mensaje.match(/^(.+?) ha sido elegido como alguacil\./)?.[1]
-      );
+      const regex =
+        /^(.+?) (?:ha sido elegido como alguacil\.|se convierte en el nuevo alguacil\.)/;
+      const match = data.mensaje.match(regex);
+      setNombreAlguacilElegido(match?.[1] ?? "");
       // Actualizar la información de qué jugador es alguacil
       if (data.alguacil) {
         setJugadoresEstado((prevJugadores) =>
@@ -1950,6 +2209,7 @@ const Jugando: React.FC = () => {
         `Evento recibido: empateVotacionDia - ${JSON.stringify(data)}`,
         jugadoresEstado[indiceUsuario]
       );
+      agregarEstado(Estado.empateVotacionDia);
     });
     socket.on("segundoEmpateVotacionDia", (data) => {
       logCustom(
@@ -2019,6 +2279,8 @@ const Jugando: React.FC = () => {
       socket.off("habilidadVidente");
       socket.off("turnoHombresLobos");
       socket.off("habilidadBruja");
+      socket.off("habilidadAlguacil");
+      socket.off("habilidadCazador");
       socket.off("diaComienza");
       socket.off("partidaFinalizada");
       socket.off("votoAlguacilRegistrado");
@@ -2061,26 +2323,120 @@ const Jugando: React.FC = () => {
     colaEstadosRef.current = colaEstados;
   }, [colaEstados]);
 
+  const prevEstadoRef = useRef<Estado | null>(null);
+
+  async function procesarFinalEstado(estado: Estado): Promise<void> {
+    switch (estado) {
+      case Estado.habilidadVidente:
+        if (!hayVidenteViva) break;
+        if (rolUsuario === "Vidente") {
+          setPlantillaActual(plantillaAnimacionNoche);
+          cerrarHabilidad();
+          cerrarChat();
+          setMostrarAnimacionEjecutarHabilidadVidente(true);
+
+          await new Promise((resolve) =>
+            setTimeout(resolve, duracionAnimacion)
+          );
+
+          setMostrarAnimacionEjecutarHabilidadVidente(false);
+          setRolObjetivoVidente(""); // Limpiar, por si la vidente no envía/recibe una nueva petición tras esta, que se marque claramente que no ha recibido nada
+        }
+
+        setPlantillaActual(plantillaAnimacionNoche);
+        cerrarHabilidad();
+        cerrarChat();
+        setMostrarAnimacionFinalHabilidadVidente(true);
+
+        await new Promise((resolve) => setTimeout(resolve, duracionAnimacion));
+
+        setMostrarAnimacionFinalHabilidadVidente(false);
+        break;
+      case Estado.turnoHombresLobos:
+        setPlantillaActual(plantillaAnimacionNoche);
+        cerrarHabilidad();
+        cerrarChat();
+        setMostrarAnimacionFinalTurnoHombresLobo(true);
+
+        await new Promise((resolve) => setTimeout(resolve, duracionAnimacion));
+
+        setMostrarAnimacionFinalTurnoHombresLobo(false);
+        break;
+      case Estado.habilidadBruja:
+        if (!hayBrujaViva) break;
+        setBotellaUsadaEnEsteTurno(false);
+        setNombreVictimaBruja(""); // Limpiar, por si la bruja no recibe una nueva petición tras esta, que se marque claramente que no ha recibido nada
+        setPlantillaActual(plantillaAnimacionNoche);
+        cerrarHabilidad();
+        cerrarChat();
+        setMostrarAnimacionFinalHabilidadBruja(true);
+
+        await new Promise((resolve) => setTimeout(resolve, duracionAnimacion));
+
+        setMostrarAnimacionFinalHabilidadBruja(false);
+        break;
+      case Estado.habilidadAlguacil:
+        setPlantillaActual(plantillaAnimacionNoche);
+        cerrarHabilidad();
+        cerrarChat();
+        setMostrarAnimacionFinalHabilidadAlguacil(true);
+
+        const nuevosJugadores = await new Promise<typeof jugadoresEstado>(
+          (resolve) => {
+            const handler = (data: { jugadores: typeof jugadoresEstado }) => {
+              socket.off("estadoJugadores", handler);
+              resolve(data.jugadores);
+            };
+            socket.on("estadoJugadores", handler);
+            socket.emit("obtenerEstadoJugadores", { idPartida: idSala });
+          }
+        );
+
+        await new Promise((resolve) => setTimeout(resolve, duracionAnimacion));
+
+        setMostrarAnimacionFinalHabilidadAlguacil(false);
+        break;
+      case Estado.habilidadCazador:
+        if (etapaActual === "Día") {
+          setPlantillaActual(plantillaAnimacionDia);
+        } else {
+          setPlantillaActual(plantillaAnimacionNoche);
+        }
+        cerrarHabilidad();
+        cerrarChat();
+        setMostrarAnimacionFinalTurnoCazador(true);
+
+        await new Promise((resolve) => setTimeout(resolve, duracionAnimacion));
+
+        setMostrarAnimacionFinalTurnoCazador(false);
+        break;
+      default:
+        break;
+    }
+  }
+
   /**
    * Procesa el siguiente estado en la cola de forma segura.
    */
   const procesarSiguienteEstado = async () => {
-    // Evitar procesamiento concurrente
     if (procesando || colaEstadosRef.current.length === 0) return;
-
     setProcesando(true);
 
-    // Obtener el siguiente estado de la referencia actual
-    const [siguiente, ...resto] = colaEstadosRef.current;
+    const siguiente = colaEstadosRef.current[0];
 
-    // Actualizar la cola usando el estado más reciente
-    setColaEstados((prev) => {
-      // Verificar coincidencia para evitar conflictos
-      if (prev[0] !== siguiente) return prev;
-      return prev.slice(1);
-    });
+    if (prevEstadoRef.current !== null) {
+      try {
+        await procesarFinalEstado(prevEstadoRef.current);
+      } catch (err) {
+        console.error("Error exit de", prevEstadoRef.current, err);
+      }
+    }
 
+    prevEstadoRef.current = siguiente;
+
+    setColaEstados((prev) => prev.slice(1));
     setEstadoActual(siguiente);
+
     await procesarEstado(siguiente);
 
     setProcesando(false);
@@ -2103,7 +2459,7 @@ const Jugando: React.FC = () => {
   };
 
   /**
-   * Tratamiento de cada estado modificado para usar async/await
+   * Tratamiento de cada estado
    * @param estado
    */
   const procesarEstado = async (estado: Estado): Promise<void> => {
@@ -2201,32 +2557,6 @@ const Jugando: React.FC = () => {
         setJugadorSeleccionado(null);
         break;
       case Estado.turnoHombresLobos:
-        if (hayVidenteViva && rolUsuario === "Vidente") {
-          setPlantillaActual(plantillaAnimacionNoche);
-          cerrarHabilidad();
-          cerrarChat();
-          setMostrarAnimacionEjecutarHabilidadVidente(true);
-
-          await new Promise((resolve) =>
-            setTimeout(resolve, duracionAnimacion)
-          );
-
-          setMostrarAnimacionEjecutarHabilidadVidente(false);
-          setRolObjetivoVidente(""); // Limpiar, por si la vidente no envía/recibe una nueva petición tras esta, que se marque claramente que no ha recibido nada
-        }
-        if (hayVidenteViva) {
-          setPlantillaActual(plantillaAnimacionNoche);
-          cerrarHabilidad();
-          cerrarChat();
-          setMostrarAnimacionFinalHabilidadVidente(true);
-
-          await new Promise((resolve) =>
-            setTimeout(resolve, duracionAnimacion)
-          );
-
-          setMostrarAnimacionFinalHabilidadVidente(false);
-        }
-
         setPlantillaActual(plantillaAnimacionNoche);
         cerrarHabilidad();
         cerrarChat();
@@ -2247,11 +2577,6 @@ const Jugando: React.FC = () => {
         setPlantillaActual(plantillaAnimacionNoche);
         cerrarHabilidad();
         cerrarChat();
-        setMostrarAnimacionFinalTurnoHombresLobo(true);
-
-        await new Promise((resolve) => setTimeout(resolve, duracionAnimacion));
-
-        setMostrarAnimacionFinalTurnoHombresLobo(false);
 
         setMostrarAnimacionInicioHabilidadBruja(true);
 
@@ -2259,7 +2584,7 @@ const Jugando: React.FC = () => {
 
         setMostrarAnimacionInicioHabilidadBruja(false);
 
-        if (rolUsuario == "Bruja") {
+        if (rolUsuario === "Bruja") {
           setPlantillaActual(plantillaAnimacionNoche);
           cerrarHabilidad();
           cerrarChat();
@@ -2270,7 +2595,6 @@ const Jugando: React.FC = () => {
           );
 
           setMostrarAnimacionEnseñarVictimaALaBruja(false);
-          setNombreVictimaBruja(""); // Limpiar, por si la bruja no recibe una nueva petición tras esta, que se marque claramente que no ha recibido nada
         }
 
         setPlantillaActual(plantillaHabilidadBruja);
@@ -2279,33 +2603,68 @@ const Jugando: React.FC = () => {
         setPasoTurno(false);
         setJugadorSeleccionado(null);
         break;
+      case Estado.habilidadAlguacil:
+        setPlantillaActual(plantillaAnimacionNoche);
+        cerrarHabilidad();
+        cerrarChat();
+
+        setMostrarAnimacionInicioHabilidadAlguacil(true);
+
+        await new Promise((resolve) => setTimeout(resolve, duracionAnimacion));
+
+        setMostrarAnimacionInicioHabilidadAlguacil(false);
+
+        setPlantillaActual(plantillaHabilidadAlguacil);
+        reiniciarTemporizador();
+        setVotoRealizado(false);
+        setPasoTurno(false);
+        setJugadorSeleccionado(null);
+
+        break;
       case Estado.habilidadCazador:
-        // Implementar lógica similar con await si es necesario
+        if (etapaActual === "Día") {
+          setPlantillaActual(plantillaAnimacionDia);
+        } /* else if (etapaActual === "Noche" )*/ else {
+          setPlantillaActual(plantillaAnimacionNoche);
+        }
+        cerrarHabilidad();
+        cerrarChat();
+
+        setMostrarAnimacionInicioTurnoCazador(true);
+
+        await new Promise((resolve) => setTimeout(resolve, duracionAnimacion));
+
+        setMostrarAnimacionInicioTurnoCazador(false);
+
+        if (etapaActual === "Día") {
+          setPlantillaActual(plantillaHabilidadCazadorDia);
+        } /* else if (etapaActual === "Noche" )*/ else {
+          setPlantillaActual(plantillaHabilidadCazadorNoche);
+        }
+
+        reiniciarTemporizador();
+        setVotoRealizado(false);
+        setPasoTurno(false);
+        setJugadorSeleccionado(null);
         break;
       case Estado.diaComienza:
-        if (!hayBrujaViva) {
-          setPlantillaActual(plantillaAnimacionNoche);
-          cerrarHabilidad();
-          cerrarChat();
-          setMostrarAnimacionFinalTurnoHombresLobo(true);
+        const nuevosJugadores = await new Promise<typeof jugadoresEstado>(
+          (resolve) => {
+            const handler = (data: { jugadores: typeof jugadoresEstado }) => {
+              socket.off("estadoJugadores", handler);
+              resolve(data.jugadores);
+            };
+            socket.on("estadoJugadores", handler);
+            socket.emit("obtenerEstadoJugadores", { idPartida: idSala });
+          }
+        );
 
-          await new Promise((resolve) =>
-            setTimeout(resolve, duracionAnimacion)
-          );
-
-          setMostrarAnimacionFinalTurnoHombresLobo(false);
-        } else if (hayBrujaViva) {
-          setPlantillaActual(plantillaAnimacionNoche);
-          cerrarHabilidad();
-          cerrarChat();
-          setMostrarAnimacionFinalHabilidadBruja(true);
-
-          await new Promise((resolve) =>
-            setTimeout(resolve, duracionAnimacion)
-          );
-
-          setMostrarAnimacionFinalHabilidadBruja(false);
+        setJugadoresEstado(nuevosJugadores);
+        if (jugadorLocalMuerto) {
+          agregarEstado(Estado.usuarioLocalMuerto);
+          break;
         }
+
         setEtapaActual("Día");
         setJornadaActual(jornadaActual + 1);
         setOpacity(0.5); // Si no estuviese esto, no le daría tiempo a actualizarse para este case
@@ -2321,7 +2680,7 @@ const Jugando: React.FC = () => {
 
         setMostrarAnimacionInicioDia1(false);
 
-        setPlantillaActual(plantillaAnimacionDia);
+        setPlantillaActual(plantillaEsperaInicial);
         reiniciarTemporizador();
         setVotoRealizado(false);
         setPasoTurno(false);
@@ -2364,7 +2723,26 @@ const Jugando: React.FC = () => {
 
         setMostrarAnimacionUsuarioLocalMuerto(false);
 
+        if (rolUsuario === "Cazador") break;
         agregarEstado(Estado.partidaFinalizada);
+
+        break;
+      case Estado.empateVotacionDia:
+        setPlantillaActual(plantillaAnimacionDia);
+        cerrarHabilidad();
+        cerrarChat();
+
+        setMostrarAnimacionEmpateVotacionDiurna(true);
+
+        await new Promise((resolve) => setTimeout(resolve, duracionAnimacion));
+
+        setMostrarAnimacionEmpateVotacionDiurna(false);
+
+        setPlantillaActual(plantillaVotacionDiurna);
+        reiniciarTemporizador();
+        setVotoRealizado(false);
+        setPasoTurno(false);
+        setJugadorSeleccionado(null);
 
         break;
       case Estado.partidaFinalizada:
@@ -2427,7 +2805,7 @@ const Jugando: React.FC = () => {
           <AnimacionGenerica
             opacity={opacitiesPrimeraVotacionAlguacil[0]}
             mostrarComponente={mostrarComponentesPrimeraVotacionAlguacil[0]}
-            texto="LOS JUGADORES DEBEN ELEGIR DE MANERA CONSENSUADA QUIEN EJERCERÁ DE ALGUACIL"
+            texto="LOS JUGADORES DEBEN ELEGIR DE MANERA POR MAYORÍA SIMPLE QUIEN EJERCERÁ DE ALGUACIL"
           />
         )}
         {mostrarAnimacionSegundaVotacionAlguacil && (
@@ -2442,11 +2820,13 @@ const Jugando: React.FC = () => {
             opacity={opacitiesAlguacilElegido[0]}
             mostrarComponente={mostrarComponentesAlguacilElegido[0]}
             texto={
-              nombreAlguacilElegido === ""
-                ? `NO SE HA LLEGADO A UN ACUERDO DE QUIÉN ES EL ALGUACIL`
-                : jugadoresEstado[indiceUsuario].esAlguacil
-                ? `HAS SIDO EL ELEGIDO POR EL PUEBLO`
-                : `${nombreAlguacilElegido.toUpperCase()} ES EL ALGUACIL`
+              !nombreAlguacilElegido // cubre "" o undefined
+                ? "NO SE HA LLEGADO A UN ACUERDO DE QUIÉN ES EL ALGUACIL"
+                : jugadoresEstado[indiceUsuario]?.esAlguacil
+                ? "HAS SIDO EL ELEGIDO POR EL PUEBLO"
+                : `${(
+                    nombreAlguacilElegido || ""
+                  ).toUpperCase()} ES EL ALGUACIL`
             }
           />
         )}
@@ -2539,7 +2919,7 @@ const Jugando: React.FC = () => {
           <AnimacionGenerica
             opacity={opacitiesInicioDia2[0]}
             mostrarComponente={mostrarComponentesInicioDia2[0]}
-            texto="LOS JUGADORES DEBEN ELIMINAR DE MANERA CONSENSUADA A UN SOPECHOSO DE SER HOMBRE LOBO"
+            texto="LOS JUGADORES DEBEN ELIMINAR DE MANERA MAYORÍA SIMPLE A UN SOPECHOSO DE SER HOMBRE LOBO"
           />
         )}
         {mostrarAnimacionInicioDia2 && (
@@ -2554,6 +2934,41 @@ const Jugando: React.FC = () => {
             opacity={opacitiesUsuarioLocalMuerto[1]}
             mostrarComponente={mostrarComponentesUsuarioLocalMuerto[1]}
             texto="HAS MUERTO"
+          />
+        )}
+        {mostrarAnimacionInicioTurnoCazador && (
+          <AnimacionGenerica
+            opacity={opacitiesInicioTurnoCazador[0]}
+            mostrarComponente={mostrarComponentesInicioTurnoCazador[0]}
+            texto="EL CAZADOR VA A MORIR. DISPARARÁ A QUIÉN CREA QUE ES UN HOMBRE LOBO"
+          />
+        )}
+        {mostrarAnimacionFinalTurnoCazador && (
+          <AnimacionGenerica
+            opacity={opacitiesFinalTurnoCazador[0]}
+            mostrarComponente={mostrarComponentesFinalTurnoCazador[0]}
+            texto="EL CAZADOR CAE ÉPICAMENTE EN EL SUELO MUERTO."
+          />
+        )}
+        {mostrarAnimacionInicioHabilidadAlguacil && (
+          <AnimacionGenerica
+            opacity={opacitiesInicioHabilidadAlguacil[0]}
+            mostrarComponente={mostrarComponentesInicioHabilidadAlguacil[0]}
+            texto="EL ALGUACIL VA A MORIR. ELIGIRÁ A SU NUEVO SUCESOR"
+          />
+        )}
+        {mostrarAnimacionFinalHabilidadAlguacil && (
+          <AnimacionGenerica
+            opacity={opacitiesFinalHabilidadAlguacil[0]}
+            mostrarComponente={mostrarComponentesFinalHabilidadAlguacil[0]}
+            texto="EL ANTIGUO ALGUACIL CAE ÉPICAMENTE EN EL SUELO MUERTO."
+          />
+        )}
+        {mostrarAnimacionEmpateVotacionDiurna && (
+          <AnimacionGenerica
+            opacity={opacitiesEmpateVotacionDiurna[0]}
+            mostrarComponente={mostrarComponentesEmpateVotacionDiurna[0]}
+            texto="NO SE HA LLEGADO A UNA MAYORÍA SIMPLE DE A QUÉ JUGADOR MATAR."
           />
         )}
         {errorMessage && (
