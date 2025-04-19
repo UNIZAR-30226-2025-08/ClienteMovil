@@ -82,36 +82,39 @@ const NotificationButton = () => {
   // Configuración del socket para recibir invitaciones
   useEffect(() => {
     socket.on("invitacionSala", async (data) => {
-      // data contiene: { idAmigo, idSala, idInvitador }
+      // Log completo de la invitación en formato JSON
+      console.log("Invitación recibida:", JSON.stringify(data, null, 2));
+
+      // Log individual de cada componente de la invitación
+      console.log("Componentes de la invitación a una sala:");
+      console.log("idAmigo:", data.idAmigo);
+      console.log("idSala:", data.idSala);
+      console.log("idInvitador:", data.idInvitador);
+
+      // Aquí continuaría la lógica para enriquecer la invitación
+      // (por ejemplo, obteniendo el nombre y el avatar del invitador)
       try {
-        // Primero, obtenemos los datos completos (para el nombre, etc.) del invitador.
         const responseName = await axios.post(
           `${BACKEND_URL}/api/usuario/obtener_por_id`,
-          {
-            idUsuario: data.idInvitador,
-          }
+          { idUsuario: data.idInvitador }
         );
         const usuarioInvitador = responseName.data.usuario;
-
-        // Luego, usamos la nueva función para obtener solo el avatar por el id.
         const responseAvatar = await axios.post(
           `${BACKEND_URL}/api/usuario/obtener_avatar_por_id`,
-          {
-            idUsuario: data.idInvitador,
-          }
+          { idUsuario: data.idInvitador }
         );
         const avatarInvitador = responseAvatar.data.avatar;
+        console.log("Nombre del invitador:", usuarioInvitador.nombre);
+        console.log("Avatar del invitador:", avatarInvitador);
 
         const invitacionEnriquecida = {
           ...data,
           nombreInvitador: usuarioInvitador.nombre,
-          avatarInvitador: avatarInvitador, // Se utiliza el avatar obtenido con la nueva función
+          avatarInvitador: avatarInvitador,
         };
-
         setWsInvitaciones((prev: any[]) => [...prev, invitacionEnriquecida]);
       } catch (error) {
         console.error("Error al obtener datos del invitador:", error);
-        // En caso de error, se agrega la invitación sin los datos enriquecidos.
         setWsInvitaciones((prev: any[]) => [...prev, data]);
       }
     });
@@ -231,44 +234,54 @@ const NotificationButton = () => {
     }
   };
 
-  // Funciones para aceptar o rechazar invitación a sala
-  const acceptInvitation = () => {
+  // Función actualizada para aceptar invitación a sala
+  const acceptInvitation = (notif: any) => {
     if (!user.id) {
       Alert.alert("Error", "Usuario no disponible");
       return;
     }
     socket.emit("unirseSala", {
-      idSala: invitationData.idSala,
+      idSala: notif.idSala,
       usuario: user,
       contrasena: null,
-      codigoInvitacion: invitationData.codigoInvitacion,
+      codigoInvitacion: notif.codigoInvitacion,
     });
-    setWsInvitaciones((prev: any[]) =>
+    // Elimina la invitación de la lista
+    setWsInvitaciones((prev) =>
       prev.filter(
         (inv) =>
-          inv.codigoInvitacion !== invitationData.codigoInvitacion ||
-          inv.idSala !== invitationData.idSala
+          inv.codigoInvitacion !== notif.codigoInvitacion ||
+          inv.idSala !== notif.idSala
       )
     );
-    setShowInvitationModal(false);
     Alert.alert("Éxito", "Te has unido a la sala");
     router.push({
       pathname: "/(sala)/sala",
-      params: { idSala: invitationData.idSala },
+      params: { idSala: notif.idSala },
     });
   };
 
-  const rejectInvitation = () => {
+  // Cambiamos la firma para recibir la invitación a rechazar
+  const rejectInvitation = (notif: any) => {
     if (!user.id) return;
     socket.emit("invitacionRechazada", { idAmigo: user.id });
-    setWsInvitaciones((prev: any[]) =>
+
+    // Filtramos wsInvitaciones y notificaciones para que la invitación desaparezca
+    setWsInvitaciones((prev) =>
       prev.filter(
         (inv) =>
-          inv.codigoInvitacion !== invitationData.codigoInvitacion ||
-          inv.idSala !== invitationData.idSala
+          inv.codigoInvitacion !== notif.codigoInvitacion ||
+          inv.idSala !== notif.idSala
       )
     );
-    setShowInvitationModal(false);
+    setNotificaciones((prev) =>
+      prev.filter(
+        (inv) =>
+          inv.codigoInvitacion !== notif.codigoInvitacion ||
+          inv.idSala !== notif.idSala
+      )
+    );
+
     Alert.alert("Invitación", "Invitación rechazada");
   };
 
@@ -406,7 +419,7 @@ const NotificationButton = () => {
                                 styles.cardButton,
                                 styles.cardButtonAccept,
                               ]}
-                              onPress={acceptInvitation}
+                              onPress={() => acceptInvitation(notif)}
                             >
                               <Text style={styles.cardButtonText}>Aceptar</Text>
                             </TouchableOpacity>
@@ -415,7 +428,7 @@ const NotificationButton = () => {
                                 styles.cardButton,
                                 styles.cardButtonReject,
                               ]}
-                              onPress={rejectInvitation}
+                              onPress={() => rejectInvitation(notif)}
                             >
                               <Text style={styles.cardButtonText}>
                                 Rechazar
