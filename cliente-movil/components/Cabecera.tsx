@@ -15,6 +15,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import Constants from "expo-constants";
 import socket from "@/app/(sala)/socket";
+import { InviteBus } from "../src/utils/InviteBus";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const { width } = Dimensions.get("window");
@@ -44,6 +45,23 @@ const Cabecera = ({ compacto = false }) => {
 
   const [wsInvitaciones, setWsInvitaciones] = useState<any[]>([]);
   const [solicitudesPendientes, setSolicitudesPendientes] = useState<any[]>([]);
+
+  // sincronizar invitaciones removidas desde otros componentes
+  useEffect(() => {
+    const handler = (payload: { idSala: number; codigoInvitacion: string }) => {
+      setWsInvitaciones((prev) =>
+        prev.filter(
+          (inv) =>
+            inv.idSala !== payload.idSala ||
+            inv.codigoInvitacion !== payload.codigoInvitacion
+        )
+      );
+    };
+    InviteBus.on("invite:removed", handler);
+    return () => {
+      InviteBus.off("invite:removed", handler);
+    };
+  }, []);
 
   // Carga inicial del usuario
   useEffect(() => {
@@ -236,7 +254,6 @@ const Cabecera = ({ compacto = false }) => {
             inv.idSala !== notif.idSala
         )
       );
-      Alert.alert("Éxito", "Te has unido a la sala");
       router.push({
         pathname: "/(sala)/sala",
         params: { idSala: notif.idSala, salaData: JSON.stringify(salaData) },

@@ -1,3 +1,4 @@
+/*
 // src/events.ts
 import mitt, { Emitter } from "mitt";
 
@@ -10,3 +11,4 @@ export type Events = {
 const emitter: Emitter<Events> = mitt<Events>();
 
 export default emitter;
+*/

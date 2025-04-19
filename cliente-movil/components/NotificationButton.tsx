@@ -18,6 +18,7 @@ import axios from "axios";
 import Constants from "expo-constants";
 import socket from "@/app/(sala)/socket";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { InviteBus } from "../src/utils/InviteBus";
 
 const { width } = Dimensions.get("window");
 const BACKEND_URL = Constants.expoConfig?.extra?.backendUrl;
@@ -240,24 +241,37 @@ const NotificationButton = () => {
       Alert.alert("Error", "Usuario no disponible");
       return;
     }
-    socket.emit("unirseSala", {
-      idSala: notif.idSala,
-      usuario: user,
-      contrasena: null,
-      codigoInvitacion: notif.codigoInvitacion,
-    });
-    // Elimina la invitación de la lista
-    setWsInvitaciones((prev) =>
-      prev.filter(
-        (inv) =>
-          inv.codigoInvitacion !== notif.codigoInvitacion ||
-          inv.idSala !== notif.idSala
-      )
-    );
-    Alert.alert("Éxito", "Te has unido a la sala");
-    router.push({
-      pathname: "/(sala)/sala",
-      params: { idSala: notif.idSala },
+    // Primero solicitamos los datos de la sala
+    socket.emit("obtenerSala", notif.idSala, (salaData: any) => {
+      if (!salaData) {
+        Alert.alert("Error", "No se encontró la sala.");
+        return;
+      }
+      // Si existe, nos unimos
+      socket.emit("unirseSala", {
+        idSala: notif.idSala,
+        usuario: user,
+        contrasena: salaData.contrasena || null,
+        codigoInvitacion: notif.codigoInvitacion,
+      });
+      // Limpiamos la invitación
+      setWsInvitaciones((prev) =>
+        prev.filter(
+          (inv) =>
+            inv.codigoInvitacion !== notif.codigoInvitacion ||
+            inv.idSala !== notif.idSala
+        )
+      );
+      // Notificamos al resto de la app
+      InviteBus.emit("invite:removed", {
+        idSala: notif.idSala,
+        codigoInvitacion: notif.codigoInvitacion,
+      });
+      Alert.alert("Éxito", "Te has unido a la sala");
+      router.push({
+        pathname: "/(sala)/sala",
+        params: { idSala: notif.idSala },
+      });
     });
   };
 
@@ -281,8 +295,11 @@ const NotificationButton = () => {
           inv.idSala !== notif.idSala
       )
     );
-
-    Alert.alert("Invitación", "Invitación rechazada");
+    InviteBus.emit("invite:removed", {
+      idSala: notif.idSala,
+      codigoInvitacion: notif.codigoInvitacion,
+    });
+    Alert.alert("Invitación rechazada");
   };
 
   // Calcular si hay notificaciones pendientes para mostrar el badge
