@@ -13,6 +13,7 @@ import { useFonts } from "expo-font";
 import Constants from "expo-constants";
 import { useFocusEffect } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import io from "socket.io-client";
 
 import NotificationButton from "@/components/NotificationButton";
 
@@ -32,6 +33,9 @@ const avatarMap: Record<string, any> = {
 
 const imagenPortada = require("@/assets/images/imagen-portada.png");
 const imagenPorDefecto = require("@/assets/images/imagenPerfil.webp");
+
+const BACKEND_URL = Constants.expoConfig?.extra?.backendUrl;
+const socket = io(BACKEND_URL);
 
 export default function OpcionesScreen(): JSX.Element | null {
   const router = useRouter();
@@ -66,8 +70,20 @@ export default function OpcionesScreen(): JSX.Element | null {
 
   const cerrarSesion = async () => {
     try {
-      await AsyncStorage.removeItem("nombreUsuario");
-      await AsyncStorage.removeItem("avatarUsuario");
+      // leemos el id antes de limpiar el storage
+      const id = await AsyncStorage.getItem("idUsuario");
+      const parsedId = id ? parseInt(id, 10) : null;
+      if (parsedId) {
+        // notificamos al servidor que el usuario se desconecta voluntariamente
+        socket.emit("desconectarUsuario", { idUsuario: parsedId });
+      }
+      // limpiamos todo
+      await AsyncStorage.multiRemove([
+        "idUsuario",
+        "nombreUsuario",
+        "avatarUsuario",
+        "rolFavorito",
+      ]);
       setUsuario(null);
       router.push("/");
     } catch (error) {
