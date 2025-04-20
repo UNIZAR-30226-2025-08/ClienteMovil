@@ -243,7 +243,10 @@ const Cabecera = ({ compacto = false }) => {
       }
       socket.emit("unirseSala", {
         idSala: notif.idSala,
-        usuario: user,
+        usuario: {
+          ...user,
+          id: String(user.id), // <-- forzamos string aquí
+        },
         contrasena: null,
         codigoInvitacion: notif.codigoInvitacion,
       });

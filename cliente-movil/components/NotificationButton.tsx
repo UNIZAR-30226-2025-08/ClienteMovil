@@ -250,7 +250,10 @@ const NotificationButton = () => {
       // Si existe, nos unimos
       socket.emit("unirseSala", {
         idSala: notif.idSala,
-        usuario: user,
+        usuario: {
+          ...user,
+          id: String(user.id), // <-- forzamos string aquí
+        },
         contrasena: salaData.contrasena || null,
         codigoInvitacion: notif.codigoInvitacion,
       });

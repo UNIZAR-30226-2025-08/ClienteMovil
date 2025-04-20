@@ -218,7 +218,7 @@ export default function AmigosScreen(): JSX.Element {
   const unirseASalaPublica = async (sala: any) => {
     if (salaActual) {
       socket.emit("salirDeSala", {
-        idUsuario: usuario?.idUsuario,
+        idUsuario: String(usuario?.idUsuario), // ahora siempre string
         idSala: salaActual.id,
       });
       await AsyncStorage.removeItem("salaActual");
@@ -229,7 +229,7 @@ export default function AmigosScreen(): JSX.Element {
     socket.emit("unirseSala", {
       idSala: sala.id,
       usuario: {
-        id: usuario?.idUsuario,
+        id: String(usuario?.idUsuario), // ahora siempre string
         nombre: usuario?.nombre,
         avatar: "avatar1",
       },
