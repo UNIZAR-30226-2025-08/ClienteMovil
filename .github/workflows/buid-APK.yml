@@ -44,6 +44,8 @@ jobs:
       - name: Obtener URL de descarga
         id: get-url
         working-directory: ./cliente-movil
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
         run: |
           URL=$(node -p "JSON.parse(require('child_process').execSync('eas build:list --platform android --status finished --limit 1 --json --non-interactive', {encoding: 'utf-8'}))[0].artifacts.buildUrl")
           echo "APK_URL=$URL" >> $GITHUB_ENV
