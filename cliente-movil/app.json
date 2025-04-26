@@ -19,7 +19,13 @@
       "softwareKeyboardLayoutMode": "pan"
     },
     "extra": {
-      "backendUrl": "http://192.168.0.20:5000"
+      "backendUrl": "http://192.168.0.20:5000",
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "cefa1918-1ddb-4c27-bd75-f3aaa6a59886"
+      }
     },
     "web": {
       "bundler": "metro",
@@ -40,6 +46,7 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "owner": "oscar-gilbe"
   }
 }
