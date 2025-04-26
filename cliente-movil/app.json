@@ -47,6 +47,9 @@
     "experiments": {
       "typedRoutes": true
     },
-    "owner": "oscar-gilbe"
+    "owner": "oscar-gilbe",
+    "android": {
+      "package": "com.robertawilliams.clientemovil"
+    }
   }
 }
