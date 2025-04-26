@@ -16,7 +16,8 @@
         "foregroundImage": "./assets/images/app-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "softwareKeyboardLayoutMode": "pan"
+      "softwareKeyboardLayoutMode": "pan",
+      "package": "com.robertawilliams.clientemovil"
     },
     "extra": {
       "backendUrl": "http://192.168.0.20:5000",
@@ -47,9 +48,6 @@
     "experiments": {
       "typedRoutes": true
     },
-    "owner": "oscar-gilbe",
-    "android": {
-      "package": "com.robertawilliams.clientemovil"
-    }
+    "owner": "oscar-gilbe"
   }
 }
