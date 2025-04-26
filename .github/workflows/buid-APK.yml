@@ -1,0 +1,64 @@
+name: Construir el APK del cliente-movil con Expo
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout del repositorio
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+
+      - name: Instalar dependencias
+        run: |
+          cd cliente-movil
+          npm install
+
+      - name: Instalar EAS CLI
+        run: npm install -g eas-cli
+
+      - name: Login en Expo
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: |
+          eas whoami || eas login --token $EXPO_TOKEN
+
+      - name: Build APK (Android)
+        working-directory: ./cliente-movil
+        env:
+          EAS_BUILD_AUTOCOMMIT: 1
+        run: |
+          eas build --platform android --profile preview --non-interactive
+
+      - name: Esperar que el build termine
+        working-directory: ./cliente-movil
+        run: |
+          eas build:wait --platform android
+
+      - name: Obtener URL de descarga
+        id: get-url
+        working-directory: ./cliente-movil
+        run: |
+          URL=$(eas build:list --platform android --status finished --limit 1 --json | jq -r '.[0].artifacts.buildUrl')
+          echo "APK_URL=$URL" >> $GITHUB_ENV
+
+      - name: Descargar APK
+        run: |
+          mkdir -p artifacts
+          curl -o artifacts/app.apk "$APK_URL"
+
+      - name: Subir APK como artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-release-apk
+          path: artifacts/app.apk
