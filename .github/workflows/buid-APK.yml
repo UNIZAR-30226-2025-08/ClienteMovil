@@ -60,3 +60,13 @@ jobs:
         with:
           name: app-release-apk
           path: artifacts/app.apk
+
+      - name: Crear release en GitHub y subir APK
+        uses: softprops/action-gh-release@v2
+        with:
+          files: artifacts/app.apk
+          tag_name: v1.0.${{ github.run_number }}
+          name: "Release APK v1.0.${{ github.run_number }}"
+          body: "APK generado automáticamente por GitHub Actions 🚀"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
