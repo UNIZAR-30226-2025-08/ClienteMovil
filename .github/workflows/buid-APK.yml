@@ -37,11 +37,14 @@ jobs:
         working-directory: ./cliente-movil
         env:
           EAS_BUILD_AUTOCOMMIT: 1
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
         run: |
           eas build --platform android --profile preview --non-interactive
 
       - name: Esperar que el build termine
         working-directory: ./cliente-movil
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
         run: |
           eas build:wait --platform android
 
