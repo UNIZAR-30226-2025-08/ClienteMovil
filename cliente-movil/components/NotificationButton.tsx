@@ -214,23 +214,25 @@ const NotificationButton = () => {
   };
 
   const handleDenegarSolicitud = async (idEmisor: number) => {
+    if (!user.id) return;
     try {
+      // Ahora llama al endpoint POST /api/solicitud/rechazar
       const response = await axios.post(
-        `${BACKEND_URL}/api/solicitud/denegar`,
+        `${BACKEND_URL}/api/solicitud/rechazar`,
         {
-          solicitudId: idEmisor,
+          idEmisor,
+          idReceptor: user.id,
         }
       );
-      if (response.data.exito) {
-        Alert.alert("Solicitud denegada", "La solicitud ha sido rechazada.");
-        setNotificaciones(
-          notificaciones.filter((n) => n.idUsuarioEmisor !== idEmisor)
+      if (response.data.mensaje) {
+        Alert.alert("Solicitud rechazada", response.data.mensaje);
+        // Filtrar la notificación de la lista
+        setNotificaciones((prev) =>
+          prev.filter((n) => n.idUsuarioEmisor !== idEmisor)
         );
-      } else {
-        Alert.alert("Error", "No se pudo rechazar la solicitud.");
       }
     } catch (error) {
-      console.error("Error al rechazar solicitud:", error);
+      console.error("Error al rechazar la solicitud:", error);
       Alert.alert("Error", "No se pudo rechazar la solicitud.");
     }
   };
@@ -362,9 +364,11 @@ const NotificationButton = () => {
                           <View style={styles.cardHeader}>
                             <Image
                               source={
-                                notif.avatarEmisor
+                                avatarMap[notif.avatarEmisor] // local key?
+                                  ? avatarMap[notif.avatarEmisor]
+                                  : notif.avatarEmisor // remote URL?
                                   ? { uri: notif.avatarEmisor }
-                                  : require("@/assets/images/imagenPerfil.webp")
+                                  : require("@/assets/images/imagenPerfil.webp") // fallback
                               }
                               style={styles.cardAvatar}
                             />

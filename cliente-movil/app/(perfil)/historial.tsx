@@ -8,7 +8,7 @@ import {
   ImageBackground,
   Image,
   ActivityIndicator,
-  Modal, // ← asegúrate de importar Modal
+  Modal,
 } from "react-native";
 import { useRouter } from "expo-router";
 import Constants from "expo-constants";
@@ -21,38 +21,49 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 const imagenFondoRoles = require("@/assets/images/fondo-roles.jpg");
 const imagenAtras = require("@/assets/images/botonAtras.png");
 
-/**
- * Pantalla que muestra el historial de partidas del usuario.
- * Permite visualizar las partidas jugadas con sus resultados.
- *
- * @returns {JSX.Element} Pantalla de historial de partidas.
- */
 export default function HistorialPartidasScreen(): JSX.Element {
   const router = useRouter();
+
   const [partidas, setPartidas] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [partidaSeleccionada, setPartidaSeleccionada] = useState<any>(null);
 
-  /**
-   * Función para regresar a la pantalla anterior.
-   */
+  // Mapas de normalización
+  const estadoMap: Record<string, string> = {
+    en_curso: "En curso",
+    "en curso": "En curso",
+    terminada: "Terminada",
+    finalizada: "Terminada",
+  };
+  const ganadoresMap: Record<string, string> = {
+    empate: "Empate",
+    lobos: "Lobos",
+    aldeanos: "Aldeanos",
+  };
+
   const irAtras = () => router.back();
 
   useEffect(() => {
     const fetchHistorial = async () => {
       try {
+        // Leer sólo el ID de usuario
         const idStr = await AsyncStorage.getItem("idUsuario");
         if (!idStr) {
           setError("Usuario no encontrado");
           return;
         }
         const idUsuario = parseInt(idStr, 10);
+
+        // Petición al backend
         const resp = await axios.get(
           `${Constants.expoConfig?.extra?.backendUrl}/api/juega/usuario/${idUsuario}`
         );
         const datos: any[] = resp.data || [];
-        const resultadoMap = datos.map((p) => {
+        console.log("Datos recibidos del backend:", resp.data);
+
+        // Mapear al resultado “Empate”/“Ganada”/“Perdida”
+        const partidasMapeadas = datos.map((p) => {
           let resultado: string;
           if (p.ganadores === "empate") {
             resultado = "Empate";
@@ -60,20 +71,22 @@ export default function HistorialPartidasScreen(): JSX.Element {
             (p.rolJugado === "lobo" && p.ganadores === "lobos") ||
             (p.rolJugado !== "lobo" && p.ganadores === "aldeanos")
           ) {
-            resultado = "Victoria";
+            resultado = "Ganada";
           } else {
-            resultado = "Derrota";
+            resultado = "Perdida";
           }
           return { ...p, resultado };
         });
-        setPartidas(resultadoMap);
+
+        setPartidas(partidasMapeadas);
       } catch (err) {
         console.error("Error al cargar historial:", err);
-        setError("No se pudo cargar el historial");
+        setError("No se pudo cargar el historial de partidas.");
       } finally {
         setLoading(false);
       }
     };
+
     fetchHistorial();
   }, []);
 
@@ -95,82 +108,94 @@ export default function HistorialPartidasScreen(): JSX.Element {
           </Text>
         )}
 
-        {/* Modal de detalles de la partida */}
         <Modal
           visible={!!partidaSeleccionada}
           transparent
           animationType="fade"
           onRequestClose={() => setPartidaSeleccionada(null)}
         >
-          <View style={styles.modalOverlay}>
-            <View style={styles.modalContent}>
-              <Text style={styles.modalTitle}>Detalles de la Partida</Text>
+          {partidaSeleccionada && (
+            <View style={styles.modalOverlay}>
+              <View style={styles.modalContent}>
+                <Text style={styles.modalTitle}>Detalles de la Partida</Text>
 
-              <Text style={styles.modalText}>
-                <Text style={styles.modalLabel}>Fecha completa: </Text>
-                {new Date(partidaSeleccionada?.fecha).toLocaleString()}
-              </Text>
+                <Text style={styles.modalText}>
+                  <Text style={styles.modalLabel}>Fecha completa: </Text>
+                  {new Date(partidaSeleccionada.fecha).toLocaleString()}
+                </Text>
 
-              <Text style={styles.modalText}>
-                <Text style={styles.modalLabel}>Modo: </Text>
-                {partidaSeleccionada?.tipo.charAt(0).toUpperCase() +
-                  partidaSeleccionada?.tipo.slice(1)}
-              </Text>
+                <Text style={styles.modalText}>
+                  <Text style={styles.modalLabel}>Modo: </Text>
+                  {partidaSeleccionada.tipo.charAt(0).toUpperCase() +
+                    partidaSeleccionada.tipo.slice(1)}
+                </Text>
 
-              <Text style={styles.modalText}>
-                <Text style={styles.modalLabel}>Estado: </Text>
-                {partidaSeleccionada?.estado === "en_curso"
-                  ? "En curso"
-                  : "Terminada"}
-              </Text>
+                <Text style={styles.modalText}>
+                  <Text style={styles.modalLabel}>Estado: </Text>
+                  {estadoMap[partidaSeleccionada.estado?.toLowerCase() || ""] ??
+                    partidaSeleccionada.estado}
+                </Text>
 
-              <Text style={styles.modalText}>
-                <Text style={styles.modalLabel}>Ganadores: </Text>
-                {partidaSeleccionada?.ganadores
-                  ? partidaSeleccionada?.ganadores.charAt(0).toUpperCase() +
-                    partidaSeleccionada?.ganadores.slice(1)
-                  : "Sin determinar"}
-              </Text>
+                <Text style={styles.modalText}>
+                  <Text style={styles.modalLabel}>Ganadores: </Text>
+                  {ganadoresMap[
+                    partidaSeleccionada.ganadores?.toLowerCase() || ""
+                  ] ?? "Sin determinar"}
+                </Text>
 
-              <Text style={styles.modalText}>
-                <Text style={styles.modalLabel}>Rol Jugado: </Text>
-                {partidaSeleccionada?.rolJugado.charAt(0).toUpperCase() +
-                  partidaSeleccionada?.rolJugado.slice(1)}
-              </Text>
+                <Text style={styles.modalText}>
+                  <Text style={styles.modalLabel}>Resultado: </Text>
+                  {partidaSeleccionada.resultado}
+                </Text>
 
-              <TouchableOpacity
-                style={styles.closeButton}
-                onPress={() => setPartidaSeleccionada(null)}
-              >
-                <Text style={styles.closeButtonText}>Cerrar</Text>
-              </TouchableOpacity>
+                <Text style={styles.modalText}>
+                  <Text style={styles.modalLabel}>Rol Jugado: </Text>
+                  {partidaSeleccionada.rolJugado.charAt(0).toUpperCase() +
+                    partidaSeleccionada.rolJugado.slice(1)}
+                </Text>
+
+                <TouchableOpacity
+                  style={styles.closeButton}
+                  onPress={() => setPartidaSeleccionada(null)}
+                >
+                  <Text style={styles.closeButtonText}>Cerrar</Text>
+                </TouchableOpacity>
+              </View>
             </View>
-          </View>
+          )}
         </Modal>
 
-        {/* Lista de partidas */}
+        <View style={styles.tableHeader}>
+          <Text style={styles.headerCellFecha}>Fecha</Text>
+          <Text style={styles.headerCellModo}>Modo</Text>
+          <Text style={styles.headerCellResultado}>Resultado</Text>
+        </View>
+
         {!loading && !error && (
           <ScrollView style={styles.scrollContainer}>
-            {partidas.map((partida) => (
+            {partidas.map((p) => (
               <TouchableOpacity
-                key={partida.idPartida || partida.id}
-                onPress={() => setPartidaSeleccionada(partida)}
+                key={p.idPartida || p.id}
+                onPress={() => setPartidaSeleccionada(p)}
               >
-                <View style={styles.partidaItem}>
-                  <Text style={styles.fecha}>
-                    {new Date(partida.fecha).toLocaleDateString()}
+                <View style={styles.tableRow}>
+                  <Text style={styles.cellFecha}>
+                    {new Date(p.fecha).toLocaleDateString()}
+                  </Text>
+                  <Text style={styles.cellModo}>
+                    {p.tipo.charAt(0).toUpperCase() + p.tipo.slice(1)}
                   </Text>
                   <Text
                     style={[
-                      styles.resultado,
-                      partida.resultado === "Victoria"
+                      styles.cellResultado,
+                      p.resultado === "Ganada"
                         ? styles.victoria
-                        : partida.resultado === "Derrota"
+                        : p.resultado === "Perdida"
                         ? styles.derrota
                         : {},
                     ]}
                   >
-                    {partida.resultado.toUpperCase()}
+                    {p.resultado.toUpperCase()}
                   </Text>
                 </View>
               </TouchableOpacity>
@@ -178,7 +203,6 @@ export default function HistorialPartidasScreen(): JSX.Element {
           </ScrollView>
         )}
 
-        {/* Botón atrás */}
         <TouchableOpacity style={styles.containerAtras} onPress={irAtras}>
           <Image source={imagenAtras} style={styles.imageAtras} />
         </TouchableOpacity>
@@ -187,76 +211,74 @@ export default function HistorialPartidasScreen(): JSX.Element {
   );
 }
 
-/**
- * Estilos de la pantalla de historial de partidas.
- */
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-
+  container: { flex: 1 },
   image: {
     width: "100%",
     height: "100%",
-    flex: 1,
-    resizeMode: "cover",
     justifyContent: "center",
     alignItems: "center",
   },
-
   overlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0, 0, 0, 0.4)",
+    backgroundColor: "rgba(0,0,0,0.4)",
   },
-
   titulo: {
     fontSize: 22,
     fontWeight: "bold",
-    marginBottom: 20,
     marginTop: 60,
+    marginBottom: 20,
     color: "#fff",
   },
 
-  scrollContainer: {
-    width: "90%",
+  tableHeader: {
+    flexDirection: "row",
+    width: "90%", // incrementa ancho para dar más espacio
+    alignSelf: "center", // centra el header
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderColor: "#ccc",
+    marginTop: 16,
+  },
+  headerCellFecha: { flex: 2, fontWeight: "bold", fontSize: 16, color: "#fff" },
+  headerCellModo: {
+    flex: 2.5, // reduce un poco para dar sitio al resultado
+    fontWeight: "bold",
+    fontSize: 16,
+    color: "#fff",
+    textAlign: "center",
+  },
+  headerCellResultado: {
+    flex: 1.5, // aumenta espacio para que no se corte
+    fontWeight: "bold",
+    fontSize: 16,
+    color: "#fff",
+    textAlign: "right",
   },
 
-  partidaItem: {
+  scrollContainer: {
+    width: "92%", // igualar al header
+    alignSelf: "center",
+  },
+  tableRow: {
+    flexDirection: "row",
     backgroundColor: "#f0f0f0",
-    padding: 12,
-    marginVertical: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 8,
+    marginVertical: 4,
     borderRadius: 8,
   },
-
-  fecha: {
-    fontSize: 16,
-    marginBottom: 4,
-  },
-
-  resultado: {
-    fontSize: 18,
+  cellFecha: { flex: 2, fontSize: 14, color: "#333" },
+  cellModo: { flex: 2.5, fontSize: 14, color: "#333", textAlign: "center" },
+  cellResultado: {
+    flex: 1.5, // coincide con headerCellResultado
+    fontSize: 14,
     fontWeight: "bold",
+    textAlign: "right",
   },
 
-  victoria: {
-    color: "green",
-  },
-
-  derrota: {
-    color: "red",
-  },
-
-  // Estilos para el nuevo botón de atrás con imagen
-  containerAtras: {
-    position: "absolute",
-    bottom: 20,
-    left: "46%",
-  },
-
-  imageAtras: {
-    width: 40,
-    height: 40,
-  },
+  victoria: { color: "green" },
+  derrota: { color: "red" },
 
   modalOverlay: {
     flex: 1,
@@ -270,24 +292,12 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 16,
   },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 12,
-  },
-  modalLabel: {
-    fontWeight: "bold",
-  },
-  modalText: {
-    fontSize: 16,
-    marginVertical: 4,
-  },
-  closeButton: {
-    marginTop: 16,
-    alignSelf: "flex-end",
-  },
-  closeButtonText: {
-    color: "#007bff",
-    fontSize: 16,
-  },
+  modalTitle: { fontSize: 18, fontWeight: "bold", marginBottom: 12 },
+  modalLabel: { fontWeight: "bold" },
+  modalText: { fontSize: 16, marginVertical: 4 },
+  closeButton: { marginTop: 16, alignSelf: "flex-end" },
+  closeButtonText: { color: "#007bff", fontSize: 16 },
+
+  containerAtras: { position: "absolute", bottom: 20, left: "46%" },
+  imageAtras: { width: 40, height: 40 },
 });
