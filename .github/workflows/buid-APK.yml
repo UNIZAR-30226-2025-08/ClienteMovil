@@ -44,8 +44,10 @@ jobs:
       - name: Obtener URL de descarga
         id: get-url
         working-directory: ./cliente-movil
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
         run: |
-          URL=$(eas build:list --platform android --status finished --limit 1 --json --non-interactive | jq -r '.[0].artifacts.buildUrl')
+          URL=$(node -p "JSON.parse(require('child_process').execSync('eas build:list --platform android --status finished --limit 1 --json --non-interactive', {encoding: 'utf-8'}))[0].artifacts.buildUrl")
           echo "APK_URL=$URL" >> $GITHUB_ENV
 
       - name: Descargar APK
@@ -58,3 +60,13 @@ jobs:
         with:
           name: app-release-apk
           path: artifacts/app.apk
+
+      - name: Crear release en GitHub y subir APK
+        uses: softprops/action-gh-release@v2
+        with:
+          files: artifacts/app.apk
+          tag_name: v1.0.${{ github.run_number }}
+          name: "Release APK v1.0.${{ github.run_number }}"
+          body: "APK generado automáticamente por GitHub Actions 🚀"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
