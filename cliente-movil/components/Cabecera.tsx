@@ -196,19 +196,21 @@ const Cabecera = ({ compacto = false }) => {
   };
 
   const handleDenegarSolicitud = async (idEmisor: number) => {
+    if (!user.id) return;
     try {
+      // Llamada al endpoint correcto: /api/solicitud/rechazar
       const response = await axios.post(
-        `${BACKEND_URL}/api/solicitud/denegar`,
-        { solicitudId: idEmisor }
+        `${BACKEND_URL}/api/solicitud/rechazar`,
+        {
+          idEmisor,
+          idReceptor: user.id,
+        }
       );
-      if (response.data.exito) {
-        Alert.alert("Solicitud denegada", "La solicitud ha sido rechazada.");
-        setNotificaciones((prev) =>
-          prev.filter((n) => n.idUsuarioEmisor !== idEmisor)
-        );
-      } else {
-        Alert.alert("Error", "No se pudo rechazar la solicitud.");
-      }
+      Alert.alert("Solicitud rechazada", response.data.mensaje);
+      // Filtra la solicitud eliminada de las notificaciones
+      setNotificaciones((prev) =>
+        prev.filter((n) => n.idUsuarioEmisor !== idEmisor)
+      );
     } catch (error) {
       console.error("Error al rechazar solicitud:", error);
       Alert.alert("Error", "No se pudo rechazar la solicitud.");
@@ -350,7 +352,10 @@ const Cabecera = ({ compacto = false }) => {
                           <View style={styles.cardHeader}>
                             <Image
                               source={
-                                notif.avatarEmisor
+                                // usa avatarMap si es clave local, sino intenta uri, si no usa default
+                                avatarMap[notif.avatarEmisor]
+                                  ? avatarMap[notif.avatarEmisor]
+                                  : notif.avatarEmisor
                                   ? { uri: notif.avatarEmisor }
                                   : require("@/assets/images/imagenPerfil.webp")
                               }
