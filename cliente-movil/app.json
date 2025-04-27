@@ -24,9 +24,7 @@
       "router": {
         "origin": false
       },
-      "eas": {
-        "projectId": "cefa1918-1ddb-4c27-bd75-f3aaa6a59886"
-      }
+      "eas": {}
     },
     "web": {
       "bundler": "metro",
