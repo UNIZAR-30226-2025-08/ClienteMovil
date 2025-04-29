@@ -224,6 +224,13 @@ export default function App(): JSX.Element | null {
             },
           });
         }, 30);
+
+        setTimeout(() => {
+          socket.emit("reconectarPartida", {
+            idPartida: idPartida,
+            idUsuario: idUsuario,
+          });
+        }, 30);
       }
     );
 
