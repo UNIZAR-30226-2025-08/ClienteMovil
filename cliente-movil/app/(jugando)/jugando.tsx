@@ -424,7 +424,7 @@ const Jugando: React.FC = () => {
    * @type {number}
    */
   const indiceUsuario = jugadoresEstado.findIndex(
-    (jugador) => jugador.id === usuarioID
+    (jugador) => jugador.id == usuarioID
   );
 
   /**
@@ -1687,10 +1687,7 @@ const Jugando: React.FC = () => {
         );
         return;
       }
-      if (
-        botellaSeleccionada === "muerte" &&
-        jugadorObjetivo.id === usuarioID
-      ) {
+      if (botellaSeleccionada === "muerte" && jugadorObjetivo.id == usuarioID) {
         mostrarError("No puedes lanzarte la poción de muerte a ti misma");
         logCustom(
           jornadaActual,
@@ -2213,7 +2210,7 @@ const Jugando: React.FC = () => {
       if (data.alguacil) {
         setJugadoresEstado((prevJugadores) =>
           prevJugadores.map((jugador) =>
-            jugador.id === data.alguacil
+            jugador.id == data.alguacil
               ? { ...jugador, esAlguacil: true }
               : jugador
           )
