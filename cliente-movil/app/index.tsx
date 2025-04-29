@@ -190,19 +190,42 @@ export default function App(): JSX.Element | null {
     socket.emit("buscarPartidaUsuario", { idUsuario: idUsuario });
 
     // Escuchar la respuesta del backend
-    socket.on("partidaEncontrada", (data) => {
-      console.log("En partida", data);
+    socket.on(
+      "partidaEncontrada",
+      ({
+        idPartida,
+        idSala,
+        rol,
+        idUsuario,
+        nombreUsuario,
+        jugadores,
+        lider,
+      }) => {
+        if (!idPartida) {
+          console.log("Error: Partida no encontrada");
+          return;
+        }
 
-      if (data.error) {
-        console.log("Error", data.error);
-        return;
+        const sala = {
+          jugadores,
+          lider,
+        };
+
+        router.replace("/entrar");
+        setTimeout(() => {
+          router.push({
+            pathname: "/(jugando)/jugando",
+            params: {
+              idSala: idSala,
+              salaData: JSON.stringify(sala),
+              rol: rol,
+              usuarioID: idUsuario,
+              usuarioNombre: nombreUsuario,
+            },
+          });
+        }, 30);
       }
-      socket.emit("reconectarPartida");
-      router.replace("/entrar");
-      setTimeout(() => {
-        router.push("/jugando");
-      }, 30); // 20ms suele ser suficiente
-    });
+    );
 
     // Escuchar la respuesta del backend
     socket.on("partidaNoEncontrada", (data) => {
