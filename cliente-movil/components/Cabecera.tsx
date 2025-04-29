@@ -5,20 +5,20 @@ import {
   Image,
   TouchableOpacity,
   StyleSheet,
-  Modal,
+  ScrollView,
   ActivityIndicator,
   Alert,
-  ScrollView,
-  Dimensions, // Importa Dimensions
+  Dimensions,
 } from "react-native";
-import { useRouter, useFocusEffect } from "expo-router"; // o de '@react-navigation/native'
+import { useRouter, useFocusEffect } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import Constants from "expo-constants";
 import socket from "@/app/(sala)/socket";
+import { InviteBus } from "../src/utils/InviteBus";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-const { width } = Dimensions.get("window"); // Ancho del dispositivo
+const { width } = Dimensions.get("window");
 
 const avatarMap: Record<string, any> = {
   avatar1: require("@/assets/images/imagenPerfil.webp"),
@@ -43,14 +43,27 @@ const Cabecera = ({ compacto = false }) => {
   const [loadingNotifs, setLoadingNotifs] = useState(false);
   const [errorNotifs, setErrorNotifs] = useState<string | null>(null);
 
-  // Invitaciones vía socket
   const [wsInvitaciones, setWsInvitaciones] = useState<any[]>([]);
-  const [invitationData, setInvitationData] = useState<any>(null);
-  const [showInvitationModal, setShowInvitationModal] = useState(false);
-
-  // Estado para solicitudes de amistad
   const [solicitudesPendientes, setSolicitudesPendientes] = useState<any[]>([]);
 
+  // sincronizar invitaciones removidas desde otros componentes
+  useEffect(() => {
+    const handler = (payload: { idSala: number; codigoInvitacion: string }) => {
+      setWsInvitaciones((prev) =>
+        prev.filter(
+          (inv) =>
+            inv.idSala !== payload.idSala ||
+            inv.codigoInvitacion !== payload.codigoInvitacion
+        )
+      );
+    };
+    InviteBus.on("invite:removed", handler);
+    return () => {
+      InviteBus.off("invite:removed", handler);
+    };
+  }, []);
+
+  // Carga inicial del usuario
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -59,7 +72,9 @@ const Cabecera = ({ compacto = false }) => {
         const nombre = await AsyncStorage.getItem("nombreUsuario");
         const avatar =
           (await AsyncStorage.getItem("avatarUsuario")) || "avatar1";
-        setUser({ id: parsedId, nombre, avatar });
+        const rolFavorito =
+          (await AsyncStorage.getItem("rolFavorito")) || "Sin rol favorito";
+        setUser({ id: parsedId, nombre, avatar, rolFavorito });
       } catch (error) {
         console.error("Error al cargar usuario:", error);
       }
@@ -67,44 +82,61 @@ const Cabecera = ({ compacto = false }) => {
     fetchUser();
   }, []);
 
+  // Actualizar nombre/avatar al volver al foco
   useFocusEffect(
     React.useCallback(() => {
       const fetchUserData = async () => {
         const nombre = await AsyncStorage.getItem("nombreUsuario");
         const avatar =
           (await AsyncStorage.getItem("avatarUsuario")) || "avatar1";
-        setUser({ ...user, nombre, avatar });
+        setUser((u: typeof user) => ({ ...u, nombre, avatar }));
       };
       fetchUserData();
     }, [])
   );
 
-  // Socket para recibir invitaciones
+  // Escuchar invitaciones de sala y enriquecer con datos del invitador
   useEffect(() => {
-    socket.on("invitacionSala", (data) => {
-      setWsInvitaciones((prev) => [...prev, data]);
-      setInvitationData(data);
-      setShowInvitationModal(true);
+    socket.on("invitacionSala", async (data) => {
+      console.log("Invitación recibida:", JSON.stringify(data, null, 2));
+      try {
+        const respName = await axios.post(
+          `${BACKEND_URL}/api/usuario/obtener_por_id`,
+          { idUsuario: data.idInvitador }
+        );
+        const respAvatar = await axios.post(
+          `${BACKEND_URL}/api/usuario/obtener_avatar_por_id`,
+          { idUsuario: data.idInvitador }
+        );
+        const enriched = {
+          ...data,
+          nombreInvitador: respName.data.usuario.nombre,
+          avatarInvitador: respAvatar.data.avatar,
+        };
+        setWsInvitaciones((prev) => [...prev, enriched]);
+      } catch (error) {
+        console.error("Error al enriquecer invitación:", error);
+        setWsInvitaciones((prev) => [...prev, data]);
+      }
     });
     return () => {
       socket.off("invitacionSala");
     };
   }, []);
 
-  // Obtener solicitudes de amistad para el badge
+  // Obtener solicitudes pendientes para badge
   useEffect(() => {
-    if (user.id) {
-      fetchSolicitudesPendientes();
-    }
+    if (user.id) fetchSolicitudesPendientes();
   }, [user.id]);
 
+  // Cargar notificaciones al cambiar el tipo (solicitudes vs invitaciones)
   useEffect(() => {
     if (tipoNotificacion !== "invitaciones") {
       fetchNotificaciones();
     } else {
       setNotificaciones(wsInvitaciones);
     }
-  }, [tipoNotificacion]);
+  }, [tipoNotificacion, wsInvitaciones]);
 
   const fetchSolicitudesPendientes = async () => {
     if (!user.id) return;
@@ -121,7 +153,6 @@ const Cabecera = ({ compacto = false }) => {
     }
   };
 
-  // Función para cargar notificaciones del dropdown
   const fetchNotificaciones = async () => {
     if (!user.id) return;
     const userId =
@@ -135,7 +166,6 @@ const Cabecera = ({ compacto = false }) => {
           `${BACKEND_URL}/api/solicitud/listar/${userId}`
         );
         setNotificaciones(response.data.solicitudes || []);
-        // Sincronizamos también el badge con el estado de solicitudes pendientes
         setSolicitudesPendientes(response.data.solicitudes || []);
       }
     } catch (error) {
@@ -156,10 +186,8 @@ const Cabecera = ({ compacto = false }) => {
         }
       );
       Alert.alert("Solicitud aceptada", response.data.mensaje);
-      setNotificaciones(
-        notificaciones.filter(
-          (n) => n.idUsuarioEmisor !== notif.idUsuarioEmisor
-        )
+      setNotificaciones((prev) =>
+        prev.filter((n) => n.idUsuarioEmisor !== notif.idUsuarioEmisor)
       );
     } catch (error) {
       console.error("Error al aceptar solicitud:", error);
@@ -168,21 +196,21 @@ const Cabecera = ({ compacto = false }) => {
   };
 
   const handleDenegarSolicitud = async (idEmisor: number) => {
+    if (!user.id) return;
     try {
+      // Llamada al endpoint correcto: /api/solicitud/rechazar
       const response = await axios.post(
-        `${BACKEND_URL}/api/solicitud/denegar`,
+        `${BACKEND_URL}/api/solicitud/rechazar`,
         {
-          solicitudId: idEmisor,
+          idEmisor,
+          idReceptor: user.id,
         }
       );
-      if (response.data.exito) {
-        Alert.alert("Solicitud denegada", "La solicitud ha sido rechazada.");
-        setNotificaciones(
-          notificaciones.filter((n) => n.idUsuarioEmisor !== idEmisor)
-        );
-      } else {
-        Alert.alert("Error", "No se pudo rechazar la solicitud.");
-      }
+      Alert.alert("Solicitud rechazada", response.data.mensaje);
+      // Filtra la solicitud eliminada de las notificaciones
+      setNotificaciones((prev) =>
+        prev.filter((n) => n.idUsuarioEmisor !== idEmisor)
+      );
     } catch (error) {
       console.error("Error al rechazar solicitud:", error);
       Alert.alert("Error", "No se pudo rechazar la solicitud.");
@@ -205,57 +233,58 @@ const Cabecera = ({ compacto = false }) => {
     setTipoNotificacion(tipo);
   };
 
-  const acceptInvitation = () => {
+  const acceptInvitation = (notif: any) => {
     if (!user.id) {
       Alert.alert("Error", "Usuario no disponible");
       return;
     }
-    socket.emit("unirseSala", {
-      idSala: invitationData.idSala,
-      usuario: user,
-      contrasena: null,
-      codigoInvitacion: invitationData.codigoInvitacion,
-    });
-    setWsInvitaciones((prev) =>
-      prev.filter(
-        (inv) =>
-          inv.codigoInvitacion !== invitationData.codigoInvitacion ||
-          inv.idSala !== invitationData.idSala
-      )
-    );
-    setShowInvitationModal(false);
-    Alert.alert("Éxito", "Te has unido a la sala");
-    router.push({
-      pathname: "/(sala)/sala",
-      params: { idSala: invitationData.idSala },
+    socket.emit("obtenerSala", notif.idSala, (salaData: any) => {
+      if (!salaData) {
+        Alert.alert("Error", "No se encontró la sala.");
+        return;
+      }
+      socket.emit("unirseSala", {
+        idSala: notif.idSala,
+        usuario: {
+          ...user,
+          id: String(user.id), // <-- forzamos string aquí
+        },
+        contrasena: null,
+        codigoInvitacion: notif.codigoInvitacion,
+      });
+      setWsInvitaciones((prev) =>
+        prev.filter(
+          (inv) =>
+            inv.codigoInvitacion !== notif.codigoInvitacion ||
+            inv.idSala !== notif.idSala
+        )
+      );
+      router.push({
+        pathname: "/(sala)/sala",
+        params: { idSala: notif.idSala, salaData: JSON.stringify(salaData) },
+      });
     });
   };
 
-  const rejectInvitation = () => {
+  const rejectInvitation = (notif: any) => {
     if (!user.id) return;
     socket.emit("invitacionRechazada", { idAmigo: user.id });
     setWsInvitaciones((prev) =>
       prev.filter(
         (inv) =>
-          inv.codigoInvitacion !== invitationData.codigoInvitacion ||
-          inv.idSala !== invitationData.idSala
+          inv.codigoInvitacion !== notif.codigoInvitacion ||
+          inv.idSala !== notif.idSala
       )
     );
-    setShowInvitationModal(false);
-    Alert.alert("Invitación", "Invitación rechazada");
   };
 
   const irAlPerfil = () => {
     router.push({
       pathname: "/perfil",
-      params: {
-        nombre: user.nombre,
-        avatar: user.avatar || "",
-      },
+      params: { nombre: user.nombre, avatar: user.avatar || "" },
     });
   };
 
-  // Calcular si hay alguna notificación pendiente (invitaciones o solicitudes)
   const hasNotifications =
     wsInvitaciones.length > 0 || solicitudesPendientes.length > 0;
 
@@ -275,7 +304,6 @@ const Cabecera = ({ compacto = false }) => {
             </View>
           </TouchableOpacity>
 
-          {/* Botón de notificaciones con círculo rojo si hay notificaciones */}
           <TouchableOpacity
             style={styles.notificationButton}
             onPress={toggleNotifications}
@@ -318,14 +346,16 @@ const Cabecera = ({ compacto = false }) => {
                 <Text style={styles.errorText}>{errorNotifs}</Text>
               ) : notificaciones.length > 0 ? (
                 <ScrollView style={styles.notifScroll}>
-                  {notificaciones.map((notif, idx) => (
-                    <View key={idx} style={styles.notifItem}>
-                      {tipoNotificacion === "solicitudes" && (
-                        <View style={styles.cardContainer}>
+                  {tipoNotificacion === "solicitudes"
+                    ? notificaciones.map((notif, idx) => (
+                        <View key={idx} style={styles.cardContainer}>
                           <View style={styles.cardHeader}>
                             <Image
                               source={
-                                notif.avatarEmisor
+                                // usa avatarMap si es clave local, sino intenta uri, si no usa default
+                                avatarMap[notif.avatarEmisor]
+                                  ? avatarMap[notif.avatarEmisor]
+                                  : notif.avatarEmisor
                                   ? { uri: notif.avatarEmisor }
                                   : require("@/assets/images/imagenPerfil.webp")
                               }
@@ -340,7 +370,6 @@ const Cabecera = ({ compacto = false }) => {
                               </Text>
                             </View>
                           </View>
-
                           <View style={styles.cardActions}>
                             <TouchableOpacity
                               style={[
@@ -366,60 +395,55 @@ const Cabecera = ({ compacto = false }) => {
                             </TouchableOpacity>
                           </View>
                         </View>
-                      )}
-                      {tipoNotificacion === "invitaciones" && (
-                        <ScrollView style={styles.notifScroll}>
-                          {notificaciones.map((notif, idx) => (
-                            <View key={idx} style={styles.cardContainer}>
-                              <View style={styles.cardHeader}>
-                                {notif.avatarInvitador && (
-                                  <Image
-                                    source={{ uri: notif.avatarInvitador }}
-                                    style={styles.cardAvatar}
-                                  />
-                                )}
-                                <View style={{ flex: 1 }}>
-                                  <Text style={styles.cardTitle}>
-                                    {notif.nombreInvitador}
-                                  </Text>
-                                  <Text style={styles.cardSubtitle}>
-                                    te invitó a una partida{" "}
-                                    {notif.nombreSala &&
-                                      `en "${notif.nombreSala}"`}
-                                    .
-                                  </Text>
-                                </View>
-                              </View>
-                              <View style={styles.cardActions}>
-                                <TouchableOpacity
-                                  style={[
-                                    styles.cardButton,
-                                    styles.cardButtonAccept,
-                                  ]}
-                                  onPress={acceptInvitation}
-                                >
-                                  <Text style={styles.cardButtonText}>
-                                    Aceptar
-                                  </Text>
-                                </TouchableOpacity>
-                                <TouchableOpacity
-                                  style={[
-                                    styles.cardButton,
-                                    styles.cardButtonReject,
-                                  ]}
-                                  onPress={rejectInvitation}
-                                >
-                                  <Text style={styles.cardButtonText}>
-                                    Rechazar
-                                  </Text>
-                                </TouchableOpacity>
-                              </View>
+                      ))
+                    : notificaciones.map((notif, idx) => (
+                        <View key={idx} style={styles.cardContainer}>
+                          <View style={styles.cardHeader}>
+                            <Image
+                              source={
+                                avatarMap[notif.avatarInvitador]
+                                  ? avatarMap[notif.avatarInvitador]
+                                  : { uri: notif.avatarInvitador }
+                              }
+                              style={styles.cardAvatar}
+                            />
+                            <View style={{ flex: 1 }}>
+                              <Text style={styles.cardTitle}>
+                                {notif.nombreInvitador ||
+                                  "Invitador desconocido"}
+                              </Text>
+                              <Text style={styles.cardSubtitle}>
+                                te invitó a una partida
+                                {notif.nombreSala &&
+                                  ` en \"${notif.nombreSala}\"`}
+                                .
+                              </Text>
                             </View>
-                          ))}
-                        </ScrollView>
-                      )}
-                    </View>
-                  ))}
+                          </View>
+                          <View style={styles.cardActions}>
+                            <TouchableOpacity
+                              style={[
+                                styles.cardButton,
+                                styles.cardButtonAccept,
+                              ]}
+                              onPress={() => acceptInvitation(notif)}
+                            >
+                              <Text style={styles.cardButtonText}>Aceptar</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                              style={[
+                                styles.cardButton,
+                                styles.cardButtonReject,
+                              ]}
+                              onPress={() => rejectInvitation(notif)}
+                            >
+                              <Text style={styles.cardButtonText}>
+                                Rechazar
+                              </Text>
+                            </TouchableOpacity>
+                          </View>
+                        </View>
+                      ))}
                 </ScrollView>
               ) : (
                 <Text style={styles.notifText}>No hay notificaciones.</Text>
@@ -427,40 +451,6 @@ const Cabecera = ({ compacto = false }) => {
             </View>
           </View>
         )}
-
-        <Modal visible={showInvitationModal} transparent animationType="slide">
-          <View style={styles.modalContainer}>
-            <View style={styles.modalContent}>
-              <Text style={styles.modalTitle}>Invitación a Sala</Text>
-              <Text style={styles.modalText}>
-                Has sido invitado a la sala{" "}
-                <Text style={{ fontWeight: "bold" }}>
-                  {invitationData?.idSala}
-                </Text>
-              </Text>
-              <Text style={styles.modalText}>
-                Invitación de: {invitationData?.idInvitador}
-              </Text>
-              <Text style={styles.modalText}>
-                Código: {invitationData?.codigoInvitacion}
-              </Text>
-              <View style={styles.modalButtons}>
-                <TouchableOpacity
-                  style={styles.greenButton}
-                  onPress={acceptInvitation}
-                >
-                  <Text style={styles.buttonText}>Aceptar</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.redButton}
-                  onPress={rejectInvitation}
-                >
-                  <Text style={styles.buttonText}>Rechazar</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </View>
-        </Modal>
       </View>
     </SafeAreaView>
   );
@@ -471,7 +461,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#262522",
   },
   cabecera: {
-    width: width, // Se asigna el ancho del dispositivo
+    width: width,
     backgroundColor: "#262522",
     padding: 10,
     flexDirection: "column",
@@ -501,10 +491,6 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "700",
   },
-  rol: {
-    color: "#ccc",
-    fontSize: 12,
-  },
   notificationButton: {
     padding: 10,
     backgroundColor: "#333",
@@ -515,7 +501,6 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
   },
-  // Estilo para el círculo rojo (badge)
   redCircle: {
     position: "absolute",
     top: 5,
@@ -530,8 +515,8 @@ const styles = StyleSheet.create({
     top: 60,
     left: 0,
     right: 0,
-    zIndex: 10000, // zIndex más alto para superponer a todo
-    elevation: 10, // Para Android
+    zIndex: 10000,
+    elevation: 10,
     backgroundColor: "#262522",
     borderWidth: 1,
     borderColor: "#1f1e1c",
@@ -560,9 +545,6 @@ const styles = StyleSheet.create({
     maxHeight: 150,
   },
   notifScroll: {},
-  notifItem: {
-    paddingVertical: 4,
-  },
   notifText: {
     color: "#fff",
     fontSize: 14,
@@ -570,73 +552,6 @@ const styles = StyleSheet.create({
   errorText: {
     color: "red",
     fontSize: 14,
-  },
-  modalContainer: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  modalContent: {
-    backgroundColor: "#262522",
-    padding: 20,
-    borderRadius: 8,
-    width: "80%",
-    alignItems: "center",
-  },
-  modalTitle: {
-    color: "#fff",
-    fontSize: 20,
-    fontWeight: "bold",
-    marginBottom: 10,
-  },
-  modalText: {
-    color: "#fff",
-    fontSize: 16,
-    marginBottom: 5,
-    textAlign: "center",
-  },
-  modalButtons: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    width: "100%",
-    marginTop: 20,
-  },
-  greenButton: {
-    backgroundColor: "#a2d060",
-    padding: 10,
-    borderRadius: 4,
-    minWidth: 100,
-    alignItems: "center",
-  },
-  redButton: {
-    backgroundColor: "#e74c3c",
-    padding: 10,
-    borderRadius: 4,
-    minWidth: 100,
-    alignItems: "center",
-  },
-  buttonText: {
-    color: "#fff",
-    fontWeight: "bold",
-  },
-  notifButtons: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    marginTop: 5,
-  },
-  acceptButton: {
-    backgroundColor: "#008000",
-    paddingVertical: 5,
-    paddingHorizontal: 10,
-    borderRadius: 5,
-    marginRight: 5,
-  },
-  rejectButton: {
-    backgroundColor: "#e74c3c",
-    paddingVertical: 5,
-    paddingHorizontal: 10,
-    borderRadius: 5,
   },
   cardContainer: {
     backgroundColor: "#333",
@@ -656,11 +571,10 @@ const styles = StyleSheet.create({
   cardTitle: {
     color: "#fff",
     fontWeight: "bold",
-    fontSize: 16,
   },
   cardSubtitle: {
-    color: "#ccc",
-    fontSize: 14,
+    color: "#aaa",
+    fontSize: 12,
   },
   cardActions: {
     flexDirection: "row",
@@ -669,16 +583,16 @@ const styles = StyleSheet.create({
   },
   cardButton: {
     flex: 1,
-    paddingVertical: 8,
+    paddingVertical: 5,
+    marginHorizontal: 5,
     borderRadius: 5,
     alignItems: "center",
-    marginHorizontal: 5,
   },
   cardButtonAccept: {
     backgroundColor: "#008000",
   },
   cardButtonReject: {
-    backgroundColor: "#e74c3c",
+    backgroundColor: "#800000",
   },
   cardButtonText: {
     color: "#fff",

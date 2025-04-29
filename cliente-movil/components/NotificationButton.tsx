@@ -18,6 +18,7 @@ import axios from "axios";
 import Constants from "expo-constants";
 import socket from "@/app/(sala)/socket";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { InviteBus } from "../src/utils/InviteBus";
 
 const { width } = Dimensions.get("window");
 const BACKEND_URL = Constants.expoConfig?.extra?.backendUrl;
@@ -82,36 +83,39 @@ const NotificationButton = () => {
   // Configuración del socket para recibir invitaciones
   useEffect(() => {
     socket.on("invitacionSala", async (data) => {
-      // data contiene: { idAmigo, idSala, idInvitador }
+      // Log completo de la invitación en formato JSON
+      console.log("Invitación recibida:", JSON.stringify(data, null, 2));
+
+      // Log individual de cada componente de la invitación
+      console.log("Componentes de la invitación a una sala:");
+      console.log("idAmigo:", data.idAmigo);
+      console.log("idSala:", data.idSala);
+      console.log("idInvitador:", data.idInvitador);
+
+      // Aquí continuaría la lógica para enriquecer la invitación
+      // (por ejemplo, obteniendo el nombre y el avatar del invitador)
       try {
-        // Primero, obtenemos los datos completos (para el nombre, etc.) del invitador.
         const responseName = await axios.post(
           `${BACKEND_URL}/api/usuario/obtener_por_id`,
-          {
-            idUsuario: data.idInvitador,
-          }
+          { idUsuario: data.idInvitador }
         );
         const usuarioInvitador = responseName.data.usuario;
-
-        // Luego, usamos la nueva función para obtener solo el avatar por el id.
         const responseAvatar = await axios.post(
           `${BACKEND_URL}/api/usuario/obtener_avatar_por_id`,
-          {
-            idUsuario: data.idInvitador,
-          }
+          { idUsuario: data.idInvitador }
         );
         const avatarInvitador = responseAvatar.data.avatar;
+        console.log("Nombre del invitador:", usuarioInvitador.nombre);
+        console.log("Avatar del invitador:", avatarInvitador);
 
         const invitacionEnriquecida = {
           ...data,
           nombreInvitador: usuarioInvitador.nombre,
-          avatarInvitador: avatarInvitador, // Se utiliza el avatar obtenido con la nueva función
+          avatarInvitador: avatarInvitador,
         };
-
         setWsInvitaciones((prev: any[]) => [...prev, invitacionEnriquecida]);
       } catch (error) {
         console.error("Error al obtener datos del invitador:", error);
-        // En caso de error, se agrega la invitación sin los datos enriquecidos.
         setWsInvitaciones((prev: any[]) => [...prev, data]);
       }
     });
@@ -210,66 +214,97 @@ const NotificationButton = () => {
   };
 
   const handleDenegarSolicitud = async (idEmisor: number) => {
+    if (!user.id) return;
     try {
+      // Ahora llama al endpoint POST /api/solicitud/rechazar
       const response = await axios.post(
-        `${BACKEND_URL}/api/solicitud/denegar`,
+        `${BACKEND_URL}/api/solicitud/rechazar`,
         {
-          solicitudId: idEmisor,
+          idEmisor,
+          idReceptor: user.id,
         }
       );
-      if (response.data.exito) {
-        Alert.alert("Solicitud denegada", "La solicitud ha sido rechazada.");
-        setNotificaciones(
-          notificaciones.filter((n) => n.idUsuarioEmisor !== idEmisor)
+      if (response.data.mensaje) {
+        Alert.alert("Solicitud rechazada", response.data.mensaje);
+        // Filtrar la notificación de la lista
+        setNotificaciones((prev) =>
+          prev.filter((n) => n.idUsuarioEmisor !== idEmisor)
         );
-      } else {
-        Alert.alert("Error", "No se pudo rechazar la solicitud.");
       }
     } catch (error) {
-      console.error("Error al rechazar solicitud:", error);
+      console.error("Error al rechazar la solicitud:", error);
       Alert.alert("Error", "No se pudo rechazar la solicitud.");
     }
   };
 
-  // Funciones para aceptar o rechazar invitación a sala
-  const acceptInvitation = () => {
+  // Función actualizada para aceptar invitación a sala
+  const acceptInvitation = (notif: any) => {
     if (!user.id) {
       Alert.alert("Error", "Usuario no disponible");
       return;
     }
-    socket.emit("unirseSala", {
-      idSala: invitationData.idSala,
-      usuario: user,
-      contrasena: null,
-      codigoInvitacion: invitationData.codigoInvitacion,
-    });
-    setWsInvitaciones((prev: any[]) =>
-      prev.filter(
-        (inv) =>
-          inv.codigoInvitacion !== invitationData.codigoInvitacion ||
-          inv.idSala !== invitationData.idSala
-      )
-    );
-    setShowInvitationModal(false);
-    Alert.alert("Éxito", "Te has unido a la sala");
-    router.push({
-      pathname: "/(sala)/sala",
-      params: { idSala: invitationData.idSala },
+    // Primero solicitamos los datos de la sala
+    socket.emit("obtenerSala", notif.idSala, (salaData: any) => {
+      if (!salaData) {
+        Alert.alert("Error", "No se encontró la sala.");
+        return;
+      }
+      // Si existe, nos unimos
+      socket.emit("unirseSala", {
+        idSala: notif.idSala,
+        usuario: {
+          ...user,
+          id: String(user.id), // <-- forzamos string aquí
+        },
+        contrasena: salaData.contrasena || null,
+        codigoInvitacion: notif.codigoInvitacion,
+      });
+      // Limpiamos la invitación
+      setWsInvitaciones((prev) =>
+        prev.filter(
+          (inv) =>
+            inv.codigoInvitacion !== notif.codigoInvitacion ||
+            inv.idSala !== notif.idSala
+        )
+      );
+      // Notificamos al resto de la app
+      InviteBus.emit("invite:removed", {
+        idSala: notif.idSala,
+        codigoInvitacion: notif.codigoInvitacion,
+      });
+      Alert.alert("Éxito", "Te has unido a la sala");
+      router.push({
+        pathname: "/(sala)/sala",
+        params: { idSala: notif.idSala, salaData: JSON.stringify(salaData) },
+      });
     });
   };
 
-  const rejectInvitation = () => {
+  // Cambiamos la firma para recibir la invitación a rechazar
+  const rejectInvitation = (notif: any) => {
     if (!user.id) return;
     socket.emit("invitacionRechazada", { idAmigo: user.id });
-    setWsInvitaciones((prev: any[]) =>
+
+    // Filtramos wsInvitaciones y notificaciones para que la invitación desaparezca
+    setWsInvitaciones((prev) =>
       prev.filter(
         (inv) =>
-          inv.codigoInvitacion !== invitationData.codigoInvitacion ||
-          inv.idSala !== invitationData.idSala
+          inv.codigoInvitacion !== notif.codigoInvitacion ||
+          inv.idSala !== notif.idSala
       )
     );
-    setShowInvitationModal(false);
-    Alert.alert("Invitación", "Invitación rechazada");
+    setNotificaciones((prev) =>
+      prev.filter(
+        (inv) =>
+          inv.codigoInvitacion !== notif.codigoInvitacion ||
+          inv.idSala !== notif.idSala
+      )
+    );
+    InviteBus.emit("invite:removed", {
+      idSala: notif.idSala,
+      codigoInvitacion: notif.codigoInvitacion,
+    });
+    Alert.alert("Invitación rechazada");
   };
 
   // Calcular si hay notificaciones pendientes para mostrar el badge
@@ -329,9 +364,11 @@ const NotificationButton = () => {
                           <View style={styles.cardHeader}>
                             <Image
                               source={
-                                notif.avatarEmisor
+                                avatarMap[notif.avatarEmisor] // local key?
+                                  ? avatarMap[notif.avatarEmisor]
+                                  : notif.avatarEmisor // remote URL?
                                   ? { uri: notif.avatarEmisor }
-                                  : require("@/assets/images/imagenPerfil.webp")
+                                  : require("@/assets/images/imagenPerfil.webp") // fallback
                               }
                               style={styles.cardAvatar}
                             />
@@ -406,7 +443,7 @@ const NotificationButton = () => {
                                 styles.cardButton,
                                 styles.cardButtonAccept,
                               ]}
-                              onPress={acceptInvitation}
+                              onPress={() => acceptInvitation(notif)}
                             >
                               <Text style={styles.cardButtonText}>Aceptar</Text>
                             </TouchableOpacity>
@@ -415,7 +452,7 @@ const NotificationButton = () => {
                                 styles.cardButton,
                                 styles.cardButtonReject,
                               ]}
-                              onPress={rejectInvitation}
+                              onPress={() => rejectInvitation(notif)}
                             >
                               <Text style={styles.cardButtonText}>
                                 Rechazar

@@ -16,10 +16,15 @@
         "foregroundImage": "./assets/images/app-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "softwareKeyboardLayoutMode": "pan"
+      "softwareKeyboardLayoutMode": "pan",
+      "package": "com.robertawilliams.clientemovil"
     },
     "extra": {
-      "backendUrl": "http://192.168.0.18:5000"
+      "backendUrl": "http://albertofsg.ddns.net:5000",
+      "router": {
+        "origin": false
+      },
+      "eas": {}
     },
     "web": {
       "bundler": "metro",
@@ -40,6 +45,7 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "owner": "oscar-gilbe"
   }
 }

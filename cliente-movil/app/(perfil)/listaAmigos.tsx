@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import {
   View,
   Text,
@@ -48,13 +48,16 @@ export default function AmigosScreen(): JSX.Element {
   const BACKEND_URL = Constants.expoConfig?.extra?.backendUrl;
   const [amigosDetalles, setAmigosDetalles] = useState<Jugador[]>([]);
   const [nuevoAmigo, setNuevoAmigo] = useState("");
-  const [mensaje, setMensaje] = useState<string | null>(null);
+  const [searchSuggestions, setSearchSuggestions] = useState<Jugador[]>([]);
+  const [loadingSearch, setLoadingSearch] = useState(false);
+  const [searchError, setSearchError] = useState<string | null>(null);
   const [usuario, setUsuario] = useState<{
     idUsuario: number;
     nombre: string;
   } | null>(null);
   const [salaActual, setSalaActual] = useState<any>(null);
   const [salasPublicas, setSalasPublicas] = useState<any[]>([]);
+  const debounceRef = useRef<NodeJS.Timeout | null>(null);
 
   useFocusEffect(
     useCallback(() => {
@@ -194,7 +197,7 @@ export default function AmigosScreen(): JSX.Element {
         { nombre: nuevoAmigo.trim() }
       );
       if (!responseUsuario.data.usuario) {
-        setMensaje("Usuario no encontrado");
+        setSearchError("Usuario no encontrado");
         return;
       }
       const idReceptor = responseUsuario.data.usuario.idUsuario;
@@ -203,14 +206,14 @@ export default function AmigosScreen(): JSX.Element {
         { idEmisor: usuario.idUsuario, idReceptor }
       );
       if (responseSolicitud.data.solicitud) {
-        setMensaje("¡Solicitud enviada con éxito!");
+        setSearchError("¡Solicitud enviada con éxito!");
       }
     } catch (error) {
       console.error("Error al enviar solicitud:", error);
-      setMensaje("Error al enviar solicitud");
+      setSearchError("Error al enviar solicitud");
     } finally {
       setNuevoAmigo("");
-      setTimeout(() => setMensaje(null), 1500);
+      setTimeout(() => setSearchError(null), 1500);
     }
   };
 
@@ -218,18 +221,18 @@ export default function AmigosScreen(): JSX.Element {
   const unirseASalaPublica = async (sala: any) => {
     if (salaActual) {
       socket.emit("salirDeSala", {
-        idUsuario: usuario?.idUsuario,
+        idUsuario: String(usuario?.idUsuario), // ahora siempre string
         idSala: salaActual.id,
       });
       await AsyncStorage.removeItem("salaActual");
       setSalaActual(null);
-      setMensaje("Has salido de tu sala actual.");
-      setTimeout(() => setMensaje(null), 1500);
+      setSearchError("Has salido de tu sala actual.");
+      setTimeout(() => setSearchError(null), 1500);
     }
     socket.emit("unirseSala", {
       idSala: sala.id,
       usuario: {
-        id: usuario?.idUsuario,
+        id: String(usuario?.idUsuario), // ahora siempre string
         nombre: usuario?.nombre,
         avatar: "avatar1",
       },
@@ -264,11 +267,49 @@ export default function AmigosScreen(): JSX.Element {
       setAmigosDetalles((prev) =>
         prev.filter((amigo) => (amigo.idUsuario || amigo.id) !== idAmigo)
       );
-      setMensaje("¡Amigo eliminado con éxito!");
-      setTimeout(() => setMensaje(null), 1500);
+      setSearchError("¡Amigo eliminado con éxito!");
+      setTimeout(() => setSearchError(null), 1500);
     } catch (error) {
       console.error("Error al eliminar amigo:", error);
     }
+  };
+
+  const fetchUserSuggestions = async (nombre: string) => {
+    if (!nombre.trim()) {
+      setSearchError("Por favor, ingresa un nombre.");
+      setSearchSuggestions([]);
+      // Que el mensaje solo dure 2 segundos
+      setTimeout(() => setSearchError(null), 2000);
+      return;
+    }
+    setLoadingSearch(true);
+    setSearchError(null);
+    try {
+      const resp = await axios.post(
+        `${BACKEND_URL}/api/usuario/buscar_por_nombre`,
+        { nombre }
+      );
+      setSearchSuggestions(resp.data.usuarios || []);
+    } catch (err) {
+      console.error("Error al buscar sugerencias:", err);
+      setSearchError("Error al buscar sugerencias.");
+      setTimeout(() => setSearchError(null), 2000);
+    } finally {
+      setLoadingSearch(false);
+    }
+  };
+
+  const onChangeNuevoAmigo = (text: string) => {
+    setNuevoAmigo(text);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      fetchUserSuggestions(text);
+    }, 500);
+  };
+
+  const onSelectSuggestion = (s: Jugador) => {
+    setNuevoAmigo(s.nombre);
+    setSearchSuggestions([]);
   };
 
   return (
@@ -280,9 +321,9 @@ export default function AmigosScreen(): JSX.Element {
       >
         <View style={styles.overlay} />
         <Text style={styles.titulo}>Lista de Amigos</Text>
-        {mensaje && (
+        {searchError && (
           <View style={styles.mensajeExitoContainer}>
-            <Text style={styles.mensajeExito}>{mensaje}</Text>
+            <Text style={styles.mensajeExito}>{searchError}</Text>
           </View>
         )}
         <View style={styles.addFriendContainer}>
@@ -291,7 +332,7 @@ export default function AmigosScreen(): JSX.Element {
             placeholder="Nombre del usuario"
             placeholderTextColor="#666"
             value={nuevoAmigo}
-            onChangeText={setNuevoAmigo}
+            onChangeText={onChangeNuevoAmigo}
           />
           <TouchableOpacity
             style={styles.botonAnadir}
@@ -300,6 +341,22 @@ export default function AmigosScreen(): JSX.Element {
             <Text style={styles.botonAnadirTexto}>ENVIAR SOLICITUD</Text>
           </TouchableOpacity>
         </View>
+
+        {loadingSearch && <Text style={styles.textoAyuda}>Buscando…</Text>}
+        {searchSuggestions.length > 0 && (
+          <View style={styles.suggestionsContainer}>
+            {searchSuggestions.map((s) => (
+              <TouchableOpacity
+                key={s.idUsuario || s.id}
+                style={styles.suggestionItem}
+                onPress={() => onSelectSuggestion(s)}
+              >
+                <Text style={styles.suggestionText}>{s.nombre}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
+
         <ScrollView
           contentContainerStyle={styles.scrollContainer}
           showsVerticalScrollIndicator={false}
@@ -463,4 +520,19 @@ const styles = StyleSheet.create({
   textoBoton: { color: "#fff", fontWeight: "bold" },
   containerAtras: { position: "absolute", bottom: 20, left: "46%" },
   imageAtras: { height: 40, width: 40 },
+  textoAyuda: { marginHorizontal: 20, color: "#888" },
+  errorTexto: { marginHorizontal: 20, color: "red" },
+  suggestionsContainer: {
+    marginHorizontal: 20,
+    backgroundColor: "#fff",
+    borderRadius: 8,
+    maxHeight: 150,
+  },
+  suggestionItem: {
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#eee",
+  },
+  suggestionText: { fontSize: 16, color: "#333" },
 });
