@@ -159,10 +159,19 @@ const Jugando: React.FC = () => {
 
       //  setJugadoresEstado(data.jugadores);
     });
+    console.log("Escucho estadoPartida:");
+    socket.on("estadoPartida", (data) => {
+      setJornadaActual(data.numJornada);
+      setEtapaActual(data.turno);
+      setJugadoresEstado(data.listaJugadores);
+      actualizarMaxTiempo(data.tiempoRestante);
+      // si hay lógica de cambio de fase, llama a agregarEstado con data.faseActual
+    });
 
     // Limpiar el listener al desmontar
     return () => {
       socket.off("estadoJugadores");
+      socket.off("estadoPartida");
     };
   }, [idSala]);
 
