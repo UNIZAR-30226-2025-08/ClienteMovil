@@ -7,10 +7,42 @@ import {
   Alert,
   FlatList,
   BackHandler,
+  Image,
 } from "react-native";
-import { useRouter, useLocalSearchParams } from "expo-router";
 import socket from "@/app/(sala)/socket"; // Módulo de conexión
+import axios from "axios";
+import Constants from "expo-constants";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+
+/**
+ * Mapa de avatares local (assets empaquetados)
+ */
+const avatarMap: Record<string, any> = {
+  avatar1: require("@/assets/images/imagenPerfil.webp"),
+  avatar2: require("@/assets/images/imagenPerfil2.webp"),
+  avatar3: require("@/assets/images/imagenPerfil3.webp"),
+  avatar4: require("@/assets/images/imagenPerfil4.webp"),
+  avatar5: require("@/assets/images/imagenPerfil5.webp"),
+  avatar6: require("@/assets/images/imagenPerfil6.webp"),
+  avatar7: require("@/assets/images/imagenPerfil7.webp"),
+  avatar8: require("@/assets/images/imagenPerfil8.webp"),
+};
+const defaultAvatar = require("@/assets/images/imagenPerfil.webp");
+
+/** Obtiene la clave del avatar de un usuario desde el backend */
+async function fetchAvatarKey(idUsuario: string) {
+  try {
+    const resp = await axios.post(
+      `${Constants.expoConfig?.extra?.backendUrl}/api/usuario/obtener_avatar_por_id`,
+      { idUsuario }
+    );
+    return resp.data.avatar || "avatar1";
+  } catch (err) {
+    console.warn("Error al obtener avatar:", err);
+    return "avatar1";
+  }
+}
 
 /**
  * Interfaz que define la estructura de un jugador en la sala
@@ -24,7 +56,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 type Player = {
   id: string;
   name: string;
-  avatar: string;
+  avatarKey: string; // clave obtenida dinámicamente
   isReady: boolean;
   isOwner?: boolean; // Indica si es el dueño de la sala
 };
@@ -143,42 +175,41 @@ export default function SalaPreviaScreen(): JSX.Element {
    * - Se recibe una actualización de la sala desde el servidor
    */
   useEffect(() => {
-    if (salaData) {
+    async function loadInitialPlayers() {
+      if (!salaData) return;
       const sala = JSON.parse(salaData);
-      setPlayers(
-        sala.jugadores.map((j: any) => ({
+      const list = await Promise.all(
+        sala.jugadores.map(async (j: any) => ({
           id: j.id,
           name: j.nombre || j.id,
-          avatar: j.avatar,
+          avatarKey: await fetchAvatarKey(j.id),
           isReady: j.listo || false,
           isOwner: sala.lider === j.id,
         }))
       );
+      setPlayers(list);
     }
-    // Suscribirse a "actualizarSala" para cambios futuros
-    socket.on("actualizarSala", (sala) => {
+    loadInitialPlayers();
+
+    socket.on("actualizarSala", async (sala) => {
       console.log("Evento actualizarSala recibido:", sala);
-      setPlayers(
-        sala.jugadores.map((j: any) => ({
+      setRoomName(sala.nombre?.trim() ? sala.nombre : "Sala sin nombre");
+      const updated = await Promise.all(
+        sala.jugadores.map(async (j: any) => ({
           id: j.id,
           name: j.nombre || j.id,
-          avatar: j.avatar,
+          avatarKey: await fetchAvatarKey(j.id),
           isReady: j.listo || false,
-          isOwner: String(j.id) === String(sala.lider), // Asegura comparación correcta
+          isOwner: String(j.id) === String(sala.lider),
         }))
       );
-      // Actualiza dinámicamente el nombre de la sala
-      setRoomName(
-        sala.nombre && sala.nombre.trim() !== ""
-          ? sala.nombre
-          : "Sala sin nombre"
-      );
+      setPlayers(updated);
     });
 
     return () => {
       socket.off("actualizarSala");
     };
-  }, []);
+  }, [salaData]);
 
   // Efecto para recuperar el usuario desde AsyncStorage
   useEffect(() => {
@@ -207,7 +238,7 @@ export default function SalaPreviaScreen(): JSX.Element {
         {
           id: data.id,
           name: data.nombre || data.id,
-          avatar: data.avatar,
+          avatarKey: defaultAvatar,
           isReady: false,
           isOwner: false,
         },
@@ -459,15 +490,23 @@ export default function SalaPreviaScreen(): JSX.Element {
    * Renderiza cada tarjeta de jugador.
    */
   const renderPlayerItem = ({ item }: { item: Player }) => {
-    const esLider = usuarioData?.id === players.find((p) => p.isOwner)?.id;
+    const isEmpty = item.id.startsWith("empty-");
+    const liderId = players.find((p) => p.isOwner)?.id;
+    const esLider = usuarioData?.id === liderId;
     const soyYo = item.id === usuarioData?.id;
 
     return (
-      <View style={styles.playerCard}>
+      <View
+        style={[styles.playerCard, esLider ? styles.playerCardLeader : null]}
+      >
         {item.isOwner && <Text style={styles.ownerCrown}>👑</Text>}
         <Text style={styles.playerName}>{item.name}</Text>
-
-        {/* Estado Listo / No Listo */}
+        {!isEmpty && (
+          <Image
+            source={avatarMap[item.avatarKey] || defaultAvatar}
+            style={styles.avatarCircle}
+          />
+        )}
         <TouchableOpacity
           style={[
             styles.readyButton,
@@ -480,8 +519,8 @@ export default function SalaPreviaScreen(): JSX.Element {
           </Text>
         </TouchableOpacity>
 
-        {/* Botón de expulsar visible solo para el líder y no para sí mismo */}
-        {esLider && !soyYo && (
+        {/* expulsar solo si es líder, no es tuyo y no es slot vacío */}
+        {esLider && !soyYo && !isEmpty && (
           <TouchableOpacity
             style={styles.botonExpulsar}
             onPress={() => {
@@ -519,7 +558,7 @@ export default function SalaPreviaScreen(): JSX.Element {
   const emptySlots = Array.from({ length: emptySlotsCount }, (_, i) => ({
     id: `empty-${i}`,
     name: "Vacío",
-    avatar: "avatar1",
+    avatarKey: "avatar1",
     isReady: false,
   }));
 
@@ -623,12 +662,20 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+  // tarjeta especial para el líder
+  playerCardLeader: {
+    height: 150, // sube un poco la tarjeta para el expulsar
+    justifyContent: "space-between",
+    paddingVertical: 6, // más espacio interior
+  },
 
   ownerCrown: {
     position: "absolute",
-    top: 5,
+    top: 18, // baja la corona para que quede junto al avatar
     right: 5,
     fontSize: 20,
+    zIndex: 10, // asegúrate de que la corona esté por encima
+    elevation: 10, // en Android también
   },
 
   playerName: {
@@ -706,7 +753,7 @@ const styles = StyleSheet.create({
   },
 
   botonExpulsar: {
-    marginTop: 6,
+    marginTop: 4, // reduce el margen para que no sobresalga
     backgroundColor: "#800000",
     paddingHorizontal: 8,
     paddingVertical: 4,
@@ -717,5 +764,13 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 12,
     fontWeight: "bold",
+  },
+
+  avatarCircle: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    marginBottom: 5,
+    zIndex: 1, // avatar por debajo de la corona
   },
 });
