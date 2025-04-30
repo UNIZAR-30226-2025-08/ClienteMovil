@@ -492,8 +492,8 @@ export default function SalaPreviaScreen(): JSX.Element {
   const renderPlayerItem = ({ item }: { item: Player }) => {
     const isEmpty = String(item.id).startsWith("empty-");
     const liderId = players.find((p) => p.isOwner)?.id;
-    const esLider = usuarioData?.id === liderId;
-    const soyYo = item.id === usuarioData?.id;
+    const esLider = usuarioData?.id == liderId;
+    const soyYo = item.id == usuarioData?.id;
 
     return (
       <View
