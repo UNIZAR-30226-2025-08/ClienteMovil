@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Constants from "expo-constants";
 import {
   ImageBackground,
@@ -45,6 +45,9 @@ export default function App(): JSX.Element | null {
 
   /** Estado para la contraseña del usuario */
   const [contrasena, setContrasena] = useState("");
+
+  /** Estado para el id del usuario. Sólo usado tras iniciar sesión */
+  const [idUsuario, setIdUsuario] = useState("");
 
   /**
    * Estado para controlar la visibilidad de la contraseña.
@@ -157,7 +160,8 @@ export default function App(): JSX.Element | null {
           socket.emit("registrarUsuario", {
             idUsuario: data.usuario.idUsuario,
           });
-          router.push("/entrar");
+          setIdUsuario(data.usuario.idUsuario);
+          // Ahora no entra directamente, espera eventos
         }
       } else {
         Alert.alert(
@@ -170,6 +174,81 @@ export default function App(): JSX.Element | null {
       Alert.alert("Error", "No se pudo conectar con el servidor.");
     }
   };
+
+  /**
+   * Efecto que se ejecuta cuando cambia el ID de la sala (`idSala`).
+   *
+   * - Solicita al backend el estado actual de la partida mediante el evento `obtenerEstadoPartida`.
+   * - Al recibir la respuesta por `estadoPartida`, actualiza el estado local de `jugadoresEstado`.
+   * - El listener se limpia al desmontar el componente o cuando `idSala` cambia.
+   */
+  useEffect(() => {
+    if (!idUsuario) return;
+    console.log("Lanzo buscarPartida");
+
+    // Emitir evento al backend para preguntar si el usuario está en una partida
+    socket.emit("buscarPartidaUsuario", { idUsuario: idUsuario });
+
+    // Escuchar la respuesta del backend
+    socket.on(
+      "partidaEncontrada",
+      ({
+        idPartida,
+        idSala,
+        rol,
+        idUsuario,
+        nombreUsuario,
+        jugadores,
+        lider,
+      }) => {
+        if (!idPartida) {
+          console.log("Error: Partida no encontrada");
+          return;
+        }
+
+        const sala = {
+          jugadores,
+          lider,
+        };
+
+        router.replace("/entrar");
+        setTimeout(() => {
+          router.push({
+            pathname: "/(jugando)/jugando",
+            params: {
+              idSala: idSala,
+              salaData: JSON.stringify(sala),
+              rol: rol,
+              usuarioID: idUsuario,
+              usuarioNombre: nombreUsuario,
+            },
+          });
+        }, 30);
+
+        setTimeout(() => {
+          socket.emit("reconectarPartida", {
+            idPartida: idPartida,
+            idUsuario: idUsuario,
+          });
+        }, 30);
+      }
+    );
+
+    // Escuchar la respuesta del backend
+    socket.on("partidaNoEncontrada", (data) => {
+      console.log("No en partida");
+      if (data.error) {
+        return;
+      }
+      router.push("/entrar");
+    });
+
+    // Limpiar el listener al desmontar
+    return () => {
+      socket.off("partidaEncontrada");
+      socket.off("partidaNoEncontrada");
+    };
+  }, [idUsuario]);
 
   return (
     <KeyboardAvoidingView

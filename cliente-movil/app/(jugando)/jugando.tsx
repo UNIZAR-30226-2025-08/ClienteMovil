@@ -72,6 +72,7 @@ enum Estado {
   partidaFinalizada,
   usuarioLocalMuerto,
   empateVotacionDia,
+  segundoEmpateVotacionDia,
   resultadoVotosDia,
 }
 
@@ -158,10 +159,19 @@ const Jugando: React.FC = () => {
 
       //  setJugadoresEstado(data.jugadores);
     });
+    console.log("Escucho estadoPartida:");
+    socket.on("estadoPartida", (data) => {
+      setJornadaActual(data.numJornada);
+      setEtapaActual(data.turno);
+      setJugadoresEstado(data.listaJugadores);
+      actualizarMaxTiempo(data.tiempoRestante);
+      // si hay lógica de cambio de fase, llama a agregarEstado con data.faseActual
+    });
 
     // Limpiar el listener al desmontar
     return () => {
       socket.off("estadoJugadores");
+      socket.off("estadoPartida");
     };
   }, [idSala]);
 
@@ -414,7 +424,7 @@ const Jugando: React.FC = () => {
    * @type {number}
    */
   const indiceUsuario = jugadoresEstado.findIndex(
-    (jugador) => jugador.id === usuarioID
+    (jugador) => jugador.id == usuarioID
   );
 
   /**
@@ -1306,7 +1316,7 @@ const Jugando: React.FC = () => {
   });
 
   /**
-   * Controla si se muestra la animación de cuando termina la sucesión del alguacil.
+   * Controla si se muestra la animación de cuando se da el primer empate en las votaciones diurnas.
    * @type {boolean}
    */
   const [
@@ -1315,7 +1325,7 @@ const Jugando: React.FC = () => {
   ] = useState<boolean>(false);
 
   /**
-   * Valores de opacidad y visibilidad para la animación de cuando termina la sucesión del alguacil.
+   * Valores de opacidad y visibilidad para la animación de cuando se da el primer empate en las votaciones diurnas.
    * @type {boolean}
    * Generados por el hook `useGestorAnimaciones`.
    */
@@ -1328,6 +1338,31 @@ const Jugando: React.FC = () => {
     duracionFadeOut,
     numAnimaciones: 1,
     start: mostrarAnimacionEmpateVotacionDiurna,
+  });
+
+  /**
+   * Controla si se muestra la animación de cuando se da el segundo empate en las votaciones diurnas.
+   * @type {boolean}
+   */
+  const [
+    mostrarAnimacionSegundoEmpateVotacionDiurna,
+    setMostrarAnimacionSegundoEmpateVotacionDiurna,
+  ] = useState<boolean>(false);
+
+  /**
+   * Valores de opacidad y visibilidad para la animación de cuando cuando se da el segundo empate en las votaciones diurnas.
+   * @type {boolean}
+   * Generados por el hook `useGestorAnimaciones`.
+   */
+  const {
+    opacities: opacitiesSegundoEmpateVotacionDiurna,
+    mostrarComponentes: mostrarComponentesSegundoEmpateVotacionDiurna,
+  } = useGestorAnimaciones({
+    duracionFadeIn,
+    duracionEspera,
+    duracionFadeOut,
+    numAnimaciones: 1,
+    start: mostrarAnimacionSegundoEmpateVotacionDiurna,
   });
 
   // ---------------------------------------------------------------------------
@@ -1652,10 +1687,7 @@ const Jugando: React.FC = () => {
         );
         return;
       }
-      if (
-        botellaSeleccionada === "muerte" &&
-        jugadorObjetivo.id === usuarioID
-      ) {
+      if (botellaSeleccionada === "muerte" && jugadorObjetivo.id == usuarioID) {
         mostrarError("No puedes lanzarte la poción de muerte a ti misma");
         logCustom(
           jornadaActual,
@@ -2178,7 +2210,7 @@ const Jugando: React.FC = () => {
       if (data.alguacil) {
         setJugadoresEstado((prevJugadores) =>
           prevJugadores.map((jugador) =>
-            jugador.id === data.alguacil
+            jugador.id == data.alguacil
               ? { ...jugador, esAlguacil: true }
               : jugador
           )
@@ -2218,6 +2250,7 @@ const Jugando: React.FC = () => {
         `Evento recibido: segundoEmpateVotacionDia - ${JSON.stringify(data)}`,
         jugadoresEstado[indiceUsuario]
       );
+      agregarEstado(Estado.segundoEmpateVotacionDia);
     });
     socket.on("resultadoVotosDia", (data) => {
       logCustom(
@@ -2745,6 +2778,24 @@ const Jugando: React.FC = () => {
         setJugadorSeleccionado(null);
 
         break;
+      case Estado.segundoEmpateVotacionDia:
+        setPlantillaActual(plantillaAnimacionDia);
+        cerrarHabilidad();
+        cerrarChat();
+
+        setMostrarAnimacionSegundoEmpateVotacionDiurna(true);
+
+        await new Promise((resolve) => setTimeout(resolve, duracionAnimacion));
+
+        setMostrarAnimacionSegundoEmpateVotacionDiurna(false);
+
+        setPlantillaActual(plantillaVotacionDiurna);
+        reiniciarTemporizador();
+        setVotoRealizado(false);
+        setPasoTurno(false);
+        setJugadorSeleccionado(null);
+
+        break;
       case Estado.partidaFinalizada:
         Alert.alert(
           "Sin hacer",
@@ -2968,6 +3019,13 @@ const Jugando: React.FC = () => {
           <AnimacionGenerica
             opacity={opacitiesEmpateVotacionDiurna[0]}
             mostrarComponente={mostrarComponentesEmpateVotacionDiurna[0]}
+            texto="NO SE HA LLEGADO A UNA MAYORÍA SIMPLE DE A QUÉ JUGADOR MATAR."
+          />
+        )}
+        {mostrarAnimacionSegundoEmpateVotacionDiurna && (
+          <AnimacionGenerica
+            opacity={opacitiesSegundoEmpateVotacionDiurna[0]}
+            mostrarComponente={mostrarComponentesSegundoEmpateVotacionDiurna[0]}
             texto="NO SE HA LLEGADO A UNA MAYORÍA SIMPLE DE A QUÉ JUGADOR MATAR."
           />
         )}

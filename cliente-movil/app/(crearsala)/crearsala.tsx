@@ -72,6 +72,9 @@ const CrearSala = (): JSX.Element => {
   // Estado para la privacidad ("publica" o "Privada")
   const [privacidad, setPrivacidad] = useState("Privada");
 
+  // Estado para el letrero de privacidad ("Pública" o "Privada")
+  const [privacidadVisual, setPrivacidadVisual] = useState(" Privada ");
+
   // Estado para la contraseña (si la sala es privada)
   const [password, setPassword] = useState("");
 
@@ -201,6 +204,9 @@ const CrearSala = (): JSX.Element => {
    */
   const cambiarPrivacidad = () => {
     setPrivacidad((prev) => (prev === "publica" ? "Privada" : "publica"));
+    setPrivacidadVisual((prev) =>
+      prev === " Pública " ? " Privada " : " Pública "
+    );
   };
 
   /**
@@ -395,7 +401,7 @@ const CrearSala = (): JSX.Element => {
           <Text style={styles.label}>Tipo:</Text>
           <View style={styles.privacidadBotones}>
             <Button title="⇦" onPress={cambiarPrivacidad} />
-            <Text style={styles.label}>{privacidad}</Text>
+            <Text style={styles.label}>{privacidadVisual}</Text>
             <Button title="⇨" onPress={cambiarPrivacidad} />
           </View>
         </View>
