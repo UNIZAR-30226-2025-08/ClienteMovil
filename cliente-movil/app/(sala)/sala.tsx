@@ -394,7 +394,7 @@ export default function SalaPreviaScreen(): JSX.Element {
     const esLider = usuarioData ? usuarioData.id === getLiderId() : false;
 
     const usuarioId = usuarioData.id.trim(); // Asegurar que no haya espacios
-    const liderId = players.find((p) => p.isOwner)?.id?.trim();
+    const liderId = String(players.find((p) => p.isOwner)?.id ?? "");
 
     console.log(
       "Usuario ID:",
@@ -490,10 +490,10 @@ export default function SalaPreviaScreen(): JSX.Element {
    * Renderiza cada tarjeta de jugador.
    */
   const renderPlayerItem = ({ item }: { item: Player }) => {
-    const isEmpty = item.id.startsWith("empty-");
+    const isEmpty = String(item.id).startsWith("empty-");
     const liderId = players.find((p) => p.isOwner)?.id;
-    const esLider = usuarioData?.id === liderId;
-    const soyYo = item.id === usuarioData?.id;
+    const esLider = usuarioData?.id == liderId;
+    const soyYo = item.id == usuarioData?.id;
 
     return (
       <View
