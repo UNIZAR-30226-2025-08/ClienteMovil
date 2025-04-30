@@ -490,7 +490,7 @@ export default function SalaPreviaScreen(): JSX.Element {
    * Renderiza cada tarjeta de jugador.
    */
   const renderPlayerItem = ({ item }: { item: Player }) => {
-    const isEmpty = item.id.startsWith("empty-");
+    const isEmpty = String(item.id).startsWith("empty-");
     const liderId = players.find((p) => p.isOwner)?.id;
     const esLider = usuarioData?.id === liderId;
     const soyYo = item.id === usuarioData?.id;
