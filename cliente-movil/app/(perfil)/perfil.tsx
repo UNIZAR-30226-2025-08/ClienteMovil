@@ -409,7 +409,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     width: 150,
-    height: 45,
+    height: 50,
     marginTop: 15,
     borderRadius: 10,
   },
@@ -424,7 +424,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     width: 150,
-    height: 45, // Aumenta la altura del botón
+    height: 50,
     marginTop: 15,
     borderRadius: 10,
   },
@@ -433,7 +433,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: 20,
     color: "white",
-    textAlign: "center", // Alinea el texto al centro
+    textAlign: "center",
   },
 
   botonEditar: {

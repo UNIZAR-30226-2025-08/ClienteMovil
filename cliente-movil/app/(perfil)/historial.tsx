@@ -10,7 +10,7 @@ import {
   ActivityIndicator,
   Modal,
 } from "react-native";
-import { useRouter } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import Constants from "expo-constants";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -23,6 +23,9 @@ const imagenAtras = require("@/assets/images/botonAtras.png");
 
 export default function HistorialPartidasScreen(): JSX.Element {
   const router = useRouter();
+
+  // Recibimos opcionalmente el ID del usuario a consultar
+  const { usuarioId } = useLocalSearchParams<{ usuarioId: string }>();
 
   const [partidas, setPartidas] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -47,17 +50,23 @@ export default function HistorialPartidasScreen(): JSX.Element {
   useEffect(() => {
     const fetchHistorial = async () => {
       try {
-        // Leer sólo el ID de usuario
-        const idStr = await AsyncStorage.getItem("idUsuario");
-        if (!idStr) {
-          setError("Usuario no encontrado");
-          return;
+        // Si vino por parámetro, lo usamos; si no, caemos en AsyncStorage
+        let id: number;
+        if (usuarioId) {
+          id = parseInt(usuarioId, 10);
+        } else {
+          const idStr = await AsyncStorage.getItem("idUsuario");
+          if (!idStr) {
+            setError("Usuario no encontrado");
+            setLoading(false);
+            return;
+          }
+          id = parseInt(idStr, 10);
         }
-        const idUsuario = parseInt(idStr, 10);
 
         // Petición al backend
         const resp = await axios.get(
-          `${Constants.expoConfig?.extra?.backendUrl}/api/juega/usuario/${idUsuario}`
+          `${Constants.expoConfig?.extra?.backendUrl}/api/juega/usuario/${id}`
         );
         const datos: any[] = resp.data || [];
         console.log("Datos recibidos del backend:", resp.data);
@@ -88,7 +97,7 @@ export default function HistorialPartidasScreen(): JSX.Element {
     };
 
     fetchHistorial();
-  }, []);
+  }, [usuarioId]);
 
   return (
     <View style={styles.container}>

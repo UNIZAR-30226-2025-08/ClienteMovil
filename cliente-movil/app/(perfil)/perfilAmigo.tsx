@@ -81,7 +81,7 @@ export default function PerfilAmigoScreen(): JSX.Element {
     const fetchAmigoDetails = async () => {
       try {
         const amigoIdFromStorage = await AsyncStorage.getItem("amigoId");
-        console.log("ID del amigo desde los parámetros:", amigoIdFromStorage);
+        //console.log("ID del amigo desde los parámetros:", amigoIdFromStorage);
 
         const response = await axios.post(
           `${BACKEND_URL}/api/usuario/obtener_por_id`,
@@ -121,31 +121,44 @@ export default function PerfilAmigoScreen(): JSX.Element {
 
   return (
     <View style={styles.container}>
-      <ImageBackground
-        source={imagenFondoRoles}
-        resizeMode="cover"
-        style={styles.image}
-      >
+      <ImageBackground source={imagenFondoRoles} style={styles.image}>
         <View style={styles.overlay} />
         <Image
           source={avatarMap[amigo.avatar || "avatar1"]}
           style={styles.profileImage}
         />
 
-        <Image source={imagenPapiro} style={styles.imagePapiro} />
+        {/* Papiro con nombre dentro */}
+        <ImageBackground source={imagenPapiro} style={styles.imagePapiro}>
+          <Text style={styles.textoNombrePapiro}>👤 {amigo.nombre}</Text>
+        </ImageBackground>
 
         <View style={styles.formContainer}>
-          <Text style={styles.textoNombre}>{amigo.nombre}</Text>
           <Text style={styles.fechaCreacion}>
-            Perfil creado:{" "}
+            📅 Perfil creado:{" "}
             {new Date(amigo.fechaCreacion).toLocaleDateString("es-ES")}
           </Text>
-          <Text style={styles.textoRol}>Rol favorito: {amigo.rolFavorito}</Text>
+          <Text style={styles.textoRol}>
+            ⭐ Rol favorito: {amigo.rolFavorito}
+          </Text>
           {victorias !== null && (
             <Text style={styles.textoRol}>
-              Número de victorias: {victorias}
+              🏆 Número de victorias: {victorias}
             </Text>
           )}
+
+          {/* Historial de partidas justo debajo de las victorias */}
+          <TouchableOpacity
+            style={styles.botonHistorial}
+            onPress={() =>
+              router.push({
+                pathname: "/(perfil)/historial",
+                params: { usuarioId: amigo.idUsuario.toString() },
+              })
+            }
+          >
+            <Text style={styles.textoHistorial}>HISTORIAL PARTIDAS</Text>
+          </TouchableOpacity>
         </View>
 
         <TouchableOpacity
@@ -185,6 +198,7 @@ const styles = StyleSheet.create({
     top: 80,
     left: "50%",
     marginLeft: -50,
+    zIndex: 1,
   },
 
   imagePapiro: {
@@ -193,6 +207,8 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: "20%",
     left: "8%",
+    justifyContent: "flex-start",
+    alignItems: "center",
   },
 
   formContainer: {
@@ -204,10 +220,13 @@ const styles = StyleSheet.create({
     height: "40%",
   },
 
-  textoNombre: {
+  textoNombrePapiro: {
     fontSize: 30,
     fontWeight: "bold",
     color: "black",
+    marginTop: 20,
+    textAlign: "center",
+    width: "100%",
   },
 
   fechaCreacion: {
@@ -233,5 +252,22 @@ const styles = StyleSheet.create({
   imageAtras: {
     height: 40,
     width: 40,
+  },
+
+  botonHistorial: {
+    backgroundColor: "#000",
+    justifyContent: "center",
+    alignItems: "center",
+    width: 150,
+    height: 50,
+    marginTop: 15,
+    borderRadius: 10,
+  },
+
+  textoHistorial: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 20,
+    textAlign: "center",
   },
 });
