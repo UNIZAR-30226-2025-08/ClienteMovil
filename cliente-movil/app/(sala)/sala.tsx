@@ -394,7 +394,7 @@ export default function SalaPreviaScreen(): JSX.Element {
     const esLider = usuarioData ? usuarioData.id === getLiderId() : false;
 
     const usuarioId = usuarioData.id.trim(); // Asegurar que no haya espacios
-    const liderId = players.find((p) => p.isOwner)?.id?.trim();
+    const liderId = String(players.find((p) => p.isOwner)?.id ?? "");
 
     console.log(
       "Usuario ID:",
