@@ -69,45 +69,37 @@ export default function ComoJugarScreen(): JSX.Element | null {
 
         {/* Botón para ir a la fase de Noche */}
         <TouchableOpacity style={styles.containerTurnoNoche}>
-          <View style={styles.turnoContainer}>
-            <Link href="/(comoJugar)/(turnos)/turnoNoche">
-              {" "}
-              {/* Ruta a la que quieres redirigir */}
-              <View style={styles.imageContainer}>
-                <Image
-                  source={imageFondoTurnos}
-                  style={styles.imageFondoTurnos}
-                />
-                <View style={styles.overlayTurno} />
+          <Link href="/(comoJugar)/(turnos)/turnoNoche">
+            <ImageBackground
+              source={imageFondoTurnos}
+              style={styles.imageFondoTurnos}
+            >
+              <View style={styles.overlayTurno} />
+              <View style={styles.buttonContent}>
+                <Image source={imagenLuna} style={styles.iconTurno} />
+                <Text style={styles.textTurno}>NOCHE</Text>
+                <Image source={imagenLuna} style={styles.iconTurno} />
               </View>
-            </Link>
-          </View>
+            </ImageBackground>
+          </Link>
         </TouchableOpacity>
-
-        <Text style={styles.textoNoche}>NOCHE</Text>
-        <Image source={imagenLuna} style={styles.imagenTurnoNoche1}></Image>
-        <Image source={imagenLuna} style={styles.imagenTurnoNoche2}></Image>
 
         {/* Botón para ir a la fase de Día */}
         <TouchableOpacity style={styles.containerTurnoDia}>
-          <View style={styles.turnoContainer}>
-            <Link href="/(comoJugar)/(turnos)/turnoDia">
-              {" "}
-              {/* Ruta a la que quieres redirigir */}
-              <View style={styles.imageContainer}>
-                <Image
-                  source={imageFondoTurnos}
-                  style={styles.imageFondoTurnos}
-                />
-                <View style={styles.overlayTurno} />
+          <Link href="/(comoJugar)/(turnos)/turnoDia">
+            <ImageBackground
+              source={imageFondoTurnos}
+              style={styles.imageFondoTurnos}
+            >
+              <View style={styles.overlayTurno} />
+              <View style={styles.buttonContent}>
+                <Image source={imagenSol} style={styles.iconTurno} />
+                <Text style={styles.textTurno}>DIA</Text>
+                <Image source={imagenSol} style={styles.iconTurno} />
               </View>
-            </Link>
-          </View>
+            </ImageBackground>
+          </Link>
         </TouchableOpacity>
-
-        <Text style={styles.textoDia}>DIA</Text>
-        <Image source={imagenSol} style={styles.imagenTurnoDia1}></Image>
-        <Image source={imagenSol} style={styles.imagenTurnoDia2}></Image>
 
         {/* Botón de regreso */}
         <TouchableOpacity style={styles.containerAtras} onPress={irAtras}>
@@ -230,57 +222,23 @@ const styles = StyleSheet.create({
     top: "45%",
   },
 
-  textoNoche: {
-    position: "absolute",
+  buttonContent: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between", // antes era space-around
+    paddingHorizontal: 10, // opcional para márgenes laterales
+  },
+
+  iconTurno: {
+    width: 35,
+    height: 35,
+    borderRadius: 17.5, // mitad de width/height para círculo perfecto
+  },
+
+  textTurno: {
     fontSize: 20,
     fontWeight: "bold",
     color: "white",
-    left: "43%",
-    bottom: "25%",
-  },
-
-  textoDia: {
-    position: "absolute",
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "white",
-    left: "47%",
-    bottom: "17.5%",
-  },
-
-  imagenTurnoNoche1: {
-    width: 35,
-    height: 35,
-    position: "absolute",
-    bottom: "24.3%",
-    left: "28%",
-    borderRadius: 100,
-  },
-
-  imagenTurnoNoche2: {
-    width: 35,
-    height: 35,
-    position: "absolute",
-    bottom: "24.3%",
-    left: "66%",
-    borderRadius: 100,
-  },
-
-  imagenTurnoDia1: {
-    width: 35,
-    height: 35,
-    position: "absolute",
-    bottom: "16.8%",
-    left: "28%",
-    borderRadius: 100,
-  },
-
-  imagenTurnoDia2: {
-    width: 35,
-    height: 35,
-    position: "absolute",
-    bottom: "16.8%",
-    left: "66%",
-    borderRadius: 100,
   },
 });

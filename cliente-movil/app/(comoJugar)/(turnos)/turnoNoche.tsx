@@ -153,7 +153,7 @@ const styles = StyleSheet.create({
   },
 
   textoTurnoNoche: {
-    fontSize: 10.5,
+    fontSize: 11.2,
     fontWeight: "bold",
     position: "absolute",
     width: 230,

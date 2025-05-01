@@ -211,7 +211,7 @@ export default function PerfilScreen(): JSX.Element | null {
         <Image source={imagenPapiro} style={styles.imagePapiro} />
 
         <View style={styles.formContainer}>
-          <Text style={styles.textoNombre}>Nombre</Text>
+          <Text style={styles.textoNombre}>👤 Nombre</Text>
           <TextInput
             style={styles.input}
             placeholder="Nuevo nombre"
@@ -221,12 +221,13 @@ export default function PerfilScreen(): JSX.Element | null {
           />
 
           <Text style={styles.fechaCreacion}>
+            📅{" "}
             {fechaCreacion
               ? new Date(fechaCreacion).toLocaleDateString("es-ES")
               : "Cargando..."}
           </Text>
 
-          <Text style={styles.textoRol}>Rol favorito</Text>
+          <Text style={styles.textoRol}>⭐ Rol favorito</Text>
           <View style={styles.pickerContainer}>
             <Picker
               selectedValue={rolFavorito}
