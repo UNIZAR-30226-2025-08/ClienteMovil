@@ -21,6 +21,7 @@ interface ControlesAccionProps {
   manejarBotellaMuerte: () => void;
   botellaSeleccionada: "vida" | "muerte" | null;
   textoBotonVotar: string;
+  mostrarBotonPasarTurno: boolean;
 }
 
 /**
@@ -45,6 +46,7 @@ const ControlesAccion: React.FC<ControlesAccionProps> = ({
   manejarBotellaMuerte,
   botellaSeleccionada,
   textoBotonVotar,
+  mostrarBotonPasarTurno,
 }) => {
   return (
     <>
@@ -71,7 +73,7 @@ const ControlesAccion: React.FC<ControlesAccionProps> = ({
             Si turnoPasado es true, se aplica un borde rojo al botón de pasar turno.
           */}
 
-          {/*
+          {mostrarBotonPasarTurno && (
           <TouchableOpacity
             style={[
               estilos.botonAccion,
@@ -83,7 +85,7 @@ const ControlesAccion: React.FC<ControlesAccionProps> = ({
               {CONSTANTES.TEXTOS.BOTON_PASAR_TURNO}
             </Text>
           </TouchableOpacity>
-          */}
+          )}
 
           {/*
             Si votoRealizado es true, se aplica un borde rojo al botón de votar.

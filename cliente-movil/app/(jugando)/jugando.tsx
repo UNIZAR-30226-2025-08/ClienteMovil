@@ -90,6 +90,7 @@ type PlantillaUI = {
   mostrarMedallaAlguacilPropia: boolean;
   valorOpacidadPantallaOscura: number;
   textoBotonVotar: string;
+  mostrarBotonPasarTurno: boolean;
 };
 
 /**
@@ -254,6 +255,8 @@ const Jugando: React.FC = () => {
     };
   }, []);
 
+  const animacionesInicialesYaEjecutadas: Record<string, boolean> = {};
+
   /**
    * Efecto de inicialización que se ejecuta una única vez al montar el componente.
    *
@@ -266,7 +269,11 @@ const Jugando: React.FC = () => {
   useEffect(() => {
     const fetchJugadores = async () => {
       setRolUsuario(rol as Rol);
-      agregarEstado(Estado.esperaInicial);
+      
+      if (!animacionesInicialesYaEjecutadas[idSala]) {
+        agregarEstado(Estado.esperaInicial);
+        animacionesInicialesYaEjecutadas[idSala] = true;
+      }
 
       const nuevosJugadores = await new Promise<typeof jugadoresEstado>(
         (resolve) => {
@@ -541,6 +548,22 @@ const Jugando: React.FC = () => {
    */
   const [mensajes, setMensajes] = useState<MensajeChat[]>([]);
 
+  /**
+   * Estados para la duración de cada timer en las fases.
+   * Deberían enviarlos el backend, esto son solo fallbacks como los de web.
+   * Cuando web no tenía fallback, está puesto 30 segundos.
+   */
+  const [duracionEsperaInicial, setDuracionEsperaInicial] = useState<number>(30);
+  const [duracionIniciarVotacionAlguacil, setDuracionIniciarVotacionAlguacil] = useState<number>(24);
+  const [duracionSegundaVotacionAlguacil, setDuracionSegundaVotacionAlguacil] = useState<number>(24);
+  const [duracionHabilidadVidente, setDuracionHabilidadVidente] = useState<number>(15);
+  const [duracionTurnoHombresLobos, setDuracionTurnoHombresLobos] = useState<number>(19);
+  const [duracionHabilidadBruja, setDuracionHabilidadBruja] = useState<number>(30);
+  const [duracionHabilidadAlguacil, setDuracionHabilidadAlguacil] = useState<number>(30);
+  const [duracionHabilidadCazador, setDuracionHabilidadCazador] = useState<number>(30);
+  const [duracionDiaComienza, setDuracionDiaComienza] = useState<number>(60);
+  const [duracionEmpateVotacionDia, setDuracionEmpateVotacionDia] = useState<number>(25);
+
   // ---------------------------------------------------------------------------
   // ¿Qué elementos de la UI mostrar en cada momento?
   // ---------------------------------------------------------------------------
@@ -556,6 +579,7 @@ const Jugando: React.FC = () => {
     mostrarMedallaAlguacilPropia: false,
     valorOpacidadPantallaOscura: 0.5,
     textoBotonVotar: "VOTAR",
+    mostrarBotonPasarTurno: false,
   };
 
   const plantillaAnimacionNoche: PlantillaUI = {
@@ -569,6 +593,7 @@ const Jugando: React.FC = () => {
     mostrarMedallaAlguacilPropia: false,
     valorOpacidadPantallaOscura: 0.95,
     textoBotonVotar: "VOTAR",
+    mostrarBotonPasarTurno: false,
   };
 
   const plantillaEsperaInicial: PlantillaUI = {
@@ -582,6 +607,7 @@ const Jugando: React.FC = () => {
     mostrarMedallaAlguacilPropia: true,
     valorOpacidadPantallaOscura: 0,
     textoBotonVotar: "VOTAR",
+    mostrarBotonPasarTurno: false,
   };
 
   const plantillaVotacionAlguacil: PlantillaUI = {
@@ -595,6 +621,7 @@ const Jugando: React.FC = () => {
     mostrarMedallaAlguacilPropia: true,
     valorOpacidadPantallaOscura: 0,
     textoBotonVotar: "VOTAR",
+    mostrarBotonPasarTurno: false,
   };
 
   const plantillaHabilidadVidente: PlantillaUI = {
@@ -608,6 +635,7 @@ const Jugando: React.FC = () => {
     mostrarMedallaAlguacilPropia: true,
     valorOpacidadPantallaOscura: 0.95,
     textoBotonVotar: "MIRAR",
+    mostrarBotonPasarTurno: false,
   };
 
   const plantillaVotacionHombresLobo: PlantillaUI = {
@@ -621,6 +649,7 @@ const Jugando: React.FC = () => {
     mostrarMedallaAlguacilPropia: true,
     valorOpacidadPantallaOscura: 0.95,
     textoBotonVotar: "VOTAR",
+    mostrarBotonPasarTurno: false,
   };
 
   const plantillaHabilidadBruja: PlantillaUI = {
@@ -634,6 +663,7 @@ const Jugando: React.FC = () => {
     mostrarMedallaAlguacilPropia: true,
     valorOpacidadPantallaOscura: 0.95,
     textoBotonVotar: "TIRAR",
+    mostrarBotonPasarTurno: rolUsuario === "Bruja",
   };
 
   const plantillaHabilidadCazadorNoche: PlantillaUI = {
@@ -647,6 +677,7 @@ const Jugando: React.FC = () => {
     mostrarMedallaAlguacilPropia: true,
     valorOpacidadPantallaOscura: 0.95,
     textoBotonVotar: "MATAR",
+    mostrarBotonPasarTurno: false,
   };
 
   const plantillaHabilidadCazadorDia: PlantillaUI = {
@@ -660,6 +691,7 @@ const Jugando: React.FC = () => {
     mostrarMedallaAlguacilPropia: true,
     valorOpacidadPantallaOscura: 0,
     textoBotonVotar: "MATAR",
+    mostrarBotonPasarTurno: false,
   };
 
   const plantillaVotacionDiurna: PlantillaUI = {
@@ -673,6 +705,7 @@ const Jugando: React.FC = () => {
     mostrarMedallaAlguacilPropia: true,
     valorOpacidadPantallaOscura: 0,
     textoBotonVotar: "VOTAR",
+    mostrarBotonPasarTurno: false,
   };
 
   const plantillaHabilidadAlguacil: PlantillaUI = {
@@ -686,6 +719,7 @@ const Jugando: React.FC = () => {
     mostrarMedallaAlguacilPropia: true,
     valorOpacidadPantallaOscura: 0.95,
     textoBotonVotar: "ELIGE",
+    mostrarBotonPasarTurno: false,
   };
 
   const [plantillaActual, setPlantillaActual] = useState<PlantillaUI>(
@@ -1797,6 +1831,18 @@ const Jugando: React.FC = () => {
       );
       return;
     }
+    if (rolUsuario === "Bruja") {
+        socket.emit("pasarTurnoBruja", {
+          idPartida: idSala,
+          idJugador: usuarioID,
+        });
+        logCustom(
+          jornadaActual,
+          etapaActual,
+          `Evento 'pasarTurnoBruja' emitido`,
+          jugadoresEstado[indiceUsuario]
+        );
+      }
     logCustom(
       jornadaActual,
       etapaActual,
@@ -1818,7 +1864,16 @@ const Jugando: React.FC = () => {
    */
   const manejarSeleccionBotellaVida = () => {
     setBotellaSeleccionada((prev) => (prev === "vida" ? null : "vida"));
-
+    if (pasoTurno) {
+        mostrarError("Has pasado turno");
+        logCustom(
+          jornadaActual,
+          etapaActual,
+          `Intento de lanzar poción turno fallido: Turno ya pasado`,
+          jugadoresEstado[indiceUsuario]
+        );
+        return;
+    }
     if (botellaUsadaEnEsteTurno) {
       logCustom(
         jornadaActual,
@@ -1847,7 +1902,16 @@ const Jugando: React.FC = () => {
    */
   const manejarSeleccionBotellaMuerte = () => {
     setBotellaSeleccionada((prev) => (prev === "muerte" ? null : "muerte"));
-
+    if (pasoTurno) {
+        mostrarError("Has pasado turno");
+        logCustom(
+          jornadaActual,
+          etapaActual,
+          `Intento de lanzar poción turno fallido: Turno ya pasado`,
+          jugadoresEstado[indiceUsuario]
+        );
+        return;
+    }
     if (botellaUsadaEnEsteTurno) {
       logCustom(
         jornadaActual,
@@ -2084,6 +2148,9 @@ const Jugando: React.FC = () => {
         `Evento recibido: iniciarVotacionAlguacil - ${JSON.stringify(data)}`,
         jugadoresEstado[indiceUsuario]
       );
+      if (data.tiempo != null) {
+        setDuracionIniciarVotacionAlguacil(data.tiempo);
+      }
       agregarEstado(Estado.iniciarVotacionAlguacil);
     });
     /* Nunca llega?
@@ -2113,6 +2180,9 @@ const Jugando: React.FC = () => {
         `Evento recibido: habilidadVidente - ${JSON.stringify(data)}`,
         jugadoresEstado[indiceUsuario]
       );
+      if (data.tiempo != null) {
+        setDuracionHabilidadVidente(data.tiempo);
+      }
       agregarEstado(Estado.habilidadVidente);
     });
     socket.on("turnoHombresLobos", (data) => {
@@ -2122,6 +2192,9 @@ const Jugando: React.FC = () => {
         `Evento recibido: turnoHombresLobos - ${JSON.stringify(data)}`,
         jugadoresEstado[indiceUsuario]
       );
+      if (data.tiempo != null) {
+        setDuracionTurnoHombresLobos(data.tiempo);
+      }
       agregarEstado(Estado.turnoHombresLobos);
     });
     socket.on("habilidadBruja", (data) => {
@@ -2131,6 +2204,9 @@ const Jugando: React.FC = () => {
         `Evento recibido: habilidadBruja - ${JSON.stringify(data)}`,
         jugadoresEstado[indiceUsuario]
       );
+      if (data.tiempo != null) {
+        setDuracionHabilidadBruja(data.tiempo);
+      }
       agregarEstado(Estado.habilidadBruja);
     });
     socket.on("habilidadAlguacil", (data) => {
@@ -2140,6 +2216,9 @@ const Jugando: React.FC = () => {
         `Evento recibido: habilidadAlguacil - ${JSON.stringify(data)}`,
         jugadoresEstado[indiceUsuario]
       );
+      if (data.tiempo != null) {
+        setDuracionHabilidadAlguacil(data.tiempo);
+      }
       agregarEstado(Estado.habilidadAlguacil);
     });
     socket.on("habilidadCazador", (data) => {
@@ -2148,6 +2227,9 @@ const Jugando: React.FC = () => {
         etapaActual,
         `Evento recibido: habilidadCazador - ${JSON.stringify(data)}`
       );
+      if (data.tiempo != null) {
+        setDuracionHabilidadCazador(data.tiempo);
+      }
       agregarEstado(Estado.habilidadCazador);
     });
     socket.on("diaComienza", (data) => {
@@ -2157,6 +2239,9 @@ const Jugando: React.FC = () => {
         `Evento recibido: diaComienza - ${JSON.stringify(data)}`,
         jugadoresEstado[indiceUsuario]
       );
+      if (data.tiempo != null) {
+        setDuracionDiaComienza(data.tiempo);
+      }
       agregarEstado(Estado.diaComienza);
     });
     socket.on("partidaFinalizada", (data) => {
@@ -2183,6 +2268,9 @@ const Jugando: React.FC = () => {
         `Evento recibido: empateVotacionAlguacil - ${JSON.stringify(data)}`,
         jugadoresEstado[indiceUsuario]
       );
+      if (data.tiempo != null) {
+        setDuracionSegundaVotacionAlguacil(data.tiempo);
+      }
       agregarEstado(Estado.iniciarSegundaVotacionAlguacil);
     });
     socket.on("segundoEmpateVotacionAlguacil", (data) => {
@@ -2516,6 +2604,7 @@ const Jugando: React.FC = () => {
 
         setMostrarAnimacionInicio3(false);
 
+        actualizarMaxTiempo(duracionEsperaInicial);
         setTemporizadorActivo(true);
         setPlantillaActual(plantillaEsperaInicial);
 
@@ -2532,6 +2621,7 @@ const Jugando: React.FC = () => {
         setMostrarAnimacionPrimeraVotacionAlguacil(false);
         setPlantillaActual(plantillaVotacionAlguacil);
         actualizarMaxTiempo(CONST_TIEMPO_VOTACION_ALGUACIL);
+        actualizarMaxTiempo(duracionIniciarVotacionAlguacil);
         reiniciarTemporizador();
         setVotoRealizado(false);
         setPasoTurno(false);
@@ -2547,6 +2637,7 @@ const Jugando: React.FC = () => {
 
         setMostrarAnimacionSegundaVotacionAlguacil(false);
         setPlantillaActual(plantillaVotacionAlguacil);
+        actualizarMaxTiempo(duracionSegundaVotacionAlguacil);
         reiniciarTemporizador();
         setVotoRealizado(false);
         setPasoTurno(false);
@@ -2584,6 +2675,7 @@ const Jugando: React.FC = () => {
 
         setMostrarAnimacionInicioHabilidadVidente(false);
         setPlantillaActual(plantillaHabilidadVidente);
+        actualizarMaxTiempo(duracionHabilidadVidente);
         reiniciarTemporizador();
         setVotoRealizado(false);
         setPasoTurno(false);
@@ -2600,6 +2692,7 @@ const Jugando: React.FC = () => {
         setMostrarAnimacionInicioTurnoHombresLobo(false);
 
         setPlantillaActual(plantillaVotacionHombresLobo);
+        actualizarMaxTiempo(duracionTurnoHombresLobos);
         reiniciarTemporizador();
         setVotoRealizado(false);
         setPasoTurno(false);
@@ -2631,6 +2724,7 @@ const Jugando: React.FC = () => {
         }
 
         setPlantillaActual(plantillaHabilidadBruja);
+        actualizarMaxTiempo(duracionHabilidadBruja);
         reiniciarTemporizador();
         setVotoRealizado(false);
         setPasoTurno(false);
@@ -2648,6 +2742,7 @@ const Jugando: React.FC = () => {
         setMostrarAnimacionInicioHabilidadAlguacil(false);
 
         setPlantillaActual(plantillaHabilidadAlguacil);
+        actualizarMaxTiempo(duracionHabilidadAlguacil);
         reiniciarTemporizador();
         setVotoRealizado(false);
         setPasoTurno(false);
@@ -2675,6 +2770,7 @@ const Jugando: React.FC = () => {
           setPlantillaActual(plantillaHabilidadCazadorNoche);
         }
 
+        actualizarMaxTiempo(duracionHabilidadCazador);
         reiniciarTemporizador();
         setVotoRealizado(false);
         setPasoTurno(false);
@@ -2714,6 +2810,7 @@ const Jugando: React.FC = () => {
         setMostrarAnimacionInicioDia1(false);
 
         setPlantillaActual(plantillaEsperaInicial);
+        actualizarMaxTiempo(3);
         reiniciarTemporizador();
         setVotoRealizado(false);
         setPasoTurno(false);
@@ -2734,6 +2831,7 @@ const Jugando: React.FC = () => {
         setMostrarAnimacionInicioDia2(false);
 
         setPlantillaActual(plantillaVotacionDiurna);
+        actualizarMaxTiempo(duracionDiaComienza);
         reiniciarTemporizador();
         setVotoRealizado(false);
         setPasoTurno(false);
@@ -2772,6 +2870,7 @@ const Jugando: React.FC = () => {
         setMostrarAnimacionEmpateVotacionDiurna(false);
 
         setPlantillaActual(plantillaVotacionDiurna);
+        actualizarMaxTiempo(duracionEmpateVotacionDia);
         reiniciarTemporizador();
         setVotoRealizado(false);
         setPasoTurno(false);
@@ -2797,6 +2896,7 @@ const Jugando: React.FC = () => {
 
         break;
       case Estado.partidaFinalizada:
+        animacionesInicialesYaEjecutadas[idSala] = true;
         Alert.alert(
           "Sin hacer",
           "La partida ha finalizado. Frontend sin montar"
@@ -3078,6 +3178,7 @@ const Jugando: React.FC = () => {
             manejarBotellaMuerte={manejarSeleccionBotellaMuerte}
             botellaSeleccionada={botellaSeleccionada}
             textoBotonVotar={plantillaActual.textoBotonVotar}
+            mostrarBotonPasarTurno={plantillaActual.mostrarBotonPasarTurno}
           />
         )}
         {/*
