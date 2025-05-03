@@ -327,11 +327,11 @@ export default function SalaPreviaScreen(): JSX.Element {
         );
         return;
       }
-
+      /*
       socket.emit("salirSala", {
         idSala,
         idUsuario: usuarioData.id,
-      });
+      });*/
 
       console.log("Futura partida:", partidaPendiente.partidaID);
 
