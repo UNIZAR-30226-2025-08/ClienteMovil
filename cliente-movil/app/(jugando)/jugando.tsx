@@ -2148,6 +2148,7 @@ const Jugando: React.FC = () => {
 
   const [visionJugador, setVisionJugador] = useState("");
   const [resultadoVotosDia, setResultadosVotosDia] = useState("");
+  const [muerteYaTratada, setMuerteYaTratada] = useState<boolean>(false);
   
 
   // ---------------------------------------------------------------------------
@@ -2167,7 +2168,7 @@ const Jugando: React.FC = () => {
         `Evento local detectado: usuarioLocalMuerto`,
         jugadoresEstado[indiceUsuario]
       );
-      agregarEstado(Estado.usuarioLocalMuerto);
+      // agregarEstado(Estado.usuarioLocalMuerto);
     }
 
     prevMuertoRef.current = ahora;
@@ -2882,8 +2883,21 @@ const Jugando: React.FC = () => {
         );
 
         setJugadoresEstado(nuevosJugadores);
-        if (jugadorLocalMuerto) {
+        logCustom(
+            jornadaActual,
+            etapaActual,
+            `Valor de jugadorLocalMuerto = ${jugadorLocalMuerto}`,
+            jugadoresEstado[indiceUsuario]
+          );
+        if (jugadorLocalMuerto && !muerteYaTratada) {
           agregarEstado(Estado.usuarioLocalMuerto);
+          setMuerteYaTratada(true);
+          logCustom(
+            jornadaActual,
+            etapaActual,
+            `Muerte detectada`,
+            jugadoresEstado[indiceUsuario]
+          );
           break;
         }
 
@@ -2931,6 +2945,12 @@ const Jugando: React.FC = () => {
         setJugadorSeleccionado(null);
         break;
       case Estado.usuarioLocalMuerto:
+        logCustom(
+            jornadaActual,
+            etapaActual,
+            `Tratando muerte de usuario`,
+            jugadoresEstado[indiceUsuario]
+          );
         if (etapaActual === "Día") {
           setPlantillaActual(plantillaAnimacionDia);
         } /* else if (etapaActual === "Noche" )*/ else {
