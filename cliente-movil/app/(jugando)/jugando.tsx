@@ -2383,6 +2383,13 @@ const Jugando: React.FC = () => {
 
         setIdObjetivoVidente(idObjetivo);
         setRolObjetivoVidente(rolObjetivo);
+
+        logCustom(
+            jornadaActual,
+            etapaActual,
+            `Jugador ${idObjetivo} tiene el rol ${rolObjetivo}`,
+            jugadoresEstado[indiceUsuario]
+          );
       }
     });
     socket.on("jugadorSalido", (data) => {
@@ -2697,7 +2704,6 @@ const Jugando: React.FC = () => {
         setJugadorSeleccionado(null);
         break;
       case Estado.turnoHombresLobos:
-        await new Promise((resolve) => setTimeout(resolve, 3000));
         setPlantillaActual(plantillaAnimacionNoche);
         cerrarHabilidad();
         cerrarChat();
