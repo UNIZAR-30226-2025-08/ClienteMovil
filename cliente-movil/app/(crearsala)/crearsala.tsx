@@ -128,7 +128,7 @@ const CrearSala = (): JSX.Element => {
 
   // Determina si el botón de "Crear Sala" debe estar deshabilitado (mínimo 5 jugadores)
   const botonCrearDeshabilitado = useMemo(
-    () => numJugadores < 5,
+    () => numJugadores < 1,
     [numJugadores]
   );
 
@@ -226,7 +226,7 @@ const CrearSala = (): JSX.Element => {
    * Decrementa el número de jugadores (disminuye la cantidad de "Aldeano") siempre que se mantenga el mínimo.
    */
   const decrementarJugadores = () => {
-    if (numJugadores > 5) {
+    if (numJugadores > 1) {
       setRolesCantidad((prevRoles) =>
         prevRoles.map((r) =>
           r.nombre === "Aldeano" && r.cantidad > 0
@@ -386,7 +386,7 @@ const CrearSala = (): JSX.Element => {
             <Button
               title="-"
               onPress={decrementarJugadores}
-              disabled={numJugadores <= 5}
+              disabled={numJugadores <= 1}
             />
             <Button
               title="+"
