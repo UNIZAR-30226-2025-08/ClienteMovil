@@ -20,7 +20,7 @@
       "package": "com.robertawilliams.clientemovil"
     },
     "extra": {
-      "backendUrl": "http://albertofsg.ddns.net:5000",
+      "backendUrl": "https://albertofsg.ddns.net:443",
       "router": {
         "origin": false
       },
