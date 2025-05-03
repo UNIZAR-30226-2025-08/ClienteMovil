@@ -2368,30 +2368,31 @@ const Jugando: React.FC = () => {
       }
     });
     socket.on("visionJugador", (data) => {
-      logCustom(
-        jornadaActual,
-        etapaActual,
-        `Evento recibido: visionJugador - ${JSON.stringify(data)}`,
-        jugadoresEstado[indiceUsuario]
-      );
-      const regex = /El jugador (\d+) es (.+)\./;
-      const match = data.mensaje.match(regex);
-
-      if (match) {
-        const idObjetivo = match[1];
-        const rolObjetivo = match[2];
-
-        setIdObjetivoVidente(idObjetivo);
-        setRolObjetivoVidente(rolObjetivo);
-
         logCustom(
+          jornadaActual,
+          etapaActual,
+          `Evento recibido: visionJugador - ${JSON.stringify(data)}`,
+          jugadoresEstado[indiceUsuario]
+        );
+      
+        const regex = /El jugador (\w+) es (.+)\./;
+        const match = data.mensaje.match(regex);
+      
+        if (match) {
+          const idObjetivo = match[1];
+          const rolObjetivo = match[2];
+      
+          setIdObjetivoVidente(idObjetivo);
+          setRolObjetivoVidente(rolObjetivo);
+      
+          logCustom(
             jornadaActual,
             etapaActual,
             `Jugador ${idObjetivo} tiene el rol ${rolObjetivo}`,
             jugadoresEstado[indiceUsuario]
           );
-      }
-    });
+        }
+      });
     socket.on("jugadorSalido", (data) => {
       logCustom(
         jornadaActual,
