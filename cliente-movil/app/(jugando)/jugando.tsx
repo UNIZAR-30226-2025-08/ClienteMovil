@@ -735,6 +735,24 @@ const Jugando: React.FC = () => {
     plantillaAnimacionDia
   );
 
+
+  //!!!!!!!!!!!!!!!!!!!
+  const [mensajeVisionJugador, setMensajeVisionJugador] = useState("");
+
+  useEffect(() => {
+    const regex = /El jugador (\d+) es (.+)\./;
+    const match = mensajeVisionJugador.match(regex);
+
+    if (match) {
+      setIdObjetivoVidente(match[1]);
+      setRolObjetivoVidente(match[2]);
+    } else {
+      setIdObjetivoVidente("");
+      setRolObjetivoVidente("");
+    }
+  }, [mensajeVisionJugador]);
+  //!!!!!!!!!!!!!!!!!!!
+
   // ---------------------------------------------------------------------------
   // Hooks exportados de los componentes de la UI para manejarlos
   // ---------------------------------------------------------------------------
@@ -816,7 +834,7 @@ const Jugando: React.FC = () => {
 
   /**
    * Habilidad del usuario que la vidente ha seleccionado en su último turno.
-   */
+    */
   const [idObjetivoVidente, setIdObjetivoVidente] = useState("");
 
   /**
@@ -2379,6 +2397,8 @@ const Jugando: React.FC = () => {
         `Evento recibido: visionJugador - ${JSON.stringify(data)}`,
         jugadoresEstado[indiceUsuario]
       );
+      setMensajeVisionJugador(data);
+      /*
       const regex = /El jugador (\d+) es (.+)\./;
       const match = data.mensaje.match(regex);
 
@@ -2388,7 +2408,7 @@ const Jugando: React.FC = () => {
 
         setIdObjetivoVidente(idObjetivo);
         setRolObjetivoVidente(rolObjetivo);
-      }
+      }*/
     });
     socket.on("jugadorSalido", (data) => {
       logCustom(
@@ -2470,7 +2490,8 @@ const Jugando: React.FC = () => {
           );
 
           setMostrarAnimacionEjecutarHabilidadVidente(false);
-          setRolObjetivoVidente(""); // Limpiar, por si la vidente no envía/recibe una nueva petición tras esta, que se marque claramente que no ha recibido nada
+          setMensajeVisionJugador("");
+          //setRolObjetivoVidente(""); // Limpiar, por si la vidente no envía/recibe una nueva petición tras esta, que se marque claramente que no ha recibido nada
         }
 
         setPlantillaActual(plantillaAnimacionNoche);
