@@ -2376,7 +2376,7 @@ const Jugando: React.FC = () => {
           `Evento recibido: visionJugador - ${JSON.stringify(data)}`,
           jugadoresEstado[indiceUsuario]
         );
-        setVisionJugador(data);
+        setVisionJugador(data.mensaje);
       });
     socket.on("jugadorSalido", (data) => {
       logCustom(
