@@ -2374,8 +2374,8 @@ const Jugando: React.FC = () => {
           `Evento recibido: visionJugador - ${JSON.stringify(data)}`,
           jugadoresEstado[indiceUsuario]
         );
-      
-        const regex = /El jugador (\w+) es (.+)\./;
+
+        const regex = /El jugador (.+) es (.+)\./;
         const match = data.mensaje.match(regex);
       
         if (match) {
