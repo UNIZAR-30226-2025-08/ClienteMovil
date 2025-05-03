@@ -269,7 +269,7 @@ const Jugando: React.FC = () => {
   useEffect(() => {
     const fetchJugadores = async () => {
       setRolUsuario(rol as Rol);
-      
+
       if (!animacionesInicialesYaEjecutadas[idSala]) {
         agregarEstado(Estado.esperaInicial);
         animacionesInicialesYaEjecutadas[idSala] = true;
@@ -553,16 +553,25 @@ const Jugando: React.FC = () => {
    * Deberían enviarlos el backend, esto son solo fallbacks como los de web.
    * Cuando web no tenía fallback, está puesto 30 segundos.
    */
-  const [duracionEsperaInicial, setDuracionEsperaInicial] = useState<number>(30);
-  const [duracionIniciarVotacionAlguacil, setDuracionIniciarVotacionAlguacil] = useState<number>(24);
-  const [duracionSegundaVotacionAlguacil, setDuracionSegundaVotacionAlguacil] = useState<number>(24);
-  const [duracionHabilidadVidente, setDuracionHabilidadVidente] = useState<number>(15);
-  const [duracionTurnoHombresLobos, setDuracionTurnoHombresLobos] = useState<number>(19);
-  const [duracionHabilidadBruja, setDuracionHabilidadBruja] = useState<number>(30);
-  const [duracionHabilidadAlguacil, setDuracionHabilidadAlguacil] = useState<number>(30);
-  const [duracionHabilidadCazador, setDuracionHabilidadCazador] = useState<number>(30);
+  const [duracionEsperaInicial, setDuracionEsperaInicial] =
+    useState<number>(30);
+  const [duracionIniciarVotacionAlguacil, setDuracionIniciarVotacionAlguacil] =
+    useState<number>(24);
+  const [duracionSegundaVotacionAlguacil, setDuracionSegundaVotacionAlguacil] =
+    useState<number>(24);
+  const [duracionHabilidadVidente, setDuracionHabilidadVidente] =
+    useState<number>(15);
+  const [duracionTurnoHombresLobos, setDuracionTurnoHombresLobos] =
+    useState<number>(19);
+  const [duracionHabilidadBruja, setDuracionHabilidadBruja] =
+    useState<number>(30);
+  const [duracionHabilidadAlguacil, setDuracionHabilidadAlguacil] =
+    useState<number>(30);
+  const [duracionHabilidadCazador, setDuracionHabilidadCazador] =
+    useState<number>(30);
   const [duracionDiaComienza, setDuracionDiaComienza] = useState<number>(60);
-  const [duracionEmpateVotacionDia, setDuracionEmpateVotacionDia] = useState<number>(25);
+  const [duracionEmpateVotacionDia, setDuracionEmpateVotacionDia] =
+    useState<number>(25);
 
   // ---------------------------------------------------------------------------
   // ¿Qué elementos de la UI mostrar en cada momento?
@@ -828,19 +837,19 @@ const Jugando: React.FC = () => {
    * Duración de la animación de entrada (fade in) en milisegundos de todas las animaciones.
    * @type {number}
    */
-  const duracionFadeIn = 1000;
+  const duracionFadeIn = 500;
 
   /**
    * Tiempo de espera entre fases de la animación en milisegundos de todas las animaciones.
    * @type {number}
    */
-  const duracionEspera = 5000;
+  const duracionEspera = 4000;
 
   /**
    * Duración de la animación de salida (fade out) en milisegundos de todas las animaciones.
    * @type {number}
    */
-  const duracionFadeOut = 1000;
+  const duracionFadeOut = 500;
 
   /**
    * Duración total de todas las animaciones.
@@ -1832,17 +1841,17 @@ const Jugando: React.FC = () => {
       return;
     }
     if (rolUsuario === "Bruja") {
-        socket.emit("pasarTurnoBruja", {
-          idPartida: idSala,
-          idJugador: usuarioID,
-        });
-        logCustom(
-          jornadaActual,
-          etapaActual,
-          `Evento 'pasarTurnoBruja' emitido`,
-          jugadoresEstado[indiceUsuario]
-        );
-      }
+      socket.emit("pasarTurnoBruja", {
+        idPartida: idSala,
+        idJugador: usuarioID,
+      });
+      logCustom(
+        jornadaActual,
+        etapaActual,
+        `Evento 'pasarTurnoBruja' emitido`,
+        jugadoresEstado[indiceUsuario]
+      );
+    }
     logCustom(
       jornadaActual,
       etapaActual,
@@ -1865,14 +1874,14 @@ const Jugando: React.FC = () => {
   const manejarSeleccionBotellaVida = () => {
     setBotellaSeleccionada((prev) => (prev === "vida" ? null : "vida"));
     if (pasoTurno) {
-        mostrarError("Has pasado turno");
-        logCustom(
-          jornadaActual,
-          etapaActual,
-          `Intento de lanzar poción turno fallido: Turno ya pasado`,
-          jugadoresEstado[indiceUsuario]
-        );
-        return;
+      mostrarError("Has pasado turno");
+      logCustom(
+        jornadaActual,
+        etapaActual,
+        `Intento de lanzar poción turno fallido: Turno ya pasado`,
+        jugadoresEstado[indiceUsuario]
+      );
+      return;
     }
     if (botellaUsadaEnEsteTurno) {
       logCustom(
@@ -1903,14 +1912,14 @@ const Jugando: React.FC = () => {
   const manejarSeleccionBotellaMuerte = () => {
     setBotellaSeleccionada((prev) => (prev === "muerte" ? null : "muerte"));
     if (pasoTurno) {
-        mostrarError("Has pasado turno");
-        logCustom(
-          jornadaActual,
-          etapaActual,
-          `Intento de lanzar poción turno fallido: Turno ya pasado`,
-          jugadoresEstado[indiceUsuario]
-        );
-        return;
+      mostrarError("Has pasado turno");
+      logCustom(
+        jornadaActual,
+        etapaActual,
+        `Intento de lanzar poción turno fallido: Turno ya pasado`,
+        jugadoresEstado[indiceUsuario]
+      );
+      return;
     }
     if (botellaUsadaEnEsteTurno) {
       logCustom(
