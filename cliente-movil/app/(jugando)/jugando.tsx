@@ -1399,6 +1399,28 @@ const Jugando: React.FC = () => {
     start: mostrarAnimacionSegundoEmpateVotacionDiurna,
   });
 
+  /**
+   *
+   */
+  const [
+    mostrarAnimacionResultadosDia,
+    setMostrarAnimacionResultadosDia,
+  ] = useState<boolean>(false);
+
+  /**
+   *
+   */
+  const {
+    opacities: opacitiesResultadosDia,
+    mostrarComponentes: mostrarComponentesResultadosDia,
+  } = useGestorAnimaciones({
+    duracionFadeIn,
+    duracionEspera,
+    duracionFadeOut,
+    numAnimaciones: 1,
+    start: mostrarAnimacionResultadosDia,
+  });
+
   // !!!!!!!!!!!!!!!!!!!!!!!!!!
   // const [mensaje, setMensaje] = useState(null);
   // !!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1415,6 +1437,16 @@ const Jugando: React.FC = () => {
    * @returns {void}
    */
   const administrarSeleccionJugadorVotacion = (index: number): void => {
+    if (jugadorLocalMuerto) {
+        mostrarError("Estas muerto :(");
+        logCustom(
+          jornadaActual,
+          etapaActual,
+          `Intento de selección de usuario fallido: Usuario muerto`,
+          jugadoresEstado[indiceUsuario]
+        );
+        return;
+    }
     if (estadoActual === Estado.esperaInicial) {
       logCustom(
         jornadaActual,
@@ -1552,6 +1584,16 @@ const Jugando: React.FC = () => {
    * @returns {void}
    */
   const votarAJugador = (): void => {
+    if (jugadorLocalMuerto) {
+        mostrarError("Estas muerto :(");
+        logCustom(
+          jornadaActual,
+          etapaActual,
+          `Intento de voto fallido: Usuario muerto`,
+          jugadoresEstado[indiceUsuario]
+        );
+        return;
+    }
     if (pasoTurno) {
       mostrarError("Has pasado turno");
       logCustom(
@@ -1815,6 +1857,16 @@ const Jugando: React.FC = () => {
    * @returns {void}
    */
   const manejarPasarTurno = (): void => {
+    if (jugadorLocalMuerto) {
+        mostrarError("Estas muerto :(");
+        logCustom(
+          jornadaActual,
+          etapaActual,
+          `Intento de pasar turno fallido: Usuario muerto`,
+          jugadoresEstado[indiceUsuario]
+        );
+        return;
+    }
     if (pasoTurno) {
       mostrarError("Has pasado turno");
       logCustom(
@@ -1868,6 +1920,16 @@ const Jugando: React.FC = () => {
    */
   const manejarSeleccionBotellaVida = () => {
     setBotellaSeleccionada((prev) => (prev === "vida" ? null : "vida"));
+    if (jugadorLocalMuerto) {
+        mostrarError("Estas muerto :(");
+        logCustom(
+          jornadaActual,
+          etapaActual,
+          `Intento de lanzar poción turno fallido: Usuario muerto`,
+          jugadoresEstado[indiceUsuario]
+        );
+        return;
+    }
     if (pasoTurno) {
         mostrarError("Has pasado turno");
         logCustom(
@@ -1906,6 +1968,16 @@ const Jugando: React.FC = () => {
    */
   const manejarSeleccionBotellaMuerte = () => {
     setBotellaSeleccionada((prev) => (prev === "muerte" ? null : "muerte"));
+    if (jugadorLocalMuerto) {
+        mostrarError("Estas muerto :(");
+        logCustom(
+          jornadaActual,
+          etapaActual,
+          `Intento de lanzar poción turno fallido: Usuario muerto`,
+          jugadoresEstado[indiceUsuario]
+        );
+        return;
+    }
     if (pasoTurno) {
         mostrarError("Has pasado turno");
         logCustom(
@@ -2075,6 +2147,8 @@ const Jugando: React.FC = () => {
   }, [jugadoresEstado, indiceUsuario]);
 
   const [visionJugador, setVisionJugador] = useState("");
+  const [resultadoVotosDia, setResultadosVotosDia] = useState("");
+  
 
   // ---------------------------------------------------------------------------
   // Encolar el evento correspondiente cuando el usuario local ha muerto
@@ -2353,6 +2427,7 @@ const Jugando: React.FC = () => {
         `Evento recibido: resultadoVotosDia - ${JSON.stringify(data)}`,
         jugadoresEstado[indiceUsuario]
       );
+      setResultadosVotosDia(data.mensaje);
     });
     socket.on("mensajeBruja", (data) => {
       logCustom(
@@ -2527,6 +2602,16 @@ const Jugando: React.FC = () => {
         await new Promise((resolve) => setTimeout(resolve, duracionAnimacion));
 
         setMostrarAnimacionFinalTurnoCazador(false);
+        break;
+    case Estado.diaComienza:
+        setPlantillaActual(plantillaAnimacionNoche);
+        cerrarHabilidad();
+        cerrarChat();
+        setMostrarAnimacionResultadosDia(true);
+
+        await new Promise((resolve) => setTimeout(resolve, duracionAnimacion));
+
+        setMostrarAnimacionResultadosDia(false);
         break;
       default:
         break;
@@ -3135,6 +3220,17 @@ const Jugando: React.FC = () => {
             opacity={opacitiesSegundoEmpateVotacionDiurna[0]}
             mostrarComponente={mostrarComponentesSegundoEmpateVotacionDiurna[0]}
             texto="NO SE HA LLEGADO A UNA MAYORÍA SIMPLE DE A QUÉ JUGADOR MATAR."
+          />
+        )}
+        {mostrarAnimacionResultadosDia && (
+          <AnimacionGenerica
+            opacity={opacitiesResultadosDia[0]}
+            mostrarComponente={mostrarComponentesResultadosDia[0]}
+            texto={
+              resultadoVotosDia !== ""
+                ? resultadoVotosDia
+                : "EL PUEBLO NO SE HA PUESTO DE ACUERDO DE A QUIÉN LINCHAR"
+            }
           />
         )}
         {errorMessage && (
