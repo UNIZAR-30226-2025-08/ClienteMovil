@@ -53,6 +53,17 @@ export default function AdminSuggestionsScreen() {
   );
   // Estado de carga (opcional)
   const [loading, setLoading] = useState(true);
+  // Estado para el filtro de sugerencias
+  const [filter, setFilter] = useState<"all" | "revisadas" | "pendientes">(
+    "all"
+  );
+
+  // Lista filtrada según el estado
+  const filteredSuggestions = suggestions.filter((sug) => {
+    if (filter === "revisadas") return sug.revisada === true;
+    if (filter === "pendientes") return sug.revisada !== true;
+    return true;
+  });
 
   /**
    * Carga las sugerencias desde el backend
@@ -160,6 +171,7 @@ export default function AdminSuggestionsScreen() {
 
   const renderSuggestion = ({ item }: { item: Suggestion }) => (
     <View style={[styles.card, item.revisada && styles.completedCard]}>
+      {item.revisada && <Text style={styles.reviewedBadge}>Revisada</Text>}
       <Text style={styles.userInfo}>
         Nombre: {item.name ? item.name : "N/D"}
       </Text>
@@ -220,11 +232,43 @@ export default function AdminSuggestionsScreen() {
       <View style={styles.overlay} />
       <View style={styles.container}>
         <Text style={styles.header}>Sugerencias de Usuarios</Text>
+
+        {/* Controles para filtrar */}
+        <View style={styles.filterContainer}>
+          <TouchableOpacity
+            onPress={() => setFilter("all")}
+            style={[
+              styles.filterBtn,
+              filter === "all" && styles.filterBtnActive,
+            ]}
+          >
+            <Text style={styles.filterText}>Todas</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => setFilter("pendientes")}
+            style={[
+              styles.filterBtn,
+              filter === "pendientes" && styles.filterBtnActive,
+            ]}
+          >
+            <Text style={styles.filterText}>Pendientes</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => setFilter("revisadas")}
+            style={[
+              styles.filterBtn,
+              filter === "revisadas" && styles.filterBtnActive,
+            ]}
+          >
+            <Text style={styles.filterText}>Revisadas</Text>
+          </TouchableOpacity>
+        </View>
+
         {loading ? (
           <Text style={styles.loadingText}>Cargando...</Text>
         ) : (
           <FlatList
-            data={suggestions}
+            data={filteredSuggestions}
             keyExtractor={(item) => item.idSugerencia.toString()}
             renderItem={renderSuggestion}
             contentContainerStyle={styles.listContent}
@@ -277,7 +321,20 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   completedCard: {
-    backgroundColor: "rgba(0, 128, 0, 0.3)",
+    backgroundColor: "#e8f5e9",
+    borderLeftWidth: 5,
+    borderLeftColor: "#008f39",
+  },
+  reviewedBadge: {
+    backgroundColor: "#008f39",
+    color: "#fff",
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+    alignSelf: "flex-start",
+    marginBottom: 8,
+    fontSize: 12,
+    fontWeight: "bold",
   },
   userInfo: {
     fontSize: 16,
@@ -322,6 +379,25 @@ const styles = StyleSheet.create({
   buttonText: {
     color: "#fff",
     fontSize: 16,
+    fontWeight: "bold",
+  },
+  filterContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    marginVertical: 10,
+  },
+  filterBtn: {
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    marginHorizontal: 5,
+    borderRadius: 4,
+    backgroundColor: "rgba(255,255,255,0.6)",
+  },
+  filterBtnActive: {
+    backgroundColor: "#008f39",
+  },
+  filterText: {
+    color: "#000",
     fontWeight: "bold",
   },
 });

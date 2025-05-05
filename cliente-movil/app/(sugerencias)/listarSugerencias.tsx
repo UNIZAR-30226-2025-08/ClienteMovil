@@ -100,8 +100,14 @@ export default function NotificacionesScreen() {
             notificaciones.map((notif, index) => (
               <View
                 key={`${notif.id}-${index}`}
-                style={styles.notificacionContainer}
+                style={[
+                  styles.notificacionContainer,
+                  notif.revisada && styles.completedNotificacionContainer,
+                ]}
               >
+                {notif.revisada && (
+                  <Text style={styles.reviewedBadge}>Revisada</Text>
+                )}
                 <Text
                   style={[styles.textoNotificacion, { fontStyle: "italic" }]}
                 >
@@ -120,17 +126,6 @@ export default function NotificacionesScreen() {
                 </Text>
                 <Text style={styles.fechaNotificacion}>
                   {new Date(notif.fechaSugerencia).toLocaleString()}
-                </Text>
-                <Text style={styles.textoNotificacion}>
-                  Estado:
-                  {notif.revisada ? (
-                    <Text style={{ color: "green", fontWeight: "bold" }}>
-                      {" "}
-                      Cerrada ✔
-                    </Text>
-                  ) : (
-                    <Text style={{ fontWeight: "bold" }}> Abierta</Text>
-                  )}
                 </Text>
               </View>
             ))
@@ -172,6 +167,22 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 15,
     marginBottom: 15,
+  },
+  completedNotificacionContainer: {
+    backgroundColor: "#e8f5e9",
+    borderLeftWidth: 5,
+    borderLeftColor: "#008f39",
+  },
+  reviewedBadge: {
+    backgroundColor: "#008f39",
+    color: "#fff",
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+    alignSelf: "flex-start",
+    marginBottom: 8,
+    fontSize: 12,
+    fontWeight: "bold",
   },
   textoNotificacion: {
     fontSize: 16,
