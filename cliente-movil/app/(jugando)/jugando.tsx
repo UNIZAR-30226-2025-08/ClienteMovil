@@ -828,19 +828,19 @@ const Jugando: React.FC = () => {
    * Duración de la animación de entrada (fade in) en milisegundos de todas las animaciones.
    * @type {number}
    */
-  const duracionFadeIn = 500;
+  const duracionFadeIn = 1000;
 
   /**
    * Tiempo de espera entre fases de la animación en milisegundos de todas las animaciones.
    * @type {number}
    */
-  const duracionEspera = 3000;
+  const duracionEspera = 5000;
 
   /**
    * Duración de la animación de salida (fade out) en milisegundos de todas las animaciones.
    * @type {number}
    */
-  const duracionFadeOut = 500;
+  const duracionFadeOut = 1000;
 
   /**
    * Duración total de todas las animaciones.
