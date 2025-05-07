@@ -834,7 +834,7 @@ const Jugando: React.FC = () => {
    * Tiempo de espera entre fases de la animación en milisegundos de todas las animaciones.
    * @type {number}
    */
-  const duracionEspera = 5000;
+  const duracionEspera = 3000;
 
   /**
    * Duración de la animación de salida (fade out) en milisegundos de todas las animaciones.
