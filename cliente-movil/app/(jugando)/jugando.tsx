@@ -828,19 +828,19 @@ const Jugando: React.FC = () => {
    * Duración de la animación de entrada (fade in) en milisegundos de todas las animaciones.
    * @type {number}
    */
-  const duracionFadeIn = 1000;
+  const duracionFadeIn = 500;
 
   /**
    * Tiempo de espera entre fases de la animación en milisegundos de todas las animaciones.
    * @type {number}
    */
-  const duracionEspera = 5000;
+  const duracionEspera = 3000;
 
   /**
    * Duración de la animación de salida (fade out) en milisegundos de todas las animaciones.
    * @type {number}
    */
-  const duracionFadeOut = 1000;
+  const duracionFadeOut = 500;
 
   /**
    * Duración total de todas las animaciones.
@@ -2141,6 +2141,10 @@ const Jugando: React.FC = () => {
    * @return `true` si el jugador local está muerto; de lo contrario, `false`
    */
   const jugadorLocalMuerto = useMemo(() => {
+    console.log("indiceUsuario:", indiceUsuario);
+    console.log("jugadoresEstado[indiceUsuario]:", jugadoresEstado[indiceUsuario]);
+    console.log("estaVivo:", jugadoresEstado[indiceUsuario]?.estaVivo);
+  
     return indiceUsuario !== -1
       ? !jugadoresEstado[indiceUsuario]?.estaVivo
       : false;
@@ -2156,24 +2160,6 @@ const Jugando: React.FC = () => {
   // ---------------------------------------------------------------------------
 
   const prevMuertoRef = useRef<boolean>(jugadorLocalMuerto);
-
-  useEffect(() => {
-    const antes = prevMuertoRef.current;
-    const ahora = jugadorLocalMuerto;
-
-    if (!antes && ahora) {
-      logCustom(
-        jornadaActual,
-        etapaActual,
-        `Evento local detectado: usuarioLocalMuerto`,
-        jugadoresEstado[indiceUsuario]
-      );
-      // agregarEstado(Estado.usuarioLocalMuerto);
-    }
-
-    prevMuertoRef.current = ahora;
-  }, [jugadorLocalMuerto]);
-
   // ---------------------------------------------------------------------------
   // Recibir eventos del backend
   // ---------------------------------------------------------------------------
@@ -2883,24 +2869,6 @@ const Jugando: React.FC = () => {
         );
 
         setJugadoresEstado(nuevosJugadores);
-        logCustom(
-            jornadaActual,
-            etapaActual,
-            `Valor de jugadorLocalMuerto = ${jugadorLocalMuerto}`,
-            jugadoresEstado[indiceUsuario]
-          );
-        if (jugadorLocalMuerto && !muerteYaTratada) {
-          agregarEstado(Estado.usuarioLocalMuerto);
-          setMuerteYaTratada(true);
-          logCustom(
-            jornadaActual,
-            etapaActual,
-            `Muerte detectada`,
-            jugadoresEstado[indiceUsuario]
-          );
-          break;
-        }
-
         setEtapaActual("Día");
         setJornadaActual(jornadaActual + 1);
         setOpacity(0.5); // Si no estuviese esto, no le daría tiempo a actualizarse para este case
@@ -2915,6 +2883,28 @@ const Jugando: React.FC = () => {
         );
 
         setMostrarAnimacionInicioDia1(false);
+
+        logCustom(
+            jornadaActual,
+            etapaActual,
+            `Valor de jugadorLocalMuerto = ${jugadorLocalMuerto}`,
+            jugadoresEstado[indiceUsuario]
+          );
+          const antes = prevMuertoRef.current;
+          const ahora = jugadorLocalMuerto;
+      
+          if (!antes && ahora) {
+            logCustom(
+              jornadaActual,
+              etapaActual,
+              `Evento local detectado: usuarioLocalMuerto`,
+              jugadoresEstado[indiceUsuario]
+            );
+            agregarEstado(Estado.usuarioLocalMuerto);
+            break;
+          }
+      
+        prevMuertoRef.current = ahora;
 
         setPlantillaActual(plantillaEsperaInicial);
         actualizarMaxTiempo(3);
@@ -3144,7 +3134,7 @@ const Jugando: React.FC = () => {
           <AnimacionGenerica
             opacity={opacitiesInicioHabilidadBruja[0]}
             mostrarComponente={mostrarComponentesFinalHabilidadBruja[0]}
-            texto="LA BRUJA SE DESPIERTA, OBSERVA VÍCTIMA DE LOS LOBOS. USARÁ SU POCIÓN CURATIVA O SU POCIÓN VENENOSA"
+            texto="LA BRUJA SE DESPIERTA, OBSERVA VÍCTIMA DE LOS LOBOS. ¿USARÁ SU POCIÓN CURATIVA O SU POCIÓN VENENOSA?"
           />
         )}
         {mostrarAnimacionFinalHabilidadBruja && (
