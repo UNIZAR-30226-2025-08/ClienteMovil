@@ -296,33 +296,40 @@ const CrearSala = (): JSX.Element => {
       .filter((rol) => rol.nombre !== "Aldeano")
       .reduce((sum, rol) => sum + rol.cantidad, 0);
 
-    // 1. Construir un objeto con las cantidades de cada rol
-    const rolesObject: Record<string, number> = rolesCantidad.reduce(
-      (acc, rol) => {
-        acc[rol.nombre] = rol.cantidad;
-        return acc;
-      },
-      {} as Record<string, number>
-    );
+    if (!password) {
+      Alert.alert(
+        "Error en la contraseña",
+        "La contraseña no puede ser vacía."
+      );
+    } else {
+      // 1. Construir un objeto con las cantidades de cada rol
+      const rolesObject: Record<string, number> = rolesCantidad.reduce(
+        (acc, rol) => {
+          acc[rol.nombre] = rol.cantidad;
+          return acc;
+        },
+        {} as Record<string, number>
+      );
 
-    // 2. Incluir este objeto en el payload que envías al servidor
-    const datosSala = {
-      nombreSala: nombreServidor,
-      tipo: privacidad.toLowerCase(),
-      contrasena: privacidad === "Privada" ? password : null,
-      maxJugadores: numJugadores,
-      maxRolesEspeciales,
-      usuario: {
-        id: usuario?.id,
-        nombre: usuario?.nombre,
-        avatar: usuario?.avatar, // Asegúrate de incluirlo
-      },
-      maxRoles: rolesObject,
-    };
+      // 2. Incluir este objeto en el payload que envías al servidor
+      const datosSala = {
+        nombreSala: nombreServidor,
+        tipo: privacidad.toLowerCase(),
+        contrasena: privacidad === "Privada" ? password : null,
+        maxJugadores: numJugadores,
+        maxRolesEspeciales,
+        usuario: {
+          id: usuario?.id,
+          nombre: usuario?.nombre,
+          avatar: usuario?.avatar, // Asegúrate de incluirlo
+        },
+        maxRoles: rolesObject,
+      };
 
-    //console.log("Datos de la sala a enviar:", datosSala);
+      //console.log("Datos de la sala a enviar:", datosSala);
 
-    socket.emit("crearSala", datosSala);
+      socket.emit("crearSala", datosSala);
+    }
   };
 
   // Escuchar respuesta del servidor sobre la creación de la sala
