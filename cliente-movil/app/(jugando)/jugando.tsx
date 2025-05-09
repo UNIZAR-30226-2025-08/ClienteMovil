@@ -248,7 +248,7 @@ const Jugando: React.FC = () => {
       // Merge defensivo: para cada jugador que viene,
       // conservamos propiedades viejas (p.ej. estaVivo) que no lleguen
       setJugadoresEstado((prev) =>
-        data.jugadores.map((j: { id: string; }) => {
+        data.jugadores.map((j: { id: string }) => {
           const viejo = prev.find((p) => p.id === j.id);
           return {
             // primero todo lo que ya había
@@ -2063,14 +2063,14 @@ const Jugando: React.FC = () => {
       return;
     }
     if (botellaUsadaEnEsteTurno > 2) {
-        logCustom(
-          jornadaActual,
-          etapaActual,
-          `Intento de selección de botella de vida fallido: el usuario ya ha usado una botella este turno`,
-          jugadoresEstado[indiceUsuario]
-        );
-        mostrarError("Ya has usado 2 pociones este turno");
-        return;
+      logCustom(
+        jornadaActual,
+        etapaActual,
+        `Intento de selección de botella de vida fallido: el usuario ya ha usado una botella este turno`,
+        jugadoresEstado[indiceUsuario]
+      );
+      mostrarError("Ya has usado 2 pociones este turno");
+      return;
     }
     if (botellaMuerteUsada) {
       logCustom(
@@ -2284,6 +2284,20 @@ const Jugando: React.FC = () => {
         `Evento recibido: mensajePrivado - ${JSON.stringify(data)}`,
         jugadoresEstado[indiceUsuario]
       );
+      if (rolUsuario === "Hombre lobo") {
+        var mensaje = data.nombre + ": " + data.mensaje;
+
+        console.log("Tamaño de mensajes.length", mensajes.length);
+
+        const nuevoMensaje: MensajeChat = {
+          id: Date.now() + Math.random(),
+          texto: mensaje,
+        };
+
+        setMensajes((prevMensajes) => [...prevMensajes, nuevoMensaje]);
+      } else {
+        console.log("Error en el envio de mensaje privado en Backend");
+      }
     });
     socket.on("iniciarVotacionAlguacil", (data) => {
       logCustom(
