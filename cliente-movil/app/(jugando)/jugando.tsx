@@ -248,7 +248,7 @@ const Jugando: React.FC = () => {
       // Merge defensivo: para cada jugador que viene,
       // conservamos propiedades viejas (p.ej. estaVivo) que no lleguen
       setJugadoresEstado((prev) =>
-        data.jugadores.map((j) => {
+        data.jugadores.map((j: { id: string; }) => {
           const viejo = prev.find((p) => p.id === j.id);
           return {
             // primero todo lo que ya había
