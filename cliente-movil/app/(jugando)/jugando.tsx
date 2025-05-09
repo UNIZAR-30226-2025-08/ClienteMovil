@@ -2274,6 +2274,7 @@ const Jugando: React.FC = () => {
         `Evento recibido: estadoJugadores - ${JSON.stringify(data)}`,
         jugadoresEstado[indiceUsuario]
       );
+      
       setJugadoresEstado(data.jugadores);
     });
     /**
@@ -2985,19 +2986,57 @@ const Jugando: React.FC = () => {
         setPasoTurno(false);
         setJugadorSeleccionado(null);
         break;
-      case Estado.diaComienza:
+        case Estado.diaComienza:{
+        // 1) Fetch the updated player list from the server
         const nuevosJugadores = await new Promise<typeof jugadoresEstado>(
-          (resolve) => {
+            (resolve) => {
             const handler = (data: { jugadores: typeof jugadoresEstado }) => {
-              socket.off("estadoJugadores", handler);
-              resolve(data.jugadores);
+                socket.off("estadoJugadores", handler);
+                resolve(data.jugadores);
             };
             socket.on("estadoJugadores", handler);
             socket.emit("obtenerEstadoJugadores", { idPartida: idSala });
-          }
+            }
         );
-
-        setJugadoresEstado(nuevosJugadores);
+        
+        // 2) Compare old vs. new to detect a local death
+        const antiguoss = jugadoresEstado;    // before-night state
+        const nuevoss   = nuevosJugadores;    // after-night state
+        
+        const antes_muertoo = !antiguoss[indiceUsuario].estaVivo;
+        const ahora_muertoo = !nuevoss[indiceUsuario].estaVivo;
+        
+        // Logging for debugging
+        console.table(nuevoss);
+        logCustom(
+            jornadaActual,
+            etapaActual,
+            `Valor de antes_muerto = ${antes_muertoo}`,
+            nuevoss[indiceUsuario]
+        );
+        logCustom(
+            jornadaActual,
+            etapaActual,
+            `Valor de ahora_muerto = ${ahora_muertoo}`,
+            nuevoss[indiceUsuario]
+        );
+        
+        // 3) Fire the “usuarioLocalMuerto” event exactly once if detected
+        if (!antes_muertoo && ahora_muertoo) {
+            logCustom(
+            jornadaActual,
+            etapaActual,
+            `Evento local detectado: usuarioLocalMuerto`,
+            nuevoss[indiceUsuario]
+            );
+            agregarEstado(Estado.usuarioLocalMuerto);
+        }
+        
+        // 4) Update our ref for next comparison
+        prevMuertoRef.current = antes_muertoo;
+        
+        // 5) Push the new state into React
+        setJugadoresEstado(nuevoss);
         setEtapaActual("Día");
         setJornadaActual(jornadaActual + 1);
         setOpacity(0.5); // Si no estuviese esto, no le daría tiempo a actualizarse para este case
@@ -3085,7 +3124,7 @@ const Jugando: React.FC = () => {
         setVotoRealizado(false);
         setPasoTurno(false);
         setJugadorSeleccionado(null);
-        break;
+        break;}
       case Estado.usuarioLocalMuerto:
         logCustom(
           jornadaActual,
