@@ -3019,7 +3019,7 @@ const Jugando: React.FC = () => {
           jugadoresEstado[indiceUsuario]
         );
         const antes = prevMuertoRef.current;
-        const ahora = jugadorLocalMuerto;
+        const ahora = !jugadoresEstado[indiceUsuario].estaVivo;
 
         if (!antes && ahora) {
           logCustom(
