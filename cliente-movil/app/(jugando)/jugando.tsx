@@ -3019,21 +3019,21 @@ const Jugando: React.FC = () => {
           `Valor de jugadorLocalMuerto = ${jugadorLocalMuerto}`,
           jugadoresEstado[indiceUsuario]
         );
-        const antes = prevMuertoRef.current;
-        const ahora = !jugadoresEstado[indiceUsuario].estaVivo;
+        const antes_muerto = prevMuertoRef.current;
+        const ahora_muerto = !jugadoresEstado[indiceUsuario].estaVivo;
         logCustom(
             jornadaActual,
             etapaActual,
-            `Valor de antes = prevMuertoRef.current; = ${antes}`,
+            `Valor de antes_muerto = prevMuertoRef.current; = ${antes_muerto}`,
             jugadoresEstado[indiceUsuario]
         );
         logCustom(
             jornadaActual,
             etapaActual,
-            `Valor de ahora = jugadoresEstado[indiceUsuario].estaVivo; = ${ahora}`,
+            `Valor de ahora_muerto = !jugadoresEstado[indiceUsuario].estaVivo; = ${ahora_muerto}`,
             jugadoresEstado[indiceUsuario]
         );
-        if (!antes && !ahora) {
+        if (!antes_muerto && ahora_muerto) {
           logCustom(
             jornadaActual,
             etapaActual,
@@ -3044,7 +3044,7 @@ const Jugando: React.FC = () => {
           break;
         }
 
-        prevMuertoRef.current = ahora;
+        prevMuertoRef.current = ahora_muerto;
 
         actualizarMaxTiempo(3);
         reiniciarTemporizador();
