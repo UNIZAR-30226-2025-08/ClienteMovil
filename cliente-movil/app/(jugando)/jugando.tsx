@@ -3109,6 +3109,8 @@ const Jugando: React.FC = () => {
 
         setMostrarAnimacionUsuarioLocalMuerto(false);
 
+        setPlantillaActual(plantillaVotacionDiurna);
+
         if (rolUsuario === "Cazador") break;
         // agregarEstado(Estado.partidaFinalizada);
 
