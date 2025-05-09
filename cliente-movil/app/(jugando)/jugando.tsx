@@ -74,6 +74,7 @@ enum Estado {
   empateVotacionDia,
   segundoEmpateVotacionDia,
   resultadoVotosDia,
+  segundoEmpateVotacionAlguacil,
 }
 
 /**
@@ -224,14 +225,13 @@ const Jugando: React.FC = () => {
         "Jugadores enPartida (stringify):",
         JSON.stringify(data.sala.jugadores, null, 2)
       );
-
+  
+      // Al entrar en partida recibes la lista completa: la usamos tal cual
       setJugadoresEstado(data.sala.jugadores);
     });
-
+  
     socket.on("actualizarSala", (data) => {
-      // console.log("Evento actualizarSala recibido:", data);
-
-      // Si ya estamos en partida, ignorar actualizaciones con jugadores vacíos
+      // Si ya estamos en partida, ignorar actualizaciones con lista vacía
       if (
         data.enPartida &&
         (!Array.isArray(data.jugadores) || data.jugadores.length === 0)
@@ -244,11 +244,22 @@ const Jugando: React.FC = () => {
         */
         return;
       }
-
-      // console.log("Actualizando jugadoresEstado con:", data.jugadores);
-      setJugadoresEstado(data.jugadores);
+  
+      // Merge defensivo: para cada jugador que viene,
+      // conservamos propiedades viejas (p.ej. estaVivo) que no lleguen
+      setJugadoresEstado((prev) =>
+        data.jugadores.map((j) => {
+          const viejo = prev.find((p) => p.id === j.id);
+          return {
+            // primero todo lo que ya había
+            ...(viejo ?? {}),
+            // luego sobreescribimos con lo nuevo
+            ...j,
+          };
+        })
+      );
     });
-
+  
     return () => {
       socket.off("enPartida");
       socket.off("actualizarSala");
@@ -1443,6 +1454,28 @@ const Jugando: React.FC = () => {
         start: mostrarAnimacionFinPartida,
     });
 
+    /**
+     *
+     */
+    const [
+        mostrarSegundoEmpateVotacionAlguacil,
+        setMostrarSegundoEmpateVotacionAlguacil,
+    ] = useState<boolean>(false);
+
+    /**
+     *
+     */
+    const {
+        opacities: opacitiesSegundoEmpateVotacionAlguacil,
+        mostrarComponentes: mostrarComponentesSegundoEmpateVotacionAlguacil,
+        } = useGestorAnimaciones({
+        duracionFadeIn,
+        duracionEspera,
+        duracionFadeOut,
+        numAnimaciones: 1,
+        start: mostrarSegundoEmpateVotacionAlguacil,
+    });
+
   // !!!!!!!!!!!!!!!!!!!!!!!!!!
   // const [mensaje, setMensaje] = useState(null);
   // !!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1505,6 +1538,21 @@ const Jugando: React.FC = () => {
         "Solo los lobos pueden seleccionar jugadores durante la noche"
       );
       return;
+    }
+    if (
+        estadoActual === Estado.turnoHombresLobos &&
+        rolUsuario === "Hombre lobo" && jugadoresEstado[indiceUsuario].rol === "Hombre lobo"
+      ) {
+        logCustom(
+          jornadaActual,
+          etapaActual,
+          `Intento de selección de usuario fallido: No puedes matar a otros lobos`,
+          jugadoresEstado[indiceUsuario]
+        );
+        mostrarError(
+          "No puedes matar a otros lobos"
+        );
+        return;
     }
     if (estadoActual === Estado.habilidadBruja && rolUsuario !== "Bruja") {
       logCustom(
@@ -1843,7 +1891,7 @@ const Jugando: React.FC = () => {
         );
         setBotellaMuerteUsada(true);
       }
-      setBotellaUsadaEnEsteTurno(true);
+      // setBotellaUsadaEnEsteTurno(true);
     } else if (estadoActual === Estado.habilidadCazador) {
       socket.emit("cazadorDispara", {
         idPartida: idSala,
@@ -2372,6 +2420,7 @@ const Jugando: React.FC = () => {
         )}`,
         jugadoresEstado[indiceUsuario]
       );
+      agregarEstado(Estado.segundoEmpateVotacionAlguacil);
     });
     socket.on("alguacilElegido", (data) => {
       logCustom(
@@ -2584,16 +2633,17 @@ const Jugando: React.FC = () => {
         cerrarChat();
         setMostrarAnimacionFinalHabilidadAlguacil(true);
 
-        const nuevosJugadores = await new Promise<typeof jugadoresEstado>(
-          (resolve) => {
-            const handler = (data: { jugadores: typeof jugadoresEstado }) => {
-              socket.off("estadoJugadores", handler);
-              resolve(data.jugadores);
-            };
-            socket.on("estadoJugadores", handler);
-            socket.emit("obtenerEstadoJugadores", { idPartida: idSala });
-          }
-        );
+        const jugadoresNuevos = await new Promise<typeof jugadoresEstado>(
+            (resolve) => {
+                const handler = (data: { jugadores: typeof jugadoresEstado }) => {
+                socket.off("estadoJugadores", handler);
+                resolve(data.jugadores);
+                };
+                socket.on("estadoJugadores", handler);
+                socket.emit("obtenerEstadoJugadores", { idPartida: idSala });
+            }
+            );
+        setJugadoresEstado(jugadoresNuevos);
 
         await new Promise((resolve) => setTimeout(resolve, duracionAnimacion));
 
@@ -2745,6 +2795,16 @@ const Jugando: React.FC = () => {
 
         setMostrarAnimacionAlguacilElegido(false);
         break;
+      case Estado.segundoEmpateVotacionAlguacil:
+        setPlantillaActual(plantillaAnimacionDia);
+        cerrarHabilidad();
+        cerrarChat();
+        setMostrarAnimacionSegundoEmpateVotacionDiurna(true);
+
+        await new Promise((resolve) => setTimeout(resolve, duracionAnimacion));
+
+        setMostrarAnimacionSegundoEmpateVotacionDiurna(false);
+        break;
       case Estado.nocheComienza:
         const jugadoresNuevos = await new Promise<typeof jugadoresEstado>(
             (resolve) => {
@@ -2756,7 +2816,7 @@ const Jugando: React.FC = () => {
                 socket.emit("obtenerEstadoJugadores", { idPartida: idSala });
             }
             );
-            setJugadoresEstado(jugadoresNuevos);
+        setJugadoresEstado(jugadoresNuevos);
         setEtapaActual("Noche");
         setPlantillaActual(plantillaAnimacionNoche);
         cerrarHabilidad();
@@ -2981,7 +3041,7 @@ const Jugando: React.FC = () => {
         setMostrarAnimacionUsuarioLocalMuerto(false);
 
         if (rolUsuario === "Cazador") break;
-        agregarEstado(Estado.partidaFinalizada);
+        // agregarEstado(Estado.partidaFinalizada);
 
         break;
       case Estado.empateVotacionDia:
@@ -3272,9 +3332,16 @@ const Jugando: React.FC = () => {
             mostrarComponente={mostrarComponentesResultadosDia[0]}
             texto={
               resultadoVotosDia !== ""
-                ? resultadoVotosDia
+                ? `${resultadoVotosDia.toUpperCase()}`
                 : "EL PUEBLO NO SE HA PUESTO DE ACUERDO DE A QUIÉN LINCHAR"
             }
+          />
+        )}
+        {mostrarSegundoEmpateVotacionAlguacil && (
+          <AnimacionGenerica
+            opacity={opacitiesSegundoEmpateVotacionAlguacil[0]}
+            mostrarComponente={mostrarComponentesSegundoEmpateVotacionAlguacil[0]}
+            texto={"NO SE HA LLEGADO A UN ACUERDO DE QUIÉN ES EL ALGUACIL"}
           />
         )}
         {mostrarAnimacionFinPartida && (

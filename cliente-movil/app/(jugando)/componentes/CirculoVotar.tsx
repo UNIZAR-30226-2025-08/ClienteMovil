@@ -132,7 +132,7 @@ const CirculoVotar: React.FC<CirculoVotarProps> = ({
               <Image source={avatarFuente} style={estilos.imagenCirculo} />
 
               {/* Superposición de calavera para jugadores muertos */}
-              {!jugador.estaVivo && (
+              {jugador.estaVivo === false && (
                 <Image
                   source={imagenCalavera}
                   style={[
