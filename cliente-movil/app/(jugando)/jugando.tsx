@@ -3033,7 +3033,7 @@ const Jugando: React.FC = () => {
             `Valor de ahora = jugadoresEstado[indiceUsuario].estaVivo; = ${ahora}`,
             jugadoresEstado[indiceUsuario]
         );
-        if (!antes && ahora) {
+        if (!antes && !ahora) {
           logCustom(
             jornadaActual,
             etapaActual,
@@ -3278,7 +3278,7 @@ const Jugando: React.FC = () => {
             mostrarComponente={mostrarComponentesEjecutarHabilidadVidente[0]}
             texto={
               visionJugador !== ""
-                ? visionJugador
+                ? visionJugador.toUpperCase()
                 : "NO HAS SELECCIONADO A UN JUGADOR AL QUE VISUALIZAR"
             }
           />
