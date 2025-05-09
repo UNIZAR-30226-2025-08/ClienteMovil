@@ -225,11 +225,11 @@ const Jugando: React.FC = () => {
         "Jugadores enPartida (stringify):",
         JSON.stringify(data.sala.jugadores, null, 2)
       );
-  
+
       // Al entrar en partida recibes la lista completa: la usamos tal cual
       setJugadoresEstado(data.sala.jugadores);
     });
-  
+
     socket.on("actualizarSala", (data) => {
       // Si ya estamos en partida, ignorar actualizaciones con lista vacía
       if (
@@ -244,7 +244,7 @@ const Jugando: React.FC = () => {
         */
         return;
       }
-  
+
       // Merge defensivo: para cada jugador que viene,
       // conservamos propiedades viejas (p.ej. estaVivo) que no lleguen
       setJugadoresEstado((prev) =>
@@ -259,7 +259,7 @@ const Jugando: React.FC = () => {
         })
       );
     });
-  
+
     return () => {
       socket.off("enPartida");
       socket.off("actualizarSala");
@@ -280,7 +280,7 @@ const Jugando: React.FC = () => {
   useEffect(() => {
     const fetchJugadores = async () => {
       setRolUsuario(rol as Rol);
-      
+
       if (!animacionesInicialesYaEjecutadas[idSala]) {
         agregarEstado(Estado.esperaInicial);
         animacionesInicialesYaEjecutadas[idSala] = true;
@@ -564,16 +564,25 @@ const Jugando: React.FC = () => {
    * Deberían enviarlos el backend, esto son solo fallbacks como los de web.
    * Cuando web no tenía fallback, está puesto 30 segundos.
    */
-  const [duracionEsperaInicial, setDuracionEsperaInicial] = useState<number>(30);
-  const [duracionIniciarVotacionAlguacil, setDuracionIniciarVotacionAlguacil] = useState<number>(24);
-  const [duracionSegundaVotacionAlguacil, setDuracionSegundaVotacionAlguacil] = useState<number>(24);
-  const [duracionHabilidadVidente, setDuracionHabilidadVidente] = useState<number>(15);
-  const [duracionTurnoHombresLobos, setDuracionTurnoHombresLobos] = useState<number>(19);
-  const [duracionHabilidadBruja, setDuracionHabilidadBruja] = useState<number>(30);
-  const [duracionHabilidadAlguacil, setDuracionHabilidadAlguacil] = useState<number>(30);
-  const [duracionHabilidadCazador, setDuracionHabilidadCazador] = useState<number>(30);
+  const [duracionEsperaInicial, setDuracionEsperaInicial] =
+    useState<number>(30);
+  const [duracionIniciarVotacionAlguacil, setDuracionIniciarVotacionAlguacil] =
+    useState<number>(24);
+  const [duracionSegundaVotacionAlguacil, setDuracionSegundaVotacionAlguacil] =
+    useState<number>(24);
+  const [duracionHabilidadVidente, setDuracionHabilidadVidente] =
+    useState<number>(15);
+  const [duracionTurnoHombresLobos, setDuracionTurnoHombresLobos] =
+    useState<number>(19);
+  const [duracionHabilidadBruja, setDuracionHabilidadBruja] =
+    useState<number>(30);
+  const [duracionHabilidadAlguacil, setDuracionHabilidadAlguacil] =
+    useState<number>(30);
+  const [duracionHabilidadCazador, setDuracionHabilidadCazador] =
+    useState<number>(30);
   const [duracionDiaComienza, setDuracionDiaComienza] = useState<number>(60);
-  const [duracionEmpateVotacionDia, setDuracionEmpateVotacionDia] = useState<number>(25);
+  const [duracionEmpateVotacionDia, setDuracionEmpateVotacionDia] =
+    useState<number>(25);
 
   // ---------------------------------------------------------------------------
   // ¿Qué elementos de la UI mostrar en cada momento?
@@ -1410,15 +1419,11 @@ const Jugando: React.FC = () => {
     start: mostrarAnimacionSegundoEmpateVotacionDiurna,
   });
 
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
   /**
    *
    */
-  const [
-    mostrarAnimacionResultadosDia,
-    setMostrarAnimacionResultadosDia,
-  ] = useState<boolean>(false);
+  const [mostrarAnimacionResultadosDia, setMostrarAnimacionResultadosDia] =
+    useState<boolean>(false);
 
   /**
    *
@@ -1434,54 +1439,48 @@ const Jugando: React.FC = () => {
     start: mostrarAnimacionResultadosDia,
   });
 
-    /**
-     *
-     */
-    const [
-        mostrarAnimacionFinPartida,
-        setMostrarAnimacionFinPartida,
-    ] = useState<boolean>(false);
+  /**
+   *
+   */
+  const [mostrarAnimacionFinPartida, setMostrarAnimacionFinPartida] =
+    useState<boolean>(false);
 
-    /**
-     *
-     */
-    const {
-        opacities: opacitiesFinPartida,
-        mostrarComponentes: mostrarComponentesFinPartida,
-        } = useGestorAnimaciones({
-        duracionFadeIn,
-        duracionEspera,
-        duracionFadeOut,
-        numAnimaciones: 1,
-        start: mostrarAnimacionFinPartida,
-    });
+  /**
+   *
+   */
+  const {
+    opacities: opacitiesFinPartida,
+    mostrarComponentes: mostrarComponentesFinPartida,
+  } = useGestorAnimaciones({
+    duracionFadeIn,
+    duracionEspera,
+    duracionFadeOut,
+    numAnimaciones: 1,
+    start: mostrarAnimacionFinPartida,
+  });
 
-    /**
-     *
-     */
-    const [
-        mostrarSegundoEmpateVotacionAlguacil,
-        setMostrarSegundoEmpateVotacionAlguacil,
-    ] = useState<boolean>(false);
+  /**
+   *
+   */
+  const [
+    mostrarSegundoEmpateVotacionAlguacil,
+    setMostrarSegundoEmpateVotacionAlguacil,
+  ] = useState<boolean>(false);
 
-    /**
-     *
-     */
-    const {
-        opacities: opacitiesSegundoEmpateVotacionAlguacil,
-        mostrarComponentes: mostrarComponentesSegundoEmpateVotacionAlguacil,
-        } = useGestorAnimaciones({
-        duracionFadeIn,
-        duracionEspera,
-        duracionFadeOut,
-        numAnimaciones: 1,
-        start: mostrarSegundoEmpateVotacionAlguacil,
-    });
+  /**
+   *
+   */
+  const {
+    opacities: opacitiesSegundoEmpateVotacionAlguacil,
+    mostrarComponentes: mostrarComponentesSegundoEmpateVotacionAlguacil,
+  } = useGestorAnimaciones({
+    duracionFadeIn,
+    duracionEspera,
+    duracionFadeOut,
+    numAnimaciones: 1,
+    start: mostrarSegundoEmpateVotacionAlguacil,
+  });
 
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
   // !!!!!!!!!!!!!!!!!!!!!!!!!!
   // const [mensaje, setMensaje] = useState(null);
   // !!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1499,14 +1498,14 @@ const Jugando: React.FC = () => {
    */
   const administrarSeleccionJugadorVotacion = (index: number): void => {
     if (jugadorLocalMuerto) {
-        mostrarError("Estas muerto :(");
-        logCustom(
-          jornadaActual,
-          etapaActual,
-          `Intento de selección de usuario fallido: Usuario muerto`,
-          jugadoresEstado[indiceUsuario]
-        );
-        return;
+      mostrarError("Estas muerto :(");
+      logCustom(
+        jornadaActual,
+        etapaActual,
+        `Intento de selección de usuario fallido: Usuario muerto`,
+        jugadoresEstado[indiceUsuario]
+      );
+      return;
     }
     if (estadoActual === Estado.esperaInicial) {
       logCustom(
@@ -1546,19 +1545,18 @@ const Jugando: React.FC = () => {
       return;
     }
     if (
-        estadoActual === Estado.turnoHombresLobos &&
-        rolUsuario === "Hombre lobo" && jugadoresEstado[indiceUsuario].rol === "Hombre lobo"
-      ) {
-        logCustom(
-          jornadaActual,
-          etapaActual,
-          `Intento de selección de usuario fallido: No puedes matar a otros lobos`,
-          jugadoresEstado[indiceUsuario]
-        );
-        mostrarError(
-          "No puedes matar a otros lobos"
-        );
-        return;
+      estadoActual === Estado.turnoHombresLobos &&
+      rolUsuario === "Hombre lobo" &&
+      jugadoresEstado[indiceUsuario].rol === "Hombre lobo"
+    ) {
+      logCustom(
+        jornadaActual,
+        etapaActual,
+        `Intento de selección de usuario fallido: No puedes matar a otros lobos`,
+        jugadoresEstado[indiceUsuario]
+      );
+      mostrarError("No puedes matar a otros lobos");
+      return;
     }
     if (estadoActual === Estado.habilidadBruja && rolUsuario !== "Bruja") {
       logCustom(
@@ -1661,14 +1659,14 @@ const Jugando: React.FC = () => {
    */
   const votarAJugador = (): void => {
     if (jugadorLocalMuerto) {
-        mostrarError("Estas muerto :(");
-        logCustom(
-          jornadaActual,
-          etapaActual,
-          `Intento de voto fallido: Usuario muerto`,
-          jugadoresEstado[indiceUsuario]
-        );
-        return;
+      mostrarError("Estas muerto :(");
+      logCustom(
+        jornadaActual,
+        etapaActual,
+        `Intento de voto fallido: Usuario muerto`,
+        jugadoresEstado[indiceUsuario]
+      );
+      return;
     }
     if (pasoTurno) {
       mostrarError("Has pasado turno");
@@ -1934,14 +1932,14 @@ const Jugando: React.FC = () => {
    */
   const manejarPasarTurno = (): void => {
     if (jugadorLocalMuerto) {
-        mostrarError("Estas muerto :(");
-        logCustom(
-          jornadaActual,
-          etapaActual,
-          `Intento de pasar turno fallido: Usuario muerto`,
-          jugadoresEstado[indiceUsuario]
-        );
-        return;
+      mostrarError("Estas muerto :(");
+      logCustom(
+        jornadaActual,
+        etapaActual,
+        `Intento de pasar turno fallido: Usuario muerto`,
+        jugadoresEstado[indiceUsuario]
+      );
+      return;
     }
     if (pasoTurno) {
       mostrarError("Has pasado turno");
@@ -1964,17 +1962,17 @@ const Jugando: React.FC = () => {
       return;
     }
     if (rolUsuario === "Bruja") {
-        socket.emit("pasarTurnoBruja", {
-          idPartida: idSala,
-          idJugador: usuarioID,
-        });
-        logCustom(
-          jornadaActual,
-          etapaActual,
-          `Evento 'pasarTurnoBruja' emitido`,
-          jugadoresEstado[indiceUsuario]
-        );
-      }
+      socket.emit("pasarTurnoBruja", {
+        idPartida: idSala,
+        idJugador: usuarioID,
+      });
+      logCustom(
+        jornadaActual,
+        etapaActual,
+        `Evento 'pasarTurnoBruja' emitido`,
+        jugadoresEstado[indiceUsuario]
+      );
+    }
     logCustom(
       jornadaActual,
       etapaActual,
@@ -1997,24 +1995,24 @@ const Jugando: React.FC = () => {
   const manejarSeleccionBotellaVida = () => {
     setBotellaSeleccionada((prev) => (prev === "vida" ? null : "vida"));
     if (jugadorLocalMuerto) {
-        mostrarError("Estas muerto :(");
-        logCustom(
-          jornadaActual,
-          etapaActual,
-          `Intento de lanzar poción turno fallido: Usuario muerto`,
-          jugadoresEstado[indiceUsuario]
-        );
-        return;
+      mostrarError("Estas muerto :(");
+      logCustom(
+        jornadaActual,
+        etapaActual,
+        `Intento de lanzar poción turno fallido: Usuario muerto`,
+        jugadoresEstado[indiceUsuario]
+      );
+      return;
     }
     if (pasoTurno) {
-        mostrarError("Has pasado turno");
-        logCustom(
-          jornadaActual,
-          etapaActual,
-          `Intento de lanzar poción turno fallido: Turno ya pasado`,
-          jugadoresEstado[indiceUsuario]
-        );
-        return;
+      mostrarError("Has pasado turno");
+      logCustom(
+        jornadaActual,
+        etapaActual,
+        `Intento de lanzar poción turno fallido: Turno ya pasado`,
+        jugadoresEstado[indiceUsuario]
+      );
+      return;
     }
     if (botellaUsadaEnEsteTurno) {
       logCustom(
@@ -2045,24 +2043,24 @@ const Jugando: React.FC = () => {
   const manejarSeleccionBotellaMuerte = () => {
     setBotellaSeleccionada((prev) => (prev === "muerte" ? null : "muerte"));
     if (jugadorLocalMuerto) {
-        mostrarError("Estas muerto :(");
-        logCustom(
-          jornadaActual,
-          etapaActual,
-          `Intento de lanzar poción turno fallido: Usuario muerto`,
-          jugadoresEstado[indiceUsuario]
-        );
-        return;
+      mostrarError("Estas muerto :(");
+      logCustom(
+        jornadaActual,
+        etapaActual,
+        `Intento de lanzar poción turno fallido: Usuario muerto`,
+        jugadoresEstado[indiceUsuario]
+      );
+      return;
     }
     if (pasoTurno) {
-        mostrarError("Has pasado turno");
-        logCustom(
-          jornadaActual,
-          etapaActual,
-          `Intento de lanzar poción turno fallido: Turno ya pasado`,
-          jugadoresEstado[indiceUsuario]
-        );
-        return;
+      mostrarError("Has pasado turno");
+      logCustom(
+        jornadaActual,
+        etapaActual,
+        `Intento de lanzar poción turno fallido: Turno ya pasado`,
+        jugadoresEstado[indiceUsuario]
+      );
+      return;
     }
     if (botellaUsadaEnEsteTurno) {
       logCustom(
@@ -2218,9 +2216,12 @@ const Jugando: React.FC = () => {
    */
   const jugadorLocalMuerto = useMemo(() => {
     console.log("indiceUsuario:", indiceUsuario);
-    console.log("jugadoresEstado[indiceUsuario]:", jugadoresEstado[indiceUsuario]);
+    console.log(
+      "jugadoresEstado[indiceUsuario]:",
+      jugadoresEstado[indiceUsuario]
+    );
     console.log("estaVivo:", jugadoresEstado[indiceUsuario]?.estaVivo);
-  
+
     return indiceUsuario !== -1
       ? !jugadoresEstado[indiceUsuario]?.estaVivo
       : false;
@@ -2510,14 +2511,14 @@ const Jugando: React.FC = () => {
       }
     });
     socket.on("visionJugador", (data) => {
-        logCustom(
-          jornadaActual,
-          etapaActual,
-          `Evento recibido: visionJugador - ${JSON.stringify(data)}`,
-          jugadoresEstado[indiceUsuario]
-        );
-        setVisionJugador(data.mensaje);
-      });
+      logCustom(
+        jornadaActual,
+        etapaActual,
+        `Evento recibido: visionJugador - ${JSON.stringify(data)}`,
+        jugadoresEstado[indiceUsuario]
+      );
+      setVisionJugador(data.mensaje);
+    });
     socket.on("jugadorSalido", (data) => {
       logCustom(
         jornadaActual,
@@ -2640,15 +2641,15 @@ const Jugando: React.FC = () => {
         setMostrarAnimacionFinalHabilidadAlguacil(true);
 
         const jugadoresNuevos = await new Promise<typeof jugadoresEstado>(
-            (resolve) => {
-                const handler = (data: { jugadores: typeof jugadoresEstado }) => {
-                socket.off("estadoJugadores", handler);
-                resolve(data.jugadores);
-                };
-                socket.on("estadoJugadores", handler);
-                socket.emit("obtenerEstadoJugadores", { idPartida: idSala });
-            }
-            );
+          (resolve) => {
+            const handler = (data: { jugadores: typeof jugadoresEstado }) => {
+              socket.off("estadoJugadores", handler);
+              resolve(data.jugadores);
+            };
+            socket.on("estadoJugadores", handler);
+            socket.emit("obtenerEstadoJugadores", { idPartida: idSala });
+          }
+        );
         setJugadoresEstado(jugadoresNuevos);
 
         await new Promise((resolve) => setTimeout(resolve, duracionAnimacion));
@@ -2669,7 +2670,7 @@ const Jugando: React.FC = () => {
 
         setMostrarAnimacionFinalTurnoCazador(false);
         break;
-    case Estado.diaComienza:
+      case Estado.diaComienza:
         setPlantillaActual(plantillaAnimacionNoche);
         cerrarHabilidad();
         cerrarChat();
@@ -2813,15 +2814,15 @@ const Jugando: React.FC = () => {
         break;
       case Estado.nocheComienza:
         const jugadoresNuevos = await new Promise<typeof jugadoresEstado>(
-            (resolve) => {
-                const handler = (data: { jugadores: typeof jugadoresEstado }) => {
-                socket.off("estadoJugadores", handler);
-                resolve(data.jugadores);
-                };
-                socket.on("estadoJugadores", handler);
-                socket.emit("obtenerEstadoJugadores", { idPartida: idSala });
-            }
-            );
+          (resolve) => {
+            const handler = (data: { jugadores: typeof jugadoresEstado }) => {
+              socket.off("estadoJugadores", handler);
+              resolve(data.jugadores);
+            };
+            socket.on("estadoJugadores", handler);
+            socket.emit("obtenerEstadoJugadores", { idPartida: idSala });
+          }
+        );
         setJugadoresEstado(jugadoresNuevos);
         setEtapaActual("Noche");
         setPlantillaActual(plantillaAnimacionNoche);
@@ -2974,25 +2975,25 @@ const Jugando: React.FC = () => {
         setMostrarAnimacionInicioDia1(false);
 
         logCustom(
+          jornadaActual,
+          etapaActual,
+          `Valor de jugadorLocalMuerto = ${jugadorLocalMuerto}`,
+          jugadoresEstado[indiceUsuario]
+        );
+        const antes = prevMuertoRef.current;
+        const ahora = jugadorLocalMuerto;
+
+        if (!antes && ahora) {
+          logCustom(
             jornadaActual,
             etapaActual,
-            `Valor de jugadorLocalMuerto = ${jugadorLocalMuerto}`,
+            `Evento local detectado: usuarioLocalMuerto`,
             jugadoresEstado[indiceUsuario]
           );
-          const antes = prevMuertoRef.current;
-          const ahora = jugadorLocalMuerto;
-      
-          if (!antes && ahora) {
-            logCustom(
-              jornadaActual,
-              etapaActual,
-              `Evento local detectado: usuarioLocalMuerto`,
-              jugadoresEstado[indiceUsuario]
-            );
-            agregarEstado(Estado.usuarioLocalMuerto);
-            break;
-          }
-      
+          agregarEstado(Estado.usuarioLocalMuerto);
+          break;
+        }
+
         prevMuertoRef.current = ahora;
 
         setPlantillaActual(plantillaEsperaInicial);
@@ -3025,11 +3026,11 @@ const Jugando: React.FC = () => {
         break;
       case Estado.usuarioLocalMuerto:
         logCustom(
-            jornadaActual,
-            etapaActual,
-            `Tratando muerte de usuario`,
-            jugadoresEstado[indiceUsuario]
-          );
+          jornadaActual,
+          etapaActual,
+          `Tratando muerte de usuario`,
+          jugadoresEstado[indiceUsuario]
+        );
         if (etapaActual === "Día") {
           setPlantillaActual(plantillaAnimacionDia);
         } /* else if (etapaActual === "Noche" )*/ else {
@@ -3346,7 +3347,9 @@ const Jugando: React.FC = () => {
         {mostrarSegundoEmpateVotacionAlguacil && (
           <AnimacionGenerica
             opacity={opacitiesSegundoEmpateVotacionAlguacil[0]}
-            mostrarComponente={mostrarComponentesSegundoEmpateVotacionAlguacil[0]}
+            mostrarComponente={
+              mostrarComponentesSegundoEmpateVotacionAlguacil[0]
+            }
             texto={"NO SE HA LLEGADO A UN ACUERDO DE QUIÉN ES EL ALGUACIL"}
           />
         )}
