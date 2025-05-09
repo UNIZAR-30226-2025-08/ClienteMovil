@@ -161,7 +161,8 @@ export default function App(): JSX.Element | null {
             idUsuario: data.usuario.idUsuario,
           });
           setIdUsuario(data.usuario.idUsuario);
-          // Ahora no entra directamente, espera eventos
+          // Entra al menú principal
+          router.push("/entrar");
         }
       } else {
         Alert.alert(
@@ -182,7 +183,7 @@ export default function App(): JSX.Element | null {
    * - Al recibir la respuesta por `estadoPartida`, actualiza el estado local de `jugadoresEstado`.
    * - El listener se limpia al desmontar el componente o cuando `idSala` cambia.
    */
-  useEffect(() => {
+  /*useEffect(() => {
     if (!idUsuario) return;
     console.log("Lanzo buscarPartida");
 
@@ -248,7 +249,7 @@ export default function App(): JSX.Element | null {
       socket.off("partidaEncontrada");
       socket.off("partidaNoEncontrada");
     };
-  }, [idUsuario]);
+  }, [idUsuario]);*/
 
   return (
     <KeyboardAvoidingView
