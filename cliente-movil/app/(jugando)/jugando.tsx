@@ -1411,6 +1411,7 @@ const Jugando: React.FC = () => {
   });
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
   /**
    *
    */
@@ -1477,6 +1478,8 @@ const Jugando: React.FC = () => {
         start: mostrarSegundoEmpateVotacionAlguacil,
     });
 
+=======
+>>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
   // !!!!!!!!!!!!!!!!!!!!!!!!!!
