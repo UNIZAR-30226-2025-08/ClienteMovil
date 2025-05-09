@@ -191,6 +191,7 @@ const Jugando: React.FC = () => {
           {
             text: "Salir",
             onPress: () => {
+              socket.connect();
               router.back(); // Regresa a la pantalla anterior
             },
           },
@@ -3156,6 +3157,7 @@ const Jugando: React.FC = () => {
         setPasoTurno(false);
         setJugadorSeleccionado(null);
 
+        socket.connect();
         router.back();
         break;
       default:
