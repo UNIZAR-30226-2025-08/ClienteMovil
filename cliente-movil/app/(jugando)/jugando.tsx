@@ -1951,12 +1951,12 @@ const Jugando: React.FC = () => {
       );
       return;
     }
-    if (votoRealizado) {
-      mostrarError("Has pasado turno");
+    if (votoRealizado && estadoActual !== Estado.habilidadBruja) {
+      mostrarError("Ya has votado");
       logCustom(
         jornadaActual,
         etapaActual,
-        `Intento de pasar turno fallido: Turno pasado`,
+        `Intento de pasar turno fallido: Ya has votado`,
         jugadoresEstado[indiceUsuario]
       );
       return;
