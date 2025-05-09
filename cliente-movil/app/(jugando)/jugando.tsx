@@ -1481,6 +1481,28 @@ const Jugando: React.FC = () => {
     start: mostrarSegundoEmpateVotacionAlguacil,
   });
 
+    /**
+   *
+   */
+    const [
+        mostrarMuertosNoche,
+        setMostrarMuertosNoche,
+      ] = useState<boolean>(false);
+    
+      /**
+       *
+       */
+      const {
+        opacities: opacitiesMuertosNoche,
+        mostrarComponentes: mostrarComponenteMuertosNoche,
+      } = useGestorAnimaciones({
+        duracionFadeIn,
+        duracionEspera,
+        duracionFadeOut,
+        numAnimaciones: 1,
+        start: mostrarMuertosNoche,
+      });
+
   // !!!!!!!!!!!!!!!!!!!!!!!!!!
   // const [mensaje, setMensaje] = useState(null);
   // !!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -2231,6 +2253,7 @@ const Jugando: React.FC = () => {
   const [resultadoVotosDia, setResultadosVotosDia] = useState("");
   const [muerteYaTratada, setMuerteYaTratada] = useState<boolean>(false);
   const [mensajeFinPartida, setMensajeFinPartida] = useState("");
+  const [muertesNoche, setMuertesNoche] = useState<{ nombre: string; rol: string }[]>([]);
 
   // ---------------------------------------------------------------------------
   // Encolar el evento correspondiente cuando el usuario local ha muerto
@@ -3017,7 +3040,20 @@ const Jugando: React.FC = () => {
         setPasoTurno(false);
         setJugadorSeleccionado(null);
 
-        await new Promise((resolve) => setTimeout(resolve, 3000));
+        const antiguos = jugadoresEstado;         // estado previo (antes de la noche)
+        const nuevos = nuevosJugadores;           // estado tras la noche
+        // Filtrar los que estaban vivos y ahora ya no
+        const victimas = antiguos
+        .filter(oldJ => oldJ.estaVivo && !!nuevos.find(n => n.id === oldJ.id && !n.estaVivo))
+        .map(v => ({ nombre: v.nombre, rol: v.rol }));
+
+        setMuertesNoche(victimas);
+
+        setMostrarMuertosNoche(true);
+
+        await new Promise(resolve => setTimeout(resolve, duracionAnimacion));
+
+        setMostrarMuertosNoche(false)
 
         setPlantillaActual(plantillaAnimacionDia);
         cerrarHabilidad();
@@ -3119,6 +3155,8 @@ const Jugando: React.FC = () => {
         setVotoRealizado(false);
         setPasoTurno(false);
         setJugadorSeleccionado(null);
+
+        router.back();
         break;
       default:
         break;
@@ -3365,6 +3403,22 @@ const Jugando: React.FC = () => {
               mostrarComponentesSegundoEmpateVotacionAlguacil[0]
             }
             texto={"NO SE HA LLEGADO A UN ACUERDO DE QUIÉN ES EL ALGUACIL"}
+          />
+        )}
+        {mostrarMuertosNoche && (
+          <AnimacionGenerica
+            opacity={opacitiesMuertosNoche[0]}
+            mostrarComponente={
+              mostrarComponenteMuertosNoche[0]
+            }
+            texto={
+                muertesNoche.length > 0
+                  ? `RESUMEN DE LA NOCHE:\n` +
+                    muertesNoche
+                      .map(m => `${m.nombre.toUpperCase()} (${m.rol})`)
+                      .join('\n')
+                  : 'RESUMEN DE LA NOCHE:\nNO HA MUERTO NADIE'
+              }
           />
         )}
         {mostrarAnimacionFinPartida && (
