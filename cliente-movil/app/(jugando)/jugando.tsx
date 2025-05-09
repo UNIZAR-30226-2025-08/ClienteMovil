@@ -1410,6 +1410,7 @@ const Jugando: React.FC = () => {
     start: mostrarAnimacionSegundoEmpateVotacionDiurna,
   });
 
+<<<<<<< Updated upstream
   /**
    *
    */
@@ -1476,6 +1477,8 @@ const Jugando: React.FC = () => {
         start: mostrarSegundoEmpateVotacionAlguacil,
     });
 
+=======
+>>>>>>> Stashed changes
   // !!!!!!!!!!!!!!!!!!!!!!!!!!
   // const [mensaje, setMensaje] = useState(null);
   // !!!!!!!!!!!!!!!!!!!!!!!!!!
