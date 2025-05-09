@@ -344,7 +344,7 @@ export default function AmigosScreen(): JSX.Element {
 
         {loadingSearch && <Text style={styles.textoAyuda}>Buscando…</Text>}
         {searchSuggestions.length > 0 && (
-          <View style={styles.suggestionsContainer}>
+          <ScrollView style={styles.suggestionsContainer} nestedScrollEnabled>
             {searchSuggestions.map((s) => (
               <TouchableOpacity
                 key={s.idUsuario || s.id}
@@ -354,7 +354,7 @@ export default function AmigosScreen(): JSX.Element {
                 <Text style={styles.suggestionText}>{s.nombre}</Text>
               </TouchableOpacity>
             ))}
-          </View>
+          </ScrollView>
         )}
 
         <ScrollView
@@ -526,7 +526,8 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
     backgroundColor: "#fff",
     borderRadius: 8,
-    maxHeight: 150,
+    maxHeight: 200, // aumenta si necesitas más espacio
+    zIndex: 1000, // asegurar que quede por encima de otros elementos
   },
   suggestionItem: {
     paddingVertical: 8,
