@@ -51,9 +51,11 @@ jobs:
           echo "APK_URL=$URL" >> $GITHUB_ENV
 
       - name: Descargar APK
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
         run: |
           mkdir -p artifacts
-          curl -o artifacts/app.apk "$APK_URL"
+          curl -H "Authorization: Bearer $EXPO_TOKEN" -L -o artifacts/app.apk "$APK_URL"
 
       - name: Subir APK como artifact
         uses: actions/upload-artifact@v4

@@ -37,6 +37,7 @@ type Jugador = {
   idUsuario: number;
   nombre: string;
   avatar?: string;
+  enLinea?: boolean; // agregado
 };
 
 const imagenFondoRoles = require("@/assets/images/fondo-roles.jpg");
@@ -114,7 +115,10 @@ export default function AmigosScreen(): JSX.Element {
             `${BACKEND_URL}/api/usuario/obtener_por_id`,
             { idUsuario: idAmigo }
           );
-          return response.data.usuario;
+          return {
+            ...response.data.usuario,
+            enLinea: false, // por defecto offline
+          };
         })
       );
       setAmigosDetalles(detalles);
@@ -122,6 +126,31 @@ export default function AmigosScreen(): JSX.Element {
       console.error("Error al obtener los detalles de los amigos:", error);
     }
   };
+
+  // Suscribirse a estado online de amigos
+  useEffect(() => {
+    if (usuario?.idUsuario) {
+      if (!socket.connected) socket.connect();
+      socket.emit("registrarUsuario", { idUsuario: usuario.idUsuario });
+      socket.emit("solicitarEstadoAmigos", { idUsuario: usuario.idUsuario });
+
+      const handleEstadoAmigos = (
+        estadoAmigos: { idUsuario: number; en_linea: boolean }[]
+      ) => {
+        setAmigosDetalles((prev) =>
+          prev.map((a) => {
+            const est = estadoAmigos.find((e) => e.idUsuario === a.idUsuario);
+            return est ? { ...a, enLinea: est.en_linea } : a;
+          })
+        );
+      };
+
+      socket.on("estadoAmigos", handleEstadoAmigos);
+      return () => {
+        socket.off("estadoAmigos", handleEstadoAmigos);
+      };
+    }
+  }, [usuario]);
 
   // Función para manejar la acción de invitar a un amigo usando socket.emit
   const handleInvite = (amigoNombre: string, idAmigo: number) => {
@@ -159,7 +188,15 @@ export default function AmigosScreen(): JSX.Element {
                 }
                 style={styles.imagenPerfil}
               />
-              <Text style={styles.nombre}>{amigo.nombre}</Text>
+              <View style={styles.infoContainer}>
+                <Text style={styles.nombre}>{amigo.nombre}</Text>
+                <View
+                  style={[
+                    styles.estadoDot,
+                    amigo.enLinea ? styles.enLinea : styles.desconectadoDot,
+                  ]}
+                />
+              </View>
               <TouchableOpacity
                 style={styles.inviteButton}
                 onPress={() => handleInvite(amigo.nombre, amigo.idUsuario)}
@@ -219,6 +256,18 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     marginRight: 10,
   },
+  infoContainer: {
+    flexDirection: "column",
+    justifyContent: "center",
+  },
+  estadoDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    marginTop: 4,
+  },
+  enLinea: { backgroundColor: "green" },
+  desconectadoDot: { backgroundColor: "gray" },
   nombre: {
     fontSize: 18,
     fontWeight: "bold",
