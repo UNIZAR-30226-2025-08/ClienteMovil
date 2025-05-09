@@ -552,7 +552,7 @@ const Jugando: React.FC = () => {
    * @type {boolean}
    */
   const [botellaUsadaEnEsteTurno, setBotellaUsadaEnEsteTurno] =
-    useState<boolean>(false);
+    useState<number>(0);
 
   /**
    * Lista de mensajes enviados durante la partida.
@@ -1724,15 +1724,15 @@ const Jugando: React.FC = () => {
     }
     if (
       votoRealizado &&
-      botellaUsadaEnEsteTurno &&
+      botellaUsadaEnEsteTurno > 2 &&
       estadoActual === Estado.habilidadBruja &&
       rolUsuario === "Bruja"
     ) {
-      mostrarError("Solo puedes lanzar una poción por turno");
+      mostrarError("Solo puedes lanzar 2 pociones por turno");
       logCustom(
         jornadaActual,
         etapaActual,
-        `Intento de acción bruja fallida: La bruja ya ha lanzado una poción a un jugador en este turno`,
+        `Intento de acción bruja fallida: La bruja ya ha lanzado 2 pociones en este turno`,
         jugadoresEstado[indiceUsuario]
       );
       return;
@@ -1895,7 +1895,7 @@ const Jugando: React.FC = () => {
         );
         setBotellaMuerteUsada(true);
       }
-      // setBotellaUsadaEnEsteTurno(true);
+      setBotellaUsadaEnEsteTurno(botellaUsadaEnEsteTurno + 1);
     } else if (estadoActual === Estado.habilidadCazador) {
       socket.emit("cazadorDispara", {
         idPartida: idSala,
@@ -2014,14 +2014,14 @@ const Jugando: React.FC = () => {
       );
       return;
     }
-    if (botellaUsadaEnEsteTurno) {
+    if (botellaUsadaEnEsteTurno > 2) {
       logCustom(
         jornadaActual,
         etapaActual,
         `Intento de selección de botella de vida fallido: el usuario ya ha usado una botella este turno`,
         jugadoresEstado[indiceUsuario]
       );
-      mostrarError("Ya has usado una pocima este turno");
+      mostrarError("Ya has usado 2 pociones este turno");
       return;
     }
     if (botellaVidaUsada) {
@@ -2062,15 +2062,15 @@ const Jugando: React.FC = () => {
       );
       return;
     }
-    if (botellaUsadaEnEsteTurno) {
-      logCustom(
-        jornadaActual,
-        etapaActual,
-        `Intento de selección de botella de muerte fallido: el usuario ya ha usado una botella este turno`,
-        jugadoresEstado[indiceUsuario]
-      );
-      mostrarError("Ya has usado una pocima este turno");
-      return;
+    if (botellaUsadaEnEsteTurno > 2) {
+        logCustom(
+          jornadaActual,
+          etapaActual,
+          `Intento de selección de botella de vida fallido: el usuario ya ha usado una botella este turno`,
+          jugadoresEstado[indiceUsuario]
+        );
+        mostrarError("Ya has usado 2 pociones este turno");
+        return;
     }
     if (botellaMuerteUsada) {
       logCustom(
@@ -2623,7 +2623,7 @@ const Jugando: React.FC = () => {
         break;
       case Estado.habilidadBruja:
         if (!hayBrujaViva) break;
-        setBotellaUsadaEnEsteTurno(false);
+        setBotellaUsadaEnEsteTurno(0);
         setNombreVictimaBruja(""); // Limpiar, por si la bruja no recibe una nueva petición tras esta, que se marque claramente que no ha recibido nada
         setPlantillaActual(plantillaAnimacionNoche);
         cerrarHabilidad();
@@ -2806,11 +2806,11 @@ const Jugando: React.FC = () => {
         setPlantillaActual(plantillaAnimacionDia);
         cerrarHabilidad();
         cerrarChat();
-        setMostrarAnimacionSegundoEmpateVotacionDiurna(true);
+        setMostrarSegundoEmpateVotacionAlguacil(true);
 
         await new Promise((resolve) => setTimeout(resolve, duracionAnimacion));
 
-        setMostrarAnimacionSegundoEmpateVotacionDiurna(false);
+        setMostrarSegundoEmpateVotacionAlguacil(false);
         break;
       case Estado.nocheComienza:
         const jugadoresNuevos = await new Promise<typeof jugadoresEstado>(
