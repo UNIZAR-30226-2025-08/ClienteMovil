@@ -296,7 +296,7 @@ const CrearSala = (): JSX.Element => {
       .filter((rol) => rol.nombre !== "Aldeano")
       .reduce((sum, rol) => sum + rol.cantidad, 0);
 
-    if (!password) {
+    if (privacidad === "Privada" && !password) {
       Alert.alert(
         "Error en la contraseña",
         "La contraseña no puede ser vacía."
