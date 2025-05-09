@@ -3011,7 +3011,7 @@ const Jugando: React.FC = () => {
         );
 
         setMostrarAnimacionInicioDia1(false);
-
+        console.table(jugadoresEstado);
         logCustom(
           jornadaActual,
           etapaActual,
@@ -3034,7 +3034,6 @@ const Jugando: React.FC = () => {
 
         prevMuertoRef.current = ahora;
 
-        setPlantillaActual(plantillaEsperaInicial);
         actualizarMaxTiempo(3);
         reiniciarTemporizador();
         setVotoRealizado(false);
@@ -3417,7 +3416,7 @@ const Jugando: React.FC = () => {
                 muertesNoche.length > 0
                   ? `RESUMEN DE LA NOCHE:\n` +
                     muertesNoche
-                      .map(m => `${m.nombre.toUpperCase()} (${m.rol})`)
+                      .map(m => `${m.nombre.toUpperCase()} (${m.rol.toUpperCase()})`)
                       .join('\n')
                   : 'RESUMEN DE LA NOCHE:\nNO HA MUERTO NADIE'
               }
