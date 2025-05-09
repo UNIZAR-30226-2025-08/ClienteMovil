@@ -556,7 +556,7 @@ export const estilos = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    gap: ancho * 0.045,
+    gap: ancho * 0.015, // doble
     marginTop: TAMANIO_TEMPORIZADOR * 2 + alto * 0.02,
     paddingBottom: ancho * 0.03,
   },

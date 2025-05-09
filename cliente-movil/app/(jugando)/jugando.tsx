@@ -191,6 +191,7 @@ const Jugando: React.FC = () => {
           {
             text: "Salir",
             onPress: () => {
+              socket.disconnect();
               socket.connect();
               router.back(); // Regresa a la pantalla anterior
             },
@@ -3156,6 +3157,7 @@ const Jugando: React.FC = () => {
         setPasoTurno(false);
         setJugadorSeleccionado(null);
 
+        socket.disconnect();
         socket.connect();
         router.back();
         break;
@@ -3242,7 +3244,7 @@ const Jugando: React.FC = () => {
           <AnimacionGenerica
             opacity={opacitiesNocheComienza[0]}
             mostrarComponente={mostrarComponentesNocheComienza[0]}
-            texto="SE HACE DE NOCHE, LOS SUPERVIVIENTES SE VUELVEN A DORMIR"
+            texto="SE HACE DE NOCHE, LOS VIVOS SE VUELVEN A DORMIR"
           />
         )}
         {mostrarAnimacionInicioHabilidadVidente && (
