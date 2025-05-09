@@ -3021,7 +3021,18 @@ const Jugando: React.FC = () => {
         );
         const antes = prevMuertoRef.current;
         const ahora = !jugadoresEstado[indiceUsuario].estaVivo;
-
+        logCustom(
+            jornadaActual,
+            etapaActual,
+            `Valor de antes = prevMuertoRef.current; = ${antes}`,
+            jugadoresEstado[indiceUsuario]
+        );
+        logCustom(
+            jornadaActual,
+            etapaActual,
+            `Valor de ahora = jugadoresEstado[indiceUsuario].estaVivo; = ${ahora}`,
+            jugadoresEstado[indiceUsuario]
+        );
         if (!antes && ahora) {
           logCustom(
             jornadaActual,
@@ -3428,7 +3439,7 @@ const Jugando: React.FC = () => {
           <AnimacionGenerica
             opacity={opacitiesFinPartida[0]}
             mostrarComponente={mostrarComponentesFinPartida[0]}
-            texto={`${mensajeFinPartida}`}
+            texto={`${mensajeFinPartida.toUpperCase()}`}
           />
         )}
         {errorMessage && (
