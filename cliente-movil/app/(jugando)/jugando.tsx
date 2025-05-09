@@ -1547,7 +1547,7 @@ const Jugando: React.FC = () => {
     if (
       estadoActual === Estado.turnoHombresLobos &&
       rolUsuario === "Hombre lobo" &&
-      jugadoresEstado[indiceUsuario].rol === "Hombre lobo"
+      jugadoresEstado[index].rol === "Hombre lobo"
     ) {
       logCustom(
         jornadaActual,
