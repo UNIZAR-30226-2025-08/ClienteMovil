@@ -1421,6 +1421,28 @@ const Jugando: React.FC = () => {
     start: mostrarAnimacionResultadosDia,
   });
 
+    /**
+     *
+     */
+    const [
+        mostrarAnimacionFinPartida,
+        setMostrarAnimacionFinPartida,
+    ] = useState<boolean>(false);
+
+    /**
+     *
+     */
+    const {
+        opacities: opacitiesFinPartida,
+        mostrarComponentes: mostrarComponentesFinPartida,
+        } = useGestorAnimaciones({
+        duracionFadeIn,
+        duracionEspera,
+        duracionFadeOut,
+        numAnimaciones: 1,
+        start: mostrarAnimacionFinPartida,
+    });
+
   // !!!!!!!!!!!!!!!!!!!!!!!!!!
   // const [mensaje, setMensaje] = useState(null);
   // !!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -2153,7 +2175,7 @@ const Jugando: React.FC = () => {
   const [visionJugador, setVisionJugador] = useState("");
   const [resultadoVotosDia, setResultadosVotosDia] = useState("");
   const [muerteYaTratada, setMuerteYaTratada] = useState<boolean>(false);
-  
+  const [mensajeFinPartida, setMensajeFinPartida] = useState("");
 
   // ---------------------------------------------------------------------------
   // Encolar el evento correspondiente cuando el usuario local ha muerto
@@ -2318,6 +2340,7 @@ const Jugando: React.FC = () => {
         `Evento recibido: partidaFinalizada - ${JSON.stringify(data)}`,
         jugadoresEstado[indiceUsuario]
       );
+      setMensajeFinPartida(data.mensaje);
       agregarEstado(Estado.partidaFinalizada);
     });
     socket.on("votoAlguacilRegistrado", (data) => {
@@ -3000,10 +3023,21 @@ const Jugando: React.FC = () => {
         break;
       case Estado.partidaFinalizada:
         animacionesInicialesYaEjecutadas[idSala] = true;
-        Alert.alert(
-          "Sin hacer",
-          "La partida ha finalizado. Frontend sin montar"
-        );
+        setPlantillaActual(plantillaAnimacionDia);
+        cerrarHabilidad();
+        cerrarChat();
+
+        setMostrarAnimacionFinPartida(true);
+
+        await new Promise((resolve) => setTimeout(resolve, duracionAnimacion));
+
+        setMostrarAnimacionFinPartida(false);
+
+        setPlantillaActual(plantillaVotacionDiurna);
+        reiniciarTemporizador();
+        setVotoRealizado(false);
+        setPasoTurno(false);
+        setJugadorSeleccionado(null);
         break;
       default:
         break;
@@ -3241,6 +3275,13 @@ const Jugando: React.FC = () => {
                 ? resultadoVotosDia
                 : "EL PUEBLO NO SE HA PUESTO DE ACUERDO DE A QUIÉN LINCHAR"
             }
+          />
+        )}
+        {mostrarAnimacionFinPartida && (
+          <AnimacionGenerica
+            opacity={opacitiesFinPartida[0]}
+            mostrarComponente={mostrarComponentesFinPartida[0]}
+            texto={`${mensajeFinPartida}`}
           />
         )}
         {errorMessage && (
