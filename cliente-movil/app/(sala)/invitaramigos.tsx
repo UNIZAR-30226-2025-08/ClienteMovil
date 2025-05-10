@@ -134,6 +134,7 @@ export default function AmigosScreen(): JSX.Element {
       socket.emit("registrarUsuario", { idUsuario: usuario.idUsuario });
       socket.emit("solicitarEstadoAmigos", { idUsuario: usuario.idUsuario });
 
+      // manejar actualizaciones de múltiples amigos
       const handleEstadoAmigos = (
         estadoAmigos: { idUsuario: number; en_linea: boolean }[]
       ) => {
@@ -144,10 +145,27 @@ export default function AmigosScreen(): JSX.Element {
           })
         );
       };
+      // manejar actualización de un solo amigo
+      const handleEstadoAmigo = ({
+        idUsuario,
+        en_linea,
+      }: {
+        idUsuario: number;
+        en_linea: boolean;
+      }) => {
+        setAmigosDetalles((prev) =>
+          prev.map((a) =>
+            a.idUsuario === idUsuario ? { ...a, enLinea: en_linea } : a
+          )
+        );
+      };
 
       socket.on("estadoAmigos", handleEstadoAmigos);
+      socket.on("estadoAmigo", handleEstadoAmigo);
+
       return () => {
         socket.off("estadoAmigos", handleEstadoAmigos);
+        socket.off("estadoAmigo", handleEstadoAmigo);
       };
     }
   }, [usuario]);
