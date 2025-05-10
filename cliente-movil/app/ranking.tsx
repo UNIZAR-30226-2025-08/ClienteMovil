@@ -160,7 +160,7 @@ export default function RankingScreen(): JSX.Element {
                     <Text style={styles.nombre}>{jugador.nombre}</Text>
                   </View>
                   <Text style={styles.victorias}>
-                    {jugador.victorias} victorias
+                    {jugador.victorias} Victorias
                   </Text>
                 </View>
               </TouchableOpacity>
