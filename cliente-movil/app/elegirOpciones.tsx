@@ -228,6 +228,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
   },
+
   overlay: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: "rgba(0, 0, 0, 0.4)",
@@ -300,7 +301,7 @@ const styles = StyleSheet.create({
   botonNotificaciones: {
     position: "absolute",
     top: 10,
-    right: 15,
+    right: 9,
     padding: 12,
     zIndex: 10,
   },
@@ -314,7 +315,7 @@ const styles = StyleSheet.create({
   botonRanking: {
     position: "absolute",
     top: 50,
-    left: 20,
+    left: 14,
     padding: 12,
     zIndex: 11,
   },

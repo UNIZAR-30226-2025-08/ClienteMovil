@@ -356,8 +356,8 @@ const Cabecera = ({ compacto = false }) => {
                                 avatarMap[notif.avatarEmisor]
                                   ? avatarMap[notif.avatarEmisor]
                                   : notif.avatarEmisor
-                                  ? { uri: notif.avatarEmisor }
-                                  : require("@/assets/images/imagenPerfil.webp")
+                                    ? { uri: notif.avatarEmisor }
+                                    : require("@/assets/images/imagenPerfil.webp")
                               }
                               style={styles.cardAvatar}
                             />
