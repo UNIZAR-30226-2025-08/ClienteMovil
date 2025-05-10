@@ -19,9 +19,6 @@ import NotificationButton from "@/components/NotificationButton";
 
 /**
  * Mapa que relaciona claves de avatar con las imágenes correspondientes.
- *
- * @constant
- * @type {Record<string, any>}
  */
 const avatarMap: Record<string, any> = {
   avatar1: require("@/assets/images/imagenPerfil.webp"),
@@ -40,11 +37,8 @@ const imagenPorDefecto = require("@/assets/images/imagenPerfil.webp");
 const BACKEND_URL = Constants.expoConfig?.extra?.backendUrl;
 const socket = io(BACKEND_URL);
 
-/**
- * Pantalla de opciones donde el usuario puede ver su perfil, jugar, consultar roles, sugerencias, y cerrar sesión.
- *
- * @returns {JSX.Element | null} La vista de la pantalla de opciones o `null` mientras se carga.
- */
+const STATUSBAR_HEIGHT = Constants.statusBarHeight || 0;
+
 export default function OpcionesScreen(): JSX.Element | null {
   const router = useRouter();
 
@@ -54,13 +48,6 @@ export default function OpcionesScreen(): JSX.Element | null {
   } | null>(null);
   const [loading, setLoading] = useState(true);
 
-  /**
-   * Efecto que carga los datos del usuario (nombre y avatar) desde el almacenamiento local.
-   *
-   * @function
-   * @async
-   * @returns {Promise<void>} No retorna nada.
-   */
   useFocusEffect(
     useCallback(() => {
       const cargarUsuario = async () => {
@@ -83,13 +70,6 @@ export default function OpcionesScreen(): JSX.Element | null {
     }, [])
   );
 
-  /**
-   * Función para cerrar sesión, desconectando al usuario del servidor y limpiando el almacenamiento local.
-   *
-   * @function
-   * @async
-   * @returns {Promise<void>} No retorna nada.
-   */
   const cerrarSesion = async () => {
     try {
       // leemos el id antes de limpiar el storage
@@ -196,15 +176,9 @@ export default function OpcionesScreen(): JSX.Element | null {
           sobresalga sobre la imagen (que tiene zIndex: 1).
         */}
         <View style={styles.botonNotificaciones}>
-          <View style={styles.iconoNotificacionesContainer}>
-            <NotificationButton />
-          </View>
+          <NotificationButton />
         </View>
 
-        {/* 
-          Botón de ranking que se encuentra en la
-          esquiba superior izquierda de la pantalla.
-        */}
         <TouchableOpacity
           style={styles.botonRanking}
           onPress={() => router.push("/ranking")}
@@ -228,6 +202,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
   },
+
   overlay: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: "rgba(0, 0, 0, 0.4)",
@@ -239,21 +214,24 @@ const styles = StyleSheet.create({
     alignSelf: "center",
   },
 
+  // Contenedor con position absolute para que no desplace nada
+  // y zIndex menor (1) para que el dropdown con zIndex alto lo tape
   contenedorPerfil: {
     position: "absolute",
     top: 100,
     alignSelf: "center",
     zIndex: 1,
   },
+
   profileImage: {
-    width: 105,
-    height: 105,
+    width: 100,
+    height: 100,
     borderRadius: 100,
   },
 
   nombrePlayer: {
     position: "absolute",
-    top: 210,
+    top: 205,
     alignSelf: "center",
     color: "white",
     fontSize: 20,
@@ -277,7 +255,6 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     width: "100%",
   },
-
   textoBoton: {
     fontSize: 20,
     fontWeight: "bold",
@@ -291,39 +268,33 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     marginTop: 30,
     alignSelf: "center",
-    width: "83%",
+    width: "80%",
     position: "absolute",
-    bottom: 53,
+    bottom: 50,
   },
 
+  // Botón de notificaciones
   botonNotificaciones: {
     position: "absolute",
-    top: 10,
+    top: STATUSBAR_HEIGHT + 10,
     right: 15,
-    padding: 12,
-    zIndex: 10,
+    padding: 10,
+    zIndex: 10, // superior a 1 => se superpone a la imagen
   },
 
-  iconoNotificacionesContainer: {
-    backgroundColor: "transparent",
-    borderRadius: 12,
-    padding: 5,
-  },
-
+  // Botón de Ranking
   botonRanking: {
     position: "absolute",
-    top: 50,
+    top: STATUSBAR_HEIGHT + 10,
     left: 20,
-    padding: 12,
-    zIndex: 11,
+    padding: 10,
+    zIndex: 10,
   },
-
   iconoRankingContainer: {
     backgroundColor: "rgba(0,0,0,0.6)",
     borderRadius: 10,
     padding: 5,
   },
-
   iconoRanking: {
     fontSize: 30,
     color: "white",

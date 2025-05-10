@@ -1535,6 +1535,27 @@ const Jugando: React.FC = () => {
   // const [mensaje, setMensaje] = useState(null);
   // !!!!!!!!!!!!!!!!!!!!!!!!!!
 
+  /** 
+   * Jugadores de prueba para probar el circulo de votación 
+  */
+const jugadoresPrueba = React.useMemo(
+  () =>
+    Array.from({ length: 18 }, (_, i) => ({
+      id: `jugador${i + 1}`,
+      nombre: `Jugador ${i + 1}`,
+      avatar: "avatar1",
+      listo: true,
+      rol: "aldeano",
+      estaVivo: true,
+      esAlguacil: false,
+      haVisto: false,
+      pocionCuraUsada: false,
+      pocionMatarUsada: false,
+    })),
+  []
+);
+const votosPrueba = React.useMemo(() => Array(18).fill(0), []);
+
   // ---------------------------------------------------------------------------
   // Hooks para realizar las votaciones
   // (seleccionar jugadores + botón votar + botón pasar turno)
@@ -1696,7 +1717,7 @@ const Jugando: React.FC = () => {
     if (estadoActual === Estado.habilidadCazador && rolUsuario === "Cazador") {
       const elegido = jugadoresEstado[index];
       if (!jugadoresDisponibles.includes(elegido.id)) {
-        mostrarError("Solo puedes disparar a jugadores disponibles");
+        mostrarError("Ese jugador se está muriendo ... no malgastes tu bala");
         logCustom(
           jornadaActual,
           etapaActual,
@@ -3557,7 +3578,7 @@ const Jugando: React.FC = () => {
         )}
         {plantillaActual.mostrarCirculoJugadores && (
           <CirculoVotar
-            jugadores={jugadoresEstado}
+            jugadores={jugadoresEstado} //{jugadoresPrueba}
             votes={Array(CONSTANTES.NUMERICAS.CANTIDAD_IMAGENES).fill(0)} // Modificar si se quiere implementar los contadores de votos
             JugadorSeleccionado={JugadorSeleccionado}
             onSelectPlayer={administrarSeleccionJugadorVotacion}

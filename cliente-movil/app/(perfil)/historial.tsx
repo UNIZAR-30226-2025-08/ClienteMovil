@@ -256,8 +256,8 @@ export default function HistorialPartidasScreen(): JSX.Element {
                       p.resultado === "Ganada"
                         ? styles.victoria
                         : p.resultado === "Perdida"
-                          ? styles.derrota
-                          : {},
+                        ? styles.derrota
+                        : {},
                     ]}
                   >
                     {p.resultado.toUpperCase()}

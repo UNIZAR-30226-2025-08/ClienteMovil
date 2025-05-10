@@ -17,7 +17,6 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import Constants from "expo-constants";
 import socket from "@/app/(sala)/socket";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { InviteBus } from "../src/utils/InviteBus";
 
 const { width } = Dimensions.get("window");
@@ -312,200 +311,180 @@ const NotificationButton = () => {
     wsInvitaciones.length > 0 || solicitudesPendientes.length > 0;
 
   return (
-    <SafeAreaView>
-      <View style={styles.notificationContainer}>
-        {/* Botón (campana) para mostrar/ocultar el dropdown */}
-        <TouchableOpacity
-          style={styles.notificationButton}
-          onPress={toggleNotifications}
-        >
-          <Image
-            source={require("@/assets/images/noti_icon.png")}
-            style={styles.notificationIcon}
-          />
-          {hasNotifications && <View style={styles.redCircle} />}
-        </TouchableOpacity>
+    <View style={styles.notificationContainer}>
+      {/* Botón (campana) para mostrar/ocultar el dropdown */}
+      <TouchableOpacity
+        style={styles.notificationButton}
+        onPress={toggleNotifications}
+      >
+        <Image
+          source={require("@/assets/images/noti_icon.png")}
+          style={styles.notificationIcon}
+        />
+        {hasNotifications && <View style={styles.redCircle} />}
+      </TouchableOpacity>
 
-        {/* Dropdown de notificaciones */}
-        {showNotifications && (
-          <View style={styles.notifDropdownContainer}>
-            <View style={styles.filtroContainer}>
-              <TouchableOpacity
-                style={[
-                  styles.filtroButton,
-                  tipoNotificacion === "solicitudes" && styles.filtroActivo,
-                ]}
-                onPress={() => handleTipoChange("solicitudes")}
-              >
-                <Text style={styles.filtroTexto}>Solicitudes</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[
-                  styles.filtroButton,
-                  tipoNotificacion === "invitaciones" && styles.filtroActivo,
-                ]}
-                onPress={() => handleTipoChange("invitaciones")}
-              >
-                <Text style={styles.filtroTexto}>Invitaciones</Text>
-              </TouchableOpacity>
-            </View>
+      {/* Dropdown de notificaciones */}
+      {showNotifications && (
+        <View style={styles.notifDropdownContainer}>
+          <View style={styles.filtroContainer}>
+            <TouchableOpacity
+              style={[
+                styles.filtroButton,
+                tipoNotificacion === "solicitudes" && styles.filtroActivo,
+              ]}
+              onPress={() => handleTipoChange("solicitudes")}
+            >
+              <Text style={styles.filtroTexto}>Solicitudes</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.filtroButton,
+                tipoNotificacion === "invitaciones" && styles.filtroActivo,
+              ]}
+              onPress={() => handleTipoChange("invitaciones")}
+            >
+              <Text style={styles.filtroTexto}>Invitaciones</Text>
+            </TouchableOpacity>
+          </View>
 
-            <View style={styles.notifContent}>
-              {loadingNotifs ? (
-                <ActivityIndicator size="small" color="#fff" />
-              ) : errorNotifs ? (
-                <Text style={styles.errorText}>{errorNotifs}</Text>
-              ) : notificaciones.length > 0 ? (
-                <ScrollView style={styles.notifScroll}>
-                  {tipoNotificacion === "solicitudes" &&
-                    notificaciones.map((notif, idx) => (
-                      <View key={idx} style={styles.notifItem}>
-                        <View style={styles.cardContainer}>
-                          <View style={styles.cardHeader}>
+          <View style={styles.notifContent}>
+            {loadingNotifs ? (
+              <ActivityIndicator size="small" color="#fff" />
+            ) : errorNotifs ? (
+              <Text style={styles.errorText}>{errorNotifs}</Text>
+            ) : notificaciones.length > 0 ? (
+              <ScrollView style={styles.notifScroll}>
+                {tipoNotificacion === "solicitudes" &&
+                  notificaciones.map((notif, idx) => (
+                    <View key={idx} style={styles.notifItem}>
+                      <View style={styles.cardContainer}>
+                        <View style={styles.cardHeader}>
+                          <Image
+                            source={
+                              avatarMap[notif.avatarEmisor] // local key?
+                                ? avatarMap[notif.avatarEmisor]
+                                : notif.avatarEmisor // remote URL?
+                                ? { uri: notif.avatarEmisor }
+                                : require("@/assets/images/imagenPerfil.webp") // fallback
+                            }
+                            style={styles.cardAvatar}
+                          />
+                          <View style={{ flex: 1, marginLeft: 8 }}>
+                            <Text style={styles.cardTitle}>
+                              {notif.nombreEmisor}
+                            </Text>
+                            <Text style={styles.cardSubtitle}>
+                              te ha enviado una solicitud de amistad.
+                            </Text>
+                          </View>
+                        </View>
+                        <View style={styles.cardActions}>
+                          <TouchableOpacity
+                            style={[styles.cardButton, styles.cardButtonAccept]}
+                            onPress={() => handleAceptarSolicitud(notif)}
+                          >
+                            <Text style={styles.cardButtonText}>Aceptar</Text>
+                          </TouchableOpacity>
+                          <TouchableOpacity
+                            style={[styles.cardButton, styles.cardButtonReject]}
+                            onPress={() =>
+                              handleDenegarSolicitud(notif.idUsuarioEmisor)
+                            }
+                          >
+                            <Text style={styles.cardButtonText}>Rechazar</Text>
+                          </TouchableOpacity>
+                        </View>
+                      </View>
+                    </View>
+                  ))}
+                {tipoNotificacion === "invitaciones" &&
+                  notificaciones.map((notif, idx) => (
+                    <View key={idx} style={styles.notifItem}>
+                      <View style={styles.cardContainer}>
+                        <View style={styles.cardHeader}>
+                          {notif.avatarInvitador &&
+                          avatarMap[notif.avatarInvitador] ? (
                             <Image
-                              source={
-                                avatarMap[notif.avatarEmisor] // local key?
-                                  ? avatarMap[notif.avatarEmisor]
-                                  : notif.avatarEmisor // remote URL?
-                                  ? { uri: notif.avatarEmisor }
-                                  : require("@/assets/images/imagenPerfil.webp") // fallback
-                              }
+                              source={avatarMap[notif.avatarInvitador]}
                               style={styles.cardAvatar}
                             />
-                            <View style={{ flex: 1, marginLeft: 8 }}>
-                              <Text style={styles.cardTitle}>
-                                {notif.nombreEmisor}
-                              </Text>
-                              <Text style={styles.cardSubtitle}>
-                                te ha enviado una solicitud de amistad.
-                              </Text>
-                            </View>
-                          </View>
-                          <View style={styles.cardActions}>
-                            <TouchableOpacity
-                              style={[
-                                styles.cardButton,
-                                styles.cardButtonAccept,
-                              ]}
-                              onPress={() => handleAceptarSolicitud(notif)}
-                            >
-                              <Text style={styles.cardButtonText}>Aceptar</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                              style={[
-                                styles.cardButton,
-                                styles.cardButtonReject,
-                              ]}
-                              onPress={() =>
-                                handleDenegarSolicitud(notif.idUsuarioEmisor)
-                              }
-                            >
-                              <Text style={styles.cardButtonText}>
-                                Rechazar
-                              </Text>
-                            </TouchableOpacity>
+                          ) : (
+                            <Image
+                              source={require("@/assets/images/imagenPerfil.webp")}
+                              style={styles.cardAvatar}
+                            />
+                          )}
+                          <View style={{ flex: 1 }}>
+                            <Text style={styles.cardTitle}>
+                              {notif.nombreInvitador || "Invitador desconocido"}
+                            </Text>
+                            <Text style={styles.cardSubtitle}>
+                              te invitó a una partida{" "}
+                              {notif.nombreSala && `en "${notif.nombreSala}"`}.
+                            </Text>
                           </View>
                         </View>
-                      </View>
-                    ))}
-                  {tipoNotificacion === "invitaciones" &&
-                    notificaciones.map((notif, idx) => (
-                      <View key={idx} style={styles.notifItem}>
-                        <View style={styles.cardContainer}>
-                          <View style={styles.cardHeader}>
-                            {notif.avatarInvitador &&
-                            avatarMap[notif.avatarInvitador] ? (
-                              <Image
-                                source={avatarMap[notif.avatarInvitador]}
-                                style={styles.cardAvatar}
-                              />
-                            ) : (
-                              <Image
-                                source={require("@/assets/images/imagenPerfil.webp")}
-                                style={styles.cardAvatar}
-                              />
-                            )}
-                            <View style={{ flex: 1 }}>
-                              <Text style={styles.cardTitle}>
-                                {notif.nombreInvitador ||
-                                  "Invitador desconocido"}
-                              </Text>
-                              <Text style={styles.cardSubtitle}>
-                                te invitó a una partida{" "}
-                                {notif.nombreSala && `en "${notif.nombreSala}"`}
-                                .
-                              </Text>
-                            </View>
-                          </View>
-                          <View style={styles.cardActions}>
-                            <TouchableOpacity
-                              style={[
-                                styles.cardButton,
-                                styles.cardButtonAccept,
-                              ]}
-                              onPress={() => acceptInvitation(notif)}
-                            >
-                              <Text style={styles.cardButtonText}>Aceptar</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                              style={[
-                                styles.cardButton,
-                                styles.cardButtonReject,
-                              ]}
-                              onPress={() => rejectInvitation(notif)}
-                            >
-                              <Text style={styles.cardButtonText}>
-                                Rechazar
-                              </Text>
-                            </TouchableOpacity>
-                          </View>
+                        <View style={styles.cardActions}>
+                          <TouchableOpacity
+                            style={[styles.cardButton, styles.cardButtonAccept]}
+                            onPress={() => acceptInvitation(notif)}
+                          >
+                            <Text style={styles.cardButtonText}>Aceptar</Text>
+                          </TouchableOpacity>
+                          <TouchableOpacity
+                            style={[styles.cardButton, styles.cardButtonReject]}
+                            onPress={() => rejectInvitation(notif)}
+                          >
+                            <Text style={styles.cardButtonText}>Rechazar</Text>
+                          </TouchableOpacity>
                         </View>
                       </View>
-                    ))}
-                </ScrollView>
-              ) : (
-                <Text style={styles.notifText}>No hay notificaciones.</Text>
-              )}
-            </View>
+                    </View>
+                  ))}
+              </ScrollView>
+            ) : (
+              <Text style={styles.notifText}>No hay notificaciones.</Text>
+            )}
           </View>
-        )}
+        </View>
+      )}
 
-        {/* Modal para invitaciones vía socket */}
-        <Modal visible={showInvitationModal} transparent animationType="slide">
-          <View style={styles.modalContainer}>
-            <View style={styles.modalContent}>
-              <Text style={styles.modalTitle}>Invitación a Sala</Text>
-              <Text style={styles.modalText}>
-                Has sido invitado a la sala{" "}
-                <Text style={{ fontWeight: "bold" }}>
-                  {invitationData?.idSala}
-                </Text>
+      {/* Modal para invitaciones vía socket */}
+      <Modal visible={showInvitationModal} transparent animationType="slide">
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Invitación a Sala</Text>
+            <Text style={styles.modalText}>
+              Has sido invitado a la sala{" "}
+              <Text style={{ fontWeight: "bold" }}>
+                {invitationData?.idSala}
               </Text>
-              <Text style={styles.modalText}>
-                Invitación de: {invitationData?.idInvitador}
-              </Text>
-              <Text style={styles.modalText}>
-                Código: {invitationData?.codigoInvitacion}
-              </Text>
-              <View style={styles.modalButtons}>
-                <TouchableOpacity
-                  style={styles.greenButton}
-                  onPress={acceptInvitation}
-                >
-                  <Text style={styles.buttonText}>Aceptar</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.redButton}
-                  onPress={rejectInvitation}
-                >
-                  <Text style={styles.buttonText}>Rechazar</Text>
-                </TouchableOpacity>
-              </View>
+            </Text>
+            <Text style={styles.modalText}>
+              Invitación de: {invitationData?.idInvitador}
+            </Text>
+            <Text style={styles.modalText}>
+              Código: {invitationData?.codigoInvitacion}
+            </Text>
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={styles.greenButton}
+                onPress={acceptInvitation}
+              >
+                <Text style={styles.buttonText}>Aceptar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.redButton}
+                onPress={rejectInvitation}
+              >
+                <Text style={styles.buttonText}>Rechazar</Text>
+              </TouchableOpacity>
             </View>
           </View>
-        </Modal>
-      </View>
-    </SafeAreaView>
+        </View>
+      </Modal>
+    </View>
   );
 };
 
@@ -520,7 +499,6 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0,0,0,0.6)",
     borderRadius: 10,
     padding: 5,
-    bottom: 2, // Changed from top to bottom
   },
   // Make the icon 30x30 to match the trophy size
   notificationIcon: {
