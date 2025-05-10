@@ -1717,7 +1717,7 @@ const votosPrueba = React.useMemo(() => Array(18).fill(0), []);
     if (estadoActual === Estado.habilidadCazador && rolUsuario === "Cazador") {
       const elegido = jugadoresEstado[index];
       if (!jugadoresDisponibles.includes(elegido.id)) {
-        mostrarError("Solo puedes disparar a jugadores disponibles");
+        mostrarError("Ese jugador se está muriendo ... no malgastes tu bala");
         logCustom(
           jornadaActual,
           etapaActual,

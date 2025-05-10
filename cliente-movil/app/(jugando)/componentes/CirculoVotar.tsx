@@ -63,10 +63,10 @@ const CirculoVotar: React.FC<CirculoVotarProps> = ({
 
   // Escala para iconos y nombres si hay más de 10 jugadores
   const escala = cantidadJugadores > 10 ? 0.8 : 1;
-  // Para mantener el grosor del contorno de texto al escalar: offset de borde inverso a la escala
-  const borderOffset = cantidadJugadores > 10 ? 1 / escala : 1;
+  // El offset del borde de texto escala junto con el texto
+  const borderOffset = escala;
   // Radio extra si hay más de 10 jugadores
-  const factorRadio = cantidadJugadores > 10 ? 1.05 : 1;
+  const factorRadio = cantidadJugadores > 10 ? 1.1 : 1;
 
   // Cálculo base de radio y tamaño de imagen
   const radioBase = Math.min(ANCHO, ALTO) * NUMERICAS.MULTIPLICADOR_RADIO;
