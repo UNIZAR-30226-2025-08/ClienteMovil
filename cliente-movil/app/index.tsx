@@ -246,13 +246,6 @@ export default function App(): JSX.Element | null {
               >
                 <Text style={styles.textoEntrar}>ENTRAR</Text>
               </TouchableOpacity>
-
-              <TouchableOpacity
-                style={styles.botonEntrar}
-                onPress={() => router.push("/admin")}
-              >
-                <Text style={styles.textoEntrar}>ATAJO ADMIN</Text>
-              </TouchableOpacity>
             </View>
           </ImageBackground>
         </View>
@@ -301,7 +294,7 @@ const styles = StyleSheet.create({
   formContainer: {
     position: "absolute",
     width: "100%",
-    bottom: "20%",
+    bottom: "26%",
     alignItems: "center",
   },
 
@@ -338,6 +331,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "bold",
     marginTop: 10,
+    top: 20,
     color: "black",
   },
 
@@ -350,8 +344,9 @@ const styles = StyleSheet.create({
     backgroundColor: "#008f39",
     justifyContent: "center",
     alignItems: "center",
-    width: 150,
-    height: 45,
+    width: 210,
+    height: 65,
+    top: 50,
     marginTop: 15,
     borderRadius: 30,
   },
