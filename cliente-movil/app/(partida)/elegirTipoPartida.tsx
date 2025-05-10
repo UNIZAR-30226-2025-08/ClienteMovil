@@ -21,6 +21,8 @@ import io from "socket.io-client";
 // Importación para el botón de atrás
 const imagenAtras = require("@/assets/images/botonAtras.png");
 
+const STATUSBAR_HEIGHT = Constants.statusBarHeight || 0;
+
 /**
  * Mapa que relaciona claves de avatar con las imágenes correspondientes.
  */
@@ -208,9 +210,7 @@ export default function ElegirPartidaScreen(): JSX.Element | null {
         </Link>
 
         <View style={styles.botonNotificaciones}>
-          <View style={styles.iconoNotificacionesContainer}>
-            <NotificationButton />
-          </View>
+          <NotificationButton />
         </View>
       </ImageBackground>
     </View>
@@ -324,16 +324,10 @@ const styles = StyleSheet.create({
 
   botonNotificaciones: {
     position: "absolute",
-    top: 10,
-    right: 10,
+    top: STATUSBAR_HEIGHT + 10,
+    right: 15,
     padding: 10,
     zIndex: 10,
-  },
-
-  iconoNotificacionesContainer: {
-    backgroundColor: "transparent",
-    borderRadius: 10,
-    padding: 5,
   },
 
   botonAtras: {
