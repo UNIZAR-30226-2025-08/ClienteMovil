@@ -33,8 +33,8 @@ export default function NotFoundScreen() {
       <ThemedView style={styles.container}>
         {/* Imagen de error con animación */}
         <Animated.Image
-          source={require("@/assets/images/404.png")}
-          style={[styles.image, { transform: [{ scale: bounceAnim }] }]} // Se aplica la animación aquí
+          source={require("@/assets/images/pantallaError.png")}
+          style={[styles.image, { transform: [{ scale: bounceAnim }] }]}
         />
         <View style={styles.card}>
           <ThemedText type="title" style={styles.title}>
