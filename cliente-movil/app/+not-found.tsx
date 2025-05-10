@@ -31,10 +31,25 @@ export default function NotFoundScreen() {
     <>
       <Stack.Screen options={{ title: "Oops!" }} />
       <ThemedView style={styles.container}>
-        <ThemedText type="title">This screen doesn't exist.</ThemedText>
-        <Link href="/" style={styles.link}>
-          <ThemedText type="link">Go to home screen!</ThemedText>
-        </Link>
+        {/* Imagen de error con animación */}
+        <Animated.Image
+          source={require("@/assets/images/pantallaError.png")}
+          style={[styles.image, { transform: [{ scale: bounceAnim }] }]}
+        />
+        <View style={styles.card}>
+          <ThemedText type="title" style={styles.title}>
+            Whoops! This screen doesn't exist.
+          </ThemedText>
+          <ThemedText style={styles.description}>
+            We couldn't find the page you were looking for. But don't worry, you
+            can go back home!
+          </ThemedText>
+          <Link href="/" style={styles.link}>
+            <ThemedText type="link" style={styles.linkText}>
+              Go to home screen
+            </ThemedText>
+          </Link>
+        </View>
       </ThemedView>
     </>
   );
