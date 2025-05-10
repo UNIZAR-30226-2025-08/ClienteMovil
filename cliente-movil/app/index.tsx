@@ -284,9 +284,10 @@ const styles = StyleSheet.create({
 
   imagenInicioSesion: {
     position: "absolute",
-    width: 320,
-    height: 470,
-    left: "9.5%",
+    width: "80%", // ocupa 80% del ancho
+    height: undefined, // para usar aspectRatio
+    aspectRatio: 320 / 470, // mantiene proporción original
+    left: "10%", // mismo margen izquierdo
     bottom: "13%",
     borderRadius: 30,
   },
