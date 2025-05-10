@@ -12,11 +12,14 @@ import { useFonts } from "expo-font";
 
 /**
  * Importación de imágenes utilizadas en la pantalla "¿Cómo Jugar?".
+ *
+ * @remarks
+ * Estas imágenes se utilizan para el fondo de la pantalla y los íconos de los roles "Luna", "Sol", "Papiro", y otros botones.
  */
 const imagenFondoRoles = require("@/assets/images/fondo-roles.jpg");
 const imageLobo = require("@/assets/images/lobo.png");
 const imagenPapiro = require("@/assets/images/papiro.png");
-const imageFondoTurnos = require("@/assets/images/fondo-turnos-explicacion.jpg");
+const imageFondoTurnos = require("@/assets/images/fondo-turnos-explicacion.webp");
 const imagenAtras = require("@/assets/images/botonAtras.png");
 const imagenLuna = require("@/assets/images/imagen-luna.png");
 const imagenSol = require("@/assets/images/imagen-sol.jpg");
@@ -25,7 +28,7 @@ const imagenSol = require("@/assets/images/imagen-sol.jpg");
  * Pantalla "¿Cómo Jugar?".
  * Explica la mecánica del juego e introduce las fases de "Día" y "Noche".
  *
- * @returns {JSX.Element} Pantalla de explicación de juego.
+ * @returns {JSX.Element} Pantalla de explicación de juego, o `null` mientras se carga la fuente.
  */
 export default function ComoJugarScreen(): JSX.Element | null {
   const router = useRouter(); // Usamos useRouter para manejar la navegación
@@ -41,6 +44,10 @@ export default function ComoJugarScreen(): JSX.Element | null {
 
   /**
    * Función para regresar a la pantalla anterior.
+   * Utiliza la función `router.back()` para navegar hacia la pantalla anterior.
+   *
+   * @remarks
+   * Esta función es utilizada en el botón de "volver atrás" para regresar a la pantalla anterior.
    */
   const irAtras = () => {
     router.back(); // Regresa a la pantalla anterior
@@ -112,6 +119,11 @@ export default function ComoJugarScreen(): JSX.Element | null {
 
 /**
  * Estilos para la pantalla "¿Cómo Jugar?".
+ *
+ * @remarks
+ * Los estilos incluyen configuraciones para la
+ * disposición de los elementos, la imagen de fondo,
+ * los iconos y los textos en la pantalla.
  */
 const styles = StyleSheet.create({
   container: {
@@ -150,14 +162,14 @@ const styles = StyleSheet.create({
 
   containerTurnoNoche: {
     position: "absolute",
-    top: 570,
+    top: 580,
     left: "35%",
     marginLeft: -50,
   },
 
   containerTurnoDia: {
     position: "absolute",
-    top: 630,
+    top: 640,
     left: "35%",
     marginLeft: -50,
   },
@@ -226,14 +238,14 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between", // antes era space-around
-    paddingHorizontal: 10, // opcional para márgenes laterales
+    justifyContent: "space-between",
+    paddingHorizontal: 10,
   },
 
   iconTurno: {
     width: 35,
     height: 35,
-    borderRadius: 17.5, // mitad de width/height para círculo perfecto
+    borderRadius: 17.5,
   },
 
   textTurno: {

@@ -480,6 +480,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     padding: 20,
   },
+
   header: {
     fontSize: 24,
     fontWeight: "bold",
@@ -487,23 +488,27 @@ const styles = StyleSheet.create({
     color: "white",
     textAlign: "center",
   },
+
   label: {
     color: "white",
     fontSize: 18,
     fontWeight: "bold",
     marginBottom: 10,
   },
+
   input: {
     borderWidth: 1,
     padding: 10,
     marginBottom: 10,
     backgroundColor: "white",
   },
+
   privacidadContainer: {
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 20,
   },
+
   privacidadBotones: {
     flexDirection: "row",
     alignItems: "center",
@@ -511,47 +516,55 @@ const styles = StyleSheet.create({
   },
   botonesJugadores: {
     flexDirection: "row",
-    marginLeft: 20, // Espacio entre el texto y los botones
-    gap: 8, // Espacio entre los botones - y +
+    marginLeft: 20,
+    gap: 8,
   },
+
   jugadoresContainer: {
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 20,
   },
+
   jugadoresSubContainer: {
     flexDirection: "row",
     alignItems: "center",
     marginLeft: 10,
   },
+
   numText: {
     color: "white",
     fontSize: 18,
     fontWeight: "bold",
     marginRight: 10,
   },
+
   rolContainer: {
     flexDirection: "row",
     alignItems: "center",
     marginVertical: 10,
   },
+
   rolImagen: {
     width: 50,
     height: 50,
     marginRight: 10,
   },
+
   botonContainer: {
     flexDirection: "row",
     alignItems: "center",
     marginLeft: 10,
-    gap: 8, // Espacio entre los botones - y +
+    gap: 8,
   },
+
   modalContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "rgba(0,0,0,0.5)",
   },
+
   headerContainer: {
     position: "absolute",
     top: 0,

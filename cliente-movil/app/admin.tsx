@@ -7,7 +7,6 @@ import {
   TextInput,
   TouchableOpacity,
   Alert,
-  ScrollView,
   ImageBackground,
 } from "react-native";
 import Constants from "expo-constants";
@@ -29,13 +28,22 @@ async function fetchUserData(userId: number) {
     `${BACKEND_URL}/api/usuario/obtener_por_id`,
     { idUsuario: userId }
   );
-  // Alert.alert("Usuario Obtenido", JSON.stringify(response.data.usuario)); // Muestra lo recibido en un alert
+
   return response.data.usuario; // Ajusta según la estructura que devuelva el backend
 }
 
-// Pantalla de administración de sugerencias
+/**
+ * Pantalla de administración de sugerencias.
+ *
+ * Esta pantalla permite a los administradores ver, responder y marcar las sugerencias
+ * enviadas por los usuarios. También se puede filtrar las sugerencias por su estado (pendientes, revisadas).
+ *
+ * @returns {JSX.Element} Pantalla de administración de sugerencias
+ */
 export default function AdminSuggestionsScreen() {
-  // Estado para almacenar las sugerencias obtenidas
+  /**
+   * Estado para almacenar las sugerencias obtenidas
+   */
   interface Suggestion {
     idSugerencia: number;
     name?: string;
@@ -58,7 +66,12 @@ export default function AdminSuggestionsScreen() {
     "all"
   );
 
-  // Lista filtrada según el estado
+  /**
+   * Lista filtrada según el estado.
+   *
+   * @remarks
+   * Dependiendo del filtro seleccionado, se mostrarán las sugerencias revisadas, pendientes o todas.
+   */
   const filteredSuggestions = suggestions.filter((sug) => {
     if (filter === "revisadas") return sug.revisada === true;
     if (filter === "pendientes") return sug.revisada !== true;
@@ -66,10 +79,10 @@ export default function AdminSuggestionsScreen() {
   });
 
   /**
-   * Carga las sugerencias desde el backend
+   * Carga las sugerencias desde el backend.
    *
    * @remarks
-   * Se ejecuta al montar el componente y cada vez que se enfoca la pantalla
+   * Se ejecuta al montar el componente y cada vez que se enfoca la pantalla.
    */
   const loadSuggestions = async () => {
     try {
@@ -99,7 +112,13 @@ export default function AdminSuggestionsScreen() {
     }
   };
 
-  // Se recarga la información cada vez que la pantalla tiene foco
+  /**
+   * Recarga la información cada vez que la pantalla tiene foco.
+   *
+   * @remarks
+   * La función `loadSuggestions` se ejecuta cada vez que el componente
+   * se vuelve a mostrar.
+   */
   useFocusEffect(
     useCallback(() => {
       setLoading(true);
@@ -107,7 +126,13 @@ export default function AdminSuggestionsScreen() {
     }, [])
   );
 
-  // Función para responder a una sugerencia
+  /**
+   * Responde a una sugerencia con un mensaje.
+   *
+   * @param {number} idSugerencia - ID de la sugerencia a responder
+   * @returns {Promise<void>} No retorna nada
+   * @throws {Error} Si la respuesta está vacía o si ocurre un error en la solicitud
+   */
   const handleSendReply = async (idSugerencia: number) => {
     if (selectedReply.trim() === "") {
       Alert.alert("Error", "La respuesta no puede estar vacía.");
@@ -139,7 +164,13 @@ export default function AdminSuggestionsScreen() {
     }
   };
 
-  // Función para marcar una sugerencia como completada (revisada)
+  /**
+   * Marca una sugerencia como completada (revisada).
+   *
+   * @param {number} idSugerencia - ID de la sugerencia a marcar como completada
+   * @returns {Promise<void>} No retorna nada
+   * @throws {Error} Si ocurre un error al marcar la sugerencia como completada
+   */
   const handleMarkCompleted = async (idSugerencia: number) => {
     try {
       await axios.put(`${BACKEND_URL}/api/sugerencias/marcarRevisada`, {
@@ -169,6 +200,13 @@ export default function AdminSuggestionsScreen() {
     }
   };
 
+  /**
+   * Renderiza una sugerencia en la lista.
+   *
+   * @param {Object} param - Parámetro con la sugerencia
+   * @param {Suggestion} param.item - La sugerencia a renderizar
+   * @returns {JSX.Element} El componente visual para una sugerencia
+   */
   const renderSuggestion = ({ item }: { item: Suggestion }) => (
     <View style={[styles.card, item.revisada && styles.completedCard]}>
       {item.revisada && <Text style={styles.reviewedBadge}>Revisada</Text>}
@@ -279,20 +317,26 @@ export default function AdminSuggestionsScreen() {
   );
 }
 
+/*
+ * Estilos de la pantalla de administración de sugerencias.
+ */
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
   },
+
   image: {
     flex: 1,
     width: "100%",
     height: "100%",
   },
+
   overlay: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: "rgba(0,0,0,0.4)",
   },
+
   header: {
     fontSize: 28,
     fontFamily: "Georgia",
@@ -304,27 +348,32 @@ const styles = StyleSheet.create({
     textShadowOffset: { width: 2, height: 2 },
     textShadowRadius: 10,
   },
+
   loadingText: {
     fontSize: 18,
     color: "white",
     textAlign: "center",
     marginTop: 20,
   },
+
   listContent: {
     paddingBottom: 20,
     marginTop: 40,
   },
+
   card: {
     backgroundColor: "rgba(255,255,255,0.8)",
     padding: 15,
     borderRadius: 10,
     marginBottom: 15,
   },
+
   completedCard: {
     backgroundColor: "#e8f5e9",
     borderLeftWidth: 5,
     borderLeftColor: "#008f39",
   },
+
   reviewedBadge: {
     backgroundColor: "#008f39",
     color: "#fff",
@@ -336,30 +385,36 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: "bold",
   },
+
   userInfo: {
     fontSize: 16,
     color: "#333",
     marginBottom: 5,
   },
+
   description: {
     fontSize: 16,
     color: "#333",
     marginBottom: 10,
   },
+
   reply: {
     fontSize: 16,
     color: "green",
     marginBottom: 10,
   },
+
   actions: {
     flexDirection: "row",
     justifyContent: "space-around",
     flexWrap: "wrap",
   },
+
   replyContainer: {
     width: "100%",
     marginTop: 10,
   },
+
   input: {
     borderWidth: 1,
     borderColor: "#ccc",
@@ -368,6 +423,7 @@ const styles = StyleSheet.create({
     color: "#333",
     marginBottom: 10,
   },
+
   button: {
     backgroundColor: "#008f39",
     padding: 10,
@@ -376,16 +432,19 @@ const styles = StyleSheet.create({
     minWidth: "40%",
     alignItems: "center",
   },
+
   buttonText: {
     color: "#fff",
     fontSize: 16,
     fontWeight: "bold",
   },
+
   filterContainer: {
     flexDirection: "row",
     justifyContent: "center",
     marginVertical: 10,
   },
+
   filterBtn: {
     paddingVertical: 6,
     paddingHorizontal: 12,
@@ -393,9 +452,11 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     backgroundColor: "rgba(255,255,255,0.6)",
   },
+
   filterBtnActive: {
     backgroundColor: "#008f39",
   },
+
   filterText: {
     color: "#000",
     fontWeight: "bold",

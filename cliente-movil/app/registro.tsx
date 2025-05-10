@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import Constants from "expo-constants";
-import axios from "axios"; // Importamos axios
-import CryptoJS from "crypto-js"; // Importamos crypto-js
+import axios from "axios";
+import CryptoJS from "crypto-js";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import {
@@ -257,10 +257,12 @@ export default function RegistroScreen() {
   );
 }
 
+// Estilos de la pantalla
 const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+
   image: {
     width: "100%",
     height: "100%",
@@ -268,6 +270,7 @@ const styles = StyleSheet.create({
     resizeMode: "cover",
     justifyContent: "center",
   },
+
   title: {
     width: "90%",
     left: "6%",
@@ -282,6 +285,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 50,
   },
+
   imagenRegistro: {
     position: "absolute",
     width: 320,
@@ -290,29 +294,34 @@ const styles = StyleSheet.create({
     bottom: "13%",
     borderRadius: 30,
   },
+
   formContainer: {
     position: "absolute",
     width: "100%",
     bottom: "20%",
     alignItems: "center",
   },
+
   tituloResgistrarse: {
     fontFamily: "GhostShadow",
     fontSize: 30,
     color: "black",
   },
+
   textoCorreo: {
     fontSize: 16,
     fontWeight: "bold",
     marginTop: 10,
     color: "black",
   },
+
   textoContrasena: {
     fontSize: 16,
     fontWeight: "bold",
     marginTop: 10,
     color: "black",
   },
+
   input: {
     width: "70%",
     height: 40,
@@ -321,16 +330,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     marginTop: 5,
   },
+
   textoRegistro: {
     fontSize: 14,
     fontWeight: "bold",
     marginTop: 10,
     color: "black",
   },
+
   linkRegistro: {
     color: "blue",
     fontWeight: "bold",
   },
+
   botonEntrar: {
     backgroundColor: "#008f39",
     justifyContent: "center",
@@ -340,11 +352,13 @@ const styles = StyleSheet.create({
     marginTop: 15,
     borderRadius: 30,
   },
+
   textoEntrar: {
     fontWeight: "bold",
     fontSize: 20,
     color: "white",
   },
+
   contrasenaContainer: {
     flexDirection: "row",
     alignItems: "center",

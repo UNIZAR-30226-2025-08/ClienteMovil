@@ -9,7 +9,7 @@ import {
   BackHandler,
   Image,
 } from "react-native";
-import socket from "@/app/(sala)/socket"; // Módulo de conexión
+import socket from "@/app/(sala)/socket";
 import axios from "axios";
 import Constants from "expo-constants";
 import { useRouter, useLocalSearchParams } from "expo-router";
@@ -667,20 +667,20 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  // tarjeta especial para el líder
+
   playerCardLeader: {
-    height: 150, // sube un poco la tarjeta para el expulsar
+    height: 150,
     justifyContent: "space-between",
-    paddingVertical: 6, // más espacio interior
+    paddingVertical: 6,
   },
 
   ownerCrown: {
     position: "absolute",
-    top: 18, // baja la corona para que quede junto al avatar
+    top: 18,
     right: 5,
     fontSize: 20,
-    zIndex: 10, // asegúrate de que la corona esté por encima
-    elevation: 10, // en Android también
+    zIndex: 10,
+    elevation: 10,
   },
 
   playerName: {
@@ -758,7 +758,7 @@ const styles = StyleSheet.create({
   },
 
   botonExpulsar: {
-    marginTop: 4, // reduce el margen para que no sobresalga
+    marginTop: 4,
     backgroundColor: "#800000",
     paddingHorizontal: 8,
     paddingVertical: 4,
@@ -776,6 +776,6 @@ const styles = StyleSheet.create({
     height: 50,
     borderRadius: 25,
     marginBottom: 5,
-    zIndex: 1, // avatar por debajo de la corona
+    zIndex: 1,
   },
 });

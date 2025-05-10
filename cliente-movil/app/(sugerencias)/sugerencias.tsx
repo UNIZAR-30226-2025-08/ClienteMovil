@@ -1,4 +1,4 @@
-import React, { useState } from "react"; // Importar useState desde React
+import React, { useState } from "react";
 import {
   ImageBackground,
   StyleSheet,
@@ -15,7 +15,11 @@ import { useFonts } from "expo-font";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 /**
- * Importación de imágenes utilizadas en la pantalla de contacto.
+ * Importación de imágenes utilizadas en la pantalla de sugerencias.
+ *
+ * @remarks
+ * Estas imágenes incluyen el fondo de la pantalla, el logo de soporte técnico,
+ * el botón de regreso, y otras imágenes decorativas para la pantalla de contacto.
  */
 const imagenFondoRoles = require("@/assets/images/fondo-roles.jpg");
 const imagenContacto = require("@/assets/images/logo-soporte-tecnico.png");
@@ -24,9 +28,8 @@ const imagenAtras = require("@/assets/images/botonAtras.png");
 /**
  * Componente que representa la pantalla de sugerencias.
  *
- * Este componente permite a los usuarios enviar una sugerencia,
- * ingresando su nombre, correo y asunto. La sugerencia se envía a un backend
- * para ser almacenada en la base de datos.
+ * Este componente permite a los usuarios enviar una sugerencia, ingresando su nombre, correo y asunto.
+ * La sugerencia se envía a un backend para ser almacenada en la base de datos.
  *
  * @returns {JSX.Element | null} Retorna el componente de sugerencias o null si no se ha cargado la fuente.
  */
@@ -152,10 +155,13 @@ export default function SugerenciasScreen(): JSX.Element | null {
         <Text style={styles.textoAsunto}>Asunto</Text>
         <TextInput
           style={styles.bigInput}
-          placeholder="Asunto"
           placeholderTextColor="#444"
           value={asunto}
           onChangeText={setAsunto}
+          placeholder="Escribe el asunto aquí..."
+          multiline={true} // Permite varias líneas
+          numberOfLines={15} // Define el número de líneas visibles inicialmente
+          textAlignVertical="top" // Alinea el texto en la parte superior
         />
 
         {/* Botón de enviar mensaje */}
@@ -181,6 +187,11 @@ export default function SugerenciasScreen(): JSX.Element | null {
 
 /**
  * Estilos para la pantalla de contacto.
+ *
+ * @remarks
+ * Se utilizan estilos específicos para cada sección de la pantalla de
+ * sugerencias, incluyendo el fondo, los botones, los campos de entrada,
+ * y la posición de los textos e imágenes.
  */
 const styles = StyleSheet.create({
   container: {
@@ -237,7 +248,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "white",
     marginLeft: "20%",
-    marginTop: 160,
+    marginTop: 195,
     textAlign: "left",
   },
 

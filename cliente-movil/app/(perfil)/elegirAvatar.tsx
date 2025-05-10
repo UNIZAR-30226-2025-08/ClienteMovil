@@ -1,3 +1,12 @@
+/**
+ * @file ElegirAvatarScreen.tsx
+ * @description Pantalla que permite a los usuarios seleccionar
+ * un avatar para su perfil.
+ * La pantalla muestra una lista de avatares disponibles y permite actualizar
+ * el avatar en el backend.
+ * Después de seleccionar un avatar, se guarda en el perfil del usuario.
+ */
+
 import React, { useState } from "react";
 import {
   View,
@@ -15,12 +24,19 @@ import axios from "axios";
 
 /**
  * Imágenes utilizadas en la pantalla de selección de avatar.
+ *
+ * @remarks
+ * Estas imágenes se usan como fondo de la pantalla y para el
+ * botón de retroceso.
  */
 const imagenFondo = require("@/assets/images/fondo-roles.jpg");
 const imagenAtras = require("@/assets/images/botonAtras.png");
 
 /**
  * Mapa de avatares disponibles para la selección.
+ *
+ * @remarks
+ * Este mapa contiene las claves de los avatares y las rutas a las imágenes locales correspondientes.
  */
 const avatarMap: Record<string, any> = {
   avatar1: require("@/assets/images/imagenPerfil.webp"),
@@ -35,21 +51,30 @@ const avatarMap: Record<string, any> = {
 
 /**
  * Lista de identificadores de avatares disponibles.
+ *
+ * @remarks
+ * Esta lista se utiliza para generar dinámicamente los botones de selección de avatar.
  */
 const avatares = Object.keys(avatarMap);
 
 /**
  * Pantalla de selección de avatar del usuario.
- * Permite elegir un avatar y actualizarlo en el perfil del usuario.
  *
- * @returns {JSX.Element} Pantalla de selección de avatar.
+ * @remarks
+ * Esta pantalla permite al usuario seleccionar un avatar de una lista de opciones. Al seleccionar un avatar,
+ * se realiza una solicitud al backend para actualizar el avatar del usuario en la base de datos.
+ *
+ * @returns {JSX.Element} Componente visual que permite al usuario seleccionar un avatar.
  */
 export default function ElegirAvatarScreen(): JSX.Element {
   const BACKEND_URL = Constants.expoConfig?.extra?.backendUrl;
   const router = useRouter();
 
   /**
-   * Estado para almacenar el avatar seleccionado.
+   * Estado para almacenar el avatar seleccionado por el usuario.
+   *
+   * @remarks
+   * Este estado se utiliza para rastrear el avatar seleccionado antes de que se realice la actualización.
    */
   const [avatarSeleccionado, setAvatarSeleccionado] = useState<string | null>(
     null
@@ -58,7 +83,11 @@ export default function ElegirAvatarScreen(): JSX.Element {
   /**
    * Función para manejar la selección del avatar.
    *
-   * @param avatarId - Identificador del avatar seleccionado.
+   * @param avatarId - Identificador del avatar seleccionado por el usuario.
+   * @remarks
+   * Cuando el usuario selecciona un avatar, esta función maneja el proceso de actualización en el backend,
+   * incluyendo la obtención del ID de usuario y correo almacenados en `AsyncStorage`.
+   * Si la actualización es exitosa, se guarda el avatar seleccionado en el almacenamiento local y se navega al perfil del usuario.
    */
   const seleccionarAvatar = async (avatarId: string) => {
     try {
@@ -100,6 +129,9 @@ export default function ElegirAvatarScreen(): JSX.Element {
 
   /**
    * Función para regresar a la pantalla anterior.
+   *
+   * @remarks
+   * Esta función utiliza el hook `router` para navegar a la pantalla anterior.
    */
   const irAtras = () => {
     router.back();
@@ -137,6 +169,12 @@ export default function ElegirAvatarScreen(): JSX.Element {
 
 /**
  * Estilos de la pantalla de selección de avatar.
+ *
+ * @remarks
+ * Los estilos están diseñados para asegurar que la interfaz sea visualmente
+ * atractiva y funcional en diferentes tamaños de pantalla.
+ * Se incluyen estilos para el fondo, los avatares, los botones, y el
+ * título de la pantalla.
  */
 const styles = StyleSheet.create({
   container: {

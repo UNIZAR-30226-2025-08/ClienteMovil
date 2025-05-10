@@ -19,7 +19,12 @@ import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 /**
- * Mapa de avatares que relaciona claves de avatar con sus respectivas imágenes locales.
+ * Mapa de avatares que relaciona claves de avatar con sus respectivas
+ * imágenes locales.
+ *
+ * @remarks
+ * Este mapa es utilizado para obtener la imagen de avatar correspondiente
+ * a la clave del usuario.
  */
 const avatarMap: Record<string, any> = {
   avatar1: require("@/assets/images/imagenPerfil.webp"),
@@ -39,6 +44,10 @@ const imagenAtras = require("@/assets/images/botonAtras.png");
 
 /**
  * Interfaz que representa la estructura de un objeto usuario.
+ *
+ * @remarks
+ * Esta interfaz describe las propiedades asociadas a un amigo, como su id, nombre, correo,
+ * avatar, fecha de creación del perfil y rol favorito.
  */
 interface Usuario {
   idUsuario: number;
@@ -52,24 +61,40 @@ interface Usuario {
 /**
  * Pantalla de perfil de un amigo.
  *
- * @returns {JSX.Element} Componente visual que representa el perfil del amigo seleccionado.
- *
  * @remarks
  * - Utiliza `AsyncStorage` para obtener el ID del amigo.
  * - Hace dos peticiones: una para obtener los datos del usuario, y otra para extraer su número de victorias del ranking global.
  * - Muestra el avatar, nombre, fecha de creación del perfil, rol favorito y número de victorias.
+ *
+ * @returns {JSX.Element} Componente visual que representa el perfil del amigo seleccionado.
  */
 export default function PerfilAmigoScreen(): JSX.Element {
   const router = useRouter();
   const { amigoId } = useLocalSearchParams();
   const BACKEND_URL = Constants.expoConfig?.extra?.backendUrl;
 
+  /**
+   * Estado para almacenar los detalles del amigo.
+   */
   const [amigo, setAmigo] = useState<Usuario | null>(null);
+
+  /**
+   * Estado para el indicador de carga.
+   */
   const [loading, setLoading] = useState(true);
+
+  /**
+   * Estado para almacenar el número de victorias del amigo.
+   */
   const [victorias, setVictorias] = useState<number | null>(null);
 
   /**
-   * Hook de efecto para cargar los detalles del amigo y su número de victorias al montar el componente.
+   * Hook de efecto para cargar los detalles del amigo y su número de victorias al
+   * montar el componente.
+   *
+   * @remarks
+   * Este hook realiza dos peticiones: una para obtener los detalles del amigo y otra
+   * para obtener su número de victorias si el amigo está en el ranking global.
    */
   useEffect(() => {
     if (!amigoId) {
@@ -78,6 +103,9 @@ export default function PerfilAmigoScreen(): JSX.Element {
       return;
     }
 
+    /**
+     * Función para obtener los detalles del amigo y su número de victorias.
+     */
     const fetchAmigoDetails = async () => {
       try {
         const amigoIdFromStorage = await AsyncStorage.getItem("amigoId");
@@ -111,10 +139,16 @@ export default function PerfilAmigoScreen(): JSX.Element {
     fetchAmigoDetails();
   }, [amigoId, BACKEND_URL]);
 
+  /**
+   * Si los datos están cargando, muestra un indicador de actividad.
+   */
   if (loading) {
     return <ActivityIndicator size="large" color="#0000ff" />;
   }
 
+  /**
+   * Si no se pudo cargar el perfil del amigo, muestra un mensaje de error.
+   */
   if (!amigo) {
     return <Text>Error al cargar el perfil del amigo.</Text>;
   }
@@ -130,20 +164,18 @@ export default function PerfilAmigoScreen(): JSX.Element {
 
         {/* Papiro con nombre dentro */}
         <ImageBackground source={imagenPapiro} style={styles.imagePapiro}>
-          <Text style={styles.textoNombrePapiro}>👤 {amigo.nombre}</Text>
+          <Text style={styles.textoNombrePapiro}>Nombre: {amigo.nombre}</Text>
         </ImageBackground>
 
         <View style={styles.formContainer}>
           <Text style={styles.fechaCreacion}>
-            📅 Perfil creado:{" "}
+            Perfil creado:{" "}
             {new Date(amigo.fechaCreacion).toLocaleDateString("es-ES")}
           </Text>
-          <Text style={styles.textoRol}>
-            ⭐ Rol favorito: {amigo.rolFavorito}
-          </Text>
+          <Text style={styles.textoRol}>Rol favorito: {amigo.rolFavorito}</Text>
           {victorias !== null && (
             <Text style={styles.textoRol}>
-              🏆 Número de victorias: {victorias}
+              Número de victorias: {victorias}
             </Text>
           )}
 
@@ -174,6 +206,12 @@ export default function PerfilAmigoScreen(): JSX.Element {
 
 /**
  * Estilos para la pantalla de perfil del amigo.
+ *
+ * @remarks
+ * Los estilos están diseñados para proporcionar una
+ * buena experiencia visual y asegurar que la información
+ * se muestra de manera ordenada, tanto en pantallas de
+ * dispositivos pequeños como grandes.
  */
 const styles = StyleSheet.create({
   container: {
@@ -191,8 +229,8 @@ const styles = StyleSheet.create({
   },
 
   profileImage: {
-    width: 100,
-    height: 100,
+    width: 110,
+    height: 110,
     borderRadius: 50,
     position: "absolute",
     top: 80,
@@ -221,10 +259,10 @@ const styles = StyleSheet.create({
   },
 
   textoNombrePapiro: {
-    fontSize: 30,
+    fontSize: 23,
     fontWeight: "bold",
     color: "black",
-    marginTop: 20,
+    marginTop: 40,
     textAlign: "center",
     width: "100%",
   },

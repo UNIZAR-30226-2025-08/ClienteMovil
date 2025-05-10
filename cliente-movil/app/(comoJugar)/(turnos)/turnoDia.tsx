@@ -12,6 +12,10 @@ import { useFonts } from "expo-font";
 
 /**
  * Importación de imágenes utilizadas en la pantalla del turno de día.
+ *
+ * @remarks
+ * Estas imágenes incluyen el fondo de la pantalla, el icono del sol que representa el turno de día, un papiro decorativo,
+ * y el botón de regreso.
  */
 const imagenFondoRoles = require("@/assets/images/fondo-roles.jpg");
 const imagenSol = require("@/assets/images/imagen-sol.jpg");
@@ -20,9 +24,9 @@ const imagenAtras = require("@/assets/images/botonAtras.png");
 
 /**
  * Pantalla del turno de día en el juego.
- * Explica las mecánicas del juego cuando es de día.
+ * Explica las mecánicas del juego durante la fase diurna.
  *
- * @returns {JSX.Element} Pantalla de explicación del turno de día.
+ * @returns {JSX.Element} Pantalla de explicación del turno de día o `null` si la fuente aún no se ha cargado.
  */
 export default function TurnoDiaScreen(): JSX.Element | null {
   const router = useRouter(); // Usamos useRouter para manejar la navegación
@@ -32,15 +36,22 @@ export default function TurnoDiaScreen(): JSX.Element | null {
     GhostShadow: require("@/assets/fonts/ghost-shadow.ttf"),
   });
 
+  // Si la fuente no se ha cargado, retornamos `null`
+  // para evitar que la pantalla se muestre incompleta.
   if (!loaded) {
     return null; // Esperar a que se cargue la fuente
   }
 
   /**
    * Función para regresar a la pantalla anterior.
+   * Utiliza la función `router.back()` para navegar hacia la pantalla anterior.
+   *
+   * @remarks
+   * Esta función se usa en el botón de "volver atrás" para regresar a
+   * la pantalla anterior en la navegación.
    */
   const irAtras = () => {
-    router.back(); // Regresa a la pantalla anterior
+    router.back();
   };
 
   return (
@@ -76,6 +87,11 @@ export default function TurnoDiaScreen(): JSX.Element | null {
 
 /**
  * Estilos para la pantalla del turno de día.
+ *
+ * @remarks
+ * Los estilos incluyen la disposición de los elementos de la pantalla, como
+ * los iconos, el fondo, y los textos, asegurando que los elementos se ubiquen
+ * correctamente en la pantalla.
  */
 const styles = StyleSheet.create({
   container: {
@@ -119,7 +135,7 @@ const styles = StyleSheet.create({
     width: 170,
     height: 170,
     left: "30%",
-    top: "15%",
+    top: "16%",
     position: "absolute",
     borderRadius: 100,
   },
@@ -137,11 +153,11 @@ const styles = StyleSheet.create({
   },
 
   textoTurnoDia: {
-    fontSize: 11.2,
+    fontSize: 10.9,
     fontWeight: "bold",
     position: "absolute",
     width: 230,
-    left: "25%",
-    top: "45%",
+    left: "23%",
+    top: "46%",
   },
 });
