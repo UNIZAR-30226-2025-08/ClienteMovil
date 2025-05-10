@@ -1,4 +1,4 @@
-import React, { useState } from "react"; // Importar useState desde React
+import React, { useState } from "react";
 import {
   ImageBackground,
   StyleSheet,

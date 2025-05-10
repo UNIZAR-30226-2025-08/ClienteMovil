@@ -277,7 +277,7 @@ const styles = StyleSheet.create({
     color: "white",
     fontWeight: "bold",
     textAlign: "center",
-    marginTop: 20, // Ajusta este valor según sea necesario para centrar el texto verticalmente
+    marginTop: 20,
   },
 
   rectanglesContainer: {
@@ -287,10 +287,10 @@ const styles = StyleSheet.create({
   },
 
   rectangle: {
-    width: "80%", // Ajusta el tamaño del rectángulo
-    height: 30, // Ajusta el tamaño del rectángulo
-    backgroundColor: "rgba(0, 0, 0, 0.5)", // Color negro semitransparente
-    marginVertical: 10, // Espacio entre los rectángulos
+    width: "80%",
+    height: 30,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    marginVertical: 10,
   },
 
   salaContainer: {
@@ -383,7 +383,7 @@ const styles = StyleSheet.create({
   },
 
   scrollContenido: {
-    paddingTop: 120, // Espacio suficiente para la cabecera y dropdown
+    paddingTop: 120,
     paddingBottom: 20,
     alignItems: "center",
     width: "80%",

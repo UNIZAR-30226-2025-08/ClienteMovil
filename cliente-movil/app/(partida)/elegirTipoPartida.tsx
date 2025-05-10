@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react"; // Importar useState, useEffect y useRef desde React
+import React, { useState, useEffect, useRef } from "react";
 import {
   ImageBackground,
   StyleSheet,
@@ -6,8 +6,7 @@ import {
   View,
   Image,
   TouchableOpacity,
-  ActivityIndicator,
-  Alert, // Para mostrar errores
+  Alert,
 } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback } from "react";
@@ -17,7 +16,7 @@ import { useRouter } from "expo-router";
 import { useFonts } from "expo-font";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import NotificationButton from "@/components/NotificationButton";
-import io from "socket.io-client"; // Importar socket.io-client
+import io from "socket.io-client";
 
 // Importación para el botón de atrás
 const imagenAtras = require("@/assets/images/botonAtras.png");
@@ -323,7 +322,6 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
 
-  // Botón Notificaciones
   botonNotificaciones: {
     position: "absolute",
     top: 10,

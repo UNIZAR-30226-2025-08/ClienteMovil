@@ -718,5 +718,8 @@ const styles = StyleSheet.create({
     borderBottomColor: "#eee",
   },
 
-  suggestionText: { fontSize: 16, color: "#333" },
+  suggestionText: {
+    fontSize: 16,
+    color: "#333",
+  },
 });

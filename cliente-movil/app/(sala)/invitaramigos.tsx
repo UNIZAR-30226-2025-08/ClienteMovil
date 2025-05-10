@@ -218,7 +218,10 @@ export default function AmigosScreen(): JSX.Element {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
+  container: {
+    flex: 1,
+  },
+
   image: {
     width: "100%",
     height: "100%",
@@ -226,10 +229,12 @@ const styles = StyleSheet.create({
     resizeMode: "cover",
     justifyContent: "center",
   },
+
   overlay: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: "rgba(0, 0, 0, 0.4)",
   },
+
   titulo: {
     fontSize: 28,
     fontWeight: "bold",
@@ -237,11 +242,13 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginTop: 60,
   },
+
   scrollContainer: {
     marginTop: 20,
     paddingHorizontal: 20,
     paddingBottom: 80,
   },
+
   amigoContainer: {
     flexDirection: "row",
     alignItems: "center",
@@ -250,29 +257,40 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     marginBottom: 15,
   },
+
   imagenPerfil: {
     width: 50,
     height: 50,
     borderRadius: 25,
     marginRight: 10,
   },
+
   infoContainer: {
     flexDirection: "column",
     justifyContent: "center",
   },
+
   estadoDot: {
     width: 10,
     height: 10,
     borderRadius: 5,
     marginTop: 4,
   },
-  enLinea: { backgroundColor: "green" },
-  desconectadoDot: { backgroundColor: "gray" },
+
+  enLinea: {
+    backgroundColor: "green",
+  },
+
+  desconectadoDot: {
+    backgroundColor: "gray",
+  },
+
   nombre: {
     fontSize: 18,
     fontWeight: "bold",
     color: "black",
   },
+
   inviteButton: {
     marginLeft: "auto",
     backgroundColor: "#007BFF",
@@ -280,16 +298,19 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderRadius: 6,
   },
+
   inviteButtonText: {
     color: "#fff",
     fontWeight: "bold",
     fontSize: 14,
   },
+
   containerAtras: {
     position: "absolute",
     bottom: 20,
     left: "46%",
   },
+
   imageAtras: {
     height: 40,
     width: 40,

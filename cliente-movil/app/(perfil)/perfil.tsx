@@ -384,9 +384,9 @@ const styles = StyleSheet.create({
     marginTop: 15,
     borderRadius: 30,
     position: "absolute",
-    bottom: 95, // Ajusta este valor según sea necesario para posicionar el botón por encima del botón "VOLVER"
+    bottom: 95,
     left: "50%",
-    marginLeft: -75, // Centra el botón horizontalmente
+    marginLeft: -75,
   },
 
   textoGuardar: {

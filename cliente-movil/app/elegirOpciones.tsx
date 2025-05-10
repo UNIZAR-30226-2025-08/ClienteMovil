@@ -239,8 +239,6 @@ const styles = StyleSheet.create({
     alignSelf: "center",
   },
 
-  // Contenedor con position absolute para que no desplace nada
-  // y zIndex menor (1) para que el dropdown con zIndex alto lo tape
   contenedorPerfil: {
     position: "absolute",
     top: 100,
@@ -298,21 +296,20 @@ const styles = StyleSheet.create({
     bottom: 53,
   },
 
-  // Botón de notificaciones
   botonNotificaciones: {
     position: "absolute",
     top: 10,
     right: 15,
     padding: 12,
-    zIndex: 10, // superior a 1 => se superpone a la imagen
+    zIndex: 10,
   },
+
   iconoNotificacionesContainer: {
     backgroundColor: "transparent",
     borderRadius: 12,
     padding: 5,
   },
 
-  // Botón de Ranking
   botonRanking: {
     position: "absolute",
     top: 50,

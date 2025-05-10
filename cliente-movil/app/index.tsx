@@ -17,8 +17,8 @@ import {
 import { Link } from "expo-router";
 import { useFonts } from "expo-font";
 import { useRouter } from "expo-router";
-import axios from "axios"; // Importamos axios
-import CryptoJS from "crypto-js"; // Importamos crypto-js
+import axios from "axios";
+import CryptoJS from "crypto-js";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import socket from "@/app/(sala)/socket";
 
@@ -181,81 +181,6 @@ export default function App(): JSX.Element | null {
     }
   };
 
-  /**
-   * Efecto que se ejecuta cuando cambia el ID de la sala (`idSala`).
-   *
-   * - Solicita al backend el estado actual de la partida mediante el evento `obtenerEstadoPartida`.
-   * - Al recibir la respuesta por `estadoPartida`, actualiza el estado local de `jugadoresEstado`.
-   * - El listener se limpia al desmontar el componente o cuando `idSala` cambia.
-   */
-  /*useEffect(() => {
-    if (!idUsuario) return;
-    console.log("Lanzo buscarPartida");
-
-    // Emitir evento al backend para preguntar si el usuario está en una partida
-    socket.emit("buscarPartidaUsuario", { idUsuario: idUsuario });
-
-    // Escuchar la respuesta del backend
-    socket.on(
-      "partidaEncontrada",
-      ({
-        idPartida,
-        idSala,
-        rol,
-        idUsuario,
-        nombreUsuario,
-        jugadores,
-        lider,
-      }) => {
-        if (!idPartida) {
-          console.log("Error: Partida no encontrada");
-          return;
-        }
-
-        const sala = {
-          jugadores,
-          lider,
-        };
-
-        router.replace("/entrar");
-        setTimeout(() => {
-          router.push({
-            pathname: "/(jugando)/jugando",
-            params: {
-              idSala: idSala,
-              salaData: JSON.stringify(sala),
-              rol: rol,
-              usuarioID: idUsuario,
-              usuarioNombre: nombreUsuario,
-            },
-          });
-        }, 30);
-
-        setTimeout(() => {
-          socket.emit("reconectarPartida", {
-            idPartida: idPartida,
-            idUsuario: idUsuario,
-          });
-        }, 30);
-      }
-    );
-
-    // Escuchar la respuesta del backend
-    socket.on("partidaNoEncontrada", (data) => {
-      console.log("No en partida");
-      if (data.error) {
-        return;
-      }
-      router.push("/entrar");
-    });
-
-    // Limpiar el listener al desmontar
-    return () => {
-      socket.off("partidaEncontrada");
-      socket.off("partidaNoEncontrada");
-    };
-  }, [idUsuario]);*/
-
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : undefined}
@@ -288,7 +213,7 @@ export default function App(): JSX.Element | null {
                 placeholder="Tu correo"
                 placeholderTextColor="#444"
                 value={correo}
-                onChangeText={setCorreo} // Actualiza el estado y por tanto el valor de la variable con el texto ingresado
+                onChangeText={setCorreo}
                 keyboardType="email-address"
                 autoCapitalize="none"
               />
@@ -300,7 +225,7 @@ export default function App(): JSX.Element | null {
                   placeholder="Tu contraseña"
                   placeholderTextColor="#444"
                   value={contrasena}
-                  onChangeText={setContrasena} // Actualiza el estado y por tanto el valor de la variable con el texto ingresado  router.push('/entrar')
+                  onChangeText={setContrasena}
                   secureTextEntry={secureText}
                 />
                 <TouchableOpacity onPress={() => setSecureText(!secureText)}>

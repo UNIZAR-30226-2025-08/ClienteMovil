@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import Constants from "expo-constants";
-import axios from "axios"; // Importamos axios
-import CryptoJS from "crypto-js"; // Importamos crypto-js
+import axios from "axios";
+import CryptoJS from "crypto-js";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import {

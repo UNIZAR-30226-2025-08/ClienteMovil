@@ -98,7 +98,6 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
 
-  /* Envuelve la imagen en un TouchableOpacity */
   iconoBoton: {
     position: "absolute",
     bottom: 15,

@@ -238,14 +238,14 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between", // antes era space-around
-    paddingHorizontal: 10, // opcional para márgenes laterales
+    justifyContent: "space-between",
+    paddingHorizontal: 10,
   },
 
   iconTurno: {
     width: 35,
     height: 35,
-    borderRadius: 17.5, // mitad de width/height para círculo perfecto
+    borderRadius: 17.5,
   },
 
   textTurno: {
