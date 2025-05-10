@@ -716,6 +716,34 @@ const Jugando: React.FC = () => {
     mostrarBotonPasarTurno: false,
   };
 
+  const plantillaHabilidadCazadorNoDispararNoche: PlantillaUI = {
+    mostrarControlesAccion: true,
+    mostrarCirculoJugadores: true,
+    mostrarBarraSuperior: true,
+    mostrarBotellas: false,
+    mostrarPantallaOscura: true,
+    mostrarTemporizador: true,
+    mostrarBotonVotar: false,
+    mostrarMedallaAlguacilPropia: true,
+    valorOpacidadPantallaOscura: 0.95,
+    textoBotonVotar: "MATAR",
+    mostrarBotonPasarTurno: false,
+  };
+
+  const plantillaHabilidadCazadorNoDispararDia: PlantillaUI = {
+    mostrarControlesAccion: true,
+    mostrarCirculoJugadores: true,
+    mostrarBarraSuperior: true,
+    mostrarBotellas: false,
+    mostrarPantallaOscura: false,
+    mostrarTemporizador: true,
+    mostrarBotonVotar: false,
+    mostrarMedallaAlguacilPropia: true,
+    valorOpacidadPantallaOscura: 0,
+    textoBotonVotar: "MATAR",
+    mostrarBotonPasarTurno: false,
+  };
+
   const plantillaVotacionDiurna: PlantillaUI = {
     mostrarControlesAccion: true,
     mostrarCirculoJugadores: true,
@@ -1483,27 +1511,25 @@ const Jugando: React.FC = () => {
     start: mostrarSegundoEmpateVotacionAlguacil,
   });
 
-    /**
+  /**
    *
    */
-    const [
-        mostrarMuertosNoche,
-        setMostrarMuertosNoche,
-      ] = useState<boolean>(false);
-    
-      /**
-       *
-       */
-      const {
-        opacities: opacitiesMuertosNoche,
-        mostrarComponentes: mostrarComponenteMuertosNoche,
-      } = useGestorAnimaciones({
-        duracionFadeIn,
-        duracionEspera,
-        duracionFadeOut,
-        numAnimaciones: 1,
-        start: mostrarMuertosNoche,
-      });
+  const [mostrarMuertosNoche, setMostrarMuertosNoche] =
+    useState<boolean>(false);
+
+  /**
+   *
+   */
+  const {
+    opacities: opacitiesMuertosNoche,
+    mostrarComponentes: mostrarComponenteMuertosNoche,
+  } = useGestorAnimaciones({
+    duracionFadeIn,
+    duracionEspera,
+    duracionFadeOut,
+    numAnimaciones: 1,
+    start: mostrarMuertosNoche,
+  });
 
   // !!!!!!!!!!!!!!!!!!!!!!!!!!
   // const [mensaje, setMensaje] = useState(null);
@@ -1667,6 +1693,20 @@ const Jugando: React.FC = () => {
       mostrarError("¡No puedes seleccionar a jugadores muertos!");
       return;
     }
+    if (estadoActual === Estado.habilidadCazador && rolUsuario === "Cazador") {
+      const elegido = jugadoresEstado[index];
+      if (!jugadoresDisponibles.includes(elegido.id)) {
+        mostrarError("Solo puedes disparar a jugadores disponibles");
+        logCustom(
+          jornadaActual,
+          etapaActual,
+          `Selección inválida: ${elegido.nombre} no está en la lista de disponibles`,
+          jugadoresEstado[indiceUsuario]
+        );
+        return;
+      }
+    }
+
     logCustom(
       jornadaActual,
       etapaActual,
@@ -1920,28 +1960,32 @@ const Jugando: React.FC = () => {
         setBotellaMuerteUsada(true);
       }
       setBotellaUsadaEnEsteTurno(botellaUsadaEnEsteTurno + 1);
-    } else if (estadoActual === Estado.habilidadCazador) {
+    } else if (
+      estadoActual === Estado.habilidadCazador &&
+      jugadoresEstado[indiceUsuario]?.id === cazadorActual
+    ) {
+      const objetivo = jugadoresEstado[JugadorSeleccionado!];
+
+      if (!jugadoresDisponibles.includes(objetivo.id)) {
+        mostrarError("Solo puedes disparar a jugadores disponibles");
+        logCustom(
+          jornadaActual,
+          etapaActual,
+          `El cazador ha intentado disparar a ${objetivo.nombre} quién no está disponible para ser disparado`,
+          jugadoresEstado[indiceUsuario]
+        );
+        return;
+      }
+
       socket.emit("cazadorDispara", {
         idPartida: idSala,
         idJugador: usuarioID,
-        idObjetivo: jugadorObjetivo.id,
+        idObjetivo: objetivo.id,
       });
       logCustom(
         jornadaActual,
         etapaActual,
-        `El cazador usa su habilidad`,
-        jugadoresEstado[indiceUsuario]
-      );
-    } else if (estadoActual === Estado.habilidadAlguacil) {
-      socket.emit("elegirSucesor", {
-        idPartida: idSala,
-        idJugador: usuarioID,
-        idObjetivo: jugadorObjetivo.id,
-      });
-      logCustom(
-        jornadaActual,
-        etapaActual,
-        `El alguacil elige su sucesor`,
+        `El cazador dispara a ${objetivo.nombre}`,
         jugadoresEstado[indiceUsuario]
       );
     }
@@ -2255,7 +2299,13 @@ const Jugando: React.FC = () => {
   const [resultadoVotosDia, setResultadosVotosDia] = useState("");
   const [muerteYaTratada, setMuerteYaTratada] = useState<boolean>(false);
   const [mensajeFinPartida, setMensajeFinPartida] = useState("");
-  const [muertesNoche, setMuertesNoche] = useState<{ nombre: string; rol: string }[]>([]);
+  const [muertesNoche, setMuertesNoche] = useState<
+    { nombre: string; rol: string }[]
+  >([]);
+  const [cazadorActual, setCazadorActual] = useState<string | null>(null);
+  const [jugadoresDisponibles, setJugadoresDisponibles] = useState<string[]>(
+    []
+  );
 
   // ---------------------------------------------------------------------------
   // Encolar el evento correspondiente cuando el usuario local ha muerto
@@ -2274,7 +2324,7 @@ const Jugando: React.FC = () => {
         `Evento recibido: estadoJugadores - ${JSON.stringify(data)}`,
         jugadoresEstado[indiceUsuario]
       );
-      
+
       setJugadoresEstado(data.jugadores);
     });
     /**
@@ -2364,9 +2414,6 @@ const Jugando: React.FC = () => {
         `Evento recibido: habilidadVidente - ${JSON.stringify(data)}`,
         jugadoresEstado[indiceUsuario]
       );
-      if (data.tiempo != null) {
-        setDuracionHabilidadVidente(data.tiempo);
-      }
       agregarEstado(Estado.habilidadVidente);
     });
     socket.on("turnoHombresLobos", (data) => {
@@ -2376,9 +2423,6 @@ const Jugando: React.FC = () => {
         `Evento recibido: turnoHombresLobos - ${JSON.stringify(data)}`,
         jugadoresEstado[indiceUsuario]
       );
-      if (data.tiempo != null) {
-        setDuracionTurnoHombresLobos(data.tiempo);
-      }
       agregarEstado(Estado.turnoHombresLobos);
     });
     socket.on("habilidadBruja", (data) => {
@@ -2388,9 +2432,6 @@ const Jugando: React.FC = () => {
         `Evento recibido: habilidadBruja - ${JSON.stringify(data)}`,
         jugadoresEstado[indiceUsuario]
       );
-      if (data.tiempo != null) {
-        setDuracionHabilidadBruja(data.tiempo);
-      }
       agregarEstado(Estado.habilidadBruja);
     });
     socket.on("habilidadAlguacil", (data) => {
@@ -2400,9 +2441,6 @@ const Jugando: React.FC = () => {
         `Evento recibido: habilidadAlguacil - ${JSON.stringify(data)}`,
         jugadoresEstado[indiceUsuario]
       );
-      if (data.tiempo != null) {
-        setDuracionHabilidadAlguacil(data.tiempo);
-      }
       agregarEstado(Estado.habilidadAlguacil);
     });
     socket.on("habilidadCazador", (data) => {
@@ -2411,9 +2449,13 @@ const Jugando: React.FC = () => {
         etapaActual,
         `Evento recibido: habilidadCazador - ${JSON.stringify(data)}`
       );
-      if (data.tiempo != null) {
-        setDuracionHabilidadCazador(data.tiempo);
-      }
+      setCazadorActual(data.cazadorActual as string);
+
+      const disponiblesIds = data.jugadoresDisponibles.map(
+        (j: { id: any }) => j.id
+      );
+      setJugadoresDisponibles(disponiblesIds);
+
       agregarEstado(Estado.habilidadCazador);
     });
     socket.on("diaComienza", (data) => {
@@ -2423,9 +2465,6 @@ const Jugando: React.FC = () => {
         `Evento recibido: diaComienza - ${JSON.stringify(data)}`,
         jugadoresEstado[indiceUsuario]
       );
-      if (data.tiempo != null) {
-        setDuracionDiaComienza(data.tiempo);
-      }
       agregarEstado(Estado.diaComienza);
     });
     socket.on("partidaFinalizada", (data) => {
@@ -2453,9 +2492,6 @@ const Jugando: React.FC = () => {
         `Evento recibido: empateVotacionAlguacil - ${JSON.stringify(data)}`,
         jugadoresEstado[indiceUsuario]
       );
-      if (data.tiempo != null) {
-        setDuracionSegundaVotacionAlguacil(data.tiempo);
-      }
       agregarEstado(Estado.iniciarSegundaVotacionAlguacil);
     });
     socket.on("segundoEmpateVotacionAlguacil", (data) => {
@@ -2975,9 +3011,17 @@ const Jugando: React.FC = () => {
         setMostrarAnimacionInicioTurnoCazador(false);
 
         if (etapaActual === "Día") {
-          setPlantillaActual(plantillaHabilidadCazadorDia);
-        } /* else if (etapaActual === "Noche" )*/ else {
-          setPlantillaActual(plantillaHabilidadCazadorNoche);
+          if (usuarioID === cazadorActual) {
+            setPlantillaActual(plantillaHabilidadCazadorDia);
+          } else {
+            setPlantillaActual(plantillaHabilidadCazadorNoDispararDia);
+          }
+        } else {
+          if (usuarioID === cazadorActual) {
+            setPlantillaActual(plantillaHabilidadCazadorNoche);
+          } else {
+            setPlantillaActual(plantillaHabilidadCazadorNoDispararNoche);
+          }
         }
 
         actualizarMaxTiempo(duracionHabilidadCazador);
@@ -2986,56 +3030,50 @@ const Jugando: React.FC = () => {
         setPasoTurno(false);
         setJugadorSeleccionado(null);
         break;
-        case Estado.diaComienza:{
-        // 1) Fetch the updated player list from the server
+      case Estado.diaComienza: {
         const nuevosJugadores = await new Promise<typeof jugadoresEstado>(
-            (resolve) => {
+          (resolve) => {
             const handler = (data: { jugadores: typeof jugadoresEstado }) => {
-                socket.off("estadoJugadores", handler);
-                resolve(data.jugadores);
+              socket.off("estadoJugadores", handler);
+              resolve(data.jugadores);
             };
             socket.on("estadoJugadores", handler);
             socket.emit("obtenerEstadoJugadores", { idPartida: idSala });
-            }
+          }
         );
-        
-        // 2) Compare old vs. new to detect a local death
-        const antiguoss = jugadoresEstado;    // before-night state
-        const nuevoss   = nuevosJugadores;    // after-night state
-        
+
+        const antiguoss = jugadoresEstado;
+        const nuevoss = nuevosJugadores;
+
         const antes_muertoo = !antiguoss[indiceUsuario].estaVivo;
         const ahora_muertoo = !nuevoss[indiceUsuario].estaVivo;
-        
-        // Logging for debugging
+
         console.table(nuevoss);
         logCustom(
-            jornadaActual,
-            etapaActual,
-            `Valor de antes_muerto = ${antes_muertoo}`,
-            nuevoss[indiceUsuario]
+          jornadaActual,
+          etapaActual,
+          `Valor de antes_muerto = ${antes_muertoo}`,
+          nuevoss[indiceUsuario]
         );
         logCustom(
-            jornadaActual,
-            etapaActual,
-            `Valor de ahora_muerto = ${ahora_muertoo}`,
-            nuevoss[indiceUsuario]
+          jornadaActual,
+          etapaActual,
+          `Valor de ahora_muerto = ${ahora_muertoo}`,
+          nuevoss[indiceUsuario]
         );
-        
-        // 3) Fire the “usuarioLocalMuerto” event exactly once if detected
+
         if (!antes_muertoo && ahora_muertoo) {
-            logCustom(
+          logCustom(
             jornadaActual,
             etapaActual,
             `Evento local detectado: usuarioLocalMuerto`,
             nuevoss[indiceUsuario]
-            );
-            agregarEstado(Estado.usuarioLocalMuerto);
+          );
+          agregarEstado(Estado.usuarioLocalMuerto);
         }
-        
-        // 4) Update our ref for next comparison
+
         prevMuertoRef.current = antes_muertoo;
-        
-        // 5) Push the new state into React
+
         setJugadoresEstado(nuevoss);
         setEtapaActual("Día");
         setJornadaActual(jornadaActual + 1);
@@ -3061,16 +3099,16 @@ const Jugando: React.FC = () => {
         const antes_muerto = prevMuertoRef.current;
         const ahora_muerto = !jugadoresEstado[indiceUsuario].estaVivo;
         logCustom(
-            jornadaActual,
-            etapaActual,
-            `Valor de antes_muerto = prevMuertoRef.current; = ${antes_muerto}`,
-            jugadoresEstado[indiceUsuario]
+          jornadaActual,
+          etapaActual,
+          `Valor de antes_muerto = prevMuertoRef.current; = ${antes_muerto}`,
+          jugadoresEstado[indiceUsuario]
         );
         logCustom(
-            jornadaActual,
-            etapaActual,
-            `Valor de ahora_muerto = !jugadoresEstado[indiceUsuario].estaVivo; = ${ahora_muerto}`,
-            jugadoresEstado[indiceUsuario]
+          jornadaActual,
+          etapaActual,
+          `Valor de ahora_muerto = !jugadoresEstado[indiceUsuario].estaVivo; = ${ahora_muerto}`,
+          jugadoresEstado[indiceUsuario]
         );
         if (!antes_muerto && ahora_muerto) {
           logCustom(
@@ -3091,20 +3129,24 @@ const Jugando: React.FC = () => {
         setPasoTurno(false);
         setJugadorSeleccionado(null);
 
-        const antiguos = jugadoresEstado;         // estado previo (antes de la noche)
-        const nuevos = nuevosJugadores;           // estado tras la noche
+        const antiguos = jugadoresEstado; // estado previo (antes de la noche)
+        const nuevos = nuevosJugadores; // estado tras la noche
         // Filtrar los que estaban vivos y ahora ya no
         const victimas = antiguos
-        .filter(oldJ => oldJ.estaVivo && !!nuevos.find(n => n.id === oldJ.id && !n.estaVivo))
-        .map(v => ({ nombre: v.nombre, rol: v.rol }));
+          .filter(
+            (oldJ) =>
+              oldJ.estaVivo &&
+              !!nuevos.find((n) => n.id === oldJ.id && !n.estaVivo)
+          )
+          .map((v) => ({ nombre: v.nombre, rol: v.rol }));
 
         setMuertesNoche(victimas);
 
         setMostrarMuertosNoche(true);
 
-        await new Promise(resolve => setTimeout(resolve, duracionAnimacion));
+        await new Promise((resolve) => setTimeout(resolve, duracionAnimacion));
 
-        setMostrarMuertosNoche(false)
+        setMostrarMuertosNoche(false);
 
         setPlantillaActual(plantillaAnimacionDia);
         cerrarHabilidad();
@@ -3124,7 +3166,8 @@ const Jugando: React.FC = () => {
         setVotoRealizado(false);
         setPasoTurno(false);
         setJugadorSeleccionado(null);
-        break;}
+        break;
+      }
       case Estado.usuarioLocalMuerto:
         logCustom(
           jornadaActual,
@@ -3393,8 +3436,8 @@ const Jugando: React.FC = () => {
         )}
         {mostrarAnimacionUsuarioLocalMuerto && (
           <AnimacionGenerica
-            opacity={opacitiesUsuarioLocalMuerto[1]}
-            mostrarComponente={mostrarComponentesUsuarioLocalMuerto[1]}
+            opacity={opacitiesUsuarioLocalMuerto[0]}
+            mostrarComponente={mostrarComponentesUsuarioLocalMuerto[0]}
             texto="HAS MUERTO"
           />
         )}
@@ -3402,14 +3445,20 @@ const Jugando: React.FC = () => {
           <AnimacionGenerica
             opacity={opacitiesInicioTurnoCazador[0]}
             mostrarComponente={mostrarComponentesInicioTurnoCazador[0]}
-            texto="EL CAZADOR VA A MORIR. DISPARARÁ A QUIÉN CREA QUE ES UN HOMBRE LOBO"
+            texto={
+              cazadorActual
+                ? `EL CAZADOR ${jugadoresEstado
+                    .find((j) => j.id === cazadorActual)
+                    ?.nombre.toUpperCase()} VA A MORIR. DISPARARÁ A QUIÉN CREA QUE ES UN HOMBRE LOBO`
+                : "UN CAZADOR VA A MORIR. DISPARARÁ A QUIÉN CREA QUE ES UN HOMBRE LOBO."
+            }
           />
         )}
         {mostrarAnimacionFinalTurnoCazador && (
           <AnimacionGenerica
             opacity={opacitiesFinalTurnoCazador[0]}
             mostrarComponente={mostrarComponentesFinalTurnoCazador[0]}
-            texto="EL CAZADOR CAE ÉPICAMENTE EN EL SUELO MUERTO."
+            texto="EL CAZADOR CAE ÉPICAMENTE EN EL SUELO MUERTO"
           />
         )}
         {mostrarAnimacionInicioHabilidadAlguacil && (
@@ -3463,17 +3512,18 @@ const Jugando: React.FC = () => {
         {mostrarMuertosNoche && (
           <AnimacionGenerica
             opacity={opacitiesMuertosNoche[0]}
-            mostrarComponente={
-              mostrarComponenteMuertosNoche[0]
-            }
+            mostrarComponente={mostrarComponenteMuertosNoche[0]}
             texto={
-                muertesNoche.length > 0
-                  ? `RESUMEN DE LA NOCHE:\n` +
-                    muertesNoche
-                      .map(m => `${m.nombre.toUpperCase()} (${m.rol.toUpperCase()})`)
-                      .join('\n')
-                  : 'RESUMEN DE LA NOCHE:\nNO HA MUERTO NADIE'
-              }
+              muertesNoche.length > 0
+                ? `RESUMEN DE LA NOCHE:\n` +
+                  muertesNoche
+                    .map(
+                      (m) =>
+                        `${m.nombre.toUpperCase()} (${m.rol.toUpperCase()})`
+                    )
+                    .join("\n")
+                : "RESUMEN DE LA NOCHE:\nNO HA MUERTO NADIE"
+            }
           />
         )}
         {mostrarAnimacionFinPartida && (
