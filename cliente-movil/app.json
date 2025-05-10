@@ -23,6 +23,9 @@
       "backendUrl": "https://albertofsg.ddns.net:443",
       "router": {
         "origin": false
+      },
+      "eas": {
+        "projectId": "cefa1918-1ddb-4c27-bd75-f3aaa6a59886"
       }
     },
     "web": {
@@ -35,7 +38,7 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/splash-icon.png",
+          "image": "./assets/images/app-icon.png",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
