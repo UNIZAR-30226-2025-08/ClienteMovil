@@ -298,7 +298,7 @@ const styles = StyleSheet.create({
   formContainer: {
     position: "absolute",
     width: "100%",
-    bottom: "20%",
+    bottom: "17%",
     alignItems: "center",
   },
 

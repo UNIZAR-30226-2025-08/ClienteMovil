@@ -4,10 +4,12 @@
  * Este componente calcula la posición de cada jugador en función del ángulo y del radio máximo,
  * renderizando cada imagen en una posición circular y mostrando una barra por cada voto recibido.
  * Si el jugador está muerto, se muestra un ícono de calavera sobre su avatar.
+ * Si hay más de 10 jugadores, reduce el tamaño de los iconos y de los nombres, aumenta ligeramente el radio,
+ * y acerca los nombres a las imágenes.
  *
  * @component
  * @param {Object} props - Props del componente.
- * @param {any[]} props.imagenes - Arreglo de imágenes de los jugadores.
+ * @param {any[]} props.jugadores - Arreglo de objetos de los jugadores.
  * @param {number[]} props.votes - Arreglo con la cantidad de votos para cada jugador.
  * @param {number | null} props.JugadorSeleccionado - Índice del jugador actualmente seleccionado.
  * @param {Function} props.onSelectPlayer - Función para manejar la selección de un jugador.
@@ -21,7 +23,6 @@ import { CONSTANTES } from "../../../utils/jugando/constantes";
 const { NUMERICAS, DIMENSIONES, COLORES } = CONSTANTES;
 const { ANCHO, ALTO } = DIMENSIONES;
 
-// Mapa de avatares
 const avatarMap: Record<string, any> = {
   avatar1: require("@/assets/images/imagenPerfil.webp"),
   avatar2: require("@/assets/images/imagenPerfil2.webp"),
@@ -32,8 +33,6 @@ const avatarMap: Record<string, any> = {
   avatar7: require("@/assets/images/imagenPerfil7.webp"),
   avatar8: require("@/assets/images/imagenPerfil8.webp"),
 };
-
-// Imagen de calavera para jugadores muertos
 const imagenCalavera = require("@/assets/images/calavera.png");
 
 interface CirculoVotarProps {
@@ -62,61 +61,56 @@ const CirculoVotar: React.FC<CirculoVotarProps> = ({
 }) => {
   const cantidadJugadores = jugadores.length;
 
-  // Calcula el radio máximo del círculo basado en las dimensiones mínimas de la pantalla y un multiplicador.
-  const radioMaximoCalculado =
-    Math.min(ANCHO, ALTO) * NUMERICAS.MULTIPLICADOR_RADIO;
-  // Calcula el tamaño de cada imagen proporcional al tamaño de la pantalla.
-  const tamanioImagen =
-    Math.min(ANCHO, ALTO) * NUMERICAS.MULTIPLICADOR_TAMANIO_IMAGEN;
-  // Ajusta el radio máximo restando la mitad del tamaño de la imagen para asegurar que la imagen se vea completa.
-  const radioMaximo = radioMaximoCalculado - tamanioImagen / 2;
+  // Escala para iconos y nombres si hay más de 10 jugadores
+  const escala = cantidadJugadores > 10 ? 0.8 : 1;
+  // Para mantener el grosor del contorno de texto al escalar: offset de borde inverso a la escala
+  const borderOffset = cantidadJugadores > 10 ? 1 / escala : 1;
+  // Radio extra si hay más de 10 jugadores
+  const factorRadio = cantidadJugadores > 10 ? 1.05 : 1;
+
+  // Cálculo base de radio y tamaño de imagen
+  const radioBase = Math.min(ANCHO, ALTO) * NUMERICAS.MULTIPLICADOR_RADIO;
+  const tamanioBase = Math.min(ANCHO, ALTO) * NUMERICAS.MULTIPLICADOR_TAMANIO_IMAGEN;
+
+  // Ajustes según escala y factorRadio
+  const radioCalc = radioBase * factorRadio;
+  const tamanioImagen = tamanioBase * escala;
+  const radio = radioCalc - tamanioImagen / 2;
+  // Desplazamiento vertical del nombre para acercarlo a la imagen
+  const offsetNombre = cantidadJugadores > 10 ? -tamanioImagen * 0.3 : 0;
 
   return (
-    // Contenedor principal del círculo. Se establece el tamaño del contenedor en función del radio calculado.
     <View
       style={[
         estilos.contenedorCirculo,
         {
-          width: radioMaximoCalculado * 2,
-          height: radioMaximoCalculado * 2,
-          marginLeft: -radioMaximoCalculado,
-          marginTop: -radioMaximoCalculado,
+          width: radioCalc * 2,
+          height: radioCalc * 2,
+          marginLeft: -radioCalc,
+          marginTop: -radioCalc,
         },
       ]}
     >
-      {jugadores.map((jugador, indice) => {
-        // Calcula el ángulo para posicionar la imagen de cada jugador uniformemente en el círculo.
-        const angulo = (indice * 2 * Math.PI) / cantidadJugadores;
-        // Calcula la posición X e Y basadas en el ángulo y el radio máximo.
-        const x = radioMaximo * Math.cos(angulo);
-        const y =
-          radioMaximo *
-          Math.sin(angulo) *
-          (1 - NUMERICAS.FACTOR_ENCOGIMIENTO_VERTICAL);
-        const isSelected = JugadorSeleccionado === indice;
+      {jugadores.map((jugador, index) => {
+        const angulo = (index * 2 * Math.PI) / cantidadJugadores;
+        const x = radio * Math.cos(angulo);
+        const y = radio * Math.sin(angulo) * (1 - NUMERICAS.FACTOR_ENCOGIMIENTO_VERTICAL);
 
-        //console.log(`Jugador: ${jugador.nombre}, avatar: ${jugador.avatar}`);
-
-        // Normalizamos la clave del avatar (por si viene con mayúsculas)
+        const estaSeleccionado = JugadorSeleccionado === index;
         const avatarKey = jugador.avatar?.toLowerCase() ?? "avatar1";
-        const avatarFuente = avatarMap[avatarKey] ?? avatarMap.avatar1;
-
-        if (!avatarMap[avatarKey]) {
-          console.warn(`⚠️ Avatar no encontrado para key: ${avatarKey}`);
-        }
+        const avatarFuente = avatarMap[avatarKey] || avatarMap.avatar1;
+        if (!avatarMap[avatarKey]) console.warn(`⚠️ Avatar no encontrado para key: ${avatarKey}`);
 
         return (
-          // Botón que representa cada jugador; al pulsar se ejecuta onSelectPlayer.
           <TouchableOpacity
             key={jugador.id}
-            onPress={() => onSelectPlayer(indice)}
+            onPress={() => onSelectPlayer(index)}
             style={[
               estilos.contenedorJugador,
               { transform: [{ translateX: x }, { translateY: y }] },
             ]}
             activeOpacity={0.7}
           >
-            {/* Contenedor de la imagen del jugador con borde que resalta si está seleccionado */}
             <View
               style={[
                 estilos.contenedorImagenCirculo,
@@ -124,94 +118,44 @@ const CirculoVotar: React.FC<CirculoVotarProps> = ({
                   width: tamanioImagen,
                   height: tamanioImagen,
                   borderWidth: 3,
-                  borderColor: isSelected ? COLORES.SELECCIONADO : "white",
-                  position: "relative",
+                  borderColor: estaSeleccionado ? COLORES.SELECCIONADO : "white",
                 },
               ]}
             >
               <Image source={avatarFuente} style={estilos.imagenCirculo} />
-
-              {/* Superposición de calavera para jugadores muertos */}
-              {jugador.estaVivo === false && (
+              {!jugador.estaVivo && (
                 <Image
                   source={imagenCalavera}
                   style={[
                     estilos.imagenCirculo,
-                    {
-                      position: "absolute",
-                      top: 0,
-                      left: 0,
-                      // tintColor: "#FFF",
-                      opacity: 0.9,
-                    },
+                    { position: "absolute", top: 0, left: 0, opacity: 0.9 },
                   ]}
                 />
               )}
             </View>
-
-            {/* Nombre del jugador */}
-            <View style={{ position: "relative" }}>
-              {/* Copias en blanco para que el texto tenga un borde */}
-              <Text
-                style={[
-                  estilos.nombreJugadorPartida,
-                  {
-                    position: "absolute",
-                    top: 1,
-                    left: 1,
-                    color: "white",
-                  },
-                ]}
-              >
-                {jugador.nombre}
-              </Text>
-              <Text
-                style={[
-                  estilos.nombreJugadorPartida,
-                  {
-                    position: "absolute",
-                    top: 1,
-                    left: -1,
-                    color: "white",
-                  },
-                ]}
-              >
-                {jugador.nombre}
-              </Text>
-              <Text
-                style={[
-                  estilos.nombreJugadorPartida,
-                  {
-                    position: "absolute",
-                    top: -1,
-                    left: 1,
-                    color: "white",
-                  },
-                ]}
-              >
-                {jugador.nombre}
-              </Text>
-              <Text
-                style={[
-                  estilos.nombreJugadorPartida,
-                  {
-                    position: "absolute",
-                    top: -1,
-                    left: -1,
-                    color: "white",
-                  },
-                ]}
-              >
-                {jugador.nombre}
-              </Text>
-              {/* Texto principal */}
+            <View
+              style={{
+                position: "relative",
+                transform: [{ scale: escala }],
+                marginTop: offsetNombre,
+              }}
+            >
+              {[ -borderOffset, borderOffset ].map((dx) => (
+                <Text
+                  key={dx}
+                  style={[
+                    estilos.nombreJugadorPartida,
+                    { position: "absolute", top: dx, left: dx, color: "white" },
+                  ]}
+                >
+                  {jugador.nombre}
+                </Text>
+              ))}
               <Text style={estilos.nombreJugadorPartida}>{jugador.nombre}</Text>
             </View>
-
-            {/* Contenedor que muestra barras de votos: una barra por cada voto recibido */}
             <View style={estilos.contenedorVotos}>
-              {Array.from({ length: votes[indice] }).map((_, index) => (
-                <View key={index} style={estilos.barraVoto} />
+              {Array.from({ length: votes[index] }).map((_, i) => (
+                <View key={i} style={estilos.barraVoto} />
               ))}
             </View>
           </TouchableOpacity>

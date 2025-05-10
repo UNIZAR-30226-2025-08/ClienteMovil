@@ -202,6 +202,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
   },
+
   overlay: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: "rgba(0, 0, 0, 0.4)",
@@ -221,6 +222,7 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     zIndex: 1,
   },
+
   profileImage: {
     width: 100,
     height: 100,
