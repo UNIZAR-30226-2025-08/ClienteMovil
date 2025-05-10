@@ -17,36 +17,85 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 /**
  * Imágenes utilizadas en la pantalla de historial de partidas.
+ *
+ * @remarks
+ * Estas imágenes se usan como fondo y para el botón de "Atras" en la pantalla.
  */
 const imagenFondoRoles = require("@/assets/images/fondo-roles.jpg");
 const imagenAtras = require("@/assets/images/botonAtras.png");
 
+/**
+ * Pantalla de historial de partidas del usuario.
+ *
+ * Permite al usuario ver su historial de partidas, con detalles como la fecha,
+ * el modo de juego y el resultado. También permite ver más detalles de cada partida.
+ *
+ * @returns {JSX.Element} Componente que representa la pantalla de historial de partidas.
+ */
 export default function HistorialPartidasScreen(): JSX.Element {
   const router = useRouter();
 
-  // Recibimos opcionalmente el ID del usuario a consultar
+  /*
+   * Recibimos opcionalmente el ID del usuario a consultar
+   */
   const { usuarioId } = useLocalSearchParams<{ usuarioId: string }>();
 
+  /*
+   * Estado para almacenar las partidas obtenidas del backend
+   */
   const [partidas, setPartidas] = useState<any[]>([]);
+
+  /*
+   * Estado de carga
+   */
   const [loading, setLoading] = useState<boolean>(true);
+
+  /*
+   * Estado para almacenar errores
+   */
   const [error, setError] = useState<string | null>(null);
+
+  /*
+   * Estado para la partida seleccionada (para mostrar detalles en modal)
+   */
   const [partidaSeleccionada, setPartidaSeleccionada] = useState<any>(null);
 
-  // Mapas de normalización
+  /**
+   * Mapas de normalización de estado de las partidas.
+   *
+   * @type {Record<string, string>}
+   */
   const estadoMap: Record<string, string> = {
     en_curso: "En curso",
     "en curso": "En curso",
     terminada: "Terminada",
     finalizada: "Terminada",
   };
+
+  /**
+   * Mapa de los ganadores de la partida.
+   *
+   * @type {Record<string, string>}
+   */
   const ganadoresMap: Record<string, string> = {
     empate: "Empate",
     lobos: "Lobos",
     aldeanos: "Aldeanos",
   };
 
+  /**
+   * Función para navegar hacia la pantalla anterior.
+   */
   const irAtras = () => router.back();
 
+  /**
+   * Efecto para cargar el historial de partidas desde el backend.
+   * Si se recibe el `usuarioId` como parámetro, se usa ese; si no, se obtiene de `AsyncStorage`.
+   * Al finalizar, actualiza el estado con el historial de partidas.
+   *
+   * @remarks
+   * Este efecto se ejecuta una sola vez cuando la pantalla se monta.
+   */
   useEffect(() => {
     const fetchHistorial = async () => {
       try {
@@ -99,6 +148,13 @@ export default function HistorialPartidasScreen(): JSX.Element {
     fetchHistorial();
   }, [usuarioId]);
 
+  /**
+   * Estilos de la pantalla de historial de partidas.
+   *
+   * @remarks
+   * Los estilos están diseñados para proporcionar una buena experiencia visual y asegurar que la información
+   * se muestra de manera ordenada, tanto en pantallas de dispositivos pequeños como grandes.
+   */
   return (
     <View style={styles.container}>
       <ImageBackground
@@ -200,8 +256,8 @@ export default function HistorialPartidasScreen(): JSX.Element {
                       p.resultado === "Ganada"
                         ? styles.victoria
                         : p.resultado === "Perdida"
-                        ? styles.derrota
-                        : {},
+                          ? styles.derrota
+                          : {},
                     ]}
                   >
                     {p.resultado.toUpperCase()}
@@ -228,10 +284,12 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+
   overlay: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: "rgba(0,0,0,0.4)",
   },
+
   titulo: {
     fontSize: 22,
     fontWeight: "bold",
@@ -242,23 +300,31 @@ const styles = StyleSheet.create({
 
   tableHeader: {
     flexDirection: "row",
-    width: "90%", // incrementa ancho para dar más espacio
-    alignSelf: "center", // centra el header
+    width: "90%",
+    alignSelf: "center",
     paddingVertical: 8,
     borderBottomWidth: 1,
     borderColor: "#ccc",
     marginTop: 16,
   },
-  headerCellFecha: { flex: 2, fontWeight: "bold", fontSize: 16, color: "#fff" },
+
+  headerCellFecha: {
+    flex: 2,
+    fontWeight: "bold",
+    fontSize: 16,
+    color: "#fff",
+  },
+
   headerCellModo: {
-    flex: 2.5, // reduce un poco para dar sitio al resultado
+    flex: 2.5,
     fontWeight: "bold",
     fontSize: 16,
     color: "#fff",
     textAlign: "center",
   },
+
   headerCellResultado: {
-    flex: 1.5, // aumenta espacio para que no se corte
+    flex: 1.5,
     fontWeight: "bold",
     fontSize: 16,
     color: "#fff",
@@ -266,9 +332,10 @@ const styles = StyleSheet.create({
   },
 
   scrollContainer: {
-    width: "92%", // igualar al header
+    width: "92%",
     alignSelf: "center",
   },
+
   tableRow: {
     flexDirection: "row",
     backgroundColor: "#f0f0f0",
@@ -277,17 +344,34 @@ const styles = StyleSheet.create({
     marginVertical: 4,
     borderRadius: 8,
   },
-  cellFecha: { flex: 2, fontSize: 14, color: "#333" },
-  cellModo: { flex: 2.5, fontSize: 14, color: "#333", textAlign: "center" },
+
+  cellFecha: {
+    flex: 2,
+    fontSize: 14,
+    color: "#333",
+  },
+
+  cellModo: {
+    flex: 2.5,
+    fontSize: 14,
+    color: "#333",
+    textAlign: "center",
+  },
+
   cellResultado: {
-    flex: 1.5, // coincide con headerCellResultado
+    flex: 1.5,
     fontSize: 14,
     fontWeight: "bold",
     textAlign: "right",
   },
 
-  victoria: { color: "green" },
-  derrota: { color: "red" },
+  victoria: {
+    color: "green",
+  },
+
+  derrota: {
+    color: "red",
+  },
 
   modalOverlay: {
     flex: 1,
@@ -295,18 +379,47 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+
   modalContent: {
     width: "80%",
     backgroundColor: "#fff",
     borderRadius: 8,
     padding: 16,
   },
-  modalTitle: { fontSize: 18, fontWeight: "bold", marginBottom: 12 },
-  modalLabel: { fontWeight: "bold" },
-  modalText: { fontSize: 16, marginVertical: 4 },
-  closeButton: { marginTop: 16, alignSelf: "flex-end" },
-  closeButtonText: { color: "#007bff", fontSize: 16 },
 
-  containerAtras: { position: "absolute", bottom: 20, left: "46%" },
-  imageAtras: { width: 40, height: 40 },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 12,
+  },
+
+  modalLabel: {
+    fontWeight: "bold",
+  },
+
+  modalText: {
+    fontSize: 16,
+    marginVertical: 4,
+  },
+
+  closeButton: {
+    marginTop: 16,
+    alignSelf: "flex-end",
+  },
+
+  closeButtonText: {
+    color: "#007bff",
+    fontSize: 16,
+  },
+
+  containerAtras: {
+    position: "absolute",
+    bottom: 20,
+    left: "46%",
+  },
+
+  imageAtras: {
+    width: 40,
+    height: 40,
+  },
 });

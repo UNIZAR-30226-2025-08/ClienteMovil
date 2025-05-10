@@ -38,6 +38,10 @@ export default function AldeanoScreen(): JSX.Element | null {
 
   /**
    * Función para regresar a la pantalla anterior.
+   * Utiliza la función `router.back()` para navegar hacia la pantalla anterior.
+   *
+   * @remarks
+   * Esta función es utilizada en el botón de "volver atrás" para regresar a la pantalla anterior.
    */
   const irAtras = () => {
     router.back(); // Regresa a la pantalla anterior
@@ -77,6 +81,13 @@ export default function AldeanoScreen(): JSX.Element | null {
   );
 }
 
+/**
+ * Estilos de la pantalla del rol "Vidente".
+ *
+ * @remarks
+ * Los estilos incluyen configuraciones para la disposición de los elementos,
+ * la imagen de fondo, los iconos y los textos en la pantalla.
+ */
 const styles = StyleSheet.create({
   container: {
     flex: 1,

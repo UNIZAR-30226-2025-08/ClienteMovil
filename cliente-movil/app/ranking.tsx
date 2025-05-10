@@ -48,7 +48,7 @@ type Jugador = {
   idUsuario: number;
   nombre: string;
   victorias: number;
-  avatar?: string; // Campo opcional para la URL del avatar
+  avatar?: string;
 };
 
 /**
@@ -60,8 +60,13 @@ type Jugador = {
  * Se realiza una petición al endpoint del backend para obtener el ranking global, se muestra un indicador de carga mientras se obtienen los datos y luego se renderiza una lista de tarjetas (cards) con el avatar, nombre y victorias de cada jugador.
  */
 export default function RankingScreen(): JSX.Element {
+  // Estado que guarda el ranking de jugadores
   const [ranking, setRanking] = useState<Jugador[]>([]);
+
+  // Estado que indica si los datos están cargando
   const [loading, setLoading] = useState(true);
+
+  // Hook de enrutamiento para navegar a otras pantallas
   const router = useRouter();
 
   /** URL del backend obtenida de las constantes de Expo */
@@ -78,17 +83,26 @@ export default function RankingScreen(): JSX.Element {
       try {
         const response = await axios.get(`${BACKEND_URL}/api/ranking/ranking`);
         // Se asume que response.data.ranking está ordenado descendentemente por victorias
-        setRanking(response.data.ranking.slice(0, 10)); // Top 10
+        setRanking(response.data.ranking.slice(0, 30));
       } catch (error) {
+        // Manejo de errores al obtener el ranking
         console.error("Error al obtener el ranking:", error);
       } finally {
         setLoading(false);
       }
     };
 
+    // Llama a la función para obtener el ranking
     fetchRanking();
   }, []);
 
+  /**
+   * Maneja el evento de presionar un jugador en el ranking.
+   * Guarda el ID del jugador en AsyncStorage y navega al perfil del jugador.
+   *
+   * @param {number} idUsuario - ID del jugador que se presionó.
+   * @returns {Promise<void>} No retorna nada.
+   */
   const handlePress = async (idUsuario: number) => {
     try {
       console.log("Presionando jugador del ranking con ID:", idUsuario);
@@ -114,11 +128,12 @@ export default function RankingScreen(): JSX.Element {
       >
         <View style={styles.overlay} />
 
-        <Text style={styles.header}>Ranking Top 10</Text>
+        <Text style={styles.header}>Ranking Top 30</Text>
 
         {loading ? (
           <ActivityIndicator size="large" color="#fff" style={styles.loader} />
         ) : (
+          // Muestra la lista de jugadores en un ScrollView
           <ScrollView
             contentContainerStyle={styles.scrollContainer}
             showsVerticalScrollIndicator={false}
@@ -168,6 +183,7 @@ export default function RankingScreen(): JSX.Element {
   );
 }
 
+// Estilos de la pantalla
 const styles = StyleSheet.create({
   container: { flex: 1 },
   image: {

@@ -19,6 +19,9 @@ import NotificationButton from "@/components/NotificationButton";
 
 /**
  * Mapa que relaciona claves de avatar con las imágenes correspondientes.
+ *
+ * @constant
+ * @type {Record<string, any>}
  */
 const avatarMap: Record<string, any> = {
   avatar1: require("@/assets/images/imagenPerfil.webp"),
@@ -37,6 +40,11 @@ const imagenPorDefecto = require("@/assets/images/imagenPerfil.webp");
 const BACKEND_URL = Constants.expoConfig?.extra?.backendUrl;
 const socket = io(BACKEND_URL);
 
+/**
+ * Pantalla de opciones donde el usuario puede ver su perfil, jugar, consultar roles, sugerencias, y cerrar sesión.
+ *
+ * @returns {JSX.Element | null} La vista de la pantalla de opciones o `null` mientras se carga.
+ */
 export default function OpcionesScreen(): JSX.Element | null {
   const router = useRouter();
 
@@ -46,6 +54,13 @@ export default function OpcionesScreen(): JSX.Element | null {
   } | null>(null);
   const [loading, setLoading] = useState(true);
 
+  /**
+   * Efecto que carga los datos del usuario (nombre y avatar) desde el almacenamiento local.
+   *
+   * @function
+   * @async
+   * @returns {Promise<void>} No retorna nada.
+   */
   useFocusEffect(
     useCallback(() => {
       const cargarUsuario = async () => {
@@ -68,6 +83,13 @@ export default function OpcionesScreen(): JSX.Element | null {
     }, [])
   );
 
+  /**
+   * Función para cerrar sesión, desconectando al usuario del servidor y limpiando el almacenamiento local.
+   *
+   * @function
+   * @async
+   * @returns {Promise<void>} No retorna nada.
+   */
   const cerrarSesion = async () => {
     try {
       // leemos el id antes de limpiar el storage
@@ -179,6 +201,10 @@ export default function OpcionesScreen(): JSX.Element | null {
           </View>
         </View>
 
+        {/* 
+          Botón de ranking que se encuentra en la
+          esquiba superior izquierda de la pantalla.
+        */}
         <TouchableOpacity
           style={styles.botonRanking}
           onPress={() => router.push("/ranking")}
@@ -222,14 +248,14 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
   profileImage: {
-    width: 100,
-    height: 100,
+    width: 105,
+    height: 105,
     borderRadius: 100,
   },
 
   nombrePlayer: {
     position: "absolute",
-    top: 205,
+    top: 210,
     alignSelf: "center",
     color: "white",
     fontSize: 20,
@@ -253,6 +279,7 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     width: "100%",
   },
+
   textoBoton: {
     fontSize: 20,
     fontWeight: "bold",
@@ -266,38 +293,40 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     marginTop: 30,
     alignSelf: "center",
-    width: "80%",
+    width: "83%",
     position: "absolute",
-    bottom: 50,
+    bottom: 53,
   },
 
   // Botón de notificaciones
   botonNotificaciones: {
     position: "absolute",
     top: 10,
-    right: 10,
-    padding: 10,
+    right: 15,
+    padding: 12,
     zIndex: 10, // superior a 1 => se superpone a la imagen
   },
   iconoNotificacionesContainer: {
     backgroundColor: "transparent",
-    borderRadius: 10,
+    borderRadius: 12,
     padding: 5,
   },
 
   // Botón de Ranking
   botonRanking: {
     position: "absolute",
-    top: 40,
+    top: 50,
     left: 20,
-    padding: 10,
-    zIndex: 10,
+    padding: 12,
+    zIndex: 11,
   },
+
   iconoRankingContainer: {
     backgroundColor: "rgba(0,0,0,0.6)",
     borderRadius: 10,
     padding: 5,
   },
+
   iconoRanking: {
     fontSize: 30,
     color: "white",

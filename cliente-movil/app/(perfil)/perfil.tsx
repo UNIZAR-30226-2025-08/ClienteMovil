@@ -18,6 +18,10 @@ import axios from "axios";
 
 /**
  * Mapa de claves de avatar a sus respectivas imágenes.
+ *
+ * @remarks
+ * Este mapa se utiliza para obtener las imágenes del avatar asignado al usuario,
+ * según la clave almacenada en el backend o en el almacenamiento local.
  */
 const avatarMap: Record<string, any> = {
   avatar1: require("@/assets/images/imagenPerfil.webp"),
@@ -185,7 +189,11 @@ export default function PerfilScreen(): JSX.Element | null {
   }
 
   /**
-   * Redirige a la pantalla principal de opciones.
+   * Función para regresar a la pantalla anterior.
+   * Utiliza la función `router.back()` para navegar hacia la pantalla anterior.
+   *
+   * @remarks
+   * Esta función es utilizada en el botón de "volver atrás" para regresar a la pantalla anterior.
    */
   const irAtras = () => {
     router.back();
@@ -203,15 +211,16 @@ export default function PerfilScreen(): JSX.Element | null {
         <Image source={avatar} style={styles.profileImage} />
 
         <TouchableOpacity
-          style={styles.botonEditar}
+          style={styles.botonEditarAvatar}
           onPress={() => router.push("/(perfil)/elegirAvatar")}
         >
-          <Text style={styles.textoBotonEditar}>EDITAR</Text>
+          <Text style={styles.textoBotonEditarAvatar}>EDITAR AVATAR</Text>
         </TouchableOpacity>
+
         <Image source={imagenPapiro} style={styles.imagePapiro} />
 
         <View style={styles.formContainer}>
-          <Text style={styles.textoNombre}>👤 Nombre</Text>
+          <Text style={styles.textoNombre}>Nombre</Text>
           <TextInput
             style={styles.input}
             placeholder="Nuevo nombre"
@@ -221,13 +230,13 @@ export default function PerfilScreen(): JSX.Element | null {
           />
 
           <Text style={styles.fechaCreacion}>
-            📅{" "}
+            Fecha de creación:{" "}
             {fechaCreacion
               ? new Date(fechaCreacion).toLocaleDateString("es-ES")
               : "Cargando..."}
           </Text>
 
-          <Text style={styles.textoRol}>⭐ Rol favorito</Text>
+          <Text style={styles.textoRol}>Rol favorito</Text>
           <View style={styles.pickerContainer}>
             <Picker
               selectedValue={rolFavorito}
@@ -298,7 +307,7 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     position: "absolute",
-    top: 80,
+    top: 70,
     left: "50%",
     marginLeft: -50,
     zIndex: 1,
@@ -335,6 +344,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
     color: "black",
   },
+
   textoFecha: {
     fontSize: 16,
     fontWeight: "bold",
@@ -437,7 +447,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
 
-  botonEditar: {
+  botonEditarAvatar: {
     position: "absolute",
     top: 182,
     left: "50%",
@@ -455,7 +465,7 @@ const styles = StyleSheet.create({
     shadowRadius: 3.5,
   },
 
-  textoBotonEditar: {
+  textoBotonEditarAvatar: {
     color: "white",
     fontSize: 14,
     fontWeight: "bold",

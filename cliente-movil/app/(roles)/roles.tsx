@@ -12,6 +12,9 @@ import { useFonts } from "expo-font";
 
 /**
  * Imágenes de los roles y fondo de pantalla.
+ *
+ * @remarks
+ * Estas imágenes se utilizan como iconos para los roles y el fondo de la pantalla.
  */
 const imagenFondoRoles = require("@/assets/images/fondo-roles.jpg");
 const imagenCazador = require("@/assets/images/cazador-icon.jpeg");
@@ -26,7 +29,7 @@ const imagenAtras = require("@/assets/images/botonAtras.png");
  * Pantalla que muestra la lista de roles del juego.
  * Permite seleccionar un rol para ver más información sobre él.
  *
- * @returns {JSX.Element} Pantalla de selección de roles.
+ * @returns {JSX.Element | null} Pantalla de selección de roles o `null` mientras se carga la fuente.
  */
 export default function RolesScreen(): JSX.Element | null {
   const router = useRouter(); // Usamos useRouter para manejar la navegación
@@ -36,12 +39,16 @@ export default function RolesScreen(): JSX.Element | null {
     GhostShadow: require("@/assets/fonts/ghost-shadow.ttf"),
   });
 
+  // Verificar si la fuente se cargó correctamente antes de renderizar
   if (!loaded) {
     return null; // Esperar a que se cargue la fuente
   }
 
   /**
    * Función para regresar a la pantalla anterior.
+   *
+   * @remarks
+   * Utiliza `router.back()` para navegar hacia la pantalla anterior.
    */
   const irAtras = () => {
     router.back(); // Regresa a la pantalla anterior
@@ -140,42 +147,42 @@ const styles = StyleSheet.create({
   containerCazador: {
     position: "absolute",
     top: 200,
-    left: "28%",
+    left: "25%",
     marginLeft: -50,
   },
 
   containerAlguacil: {
     position: "absolute",
     top: 200,
-    right: "8%",
+    right: "12%",
     marginLeft: -50,
   },
 
   containerVidente: {
     position: "absolute",
     top: 375,
-    left: "28%",
+    left: "25%",
     marginLeft: -50,
   },
 
   containerBruja: {
     position: "absolute",
     top: 375,
-    right: "8%",
+    right: "12%",
     marginLeft: -50,
   },
 
   containerAldeano: {
     position: "absolute",
     top: 550,
-    left: "28%",
+    left: "25%",
     marginLeft: -50,
   },
 
   containerLobo: {
     position: "absolute",
     top: 550,
-    right: "8%",
+    right: "12%",
     marginLeft: -50,
   },
 
@@ -187,8 +194,8 @@ const styles = StyleSheet.create({
 
   textoCazador: {
     position: "absolute",
-    top: 310,
-    left: "21%",
+    top: 320,
+    left: "18%",
     color: "white",
     fontSize: 16,
     fontWeight: "bold",
@@ -197,8 +204,8 @@ const styles = StyleSheet.create({
 
   textoAlguacil: {
     position: "absolute",
-    top: 310,
-    right: "12%",
+    top: 320,
+    right: "17%",
     color: "white",
     fontSize: 16,
     fontWeight: "bold",
@@ -207,8 +214,8 @@ const styles = StyleSheet.create({
 
   textoVidente: {
     position: "absolute",
-    top: 490,
-    left: "22%",
+    top: 495,
+    left: "19%",
     color: "white",
     fontSize: 16,
     fontWeight: "bold",
@@ -217,8 +224,8 @@ const styles = StyleSheet.create({
 
   textoBruja: {
     position: "absolute",
-    top: 490,
-    right: "16%",
+    top: 495,
+    right: "20%",
     color: "white",
     fontSize: 16,
     fontWeight: "bold",
@@ -228,7 +235,7 @@ const styles = StyleSheet.create({
   textoAldeano: {
     position: "absolute",
     top: 670,
-    left: "21%",
+    left: "18%",
     color: "white",
     fontSize: 16,
     fontWeight: "bold",
@@ -238,7 +245,7 @@ const styles = StyleSheet.create({
   textoLobo: {
     position: "absolute",
     top: 670,
-    right: "17%",
+    right: "21%",
     color: "white",
     fontSize: 16,
     fontWeight: "bold",
@@ -268,17 +275,6 @@ const styles = StyleSheet.create({
     height: 110,
   },
 
-  profileImage: {
-    width: 100,
-    height: 100,
-    position: "absolute",
-    top: 100,
-    left: "50%",
-    marginLeft: -50,
-    zIndex: 1,
-    borderRadius: 50,
-  },
-
   tituloRoles: {
     position: "absolute",
     top: "8%",
@@ -289,38 +285,6 @@ const styles = StyleSheet.create({
     fontSize: 45,
     fontWeight: "bold",
     textAlign: "center",
-  },
-
-  textoPartida: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "white",
-    textShadowColor: "rgba(0, 0, 0, 0.75)",
-    textShadowOffset: { width: 2, height: 2 },
-    textShadowRadius: 10,
-    textAlign: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.6)",
-    position: "absolute",
-    top: 250,
-    width: "100%",
-    paddingVertical: 10,
-    borderRadius: 20,
-  },
-
-  textoComoJugar: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "white",
-    textShadowColor: "rgba(0, 0, 0, 0.75)",
-    textShadowOffset: { width: 2, height: 2 },
-    textShadowRadius: 10,
-    textAlign: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.6)",
-    position: "absolute",
-    top: 325,
-    width: "100%",
-    paddingVertical: 10,
-    borderRadius: 20,
   },
 
   textoRoles: {
@@ -334,38 +298,6 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255, 255, 255, 0.6)",
     position: "absolute",
     top: 400,
-    width: "100%",
-    paddingVertical: 10,
-    borderRadius: 20,
-  },
-
-  textoOpciones: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "white",
-    textShadowColor: "rgba(0, 0, 0, 0.75)",
-    textShadowOffset: { width: 2, height: 2 },
-    textShadowRadius: 10,
-    textAlign: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.6)",
-    position: "absolute",
-    top: 475,
-    width: "100%",
-    paddingVertical: 10,
-    borderRadius: 20,
-  },
-
-  textoContacto: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "white",
-    textShadowColor: "rgba(0, 0, 0, 0.75)",
-    textShadowOffset: { width: 2, height: 2 },
-    textShadowRadius: 10,
-    textAlign: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.6)",
-    position: "absolute",
-    top: 550,
     width: "100%",
     paddingVertical: 10,
     borderRadius: 20,

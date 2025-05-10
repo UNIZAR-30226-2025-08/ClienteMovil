@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Constants from "expo-constants";
 import {
   ImageBackground,
@@ -61,6 +61,11 @@ export default function App(): JSX.Element | null {
     GhostShadow: require("@/assets/fonts/ghost-shadow.ttf"),
   });
 
+  /**
+   * Si no están cargadas las fuentes, retorna null.
+   * Esto evita que la aplicación intente renderizarse antes
+   * de que las fuentes estén listas.
+   */
   if (!loaded) {
     return null;
   }

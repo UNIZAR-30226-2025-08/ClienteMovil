@@ -1,4 +1,4 @@
-import React from "react"; // Importar useState desde React
+import React from "react";
 import { ImageBackground, StyleSheet, Text, View } from "react-native";
 import { Link } from "expo-router";
 import { useFonts } from "expo-font";
@@ -74,25 +74,25 @@ const styles = StyleSheet.create({
     lineHeight: 60,
     color: "white",
     fontFamily: "GhostShadow",
-    textShadowColor: "rgba(0, 0, 0, 0.75)", // Sombra de texto
+    textShadowColor: "rgba(0, 0, 0, 0.75)",
     textShadowOffset: { width: 2, height: 2 },
     textShadowRadius: 10,
     textAlign: "center",
-    position: "absolute", // Posiciona el texto de forma absoluta
-    top: 50, // Ajusta la distancia desde la parte superior de la pantalla
+    position: "absolute",
+    top: 50,
   },
 
   textoEntrar: {
     fontSize: 20,
     fontWeight: "bold",
     color: "white",
-    textShadowColor: "rgba(0, 0, 0, 0.75)", // Sombra de texto
+    textShadowColor: "rgba(0, 0, 0, 0.75)",
     textShadowOffset: { width: 2, height: 2 },
     textShadowRadius: 10,
     textAlign: "center",
     backgroundColor: "rgba(255, 255, 255, 0.3)",
-    position: "absolute", // Fija el contenedor en la parte inferior
-    bottom: 70, // Ajusta la distancia desde la parte inferior
+    position: "absolute",
+    bottom: 70,
     width: "100%",
     paddingVertical: 10,
     borderRadius: 20,

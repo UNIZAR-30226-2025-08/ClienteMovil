@@ -12,6 +12,10 @@ import { useFonts } from "expo-font";
 
 /**
  * Importación de imágenes utilizadas en la pantalla del turno de noche.
+ *
+ * @remarks
+ * Estas imágenes representan el fondo de la pantalla, el icono de la
+ * luna para el turno de noche, el papiro decorativo y el botón de regreso.
  */
 const imagenFondoRoles = require("@/assets/images/fondo-roles.jpg");
 const imagenLuna = require("@/assets/images/imagen-luna.png");
@@ -20,9 +24,9 @@ const imagenAtras = require("@/assets/images/botonAtras.png");
 
 /**
  * Pantalla del turno de noche en el juego.
- * Explica las mecánicas que ocurren durante la noche en la partida.
+ * Explica las mecánicas que ocurren durante la noche en la partida, incluyendo las acciones de los roles especiales.
  *
- * @returns {JSX.Element} Pantalla explicativa del turno de noche.
+ * @returns {JSX.Element} Pantalla explicativa del turno de noche, o `null` mientras se carga la fuente.
  */
 export default function TurnoNocheScreen(): JSX.Element | null {
   const router = useRouter(); // Usamos useRouter para manejar la navegación
@@ -32,15 +36,22 @@ export default function TurnoNocheScreen(): JSX.Element | null {
     GhostShadow: require("@/assets/fonts/ghost-shadow.ttf"),
   });
 
+  // Si la fuente no se ha cargado, retornamos `null`
+  // para evitar que la pantalla se muestre incompleta.
   if (!loaded) {
     return null; // Esperar a que se cargue la fuente
   }
 
   /**
    * Función para regresar a la pantalla anterior.
+   * Utiliza la función `router.back()` para navegar hacia la pantalla anterior.
+   *
+   * @remarks
+   * Esta función es utilizada en el botón de "volver atrás" para regresar
+   * a la pantalla anterior.
    */
   const irAtras = () => {
-    router.back(); // Regresa a la pantalla anterior
+    router.back();
   };
 
   return (
@@ -92,6 +103,10 @@ export default function TurnoNocheScreen(): JSX.Element | null {
 
 /**
  * Estilos para la pantalla del turno de noche.
+ *
+ * @remarks
+ * Los estilos incluyen la disposición de los elementos en la pantalla,
+ * como las imágenes, los textos y los botones.
  */
 const styles = StyleSheet.create({
   container: {
@@ -135,7 +150,7 @@ const styles = StyleSheet.create({
     width: 170,
     height: 170,
     left: "30%",
-    top: "15%",
+    top: "16%",
     position: "absolute",
     borderRadius: 100,
   },
@@ -153,11 +168,11 @@ const styles = StyleSheet.create({
   },
 
   textoTurnoNoche: {
-    fontSize: 11.2,
+    fontSize: 10.9,
     fontWeight: "bold",
     position: "absolute",
     width: 230,
-    left: "25%",
-    top: "45%",
+    left: "23%",
+    top: "46%",
   },
 });
