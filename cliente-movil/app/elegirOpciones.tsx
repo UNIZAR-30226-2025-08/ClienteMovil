@@ -245,6 +245,7 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     zIndex: 1,
   },
+
   profileImage: {
     width: 105,
     height: 105,
@@ -318,14 +319,14 @@ const styles = StyleSheet.create({
     zIndex: 11,
   },
 
+  iconoRanking: {
+    fontSize: 23,
+    color: "white",
+  },
+
   iconoRankingContainer: {
     backgroundColor: "rgba(0,0,0,0.6)",
     borderRadius: 10,
-    padding: 5,
-  },
-
-  iconoRanking: {
-    fontSize: 30,
-    color: "white",
+    padding: 10,
   },
 });
