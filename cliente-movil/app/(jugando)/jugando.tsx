@@ -394,13 +394,13 @@ const Jugando: React.FC = () => {
 
   // Esto es lo que quieres modificar para cambiar los timers visuales durante la partida
   const CONST_TIEMPO_ESPERA_INICAL = 15;
-  const CONST_TIEMPO_VOTACION_ALGUACIL = 51;
+  const CONST_TIEMPO_VOTACION_ALGUACIL = 49;
   const CONST_TIEMPO_HABILIDAD_VIDENTE = 41;
   const CONST_TIEMPO_VOTACION_NOCTURNA = 44;
   const CONST_TIEMPO_HABILIDAD_BRUJA = 40;
   const CONST_TIEMPO_VOTACION_DIURNA = 38;
-  const CONST_TIEMPO_HABILIDAD_CAZADOR = 46;
-  const CONST_TIEMPO_HABILIDAD_ALGUACIL = 46;
+  const CONST_TIEMPO_HABILIDAD_CAZADOR = 38;
+  const CONST_TIEMPO_HABILIDAD_ALGUACIL = 44;
 
   // ---------------------------------------------------------------------------
   // Estados del juego
