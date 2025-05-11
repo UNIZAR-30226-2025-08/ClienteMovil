@@ -166,6 +166,14 @@ export default function RegistroScreen() {
         Alert.alert("Registro exitoso", "Ahora puedes iniciar sesión.", [
           { text: "OK", onPress: () => router.push("/entrar") },
         ]);
+
+        // Limpia los campos
+        setNombre("");
+        setCorreo("");
+        setContrasena("");
+        setconfirmContrasena("");
+        setSecureText(true);
+        setSecureTextConfirm(true);
       } else {
         Alert.alert(
           "Error",
