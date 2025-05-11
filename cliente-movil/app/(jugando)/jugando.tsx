@@ -3562,7 +3562,7 @@ const Jugando: React.FC = () => {
         {plantillaActual.mostrarCirculoJugadores && (
           <CirculoVotar
             jugadores={jugadoresEstado} //{jugadoresPrueba}
-            votes={Array(CONSTANTES.NUMERICAS.CANTIDAD_IMAGENES).fill(0)} // Modificar si se quiere implementar los contadores de votos
+            votes={Array(CONSTANTES.NUMERICAS.CANTIDAD_IMAGENES).fill(0)}
             JugadorSeleccionado={JugadorSeleccionado}
             onSelectPlayer={administrarSeleccionJugadorVotacion}
             usuarioID={usuarioID}

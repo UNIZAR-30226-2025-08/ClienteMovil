@@ -36,7 +36,6 @@ const avatarMap: Record<string, any> = {
 
 const imagenCalavera = require("@/assets/images/calavera.png");
 
-// Add this import at the top with other image imports
 const imagenAlguacil = require("@/assets/images/alguacil-icon.png");
 
 interface CirculoVotarProps {
@@ -55,7 +54,6 @@ interface CirculoVotarProps {
   votes: number[];
   JugadorSeleccionado: number | null;
   onSelectPlayer: (index: number) => void;
-  // Add this new prop
   usuarioID: string;
 }
 
@@ -64,7 +62,7 @@ const CirculoVotar: React.FC<CirculoVotarProps> = ({
   votes,
   JugadorSeleccionado,
   onSelectPlayer,
-  usuarioID, // Add this new prop
+  usuarioID,
 }) => {
   const cantidadJugadores = jugadores.length;
 
