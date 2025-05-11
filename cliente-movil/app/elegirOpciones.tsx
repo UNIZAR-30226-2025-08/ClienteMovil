@@ -7,6 +7,7 @@ import {
   Image,
   TouchableOpacity,
   ActivityIndicator,
+  BackHandler,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { useFonts } from "expo-font";
@@ -47,6 +48,7 @@ export default function OpcionesScreen(): JSX.Element | null {
     avatar?: any;
   } | null>(null);
   const [loading, setLoading] = useState(true);
+  const [esAdmin, setEsAdmin] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -60,6 +62,10 @@ export default function OpcionesScreen(): JSX.Element | null {
             nombre: nombre ?? "Usuario",
             avatar: avatar || undefined,
           });
+
+          // cargar bandera de admin
+          const adminFlag = await AsyncStorage.getItem("esAdministrador");
+          setEsAdmin(adminFlag === "true");
         } catch (error) {
           console.error("Error al cargar usuario:", error);
         } finally {
@@ -79,12 +85,13 @@ export default function OpcionesScreen(): JSX.Element | null {
         // notificamos al servidor que el usuario se desconecta voluntariamente
         socket.emit("desconectarUsuario", { idUsuario: parsedId });
       }
-      // limpiamos todo
+      // limpiamos todo, incluyendo admin flag
       await AsyncStorage.multiRemove([
         "idUsuario",
         "nombreUsuario",
         "avatarUsuario",
         "rolFavorito",
+        "esAdministrador",
       ]);
       setUsuario(null);
       router.push("/");
@@ -92,6 +99,19 @@ export default function OpcionesScreen(): JSX.Element | null {
       console.error("Error al cerrar sesión:", error);
     }
   };
+
+  // cerrar sesión al pulsar atrás en Android
+  useFocusEffect(
+    useCallback(() => {
+      const onBackPress = () => {
+        cerrarSesion();
+        return true;
+      };
+      BackHandler.addEventListener("hardwareBackPress", onBackPress);
+      return () =>
+        BackHandler.removeEventListener("hardwareBackPress", onBackPress);
+    }, [cerrarSesion])
+  );
 
   const [loaded] = useFonts({
     GhostShadow: require("@/assets/fonts/ghost-shadow.ttf"),
@@ -159,6 +179,14 @@ export default function OpcionesScreen(): JSX.Element | null {
               >
                 <Text style={styles.textoBoton}>SUGERENCIAS</Text>
               </TouchableOpacity>
+              {esAdmin && (
+                <TouchableOpacity
+                  style={styles.boton}
+                  onPress={() => router.push("/admin")}
+                >
+                  <Text style={styles.textoBoton}>Ver sugerencias admin</Text>
+                </TouchableOpacity>
+              )}
             </View>
 
             <TouchableOpacity

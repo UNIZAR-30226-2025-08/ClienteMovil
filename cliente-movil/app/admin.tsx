@@ -139,14 +139,21 @@ export default function AdminSuggestionsScreen() {
       return;
     }
     try {
+      // Envía la respuesta
       await axios.put(`${BACKEND_URL}/api/sugerencias/responder`, {
         idSugerencia,
         respuesta: selectedReply,
       });
+      // Marca como revisada
+      await axios.put(`${BACKEND_URL}/api/sugerencias/marcarRevisada`, {
+        idSugerencia,
+        revisada: true,
+      });
+      // Actualiza estado local con respuesta y revisada=true
       setSuggestions((prev) =>
         prev.map((sug) =>
           sug.idSugerencia === idSugerencia
-            ? { ...sug, respuesta: selectedReply }
+            ? { ...sug, respuesta: selectedReply, revisada: true }
             : sug
         )
       );
@@ -234,7 +241,9 @@ export default function AdminSuggestionsScreen() {
               style={styles.button}
               onPress={() => handleSendReply(item.idSugerencia)}
             >
-              <Text style={styles.buttonText}>Enviar Respuesta</Text>
+              <Text style={styles.buttonText}>
+                Enviar respuesta y marcar como revisada
+              </Text>
             </TouchableOpacity>
           </View>
         ) : (
@@ -252,7 +261,7 @@ export default function AdminSuggestionsScreen() {
                 style={styles.button}
                 onPress={() => handleMarkCompleted(item.idSugerencia)}
               >
-                <Text style={styles.buttonText}>Marcar Completada</Text>
+                <Text style={styles.buttonText}>Marcar revisada</Text>
               </TouchableOpacity>
             )}
           </>

@@ -159,16 +159,15 @@ export default function App(): JSX.Element | null {
           }
         );
         if (adminResponse.data.esAdministrador) {
-          router.push("/admin");
+          await AsyncStorage.setItem("esAdministrador", "true");
         } else {
-          // Registrar usuario en línea si NO es admin
+          await AsyncStorage.setItem("esAdministrador", "false");
           socket.emit("registrarUsuario", {
             idUsuario: data.usuario.idUsuario,
           });
           setIdUsuario(data.usuario.idUsuario);
-          // Entra al menú principal
-          router.push("/entrar");
         }
+        router.push("/entrar");
       } else {
         Alert.alert(
           "Error",
