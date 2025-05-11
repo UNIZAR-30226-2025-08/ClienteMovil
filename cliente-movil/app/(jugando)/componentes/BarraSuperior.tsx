@@ -35,7 +35,9 @@ const BarraSuperior: React.FC<PropsBarraSuperior> = ({
         <Image source={IMAGENES.PUEBLO} style={estilos.iconoBarraSuperior} />
         <View style={estilos.textoBarraSuperiorContainer}>
           <Text style={estilos.textoBarraSuperiorTitulo}>{TEXTOS.PUEBLO}</Text>
-          <Text style={estilos.textoBarraSuperiorSub}>🧍‍♂️ Vivos: {vivos}</Text>
+          <Text style={estilos.textoBarraSuperiorSub}>
+            🧍‍♂️ Vivos: {vivos + lobos}
+          </Text>
         </View>
       </View>
     </View>
@@ -51,7 +53,7 @@ const BarraSuperior: React.FC<PropsBarraSuperior> = ({
       <View style={estilos.contenedorBarraSuperiorItem}>
         <View style={estilos.textoBarraSuperiorContainer}>
           <Text style={estilos.textoBarraSuperiorTitulo}>{TEXTOS.LOBOS}</Text>
-          <Text style={estilos.textoBarraSuperiorSub}>🐺 Lobos: {lobos + vivos}</Text>
+          <Text style={estilos.textoBarraSuperiorSub}>🐺 Lobos: {lobos}</Text>
         </View>
         <Image source={IMAGENES.LOBOS} style={estilos.iconoBarraSuperior} />
       </View>
