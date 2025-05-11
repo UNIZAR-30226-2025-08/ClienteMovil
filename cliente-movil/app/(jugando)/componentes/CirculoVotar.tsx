@@ -33,7 +33,10 @@ const avatarMap: Record<string, any> = {
   avatar7: require("@/assets/images/imagenPerfil7.webp"),
   avatar8: require("@/assets/images/imagenPerfil8.webp"),
 };
+
 const imagenCalavera = require("@/assets/images/calavera.png");
+
+const imagenAlguacil = require("@/assets/images/alguacil-icon.png");
 
 interface CirculoVotarProps {
   jugadores: {
@@ -51,6 +54,7 @@ interface CirculoVotarProps {
   votes: number[];
   JugadorSeleccionado: number | null;
   onSelectPlayer: (index: number) => void;
+  usuarioID: string;
 }
 
 const CirculoVotar: React.FC<CirculoVotarProps> = ({
@@ -58,6 +62,7 @@ const CirculoVotar: React.FC<CirculoVotarProps> = ({
   votes,
   JugadorSeleccionado,
   onSelectPlayer,
+  usuarioID,
 }) => {
   const cantidadJugadores = jugadores.length;
 
@@ -70,7 +75,8 @@ const CirculoVotar: React.FC<CirculoVotarProps> = ({
 
   // Cálculo base de radio y tamaño de imagen
   const radioBase = Math.min(ANCHO, ALTO) * NUMERICAS.MULTIPLICADOR_RADIO;
-  const tamanioBase = Math.min(ANCHO, ALTO) * NUMERICAS.MULTIPLICADOR_TAMANIO_IMAGEN;
+  const tamanioBase =
+    Math.min(ANCHO, ALTO) * NUMERICAS.MULTIPLICADOR_TAMANIO_IMAGEN;
 
   // Ajustes según escala y factorRadio
   const radioCalc = radioBase * factorRadio;
@@ -94,12 +100,16 @@ const CirculoVotar: React.FC<CirculoVotarProps> = ({
       {jugadores.map((jugador, index) => {
         const angulo = (index * 2 * Math.PI) / cantidadJugadores;
         const x = radio * Math.cos(angulo);
-        const y = radio * Math.sin(angulo) * (1 - NUMERICAS.FACTOR_ENCOGIMIENTO_VERTICAL);
+        const y =
+          radio *
+          Math.sin(angulo) *
+          (1 - NUMERICAS.FACTOR_ENCOGIMIENTO_VERTICAL);
 
         const estaSeleccionado = JugadorSeleccionado === index;
         const avatarKey = jugador.avatar?.toLowerCase() ?? "avatar1";
         const avatarFuente = avatarMap[avatarKey] || avatarMap.avatar1;
-        if (!avatarMap[avatarKey]) console.warn(`⚠️ Avatar no encontrado para key: ${avatarKey}`);
+        if (!avatarMap[avatarKey])
+          console.warn(`⚠️ Avatar no encontrado para key: ${avatarKey}`);
 
         return (
           <TouchableOpacity
@@ -118,11 +128,34 @@ const CirculoVotar: React.FC<CirculoVotarProps> = ({
                   width: tamanioImagen,
                   height: tamanioImagen,
                   borderWidth: 3,
-                  borderColor: estaSeleccionado ? COLORES.SELECCIONADO : "white",
+                  borderColor: estaSeleccionado
+                    ? COLORES.SELECCIONADO
+                    : "white",
                 },
               ]}
             >
               <Image source={avatarFuente} style={estilos.imagenCirculo} />
+
+              {jugador.esAlguacil &&
+                jugador.estaVivo &&
+                jugador.id !== usuarioID && (
+                  <Image
+                    source={imagenAlguacil}
+                    style={[
+                      estilos.imagenCirculo,
+                      {
+                        position: "absolute",
+                        bottom: 20,
+                        right: 0,
+                        width: tamanioImagen * 0.4 * escala,
+                        height: tamanioImagen * 0.4 * escala,
+                        opacity: 0.9,
+                        zIndex: 2,
+                      },
+                    ]}
+                  />
+                )}
+
               {!jugador.estaVivo && (
                 <Image
                   source={imagenCalavera}
@@ -136,27 +169,46 @@ const CirculoVotar: React.FC<CirculoVotarProps> = ({
             <View
               style={{
                 position: "relative",
-                transform: [{ scale: escala }],
                 marginTop: offsetNombre,
               }}
             >
-              {[ -borderOffset, borderOffset ].map((dx) => (
+              {[
+                { dx: -1, dy: -1 },
+                { dx: 1, dy: -1 },
+                { dx: -1, dy: 1 },
+                { dx: 1, dy: 1 },
+              ].map((offset, i) => (
                 <Text
-                  key={dx}
+                  key={i}
                   style={[
                     estilos.nombreJugadorPartida,
-                    { position: "absolute", top: dx, left: dx, color: "white" },
+                    {
+                      position: "absolute",
+                      top: offset.dy,
+                      left: offset.dx,
+                      color: "white",
+                      fontSize: 16 * escala,
+                      includeFontPadding: false,
+                    },
                   ]}
                 >
                   {jugador.nombre}
                 </Text>
               ))}
-              <Text style={estilos.nombreJugadorPartida}>{jugador.nombre}</Text>
-            </View>
-            <View style={estilos.contenedorVotos}>
-              {Array.from({ length: votes[index] }).map((_, i) => (
-                <View key={i} style={estilos.barraVoto} />
-              ))}
+
+              <Text
+                style={[
+                  estilos.nombreJugadorPartida,
+                  {
+                    fontSize: 16 * escala,
+                    color: "black",
+                    includeFontPadding: false,
+                    position: "relative",
+                  },
+                ]}
+              >
+                {jugador.nombre}
+              </Text>
             </View>
           </TouchableOpacity>
         );
