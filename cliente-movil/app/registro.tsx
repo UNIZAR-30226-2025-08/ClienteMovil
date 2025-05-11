@@ -111,6 +111,12 @@ export default function RegistroScreen() {
       return;
     }
 
+    // Validación de que el nombre no contenga espacios
+    if (nombre.includes(" ")) {
+      Alert.alert("Error", "El nombre no debe contener espacios.");
+      return;
+    }
+
     // Validación de coincidencia de contraseñas
     if (contrasena !== confirmContrasena) {
       Alert.alert("Error", "Las contraseñas no coinciden.");
