@@ -171,6 +171,9 @@ export default function RegistroScreen() {
         setNombre("");
         setCorreo("");
         setContrasena("");
+        setconfirmContrasena("");
+        setSecureText(true);
+        setSecureTextConfirm(true);
       } else {
         Alert.alert(
           "Error",
