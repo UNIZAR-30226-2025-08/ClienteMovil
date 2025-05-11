@@ -394,12 +394,13 @@ const Jugando: React.FC = () => {
 
   // Esto es lo que quieres modificar para cambiar los timers visuales durante la partida
   const CONST_TIEMPO_ESPERA_INICAL = 15;
-  const CONST_TIEMPO_VOTACION_ALGUACIL = 25;
-  const CONST_TIEMPO_HABILIDAD_VIDENTE = 15;
-  const CONST_TIEMPO_VOTACION_NOCTURNA = 30;
-  const CONST_TIEMPO_HABILIDAD_BRUJA = 15;
-  const CONST_TIEMPO_VOTACION_DIURNA = 60;
-  const CONST_TIEMPO_HABILIDAD_CAZADOR = 15;
+  const CONST_TIEMPO_VOTACION_ALGUACIL = 70;
+  const CONST_TIEMPO_HABILIDAD_VIDENTE = 40;
+  const CONST_TIEMPO_VOTACION_NOCTURNA = 45;
+  const CONST_TIEMPO_HABILIDAD_BRUJA = 42;
+  const CONST_TIEMPO_VOTACION_DIURNA = 55;
+  const CONST_TIEMPO_HABILIDAD_CAZADOR = 40;
+  const CONST_TIEMPO_HABILIDAD_ALGUACIL = 40;
 
   // ---------------------------------------------------------------------------
   // Estados del juego
@@ -561,31 +562,6 @@ const Jugando: React.FC = () => {
    */
   const [mensajes, setMensajes] = useState<MensajeChat[]>([]);
 
-  /**
-   * Estados para la duración de cada timer en las fases.
-   * Deberían enviarlos el backend, esto son solo fallbacks como los de web.
-   * Cuando web no tenía fallback, está puesto 30 segundos.
-   */
-  const [duracionEsperaInicial, setDuracionEsperaInicial] =
-    useState<number>(30);
-  const [duracionIniciarVotacionAlguacil, setDuracionIniciarVotacionAlguacil] =
-    useState<number>(24);
-  const [duracionSegundaVotacionAlguacil, setDuracionSegundaVotacionAlguacil] =
-    useState<number>(24);
-  const [duracionHabilidadVidente, setDuracionHabilidadVidente] =
-    useState<number>(15);
-  const [duracionTurnoHombresLobos, setDuracionTurnoHombresLobos] =
-    useState<number>(19);
-  const [duracionHabilidadBruja, setDuracionHabilidadBruja] =
-    useState<number>(30);
-  const [duracionHabilidadAlguacil, setDuracionHabilidadAlguacil] =
-    useState<number>(30);
-  const [duracionHabilidadCazador, setDuracionHabilidadCazador] =
-    useState<number>(30);
-  const [duracionDiaComienza, setDuracionDiaComienza] = useState<number>(60);
-  const [duracionEmpateVotacionDia, setDuracionEmpateVotacionDia] =
-    useState<number>(25);
-
   // ---------------------------------------------------------------------------
   // ¿Qué elementos de la UI mostrar en cada momento?
   // ---------------------------------------------------------------------------
@@ -624,7 +600,7 @@ const Jugando: React.FC = () => {
     mostrarBarraSuperior: true,
     mostrarBotellas: false,
     mostrarPantallaOscura: false,
-    mostrarTemporizador: true,
+    mostrarTemporizador: false,
     mostrarBotonVotar: false,
     mostrarMedallaAlguacilPropia: true,
     valorOpacidadPantallaOscura: 0,
@@ -1535,26 +1511,26 @@ const Jugando: React.FC = () => {
   // const [mensaje, setMensaje] = useState(null);
   // !!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  /** 
-   * Jugadores de prueba para probar el circulo de votación 
-  */
-const jugadoresPrueba = React.useMemo(
-  () =>
-    Array.from({ length: 18 }, (_, i) => ({
-      id: `jugador${i + 1}`,
-      nombre: `Jugador ${i + 1}`,
-      avatar: "avatar1",
-      listo: true,
-      rol: "aldeano",
-      estaVivo: true,
-      esAlguacil: false,
-      haVisto: false,
-      pocionCuraUsada: false,
-      pocionMatarUsada: false,
-    })),
-  []
-);
-const votosPrueba = React.useMemo(() => Array(18).fill(0), []);
+  /**
+   * Jugadores de prueba para probar el circulo de votación
+   */
+  const jugadoresPrueba = React.useMemo(
+    () =>
+      Array.from({ length: 18 }, (_, i) => ({
+        id: `jugador${i + 1}`,
+        nombre: `Jugador ${i + 1}`,
+        avatar: "avatar1",
+        listo: true,
+        rol: "aldeano",
+        estaVivo: true,
+        esAlguacil: true,
+        haVisto: false,
+        pocionCuraUsada: false,
+        pocionMatarUsada: false,
+      })),
+    []
+  );
+  const votosPrueba = React.useMemo(() => Array(18).fill(0), []);
 
   // ---------------------------------------------------------------------------
   // Hooks para realizar las votaciones
@@ -1899,6 +1875,18 @@ const votosPrueba = React.useMemo(() => Array(18).fill(0), []);
       );
       setVotoRealizado(true);
       setJugadorSeleccionado(null);
+    } else if (estadoActual === Estado.habilidadAlguacil) {
+      socket.emit("elegirSucesor", {
+        idPartida: idSala,
+        idJugador: usuarioID,
+        idObjetivo: jugadorObjetivo.id,
+      });
+      logCustom(
+        jornadaActual,
+        etapaActual,
+        `El alguacil antes de morir pide que su sucesor sea ${jugadorObjetivo.id}`,
+        jugadoresEstado[indiceUsuario]
+      );
     }
     // Revelación de la vidente
     else if (estadoActual === Estado.habilidadVidente) {
@@ -2403,9 +2391,6 @@ const votosPrueba = React.useMemo(() => Array(18).fill(0), []);
         `Evento recibido: iniciarVotacionAlguacil - ${JSON.stringify(data)}`,
         jugadoresEstado[indiceUsuario]
       );
-      if (data.tiempo != null) {
-        setDuracionIniciarVotacionAlguacil(data.tiempo);
-      }
       agregarEstado(Estado.iniciarVotacionAlguacil);
     });
     /* Nunca llega?
@@ -2850,7 +2835,6 @@ const votosPrueba = React.useMemo(() => Array(18).fill(0), []);
 
         setMostrarAnimacionInicio3(false);
 
-        actualizarMaxTiempo(duracionEsperaInicial);
         setTemporizadorActivo(true);
         setPlantillaActual(plantillaEsperaInicial);
 
@@ -2867,7 +2851,6 @@ const votosPrueba = React.useMemo(() => Array(18).fill(0), []);
         setMostrarAnimacionPrimeraVotacionAlguacil(false);
         setPlantillaActual(plantillaVotacionAlguacil);
         actualizarMaxTiempo(CONST_TIEMPO_VOTACION_ALGUACIL);
-        actualizarMaxTiempo(duracionIniciarVotacionAlguacil);
         reiniciarTemporizador();
         setVotoRealizado(false);
         setPasoTurno(false);
@@ -2883,7 +2866,7 @@ const votosPrueba = React.useMemo(() => Array(18).fill(0), []);
 
         setMostrarAnimacionSegundaVotacionAlguacil(false);
         setPlantillaActual(plantillaVotacionAlguacil);
-        actualizarMaxTiempo(duracionSegundaVotacionAlguacil);
+        actualizarMaxTiempo(CONST_TIEMPO_VOTACION_ALGUACIL);
         reiniciarTemporizador();
         setVotoRealizado(false);
         setPasoTurno(false);
@@ -2942,7 +2925,7 @@ const votosPrueba = React.useMemo(() => Array(18).fill(0), []);
 
         setMostrarAnimacionInicioHabilidadVidente(false);
         setPlantillaActual(plantillaHabilidadVidente);
-        actualizarMaxTiempo(duracionHabilidadVidente);
+        actualizarMaxTiempo(CONST_TIEMPO_HABILIDAD_VIDENTE);
         reiniciarTemporizador();
         setVotoRealizado(false);
         setPasoTurno(false);
@@ -2959,7 +2942,7 @@ const votosPrueba = React.useMemo(() => Array(18).fill(0), []);
         setMostrarAnimacionInicioTurnoHombresLobo(false);
 
         setPlantillaActual(plantillaVotacionHombresLobo);
-        actualizarMaxTiempo(duracionTurnoHombresLobos);
+        actualizarMaxTiempo(CONST_TIEMPO_VOTACION_NOCTURNA);
         reiniciarTemporizador();
         setVotoRealizado(false);
         setPasoTurno(false);
@@ -2991,7 +2974,7 @@ const votosPrueba = React.useMemo(() => Array(18).fill(0), []);
         }
 
         setPlantillaActual(plantillaHabilidadBruja);
-        actualizarMaxTiempo(duracionHabilidadBruja);
+        actualizarMaxTiempo(CONST_TIEMPO_HABILIDAD_BRUJA);
         reiniciarTemporizador();
         setVotoRealizado(false);
         setPasoTurno(false);
@@ -3009,7 +2992,7 @@ const votosPrueba = React.useMemo(() => Array(18).fill(0), []);
         setMostrarAnimacionInicioHabilidadAlguacil(false);
 
         setPlantillaActual(plantillaHabilidadAlguacil);
-        actualizarMaxTiempo(duracionHabilidadAlguacil);
+        actualizarMaxTiempo(CONST_TIEMPO_HABILIDAD_ALGUACIL);
         reiniciarTemporizador();
         setVotoRealizado(false);
         setPasoTurno(false);
@@ -3045,7 +3028,7 @@ const votosPrueba = React.useMemo(() => Array(18).fill(0), []);
           }
         }
 
-        actualizarMaxTiempo(duracionHabilidadCazador);
+        actualizarMaxTiempo(CONST_TIEMPO_HABILIDAD_CAZADOR);
         reiniciarTemporizador();
         setVotoRealizado(false);
         setPasoTurno(false);
@@ -3182,7 +3165,7 @@ const votosPrueba = React.useMemo(() => Array(18).fill(0), []);
         setMostrarAnimacionInicioDia2(false);
 
         setPlantillaActual(plantillaVotacionDiurna);
-        actualizarMaxTiempo(duracionDiaComienza);
+        actualizarMaxTiempo(CONST_TIEMPO_VOTACION_DIURNA);
         reiniciarTemporizador();
         setVotoRealizado(false);
         setPasoTurno(false);
@@ -3230,7 +3213,7 @@ const votosPrueba = React.useMemo(() => Array(18).fill(0), []);
         setMostrarAnimacionEmpateVotacionDiurna(false);
 
         setPlantillaActual(plantillaVotacionDiurna);
-        actualizarMaxTiempo(duracionEmpateVotacionDia);
+        actualizarMaxTiempo(CONST_TIEMPO_VOTACION_DIURNA);
         reiniciarTemporizador();
         setVotoRealizado(false);
         setPasoTurno(false);
@@ -3469,7 +3452,7 @@ const votosPrueba = React.useMemo(() => Array(18).fill(0), []);
             texto={
               cazadorActual
                 ? `EL CAZADOR ${jugadoresEstado
-                    .find((j) => j.id === cazadorActual)
+                    .find((j) => String(j.id) === String(cazadorActual))
                     ?.nombre.toUpperCase()} VA A MORIR. DISPARARÁ A QUIÉN CREA QUE ES UN HOMBRE LOBO`
                 : "UN CAZADOR VA A MORIR. DISPARARÁ A QUIÉN CREA QUE ES UN HOMBRE LOBO."
             }
@@ -3579,9 +3562,10 @@ const votosPrueba = React.useMemo(() => Array(18).fill(0), []);
         {plantillaActual.mostrarCirculoJugadores && (
           <CirculoVotar
             jugadores={jugadoresEstado} //{jugadoresPrueba}
-            votes={Array(CONSTANTES.NUMERICAS.CANTIDAD_IMAGENES).fill(0)} // Modificar si se quiere implementar los contadores de votos
+            votes={Array(CONSTANTES.NUMERICAS.CANTIDAD_IMAGENES).fill(0)}
             JugadorSeleccionado={JugadorSeleccionado}
             onSelectPlayer={administrarSeleccionJugadorVotacion}
+            usuarioID={usuarioID}
           />
         )}
         {plantillaActual.mostrarControlesAccion && (

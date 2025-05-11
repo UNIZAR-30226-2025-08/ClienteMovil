@@ -3,6 +3,7 @@ import Constants from "expo-constants";
 import axios from "axios";
 import CryptoJS from "crypto-js";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import socket from "@/app/(sala)/socket";
 
 import {
   ImageBackground,
@@ -110,6 +111,12 @@ export default function RegistroScreen() {
       return;
     }
 
+    // Validación de que el nombre no contenga espacios
+    if (nombre.includes(" ")) {
+      Alert.alert("Error", "El nombre no debe contener espacios.");
+      return;
+    }
+
     // Validación de coincidencia de contraseñas
     if (contrasena !== confirmContrasena) {
       Alert.alert("Error", "Las contraseñas no coinciden.");
@@ -152,6 +159,9 @@ export default function RegistroScreen() {
         await AsyncStorage.setItem("correoUsuario", data.usuario.correo);
         await AsyncStorage.setItem("fechaCreacion", data.usuario.fechaCreacion);
         await AsyncStorage.setItem("rolFavorito", data.usuario.rolFavorito);
+
+        // Emitir evento de usuario en línea
+        socket.emit("registrarUsuario", { idUsuario: data.usuario.idUsuario });
 
         Alert.alert("Registro exitoso", "Ahora puedes iniciar sesión.", [
           { text: "OK", onPress: () => router.push("/entrar") },
