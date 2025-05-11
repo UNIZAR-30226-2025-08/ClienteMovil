@@ -1705,7 +1705,9 @@ const Jugando: React.FC = () => {
     ) {
       const elegido = jugadoresEstado[index];
       if (!jugadoresDisponibles.includes(elegido.id)) {
-        mostrarError("No puedes seleccionar a este jugador como sucesor");
+        mostrarError(
+          "No puedes seleccionar a este jugador como sucesor ... se esta muriendo"
+        );
         logCustom(
           jornadaActual,
           etapaActual,
