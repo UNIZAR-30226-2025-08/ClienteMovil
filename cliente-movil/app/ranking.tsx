@@ -18,6 +18,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 /**
  * Mapa de avatares que relaciona claves con sus respectivas imágenes.
+ * @remarks Las claves corresponden a nombres de avatar definidos en la API.
  */
 const avatarMap: Record<string, any> = {
   avatar1: require("@/assets/images/imagenPerfil.webp"),
@@ -30,6 +31,13 @@ const avatarMap: Record<string, any> = {
   avatar8: require("@/assets/images/imagenPerfil8.webp"),
 };
 
+/**
+ * Representa un jugador en el ranking.
+ * @property {number} idUsuario - Identificador único del usuario.
+ * @property {string} nombre - Nombre del jugador.
+ * @property {number} victorias - Número de victorias del jugador.
+ * @property {string} [avatar] - Clave del avatar opcional.
+ */
 type Jugador = {
   idUsuario: number;
   nombre: string;
@@ -37,25 +45,75 @@ type Jugador = {
   avatar?: string;
 };
 
+/**
+ * Componente de pantalla de ranking.
+ * @remarks Obtiene y muestra la lista de jugadores ordenados por victorias.
+ * @returns {JSX.Element} La interfaz de usuario de la pantalla de ranking.
+ */
 export default function RankingScreen(): JSX.Element {
+  /**
+   * Estado que almacena el ranking completo de jugadores.
+   */
   const [ranking, setRanking] = useState<Jugador[]>([]);
+
+  /**
+   * Estado de carga para la obtención del ranking.
+   */
   const [loading, setLoading] = useState(true);
 
+  /**
+   * Hook de navegación provisto por Expo Router.
+   */
   const router = useRouter();
+
+  /**
+   * URL base del backend obtenida de las constantes de Expo.
+   */
   const BACKEND_URL = Constants.expoConfig?.extra?.backendUrl;
 
+  /**
+   * Estado para el texto de búsqueda ingresado por el usuario.
+   */
   const [nuevoNombre, setNuevoNombre] = useState("");
+
+  /**
+   * Estado para almacenar las sugerencias de búsqueda de jugadores.
+   */
   const [searchSuggestions, setSearchSuggestions] = useState<Jugador[]>([]);
+
+  /**
+   * Indica si la búsqueda de sugerencias está en curso.
+   */
   const [loadingSearch, setLoadingSearch] = useState(false);
+
+  /**
+   * Estado que almacena el ranking filtrado según la búsqueda.
+   */
   const [filteredRanking, setFilteredRanking] = useState<Jugador[] | null>(
     null
   );
 
+  /**
+   * Estado para la página actual en la paginación.
+   */
   const [page, setPage] = useState(1);
+
+  /**
+   * Número de elementos por página en la paginación.
+   */
   const pageSize = 10;
+
+  /**
+   * Referencia para la función de debounce en la búsqueda.
+   */
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
+    /**
+     * Obtiene el ranking del backend y filtra jugadores con al menos una victoria.
+     * @async
+     * @returns {Promise<void>}
+     */
     const fetchRanking = async () => {
       try {
         const response = await axios.get(`${BACKEND_URL}/api/ranking/ranking`);
@@ -72,7 +130,10 @@ export default function RankingScreen(): JSX.Element {
     fetchRanking();
   }, []);
 
-  /** Filtra localmente el ranking según el texto escrito */
+  /**
+   * Filtra localmente el ranking según el texto ingresado.
+   * @param {string} nombre - Texto a buscar en los nombres de los jugadores.
+   */
   const fetchUserSuggestions = (nombre: string) => {
     const q = nombre.trim().toLowerCase();
     if (!q) {
@@ -89,12 +150,21 @@ export default function RankingScreen(): JSX.Element {
     setLoadingSearch(false);
   };
 
+  /**
+   * Manejador para actualización del texto de búsqueda con debounce.
+   * @param {string} text - Texto actual del campo de búsqueda.
+   */
   const onChangeNuevoNombre = (text: string) => {
     setNuevoNombre(text);
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => fetchUserSuggestions(text), 500);
   };
 
+  /**
+   * Selecciona una sugerencia y actualiza el ranking mostrado.
+   * @param {Jugador} s - Jugador seleccionado de las sugerencias.
+   * @returns {Promise<void>}
+   */
   const onSelectSuggestion = async (s: Jugador) => {
     setNuevoNombre(s.nombre);
     setSearchSuggestions([]);
@@ -102,6 +172,9 @@ export default function RankingScreen(): JSX.Element {
     setPage(1);
   };
 
+  /**
+   * Limpia la búsqueda y restaura el ranking completo.
+   */
   const clearSearch = () => {
     setFilteredRanking(null);
     setNuevoNombre("");
@@ -113,6 +186,11 @@ export default function RankingScreen(): JSX.Element {
     ? filteredRanking
     : ranking.slice((page - 1) * pageSize, page * pageSize);
 
+  /**
+   * Maneja la navegación al perfil del jugador seleccionado.
+   * @param {Jugador} jugador - Jugador cuyo perfil se abrirá.
+   * @returns {Promise<void>}
+   */
   const handlePress = async (jugador: Jugador) => {
     try {
       let id = jugador.idUsuario;
