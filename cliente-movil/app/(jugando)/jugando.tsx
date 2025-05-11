@@ -100,7 +100,7 @@ type PlantillaUI = {
  * @returns {JSX.Element | null} El componente renderizado o null si las fuentes aún no se han cargado.
  */
 const Jugando: React.FC = () => {
-  const router = useRouter(); // !!!! MOVER????
+  const router = useRouter();
 
   /**
    * Carga de fuentes personalizadas para la interfaz del juego.
@@ -1506,10 +1506,6 @@ const Jugando: React.FC = () => {
     numAnimaciones: 1,
     start: mostrarMuertosNoche,
   });
-
-  // !!!!!!!!!!!!!!!!!!!!!!!!!!
-  // const [mensaje, setMensaje] = useState(null);
-  // !!!!!!!!!!!!!!!!!!!!!!!!!!
 
   /**
    * Jugadores de prueba para probar el circulo de votación
