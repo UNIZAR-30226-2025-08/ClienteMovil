@@ -1699,6 +1699,24 @@ const Jugando: React.FC = () => {
         return;
       }
     }
+    if (
+      estadoActual === Estado.habilidadAlguacil &&
+      jugadoresEstado[indiceUsuario]?.esAlguacil
+    ) {
+      const elegido = jugadoresEstado[index];
+      if (!jugadoresDisponibles.includes(elegido.id)) {
+        mostrarError(
+          "No puedes seleccionar a este jugador como sucesor ... se esta muriendo"
+        );
+        logCustom(
+          jornadaActual,
+          etapaActual,
+          `Selección inválida: ${elegido.nombre} se va a morir`,
+          jugadoresEstado[indiceUsuario]
+        );
+        return;
+      }
+    }
 
     logCustom(
       jornadaActual,
@@ -1877,6 +1895,7 @@ const Jugando: React.FC = () => {
         idJugador: usuarioID,
         idObjetivo: jugadorObjetivo.id,
       });
+
       logCustom(
         jornadaActual,
         etapaActual,
@@ -2443,6 +2462,12 @@ const Jugando: React.FC = () => {
         `Evento recibido: habilidadAlguacil - ${JSON.stringify(data)}`,
         jugadoresEstado[indiceUsuario]
       );
+
+      const disponiblesIds = data.jugadoresDisponibles.map(
+        (j: { id: any }) => j.id
+      );
+      setJugadoresDisponibles(disponiblesIds);
+
       agregarEstado(Estado.habilidadAlguacil);
     });
     socket.on("habilidadCazador", (data) => {
@@ -3318,7 +3343,7 @@ const Jugando: React.FC = () => {
           <AnimacionGenerica
             opacity={opacitiesPrimeraVotacionAlguacil[0]}
             mostrarComponente={mostrarComponentesPrimeraVotacionAlguacil[0]}
-            texto="LOS JUGADORES DEBEN ELEGIR DE MANERA POR MAYORÍA SIMPLE QUIEN EJERCERÁ DE ALGUACIL"
+            texto="LOS JUGADORES DEBEN ELEGIR POR MAYORÍA SIMPLE QUIEN EJERCERÁ DE ALGUACIL"
           />
         )}
         {mostrarAnimacionSegundaVotacionAlguacil && (
