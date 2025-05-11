@@ -3252,9 +3252,17 @@ const Jugando: React.FC = () => {
         setPasoTurno(false);
         setJugadorSeleccionado(null);
 
+        console.log("Desconectando socket...");
         socket.disconnect();
+        console.log("Socket desconectado");
+
+        console.log("Conectando socket...");
         socket.connect();
+        console.log("Conexión de socket iniciada");
+
+        console.log("Navegando hacia atrás...");
         router.back();
+        console.log("Navegación completada");
         break;
       default:
         break;
