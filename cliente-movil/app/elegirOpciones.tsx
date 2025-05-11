@@ -269,10 +269,14 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     width: "100%",
   },
+
   textoBoton: {
+    color: "white",
     fontSize: 20,
     fontWeight: "bold",
-    color: "white",
+    textShadowColor: "rgba(0, 0, 0, 0.75)",
+    textShadowOffset: { width: 2, height: 2 },
+    textShadowRadius: 10,
     textAlign: "center",
   },
 
@@ -287,16 +291,14 @@ const styles = StyleSheet.create({
     bottom: 50,
   },
 
-  // Botón de notificaciones
   botonNotificaciones: {
     position: "absolute",
     top: STATUSBAR_HEIGHT + 10,
     right: 15,
     padding: 10,
-    zIndex: 10, // superior a 1 => se superpone a la imagen
+    zIndex: 10,
   },
 
-  // Botón de Ranking
   botonRanking: {
     position: "absolute",
     top: STATUSBAR_HEIGHT + 10,
@@ -304,11 +306,13 @@ const styles = StyleSheet.create({
     padding: 10,
     zIndex: 10,
   },
+
   iconoRankingContainer: {
     backgroundColor: "rgba(0,0,0,0.6)",
     borderRadius: 10,
     padding: 5,
   },
+
   iconoRanking: {
     fontSize: 30,
     color: "white",

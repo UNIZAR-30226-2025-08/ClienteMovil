@@ -6,6 +6,7 @@
  * @param {Array<{ id: number; texto: string }>} props.mensajes - Lista de mensajes a mostrar en el chat.
  * @param {Animated.Value} props.posicionChat - Valor animado que controla la posición vertical del chat.
  * @param {Function} props.onClose - Función que se ejecuta al cerrar el chat.
+ * @param {boolean} props.estaMuerto - Indica si el jugador está muerto y no puede enviar mensajes.
  */
 import React, { useState, useRef, useEffect } from "react";
 import {
@@ -36,6 +37,7 @@ interface ChatComponentProps {
   idSala: string;
   usuarioID: string; // Datos del usuario para obtener su ID
   usuarioNombre: string;
+  estaMuerto: boolean;
 }
 
 /**
@@ -52,6 +54,7 @@ const ChatComponent: React.FC<ChatComponentProps> = ({
   idSala,
   usuarioID,
   usuarioNombre,
+  estaMuerto,
 }) => {
   const [mensaje, setMensaje] = useState(""); // 🔹 Estado para almacenar el mensaje
   const scrollViewRef = useRef<ScrollView>(null); // Ref para controlar el scroll
@@ -63,7 +66,7 @@ const ChatComponent: React.FC<ChatComponentProps> = ({
 
   // Función para manejar el envío del mensaje
   const handleEnviarMensaje = () => {
-    if (!mensaje.trim()) return; // Evita enviar mensajes vacíos
+    if (!mensaje.trim() || estaMuerto) return; // Evita enviar mensajes vacíos o si el jugador está muerto
 
     console.log("Enviando mensaje:", mensaje);
     console.log("Test idSala", idSala);
@@ -113,10 +116,6 @@ const ChatComponent: React.FC<ChatComponentProps> = ({
       <ScrollView
         ref={scrollViewRef}
         contentContainerStyle={estilos.contenedorMensajesChat}
-        /*
-        onContentSizeChange={() =>
-          scrollViewRef.current?.scrollToEnd({ animated: true })
-        }*/
       >
         {mensajes.map((m) => (
           <Text key={m.id} style={estilos.mensajeChat}>
@@ -128,15 +127,23 @@ const ChatComponent: React.FC<ChatComponentProps> = ({
       {/* Contenedor para la entrada de texto y botón de enviar mensaje */}
       <View style={estilos.contenedorEntradaChat}>
         <TextInput
-          style={estilos.entradaChat}
+          style={[
+            estilos.entradaChat,
+            estaMuerto && estilos.entradaChatDeshabilitada, // Aplica estilo deshabilitado si está muerto
+          ]}
           placeholder={TEXTOS.CHAT.PLACEHOLDER}
           placeholderTextColor="#CCC"
           value={mensaje}
           onChangeText={setMensaje}
+          editable={!estaMuerto} // Deshabilita la edición si está muerto
         />
         <TouchableOpacity
-          style={estilos.botonEnviarChat}
+          style={[
+            estilos.botonEnviarChat,
+            estaMuerto && estilos.botonEnviarChatDeshabilitado, // Aplica estilo deshabilitado si está muerto
+          ]}
           onPress={handleEnviarMensaje}
+          disabled={estaMuerto} // Deshabilita el botón si está muerto
         >
           <Text style={estilos.textoBotonEnviarChat}>{TEXTOS.CHAT.ENVIAR}</Text>
         </TouchableOpacity>

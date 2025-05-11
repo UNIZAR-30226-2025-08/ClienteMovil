@@ -251,7 +251,7 @@ const Jugando: React.FC = () => {
       // conservamos propiedades viejas (p.ej. estaVivo) que no lleguen
       setJugadoresEstado((prev) =>
         data.jugadores.map((j: { id: string }) => {
-          const viejo = prev.find((p) => p.id === j.id);
+          const viejo = prev.find((p) => String(p.id) === String(j.id));
           return {
             // primero todo lo que ya había
             ...(viejo ?? {}),
@@ -3252,9 +3252,17 @@ const Jugando: React.FC = () => {
         setPasoTurno(false);
         setJugadorSeleccionado(null);
 
+        console.log("Desconectando socket...");
         socket.disconnect();
+        console.log("Socket desconectado");
+
+        console.log("Conectando socket...");
         socket.connect();
+        console.log("Conexión de socket iniciada");
+
+        console.log("Navegando hacia atrás...");
         router.back();
+        console.log("Navegación completada");
         break;
       default:
         break;
@@ -3608,6 +3616,7 @@ const Jugando: React.FC = () => {
             idSala={idSala}
             usuarioID={usuarioID}
             usuarioNombre={usuarioNombre}
+            estaMuerto={jugadorLocalMuerto}
           />
         )}
         {mostrarHabilidad && (
