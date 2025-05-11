@@ -10,6 +10,7 @@ import {
   TextInput,
   Modal,
   ScrollView,
+  BackHandler,
 } from "react-native";
 import { useRouter } from "expo-router";
 import socket from "@/app/(sala)/socket"; // Módulo de conexión
@@ -62,8 +63,22 @@ export default function BuscarSalasScreen(): JSX.Element {
       setSalas(listaSalas);
     });
 
+    // Escuchar evento de sala actualizada y refrescar lista
+    socket.on("actualizarSalaGlobal", (salaActualizada) => {
+      setSalas((prevSalas) => {
+        const existe = prevSalas.find((s) => s.id === salaActualizada.id);
+        if (existe) {
+          return prevSalas.map((s) =>
+            s.id === salaActualizada.id ? salaActualizada : s
+          );
+        }
+        return [...prevSalas, salaActualizada];
+      });
+    });
+
     return () => {
       socket.off("listaSalas");
+      socket.off("actualizarSalaGlobal");
     };
   }, []);
 
@@ -104,6 +119,28 @@ export default function BuscarSalasScreen(): JSX.Element {
 
     obtenerDatosUsuario();
   }, []);
+
+  // Función para eliminar los listeners de socket
+  const removeListeners = () => {
+    socket.off("listaSalas");
+    socket.off("actualizarSalaGlobal");
+  };
+  //eliminar listeners al salir de la pantalla con el botón de atrás de android
+  useEffect(() => {
+    const backAction = () => {
+      removeListeners(); // limpia listeners al pulsar atrás
+      router.back();
+      return true; // consume el evento
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction
+    );
+
+    return () => backHandler.remove();
+  }, [router]);
+
   /**
    * Al presionar una sala:
    * - Si es privada, se muestra el modal para ingresar la contraseña.
@@ -122,7 +159,7 @@ export default function BuscarSalasScreen(): JSX.Element {
           avatar: usuarioData.avatar,
         },
       });
-      // Se envía la data completa de la sala, incluida la propiedad maxJugadores
+      removeListeners(); // <-- off antes de salir de esta pantalla
       router.push({
         pathname: "/(sala)/sala",
         params: { idSala: sala.id, salaData: JSON.stringify(sala) },
@@ -151,7 +188,7 @@ export default function BuscarSalasScreen(): JSX.Element {
         contrasena: password,
       });
       setMostrarModal(false);
-      // Envía además la data completa de la sala
+      removeListeners(); // <-- off antes de salir de esta pantalla
       router.push({
         pathname: "/(sala)/sala",
         params: {
@@ -178,14 +215,26 @@ export default function BuscarSalasScreen(): JSX.Element {
           <Text style={styles.titulo}>BUSCAR{"\n"}SALAS</Text>
 
           {salas.map((sala, index) => {
-            // Obtén la cantidad actual y el máximo de jugadores
-            const currentPlayers = sala.jugadores ? sala.jugadores.length : 0;
+            const currentPlayers = sala.jugadores?.length || 0;
             const maxPlayers = sala.maxJugadores;
+            const enCurso = Boolean(sala.enPartida);
+
             return (
               <TouchableOpacity
                 key={index}
                 style={styles.salaContainer}
-                onPress={() => handleSalaPress(sala)}
+                onPress={() => {
+                  if (enCurso) {
+                    Alert.alert(
+                      "Partida en curso",
+                      "No puedes unirte, partida ya iniciada."
+                    );
+                  } else if (currentPlayers >= maxPlayers) {
+                    Alert.alert("Sala llena", "No se puede unir, sala llena.");
+                  } else {
+                    handleSalaPress(sala);
+                  }
+                }}
               >
                 <Text style={styles.texto}>
                   <Text style={styles.label}>ESTADO: </Text> {sala.estado}
@@ -203,6 +252,20 @@ export default function BuscarSalasScreen(): JSX.Element {
                   <Text style={styles.label}>JUGADORES: </Text> {currentPlayers}{" "}
                   / {maxPlayers}
                 </Text>
+                {enCurso && (
+                  <Text
+                    style={[styles.texto, { color: "red", fontWeight: "bold" }]}
+                  >
+                    PARTIDA EN CURSO
+                  </Text>
+                )}
+                {!enCurso && currentPlayers >= maxPlayers && (
+                  <Text
+                    style={[styles.texto, { color: "red", fontWeight: "bold" }]}
+                  >
+                    SALA LLENA
+                  </Text>
+                )}
               </TouchableOpacity>
             );
           })}
