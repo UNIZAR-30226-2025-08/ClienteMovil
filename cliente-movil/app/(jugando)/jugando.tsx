@@ -251,7 +251,7 @@ const Jugando: React.FC = () => {
       // conservamos propiedades viejas (p.ej. estaVivo) que no lleguen
       setJugadoresEstado((prev) =>
         data.jugadores.map((j: { id: string }) => {
-          const viejo = prev.find((p) => p.id === j.id);
+          const viejo = prev.find((p) => String(p.id) === String(j.id));
           return {
             // primero todo lo que ya había
             ...(viejo ?? {}),
