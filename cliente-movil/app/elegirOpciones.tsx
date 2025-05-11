@@ -84,6 +84,7 @@ export default function OpcionesScreen(): JSX.Element | null {
       if (parsedId) {
         // notificamos al servidor que el usuario se desconecta voluntariamente
         socket.emit("desconectarUsuario", { idUsuario: parsedId });
+        socket.disconnect();
       }
       // limpiamos todo, incluyendo admin flag
       await AsyncStorage.multiRemove([
@@ -92,9 +93,11 @@ export default function OpcionesScreen(): JSX.Element | null {
         "avatarUsuario",
         "rolFavorito",
         "esAdministrador",
+        "fechaCreacion",
+        "correoUsuario",
       ]);
       setUsuario(null);
-      router.push("/");
+      router.replace("/");
     } catch (error) {
       console.error("Error al cerrar sesión:", error);
     }
