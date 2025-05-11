@@ -149,7 +149,17 @@ export default function PerfilScreen(): JSX.Element | null {
         return;
       }
 
-      // Aseguramos que rolFavorito y avatar sean cadenas de texto válidas
+      /**
+       * Validación de que el nombre no contenga espacios.
+       */
+      if (nombre.includes(" ")) {
+        Alert.alert("Error", "El nombre no debe contener espacios.");
+        return;
+      }
+
+      /*
+       * Aseguramos que rolFavorito y avatar sean cadenas de texto válidas
+       */
       if (!rolFavorito) {
         Alert.alert("Error", "Selecciona un rol favorito antes de guardar.");
         return;
