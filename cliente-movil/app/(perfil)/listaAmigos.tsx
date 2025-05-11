@@ -401,7 +401,7 @@ export default function AmigosScreen(): JSX.Element {
     debounceRef.current = setTimeout(() => {
       fetchUserSuggestions(text);
     }, 500);
-  };
+  }; 
 
   /**
    * Función para seleccionar una sugerencia de usuario.

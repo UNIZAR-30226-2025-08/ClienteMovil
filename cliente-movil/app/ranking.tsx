@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   View,
   Text,
@@ -8,6 +8,8 @@ import {
   TouchableOpacity,
   ImageBackground,
   Image,
+  TextInput,
+  Keyboard,
 } from "react-native";
 import axios from "axios";
 import Constants from "expo-constants";
@@ -16,14 +18,6 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 /**
  * Mapa de avatares que relaciona claves con sus respectivas imágenes.
- *
- * @remarks
- * Se utiliza para obtener la imagen correspondiente a la clave almacenada en la base de datos.
- *
- * @example
- * ```ts
- * const avatar = avatarMap["avatar1"]; // Obtiene la imagen para 'avatar1'
- * ```
  */
 const avatarMap: Record<string, any> = {
   avatar1: require("@/assets/images/imagenPerfil.webp"),
@@ -36,14 +30,6 @@ const avatarMap: Record<string, any> = {
   avatar8: require("@/assets/images/imagenPerfil8.webp"),
 };
 
-/**
- * Tipo que representa a un jugador en el ranking.
- *
- * @property idUsuario - Identificador único del jugador.
- * @property nombre - Nombre del jugador.
- * @property victorias - Número de victorias del jugador.
- * @property avatar - Clave del avatar asignado al jugador (opcional).
- */
 type Jugador = {
   idUsuario: number;
   nombre: string;
@@ -51,71 +37,103 @@ type Jugador = {
   avatar?: string;
 };
 
-/**
- * Pantalla de ranking que muestra el top 10 de jugadores con más victorias.
- *
- * @returns {JSX.Element} La interfaz de la pantalla de ranking.
- *
- * @remarks
- * Se realiza una petición al endpoint del backend para obtener el ranking global, se muestra un indicador de carga mientras se obtienen los datos y luego se renderiza una lista de tarjetas (cards) con el avatar, nombre y victorias de cada jugador.
- */
 export default function RankingScreen(): JSX.Element {
-  // Estado que guarda el ranking de jugadores
   const [ranking, setRanking] = useState<Jugador[]>([]);
-
-  // Estado que indica si los datos están cargando
   const [loading, setLoading] = useState(true);
 
-  // Hook de enrutamiento para navegar a otras pantallas
   const router = useRouter();
-
-  /** URL del backend obtenida de las constantes de Expo */
   const BACKEND_URL = Constants.expoConfig?.extra?.backendUrl;
 
+  const [nuevoNombre, setNuevoNombre] = useState("");
+  const [searchSuggestions, setSearchSuggestions] = useState<Jugador[]>([]);
+  const [loadingSearch, setLoadingSearch] = useState(false);
+  const [filteredRanking, setFilteredRanking] = useState<Jugador[] | null>(
+    null
+  );
+
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
+  const debounceRef = useRef<NodeJS.Timeout | null>(null);
+
   useEffect(() => {
-    /**
-     * Función asíncrona para obtener el ranking global desde el backend.
-     *
-     * @remarks
-     * Se espera que la respuesta tenga una propiedad `ranking` que es un array de jugadores ordenados de forma descendente por victorias.
-     */
     const fetchRanking = async () => {
       try {
         const response = await axios.get(`${BACKEND_URL}/api/ranking/ranking`);
-        // Se asume que response.data.ranking está ordenado descendentemente por victorias
-        setRanking(response.data.ranking.slice(0, 30));
+        // ahora: todos los jugadores con al menos 1 victoria
+        setRanking(
+          response.data.ranking.filter((j: Jugador) => j.victorias > 0)
+        );
       } catch (error) {
-        // Manejo de errores al obtener el ranking
         console.error("Error al obtener el ranking:", error);
       } finally {
         setLoading(false);
       }
     };
-
-    // Llama a la función para obtener el ranking
     fetchRanking();
   }, []);
 
-  /**
-   * Maneja el evento de presionar un jugador en el ranking.
-   * Guarda el ID del jugador en AsyncStorage y navega al perfil del jugador.
-   *
-   * @param {number} idUsuario - ID del jugador que se presionó.
-   * @returns {Promise<void>} No retorna nada.
-   */
-  const handlePress = async (idUsuario: number) => {
+  /** Filtra localmente el ranking según el texto escrito */
+  const fetchUserSuggestions = (nombre: string) => {
+    const q = nombre.trim().toLowerCase();
+    if (!q) {
+      setSearchSuggestions([]);
+      setFilteredRanking(null);
+      return;
+    }
+    setLoadingSearch(true);
+    const suggestions = ranking.filter((j) =>
+      j.nombre.toLowerCase().includes(q)
+    );
+    setSearchSuggestions(suggestions);
+    setFilteredRanking(suggestions);
+    setLoadingSearch(false);
+  };
+
+  const onChangeNuevoNombre = (text: string) => {
+    setNuevoNombre(text);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => fetchUserSuggestions(text), 500);
+  };
+
+  const onSelectSuggestion = async (s: Jugador) => {
+    setNuevoNombre(s.nombre);
+    setSearchSuggestions([]);
+    setFilteredRanking([s]);
+    setPage(1);
+  };
+
+  const clearSearch = () => {
+    setFilteredRanking(null);
+    setNuevoNombre("");
+    setSearchSuggestions([]);
+    setPage(1);
+  };
+
+  const displayRanking = filteredRanking
+    ? filteredRanking
+    : ranking.slice((page - 1) * pageSize, page * pageSize);
+
+  const handlePress = async (jugador: Jugador) => {
     try {
-      console.log("Presionando jugador del ranking con ID:", idUsuario);
-      await AsyncStorage.setItem("amigoId", idUsuario.toString());
+      let id = jugador.idUsuario;
+      if (!id && jugador.nombre) {
+        const resp = await axios.post(
+          `${BACKEND_URL}/api/usuario/obtener_por_nombre`,
+          { nombre: jugador.nombre }
+        );
+        id = resp.data.usuario?.idUsuario;
+      }
+      if (!id) {
+        console.error("ID de usuario indefinido");
+        return;
+      }
+      await AsyncStorage.setItem("amigoId", id.toString());
       router.push({
         pathname: "/(perfil)/perfilAmigo",
-        params: { amigoId: idUsuario.toString() },
+        params: { amigoId: id.toString() },
       });
-    } catch (error) {
-      console.error(
-        "Error al guardar el ID del jugador en AsyncStorage",
-        error
-      );
+    } catch (err) {
+      console.error("Error al navegar al perfil de amigo", err);
     }
   };
 
@@ -128,62 +146,126 @@ export default function RankingScreen(): JSX.Element {
       >
         <View style={styles.overlay} />
 
-        <Text style={styles.header}>Ranking Top 30</Text>
+        <Text style={styles.header}>Ranking</Text>
 
-        {loading ? (
-          <ActivityIndicator size="large" color="#fff" style={styles.loader} />
-        ) : (
-          // Muestra la lista de jugadores en un ScrollView
-          <ScrollView
-            contentContainerStyle={styles.scrollContainer}
-            showsVerticalScrollIndicator={false}
-          >
-            {ranking.map((jugador, index) => (
+        {/* Campo de búsqueda */}
+        <View style={styles.searchContainer}>
+          <TextInput
+            style={styles.inputSearch}
+            placeholder="Buscar jugador"
+            placeholderTextColor="#000"
+            value={nuevoNombre}
+            onChangeText={onChangeNuevoNombre}
+            onSubmitEditing={() => {
+              setSearchSuggestions([]);
+              Keyboard.dismiss();
+            }}
+          />
+          {filteredRanking && (
+            <TouchableOpacity onPress={clearSearch}>
+              <Text style={styles.clearText}>Limpiar</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+
+        {loadingSearch && <Text style={styles.textoAyuda}>Buscando…</Text>}
+
+        {searchSuggestions.length > 0 && (
+          <ScrollView style={styles.suggestionsContainer} nestedScrollEnabled>
+            {searchSuggestions.map((s) => (
               <TouchableOpacity
-                key={jugador.idUsuario}
-                onPress={() => handlePress(jugador.idUsuario)}
-                activeOpacity={0.7}
+                key={s.idUsuario}
+                style={styles.suggestionItem}
+                onPress={() => onSelectSuggestion(s)}
               >
-                <View key={jugador.idUsuario} style={styles.cardContainer}>
-                  <View style={styles.cardHeader}>
-                    {/* Mostrar avatar de cada uno de los usuarios del ranking */}
-                    <Image
-                      source={
-                        jugador.avatar && avatarMap[jugador.avatar]
-                          ? avatarMap[jugador.avatar]
-                          : require("@/assets/images/imagenPerfil.webp")
-                      }
-                      style={styles.avatar}
-                    />
-
-                    <Text style={styles.rank}>{index + 1}.</Text>
-                    <Text style={styles.nombre}>{jugador.nombre}</Text>
-                  </View>
-                  <Text style={styles.victorias}>
-                    {jugador.victorias} Victorias
-                  </Text>
-                </View>
+                <Text style={styles.suggestionText}>{s.nombre}</Text>
               </TouchableOpacity>
             ))}
           </ScrollView>
         )}
 
-        {/* Botón para volver atrás */}
-        <TouchableOpacity
-          style={styles.containerAtras}
-          onPress={() => router.back()}
-        >
-          <Image
-            source={require("@/assets/images/botonAtras.png")}
-            style={styles.imageAtras}
-          />
-        </TouchableOpacity>
+        {loading ? (
+          <ActivityIndicator size="large" color="#fff" style={styles.loader} />
+        ) : (
+          <>
+            <View style={styles.listWrapper}>
+              <ScrollView
+                contentContainerStyle={styles.scrollContainer}
+                showsVerticalScrollIndicator={false}
+              >
+                {displayRanking.map((jugador, idx) => (
+                  <TouchableOpacity
+                    key={jugador.idUsuario}
+                    onPress={() => handlePress(jugador)}
+                    activeOpacity={0.7}
+                  >
+                    <View style={styles.cardContainer}>
+                      <View style={styles.cardHeader}>
+                        <Image
+                          source={
+                            jugador.avatar && avatarMap[jugador.avatar]
+                              ? avatarMap[jugador.avatar]
+                              : require("@/assets/images/imagenPerfil.webp")
+                          }
+                          style={styles.avatar}
+                        />
+                        {(() => {
+                          const rankNumber = filteredRanking
+                            ? ranking.findIndex(
+                                (j) => j.idUsuario === jugador.idUsuario
+                              ) + 1
+                            : (page - 1) * pageSize + idx + 1;
+                          return <Text style={styles.rank}>{rankNumber}.</Text>;
+                        })()}
+                        <Text style={styles.nombre}>{jugador.nombre}</Text>
+                      </View>
+                      <Text style={styles.victorias}>
+                        {jugador.victorias} Victorias
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            </View>
+
+            {/* Footer: paginación encima de la flecha */}
+            <View style={styles.footer}>
+              {!filteredRanking && (
+                <View style={styles.pagination}>
+                  <TouchableOpacity
+                    disabled={page <= 1}
+                    onPress={() => setPage(page - 1)}
+                  >
+                    <Text style={styles.pageButton}>Anterior</Text>
+                  </TouchableOpacity>
+                  <Text style={styles.pageInfo}>
+                    {page}/{Math.ceil(ranking.length / pageSize)}
+                  </Text>
+                  <TouchableOpacity
+                    disabled={page >= Math.ceil(ranking.length / pageSize)}
+                    onPress={() => setPage(page + 1)}
+                  >
+                    <Text style={styles.pageButton}>Siguiente</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+              <TouchableOpacity
+                style={styles.buttonBack}
+                onPress={() => router.back()}
+              >
+                <Image
+                  source={require("@/assets/images/botonAtras.png")}
+                  style={styles.imageBack}
+                />
+              </TouchableOpacity>
+            </View>
+          </>
+        )}
       </ImageBackground>
     </View>
   );
 }
 
-// Estilos de la pantalla
 const styles = StyleSheet.create({
   container: { flex: 1 },
   image: {
@@ -192,12 +274,10 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
   },
-
   overlay: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: "rgba(0,0,0,0.4)",
   },
-
   header: {
     fontSize: 28,
     fontWeight: "bold",
@@ -206,13 +286,15 @@ const styles = StyleSheet.create({
     marginTop: 60,
     zIndex: 1,
   },
-
-  scrollContainer: {
-    marginTop: 20,
-    paddingHorizontal: 20,
-    paddingBottom: 80,
+  listWrapper: {
+    flex: 1,
+    marginBottom: 100,
   },
-
+  scrollContainer: {
+    marginTop: 30,
+    paddingHorizontal: 20,
+    paddingBottom: 100, // deja sitio para el footer
+  },
   cardContainer: {
     flexDirection: "column",
     backgroundColor: "rgba(255, 255, 255, 0.8)",
@@ -220,49 +302,100 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     marginBottom: 15,
   },
-
   cardHeader: {
     flexDirection: "row",
     alignItems: "center",
   },
-
   avatar: {
     width: 50,
     height: 50,
     borderRadius: 25,
     marginRight: 10,
   },
-
   rank: {
     fontSize: 20,
     fontWeight: "bold",
     marginRight: 10,
   },
-
   nombre: {
     fontSize: 20,
     fontWeight: "bold",
     flex: 1,
   },
-
   victorias: {
     fontSize: 16,
     color: "gray",
     marginTop: 5,
   },
-
   loader: {
     marginTop: 20,
   },
-
-  containerAtras: {
+  searchContainer: {
+    flexDirection: "row",
+    marginHorizontal: 20,
+    marginTop: 15,
+    alignItems: "center",
+  },
+  inputSearch: {
+    flex: 1,
+    backgroundColor: "rgba(255,255,255,0.8)",
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    height: 40,
+    color: "#000",
+  },
+  clearText: {
+    color: "#fff",
+    marginLeft: 10,
+    fontWeight: "bold",
+  },
+  suggestionsContainer: {
+    marginHorizontal: 20,
+    backgroundColor: "#fff",
+    borderRadius: 8,
+    maxHeight: 150,
+    zIndex: 1000,
+  },
+  suggestionItem: {
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#eee",
+  },
+  suggestionText: {
+    fontSize: 16,
+    color: "#333",
+  },
+  footer: {
     position: "absolute",
     bottom: 20,
-    left: "46%",
+    left: 0,
+    right: 0,
+    alignItems: "center",
   },
-
-  imageAtras: {
+  pagination: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 8,
+    zIndex: 2,
+  },
+  buttonBack: {},
+  imageBack: {
     width: 40,
     height: 40,
+  },
+  textoAyuda: {
+    color: "#fff",
+    textAlign: "center",
+    marginTop: 10,
+    fontSize: 16,
+  },
+  pageButton: {
+    color: "#fff",
+    marginHorizontal: 20,
+  },
+  pageInfo: {
+    color: "#fff",
+    fontWeight: "bold",
   },
 });

@@ -270,7 +270,7 @@ export default function PerfilScreen(): JSX.Element | null {
           </TouchableOpacity>
         </View>
 
-        {/* Reutilizando el mismo botón "GUARDAR" */}
+        {/* Botón para guardar los cambios */}
         <TouchableOpacity
           style={styles.botonGuardar}
           onPress={guardarDatosUsuario}
