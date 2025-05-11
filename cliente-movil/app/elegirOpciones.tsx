@@ -7,6 +7,7 @@ import {
   Image,
   TouchableOpacity,
   ActivityIndicator,
+  BackHandler,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { useFonts } from "expo-font";
@@ -98,6 +99,19 @@ export default function OpcionesScreen(): JSX.Element | null {
       console.error("Error al cerrar sesión:", error);
     }
   };
+
+  // cerrar sesión al pulsar atrás en Android
+  useFocusEffect(
+    useCallback(() => {
+      const onBackPress = () => {
+        cerrarSesion();
+        return true;
+      };
+      BackHandler.addEventListener("hardwareBackPress", onBackPress);
+      return () =>
+        BackHandler.removeEventListener("hardwareBackPress", onBackPress);
+    }, [cerrarSesion])
+  );
 
   const [loaded] = useFonts({
     GhostShadow: require("@/assets/fonts/ghost-shadow.ttf"),
