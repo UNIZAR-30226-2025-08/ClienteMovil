@@ -612,4 +612,11 @@ export const estilos = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+  entradaChatDeshabilitada: {
+    backgroundColor: "#f0f0f0",
+    color: "#999",
+  },
+  botonEnviarChatDeshabilitado: {
+    backgroundColor: "#ccc",
+  },
 });

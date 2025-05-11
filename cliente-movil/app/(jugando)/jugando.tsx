@@ -3608,6 +3608,7 @@ const Jugando: React.FC = () => {
             idSala={idSala}
             usuarioID={usuarioID}
             usuarioNombre={usuarioNombre}
+            estaMuerto={jugadorLocalMuerto}
           />
         )}
         {mostrarHabilidad && (
