@@ -160,6 +160,9 @@ export default function App(): JSX.Element | null {
         );
         if (adminResponse.data.esAdministrador) {
           await AsyncStorage.setItem("esAdministrador", "true");
+          socket.emit("registrarUsuario", {
+            idUsuario: data.usuario.idUsuario,
+          });
         } else {
           await AsyncStorage.setItem("esAdministrador", "false");
           socket.emit("registrarUsuario", {

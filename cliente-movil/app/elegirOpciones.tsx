@@ -66,6 +66,12 @@ export default function OpcionesScreen(): JSX.Element | null {
           // cargar bandera de admin
           const adminFlag = await AsyncStorage.getItem("esAdministrador");
           setEsAdmin(adminFlag === "true");
+
+          const idUsuarioStr = await AsyncStorage.getItem("idUsuario");
+          const parsedId = idUsuarioStr ? parseInt(idUsuarioStr, 10) : null;
+          if (parsedId) {
+            socket.emit("registrarUsuario", { idUsuario: parsedId });
+          }
         } catch (error) {
           console.error("Error al cargar usuario:", error);
         } finally {
